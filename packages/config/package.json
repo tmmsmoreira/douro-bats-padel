@@ -1,0 +1,13 @@
+{
+  "name": "@padel/config",
+  "version": "0.1.0",
+  "files": ["eslint-preset.js", "tsconfig.json"],
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.18.1",
+    "@typescript-eslint/parser": "^8.18.1",
+    "eslint": "^9.17.0",
+    "eslint-config-next": "^15.1.3",
+    "eslint-config-prettier": "^9.1.0",
+    "typescript": "^5.7.2"
+  }
+}

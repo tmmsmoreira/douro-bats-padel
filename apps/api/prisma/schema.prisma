@@ -1,0 +1,182 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String         @id @default(cuid())
+  email        String         @unique
+  name         String?
+  passwordHash String?
+  roles        Role[]
+  player       PlayerProfile?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+model PlayerProfile {
+  id               String             @id @default(cuid())
+  userId           String             @unique
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating           Int                @default(0)
+  tier             Tier               @default(EXPLORERS)
+  status           String             @default("ACTIVE")
+  rsvps            RSVP[]
+  weeklyScores     WeeklyScore[]
+  rankingSnapshots RankingSnapshot[]
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  @@index([tier, rating])
+}
+
+model Venue {
+  id      String  @id @default(cuid())
+  name    String
+  address String?
+  courts  Court[]
+  events  Event[]
+}
+
+model Court {
+  id          String       @id @default(cuid())
+  venueId     String
+  venue       Venue        @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  label       String
+  assignments Assignment[]
+  matches     Match[]
+}
+
+model Event {
+  id            String      @id @default(cuid())
+  title         String?
+  date          DateTime
+  startsAt      DateTime
+  endsAt        DateTime
+  venueId       String?
+  venue         Venue?      @relation(fields: [venueId], references: [id])
+  capacity      Int
+  seed          String?
+  rsvpOpensAt   DateTime
+  rsvpClosesAt  DateTime
+  state         EventState  @default(DRAFT)
+  tierRules     Json?
+  draws         Draw[]
+  matches       Match[]
+  rsvps         RSVP[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([date, state])
+}
+
+model RSVP {
+  id        String     @id @default(cuid())
+  eventId   String
+  event     Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  playerId  String
+  player    PlayerProfile @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  status    RSVPStatus
+  position  Int        @default(0)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@unique([eventId, playerId])
+  @@index([eventId, status, position])
+}
+
+model Draw {
+  id              String       @id @default(cuid())
+  eventId         String
+  event           Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  constraintsJson Json?
+  createdBy       String?
+  lockedAt        DateTime?
+  assignments     Assignment[]
+  createdAt       DateTime     @default(now())
+}
+
+model Assignment {
+  id      String  @id @default(cuid())
+  drawId  String
+  draw    Draw    @relation(fields: [drawId], references: [id], onDelete: Cascade)
+  courtId String?
+  court   Court?  @relation(fields: [courtId], references: [id])
+  round   Int
+  teamA   String[]
+  teamB   String[]
+
+  @@index([drawId, round])
+}
+
+model Match {
+  id          String    @id @default(cuid())
+  eventId     String
+  event       Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  courtId     String?
+  court       Court?    @relation(fields: [courtId], references: [id])
+  round       Int
+  setsA       Int       @default(0)
+  setsB       Int       @default(0)
+  tier        Tier
+  reportedBy  String?
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([eventId, publishedAt])
+}
+
+model WeeklyScore {
+  id        String        @id @default(cuid())
+  playerId  String
+  player    PlayerProfile @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  weekStart DateTime
+  score     Int
+  createdAt DateTime      @default(now())
+
+  @@unique([playerId, weekStart])
+  @@index([playerId, weekStart])
+}
+
+model RankingSnapshot {
+  id           String        @id @default(cuid())
+  playerId     String
+  player       PlayerProfile @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  eventId      String?
+  before       Int           @default(0)
+  after        Int           @default(0)
+  algoVersion  String        @default("v1")
+  createdAt    DateTime      @default(now())
+
+  @@index([playerId, createdAt])
+}
+
+enum Role {
+  VIEWER
+  EDITOR
+  ADMIN
+}
+
+enum Tier {
+  MASTERS
+  EXPLORERS
+}
+
+enum EventState {
+  DRAFT
+  OPEN
+  FROZEN
+  DRAWN
+  PUBLISHED
+}
+
+enum RSVPStatus {
+  CONFIRMED
+  WAITLISTED
+  DECLINED
+  CANCELLED
+}

@@ -1,6 +1,6 @@
-import { Controller, Post, UseGuards, Get, Req } from "@nestjs/common"
-import type { AuthService } from "./auth.service"
-import type { LoginDto, SignupDto, AuthTokens } from "@padel/types"
+import { Controller, Post, UseGuards, Get, Req, Body } from "@nestjs/common"
+import { AuthService } from "./auth.service"
+import type { LoginDto, SignupDto, AuthTokens, ForgotPasswordDto, ResetPasswordDto } from "@padel/types"
 import { JwtRefreshGuard } from "./guards/jwt-refresh.guard"
 import { JwtAuthGuard } from "./guards/jwt-auth.guard"
 
@@ -9,12 +9,12 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post("signup")
-  async signup(dto: SignupDto): Promise<AuthTokens> {
+  async signup(@Body() dto: SignupDto): Promise<AuthTokens> {
     return this.authService.signup(dto)
   }
 
   @Post("login")
-  async login(dto: LoginDto): Promise<AuthTokens> {
+  async login(@Body() dto: LoginDto): Promise<AuthTokens> {
     return this.authService.login(dto)
   }
 
@@ -28,5 +28,15 @@ export class AuthController {
   @Get("me")
   async getProfile(@Req() req: any) {
     return this.authService.validateUser(req.user.sub)
+  }
+
+  @Post("forgot-password")
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(dto)
+  }
+
+  @Post("reset-password")
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto)
   }
 }

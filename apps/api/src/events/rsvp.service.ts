@@ -1,8 +1,8 @@
 import { Injectable, BadRequestException, NotFoundException } from "@nestjs/common"
-import type { PrismaService } from "../prisma/prisma.service"
+import { PrismaService } from "../prisma/prisma.service"
 import type { RSVPDto, RSVPResponse } from "@padel/types"
 import { RSVPStatus } from "@padel/types"
-import type { NotificationService } from "../notifications/notification.service"
+import { NotificationService } from "../notifications/notification.service"
 
 @Injectable()
 export class RSVPService {

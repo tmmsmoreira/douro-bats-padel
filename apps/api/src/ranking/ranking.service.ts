@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common"
-import type { PrismaService } from "../prisma/prisma.service"
+import { PrismaService } from "../prisma/prisma.service"
 import { computeRanking, toTier, type MatchResult, type LeaderboardEntry, type PlayerHistory } from "@padel/types"
 import { EventState, type Tier } from "@padel/types"
-import type { NotificationService } from "../notifications/notification.service"
+import { NotificationService } from "../notifications/notification.service"
 
 @Injectable()
 export class RankingService {
@@ -62,7 +62,7 @@ export class RankingService {
 
         matchResults.push({
           matchId: match.id,
-          tier: match.tier,
+          tier: match.tier as Tier,
           teamA: [p1, p2],
           teamB: [p3, p4],
           setsA: match.setsA,
@@ -74,6 +74,7 @@ export class RankingService {
     // Get current ratings
     const players = await this.prisma.playerProfile.findMany({
       where: { id: { in: Array.from(playerIds) } },
+      include: { user: true },
     })
 
     const currentRatings: Record<string, number> = {}
@@ -209,7 +210,7 @@ export class RankingService {
         playerId: player.id,
         playerName: player.user.name || "Unknown",
         rating: player.rating,
-        tier: player.tier,
+        tier: player.tier as Tier,
         delta,
         weeklyScores: player.weeklyScores.map((ws) => ws.score),
       }
@@ -253,7 +254,7 @@ export class RankingService {
     return {
       playerId: player.id,
       playerName: player.user.name || "Unknown",
-      tier: player.tier,
+      tier: player.tier as Tier,
       currentRating: player.rating,
       history,
     }

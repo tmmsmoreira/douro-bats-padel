@@ -2,6 +2,10 @@
   "name": "@padel/config",
   "version": "0.1.0",
   "files": ["eslint-preset.js", "tsconfig.json"],
+  "exports": {
+    "./tsconfig.json": "./tsconfig.json",
+    "./eslint-preset.js": "./eslint-preset.js"
+  },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.18.1",
     "@typescript-eslint/parser": "^8.18.1",

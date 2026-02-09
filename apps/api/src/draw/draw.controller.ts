@@ -1,5 +1,5 @@
-import { Controller, Get, Post, Patch, UseGuards } from "@nestjs/common"
-import type { DrawService } from "./draw.service"
+import { Controller, Get, Post, Patch, UseGuards, Param, Body, Request } from "@nestjs/common"
+import { DrawService } from "./draw.service"
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard"
 import { RolesGuard } from "../auth/guards/roles.guard"
 import { Roles } from "../auth/decorators/roles.decorator"
@@ -13,26 +13,26 @@ export class DrawController {
   @Post("events/:eventId")
   @UseGuards(RolesGuard)
   @Roles(Role.EDITOR, Role.ADMIN)
-  async generateDraw(eventId: string, body: { constraints?: any }, req: any) {
+  async generateDraw(@Param("eventId") eventId: string, @Body() body: { constraints?: any }, @Request() req: any) {
     return this.drawService.generateDraw(eventId, req.user.sub, body.constraints)
   }
 
   @Get("events/:eventId")
-  async getDraw(eventId: string) {
+  async getDraw(@Param("eventId") eventId: string) {
     return this.drawService.getDraw(eventId)
   }
 
   @Patch("assignments/:assignmentId")
   @UseGuards(RolesGuard)
   @Roles(Role.EDITOR, Role.ADMIN)
-  async updateAssignment(assignmentId: string, body: { teamA: string[]; teamB: string[] }, req: any) {
+  async updateAssignment(@Param("assignmentId") assignmentId: string, @Body() body: { teamA: string[]; teamB: string[] }, @Request() req: any) {
     return this.drawService.updateAssignment(assignmentId, body.teamA, body.teamB, req.user.sub)
   }
 
   @Post("events/:eventId/publish")
   @UseGuards(RolesGuard)
   @Roles(Role.EDITOR, Role.ADMIN)
-  async publishDraw(eventId: string) {
+  async publishDraw(@Param("eventId") eventId: string) {
     return this.drawService.publishDraw(eventId)
   }
 }

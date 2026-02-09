@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards, Request } from "@nestjs/common"
-import type { EventsService } from "./events.service"
-import type { RSVPService } from "./rsvp.service"
+import { EventsService } from "./events.service"
+import { RSVPService } from "./rsvp.service"
 import type { CreateEventDto, RSVPDto } from "@padel/types"
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard"
 import { RolesGuard } from "../auth/guards/roles.guard"
@@ -16,7 +16,7 @@ export class EventsController {
   ) {}
 
   @Get()
-  async findAll(@Query("from") from?: string, @Query("to") to?: string, @Request() req: any) {
+  async findAll(@Request() req: any, @Query("from") from?: string, @Query("to") to?: string) {
     const fromDate = from ? new Date(from) : undefined
     const toDate = to ? new Date(to) : undefined
     const userId = req.user?.sub

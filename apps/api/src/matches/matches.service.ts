@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common"
-import type { PrismaService } from "../prisma/prisma.service"
+import { PrismaService } from "../prisma/prisma.service"
 import type { Tier } from "@padel/types"
 
 interface SubmitMatchDto {
@@ -135,7 +135,8 @@ export class MatchesService {
       include: { user: true },
     })
 
-    const playerMap = new Map(players.map((p) => [p.id, p]))
+    type PlayerWithUser = typeof players[0]
+    const playerMap = new Map<string, PlayerWithUser>(players.map((p) => [p.id, p]))
 
     return matches.map((match) => {
       const assignment = draw.assignments.find((a) => a.round === match.round && a.courtId === match.courtId)

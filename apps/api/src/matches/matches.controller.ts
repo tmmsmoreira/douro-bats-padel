@@ -1,5 +1,5 @@
-import { Controller, Get, Post, Param, UseGuards, Request } from "@nestjs/common"
-import type { MatchesService } from "./matches.service"
+import { Controller, Get, Post, Param, UseGuards, Request, Body } from "@nestjs/common"
+import { MatchesService } from "./matches.service"
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard"
 import { RolesGuard } from "../auth/guards/roles.guard"
 import { Roles } from "../auth/decorators/roles.decorator"
@@ -13,7 +13,7 @@ export class MatchesController {
   @Post()
   @UseGuards(RolesGuard)
   @Roles(Role.EDITOR, Role.ADMIN)
-  async submitMatch(dto: any, @Request() req: any) {
+  async submitMatch(@Body() dto: any, @Request() req: any) {
     return this.matchesService.submitMatch(dto, req.user.sub)
   }
 

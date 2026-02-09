@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common"
-import type { PrismaService } from "../prisma/prisma.service"
+import { PrismaService } from "../prisma/prisma.service"
 import type { CreateEventDto, EventWithRSVP } from "@padel/types"
 import { EventState } from "@padel/types"
 

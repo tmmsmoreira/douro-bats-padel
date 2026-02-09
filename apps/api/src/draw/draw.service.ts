@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common"
-import type { PrismaService } from "../prisma/prisma.service"
-import type { ConfigService } from "@nestjs/config"
+import { PrismaService } from "../prisma/prisma.service"
+import { ConfigService } from "@nestjs/config"
 import seedrandom from "seedrandom"
 import { EventState, Tier } from "@padel/types"
-import type { NotificationService } from "../notifications/notification.service"
+import { NotificationService } from "../notifications/notification.service"
 
 interface Player {
   id: string
@@ -73,7 +73,7 @@ export class DrawService {
       id: rsvp.player.id,
       name: rsvp.player.user.name || "Unknown",
       rating: rsvp.player.rating,
-      tier: rsvp.player.tier,
+      tier: rsvp.player.tier as Tier,
     }))
 
     if (players.length < 4) {
@@ -107,7 +107,7 @@ export class DrawService {
       data: {
         eventId,
         createdBy,
-        constraintsJson: constraints || {},
+        constraintsJson: (constraints as any) || {},
         assignments: {
           create: matches.map((match) => ({
             round: match.round,
@@ -414,7 +414,8 @@ export class DrawService {
       include: { user: true },
     })
 
-    const playerMap = new Map(players.map((p) => [p.id, p]))
+    type PlayerWithUser = typeof players[0]
+    const playerMap = new Map<string, PlayerWithUser>(players.map((p) => [p.id, p]))
 
     return {
       ...draw,
@@ -422,20 +423,22 @@ export class DrawService {
         ...a,
         teamA: a.teamA.map((id) => {
           const p = playerMap.get(id)
+          if (!p) throw new Error(`Player with id ${id} not found`)
           return {
-            id: p?.id,
-            name: p?.user.name,
-            rating: p?.rating,
-            tier: p?.tier,
+            id: p.id,
+            name: p.user.name,
+            rating: p.rating,
+            tier: p.tier,
           }
         }),
         teamB: a.teamB.map((id) => {
           const p = playerMap.get(id)
+          if (!p) throw new Error(`Player with id ${id} not found`)
           return {
-            id: p?.id,
-            name: p?.user.name,
-            rating: p?.rating,
-            tier: p?.tier,
+            id: p.id,
+            name: p.user.name,
+            rating: p.rating,
+            tier: p.tier,
           }
         }),
       })),

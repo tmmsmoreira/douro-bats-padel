@@ -1,7 +1,0 @@
-{
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "turbo run build --filter=@padel/web",
-  "outputDirectory": "apps/web/.next",
-  "installCommand": "pnpm install --frozen-lockfile"
-}
-

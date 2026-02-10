@@ -32,3 +32,9 @@ export interface ResetPasswordDto {
   token: string
   password: string
 }
+
+export interface GoogleAuthDto {
+  email: string
+  name?: string | null
+  profilePhoto?: string | null
+}

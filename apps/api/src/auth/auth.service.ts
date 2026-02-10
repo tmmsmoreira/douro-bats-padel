@@ -4,7 +4,7 @@ import { ConfigService } from "@nestjs/config"
 import * as bcrypt from "bcrypt"
 import * as crypto from "crypto"
 import { PrismaService } from "../prisma/prisma.service"
-import type { LoginDto, SignupDto, AuthTokens, ForgotPasswordDto, ResetPasswordDto } from "@padel/types"
+import type { LoginDto, SignupDto, AuthTokens, ForgotPasswordDto, ResetPasswordDto, GoogleAuthDto } from "@padel/types"
 import { Role } from "@padel/types"
 
 @Injectable()
@@ -61,6 +61,45 @@ export class AuthService {
 
     if (!isPasswordValid) {
       throw new UnauthorizedException("Invalid credentials")
+    }
+
+    return this.generateTokens(user.id, user.email, user.roles as Role[])
+  }
+
+  async googleAuth(dto: GoogleAuthDto): Promise<AuthTokens> {
+    // Check if user exists
+    let user = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    })
+
+    // If user doesn't exist, create them
+    if (!user) {
+      user = await this.prisma.user.create({
+        data: {
+          email: dto.email,
+          name: dto.name,
+          profilePhoto: dto.profilePhoto,
+          roles: [Role.VIEWER],
+          player: {
+            create: {
+              rating: 0,
+              tier: "EXPLORERS",
+              status: "ACTIVE",
+            },
+          },
+        },
+        include: {
+          player: true,
+        },
+      })
+    } else {
+      // Update profile photo if provided and different
+      if (dto.profilePhoto && dto.profilePhoto !== user.profilePhoto) {
+        user = await this.prisma.user.update({
+          where: { id: user.id },
+          data: { profilePhoto: dto.profilePhoto },
+        })
+      }
     }
 
     return this.generateTokens(user.id, user.email, user.roles as Role[])

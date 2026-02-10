@@ -1,6 +1,6 @@
 import { Controller, Post, UseGuards, Get, Req, Body, Patch } from "@nestjs/common"
 import { AuthService } from "./auth.service"
-import type { LoginDto, SignupDto, AuthTokens, ForgotPasswordDto, ResetPasswordDto } from "@padel/types"
+import type { LoginDto, SignupDto, AuthTokens, ForgotPasswordDto, ResetPasswordDto, GoogleAuthDto } from "@padel/types"
 import { JwtRefreshGuard } from "./guards/jwt-refresh.guard"
 import { JwtAuthGuard } from "./guards/jwt-auth.guard"
 
@@ -16,6 +16,11 @@ export class AuthController {
   @Post("login")
   async login(@Body() dto: LoginDto): Promise<AuthTokens> {
     return this.authService.login(dto)
+  }
+
+  @Post("google")
+  async googleAuth(@Body() dto: GoogleAuthDto): Promise<AuthTokens> {
+    return this.authService.googleAuth(dto)
   }
 
   @UseGuards(JwtRefreshGuard)

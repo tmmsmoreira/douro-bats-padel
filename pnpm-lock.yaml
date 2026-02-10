@@ -64,7 +64,7 @@ importers:
         version: 0.454.0(react@19.2.0)
       next:
         specifier: 16.0.10
-        version: 16.0.10(react-dom@19.2.0)(react@19.2.0)
+        version: 16.0.10(@babel/core@7.29.0)(react-dom@19.2.0)(react@19.2.0)
       next-auth:
         specifier: latest
         version: 4.24.12(@auth/core@0.41.1)(next@16.0.10)(nodemailer@7.0.10)(react-dom@19.2.0)(react@19.2.0)
@@ -246,13 +246,13 @@ importers:
         version: 0.468.0(react@19.2.0)
       next:
         specifier: 16.0.10
-        version: 16.0.10(react-dom@19.2.0)(react@19.2.0)
+        version: 16.0.10(@babel/core@7.29.0)(react-dom@19.2.0)(react@19.2.0)
       next-auth:
         specifier: ^5.0.0-beta.25
         version: 5.0.0-beta.30(next@16.0.10)(nodemailer@7.0.10)(react@19.2.0)
       next-pwa:
         specifier: ^5.6.0
-        version: 5.6.0(@babel/core@7.29.0)(next@16.0.1)(webpack@5.97.1)
+        version: 5.6.0(@babel/core@7.29.0)(next@16.0.10)(webpack@5.97.1)
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.2.0)(react@19.2.0)
@@ -8097,7 +8097,7 @@ packages:
       '@panva/hkdf': 1.2.1
       cookie: 0.7.2
       jose: 4.15.9
-      next: 16.0.10(react-dom@19.2.0)(react@19.2.0)
+      next: 16.0.10(@babel/core@7.29.0)(react-dom@19.2.0)(react@19.2.0)
       nodemailer: 7.0.10
       oauth: 0.9.15
       openid-client: 5.7.1
@@ -8125,12 +8125,12 @@ packages:
         optional: true
     dependencies:
       '@auth/core': 0.41.0(nodemailer@7.0.10)
-      next: 16.0.10(react-dom@19.2.0)(react@19.2.0)
+      next: 16.0.10(@babel/core@7.29.0)(react-dom@19.2.0)(react@19.2.0)
       nodemailer: 7.0.10
       react: 19.2.0
     dev: false
 
-  /next-pwa@5.6.0(@babel/core@7.29.0)(next@16.0.1)(webpack@5.97.1):
+  /next-pwa@5.6.0(@babel/core@7.29.0)(next@16.0.10)(webpack@5.97.1):
     resolution: {integrity: sha512-XV8g8C6B7UmViXU8askMEYhWwQ4qc/XqJGnexbLV68hzKaGHZDMtHsm2TNxFcbR7+ypVuth/wwpiIlMwpRJJ5A==}
     peerDependencies:
       next: '>=9.0.0'
@@ -8138,7 +8138,7 @@ packages:
       babel-loader: 8.4.1(@babel/core@7.29.0)(webpack@5.97.1)
       clean-webpack-plugin: 4.0.0(webpack@5.97.1)
       globby: 11.1.0
-      next: 16.0.1(@babel/core@7.29.0)(react-dom@19.2.0)(react@19.2.0)
+      next: 16.0.10(@babel/core@7.29.0)(react-dom@19.2.0)(react@19.2.0)
       terser-webpack-plugin: 5.3.14(webpack@5.97.1)
       workbox-webpack-plugin: 6.6.0(webpack@5.97.1)
       workbox-window: 6.6.0
@@ -8162,7 +8162,7 @@ packages:
       react-dom: 19.2.0(react@19.2.0)
     dev: false
 
-  /next@16.0.10(react-dom@19.2.0)(react@19.2.0):
+  /next@16.0.10(@babel/core@7.29.0)(react-dom@19.2.0)(react@19.2.0):
     resolution: {integrity: sha512-RtWh5PUgI+vxlV3HdR+IfWA1UUHu0+Ram/JBO4vWB54cVPentCD0e+lxyAYEsDTqGGMg7qpjhKh6dc6aW7W/sA==}
     engines: {node: '>=20.9.0'}
     hasBin: true

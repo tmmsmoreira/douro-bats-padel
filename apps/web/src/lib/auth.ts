@@ -1,7 +1,7 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import Google from "next-auth/providers/google"
-import type { AuthTokens } from "@padel/types"
+import type { AuthTokens, AuthUser } from "@padel/types"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -36,12 +36,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           if (!userRes.ok) return null
 
-          const user = await userRes.json()
+          const user: AuthUser = await userRes.json()
 
           return {
             id: user.id,
             email: user.email,
             name: user.name,
+            profilePhoto: user.profilePhoto,
             accessToken: tokens.accessToken,
             refreshToken: tokens.refreshToken,
             roles: user.roles,
@@ -54,11 +55,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user, account }) {
+    async jwt({ token, user }) {
       if (user) {
         token.accessToken = user.accessToken
         token.refreshToken = user.refreshToken
         token.roles = user.roles
+        token.profilePhoto = user.profilePhoto
       }
       return token
     },
@@ -67,6 +69,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       session.accessToken = token.accessToken as string
       session.refreshToken = token.refreshToken as string
       session.user.roles = token.roles as string[]
+      session.user.profilePhoto = token.profilePhoto as string | undefined
       return session
     },
   },

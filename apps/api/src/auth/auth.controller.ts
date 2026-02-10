@@ -1,4 +1,4 @@
-import { Controller, Post, UseGuards, Get, Req, Body } from "@nestjs/common"
+import { Controller, Post, UseGuards, Get, Req, Body, Patch } from "@nestjs/common"
 import { AuthService } from "./auth.service"
 import type { LoginDto, SignupDto, AuthTokens, ForgotPasswordDto, ResetPasswordDto } from "@padel/types"
 import { JwtRefreshGuard } from "./guards/jwt-refresh.guard"
@@ -38,5 +38,11 @@ export class AuthController {
   @Post("reset-password")
   async resetPassword(@Body() dto: ResetPasswordDto) {
     return this.authService.resetPassword(dto)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch("profile-photo")
+  async updateProfilePhoto(@Req() req: any, @Body() body: { profilePhoto: string }) {
+    return this.authService.updateProfilePhoto(req.user.sub, body.profilePhoto)
   }
 }

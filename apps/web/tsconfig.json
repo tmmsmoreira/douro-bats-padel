@@ -1,5 +1,5 @@
 {
-  "extends": "@padel/config/tsconfig.json",
+  "extends": "../../packages/config/tsconfig.json",
   "compilerOptions": {
     "plugins": [{ "name": "next" }],
     "paths": {

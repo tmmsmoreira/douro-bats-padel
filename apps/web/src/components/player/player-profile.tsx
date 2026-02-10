@@ -1,22 +1,114 @@
 "use client"
 
 import { useSession } from "next-auth/react"
-import { useQuery } from "@tanstack/react-query"
-import { apiClient } from "@/lib/api-client"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
+import { Camera } from "lucide-react"
+import { useState } from "react"
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
 
 export function PlayerProfile() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
+  const queryClient = useQueryClient()
+  const [photoUrl, setPhotoUrl] = useState("")
+  const [isEditingPhoto, setIsEditingPhoto] = useState(false)
 
-  const { data: profile, isLoading } = useQuery({
-    queryKey: ["profile"],
-    queryFn: () => apiClient.get("/auth/me"),
-    enabled: !!session,
+  const { data: profile, isLoading, error } = useQuery({
+    queryKey: ["profile", session?.accessToken],
+    queryFn: async () => {
+      if (!session?.accessToken) {
+        throw new Error("No access token")
+      }
+
+      console.log("Fetching profile with token:", session.accessToken.substring(0, 20) + "...")
+
+      const res = await fetch(`${API_URL}/auth/me`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.accessToken}`,
+        },
+      })
+
+      if (!res.ok) {
+        const errorText = await res.text()
+        console.error("API Error:", res.status, errorText)
+        throw new Error(`API Error: ${res.statusText}`)
+      }
+
+      const data = await res.json()
+      console.log("Profile data received:", data)
+      return data
+    },
+    enabled: !!session?.accessToken,
   })
 
-  if (isLoading) {
+  const updatePhotoMutation = useMutation({
+    mutationFn: async (profilePhoto: string) => {
+      if (!session?.accessToken) {
+        throw new Error("No access token")
+      }
+
+      const res = await fetch(`${API_URL}/auth/profile-photo`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.accessToken}`,
+        },
+        body: JSON.stringify({ profilePhoto }),
+      })
+
+      if (!res.ok) {
+        throw new Error(`API Error: ${res.statusText}`)
+      }
+
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["profile"] })
+      setPhotoUrl("")
+      setIsEditingPhoto(false)
+    },
+  })
+
+  const handlePhotoSubmit = () => {
+    if (photoUrl.trim()) {
+      updatePhotoMutation.mutate(photoUrl)
+    }
+  }
+
+  const handleCancelEdit = () => {
+    setPhotoUrl("")
+    setIsEditingPhoto(false)
+  }
+
+  const getUserInitials = (name?: string | null, email?: string) => {
+    if (name) {
+      return name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2)
+    }
+    return email?.[0]?.toUpperCase() || "U"
+  }
+
+  console.log("Session status:", status, "Has token:", !!session?.accessToken, "Profile:", profile, "Error:", error)
+
+  if (status === "loading" || isLoading) {
     return <div className="text-center py-8">Loading profile...</div>
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-destructive">Error loading profile: {(error as Error).message}</p>
+      </div>
+    )
   }
 
   if (!profile) {
@@ -36,6 +128,44 @@ export function PlayerProfile() {
             <CardTitle>Player Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="flex items-center gap-4">
+              <Avatar className="h-20 w-20">
+                <AvatarImage src={profile.profilePhoto || undefined} alt={profile.name || "User"} />
+                <AvatarFallback className="text-2xl">{getUserInitials(profile.name, profile.email)}</AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                {!isEditingPhoto ? (
+                  // Display mode: Show edit button
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Profile Photo</p>
+                    <Button onClick={() => setIsEditingPhoto(true)} variant="outline" size="sm">
+                      <Camera className="h-4 w-4 mr-2" />
+                      Edit Photo
+                    </Button>
+                  </div>
+                ) : (
+                  // Edit mode: Show input with save/cancel
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Profile Photo URL</p>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={photoUrl}
+                        onChange={(e) => setPhotoUrl(e.target.value)}
+                        placeholder="Enter image URL"
+                        className="flex-1 px-3 py-2 text-sm border rounded-md bg-background"
+                      />
+                      <Button onClick={handlePhotoSubmit} disabled={updatePhotoMutation.isPending} size="sm">
+                        {updatePhotoMutation.isPending ? "Saving..." : "Save"}
+                      </Button>
+                      <Button onClick={handleCancelEdit} variant="outline" size="sm">
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
             <div>
               <p className="text-sm text-muted-foreground">Name</p>
               <p className="text-lg font-medium">{profile.name || "Not set"}</p>

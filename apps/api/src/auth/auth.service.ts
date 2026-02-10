@@ -1,9 +1,10 @@
-import { Injectable, UnauthorizedException, ConflictException } from "@nestjs/common"
-import type { JwtService } from "@nestjs/jwt"
-import type { ConfigService } from "@nestjs/config"
+import { Injectable, UnauthorizedException, ConflictException, BadRequestException } from "@nestjs/common"
+import { JwtService } from "@nestjs/jwt"
+import { ConfigService } from "@nestjs/config"
 import * as bcrypt from "bcrypt"
-import type { PrismaService } from "../prisma/prisma.service"
-import type { LoginDto, SignupDto, AuthTokens } from "@padel/types"
+import * as crypto from "crypto"
+import { PrismaService } from "../prisma/prisma.service"
+import type { LoginDto, SignupDto, AuthTokens, ForgotPasswordDto, ResetPasswordDto } from "@padel/types"
 import { Role } from "@padel/types"
 
 @Injectable()
@@ -44,7 +45,7 @@ export class AuthService {
       },
     })
 
-    return this.generateTokens(user.id, user.email, user.roles)
+    return this.generateTokens(user.id, user.email, user.roles as Role[])
   }
 
   async login(dto: LoginDto): Promise<AuthTokens> {
@@ -62,7 +63,7 @@ export class AuthService {
       throw new UnauthorizedException("Invalid credentials")
     }
 
-    return this.generateTokens(user.id, user.email, user.roles)
+    return this.generateTokens(user.id, user.email, user.roles as Role[])
   }
 
   async refresh(userId: string): Promise<AuthTokens> {
@@ -74,7 +75,7 @@ export class AuthService {
       throw new UnauthorizedException("User not found")
     }
 
-    return this.generateTokens(user.id, user.email, user.roles)
+    return this.generateTokens(user.id, user.email, user.roles as Role[])
   }
 
   async validateUser(userId: string) {
@@ -93,9 +94,73 @@ export class AuthService {
       id: user.id,
       email: user.email,
       name: user.name,
+      profilePhoto: user.profilePhoto,
       roles: user.roles,
       player: user.player,
     }
+  }
+
+  async forgotPassword(dto: ForgotPasswordDto): Promise<{ message: string; token?: string }> {
+    const user = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    })
+
+    // Don't reveal if user exists or not for security
+    if (!user) {
+      return { message: "If the email exists, a password reset link has been sent" }
+    }
+
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString("hex")
+    const resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex")
+    const resetPasswordExpires = new Date(Date.now() + 3600000) // 1 hour from now
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        resetPasswordToken,
+        resetPasswordExpires,
+      },
+    })
+
+    // In production, send email with reset link
+    // For now, return the token for testing purposes
+    console.log(`Password reset token for ${dto.email}: ${resetToken}`)
+
+    return {
+      message: "If the email exists, a password reset link has been sent",
+      token: resetToken, // Remove this in production
+    }
+  }
+
+  async resetPassword(dto: ResetPasswordDto): Promise<{ message: string }> {
+    const resetPasswordToken = crypto.createHash("sha256").update(dto.token).digest("hex")
+
+    const user = await this.prisma.user.findFirst({
+      where: {
+        resetPasswordToken,
+        resetPasswordExpires: {
+          gt: new Date(),
+        },
+      },
+    })
+
+    if (!user) {
+      throw new BadRequestException("Invalid or expired reset token")
+    }
+
+    const passwordHash = await bcrypt.hash(dto.password, 10)
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        passwordHash,
+        resetPasswordToken: null,
+        resetPasswordExpires: null,
+      },
+    })
+
+    return { message: "Password has been reset successfully" }
   }
 
   private async generateTokens(userId: string, email: string, roles: Role[]): Promise<AuthTokens> {
@@ -112,6 +177,25 @@ export class AuthService {
     return {
       accessToken,
       refreshToken,
+    }
+  }
+
+  async updateProfilePhoto(userId: string, profilePhoto: string) {
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: { profilePhoto },
+      include: {
+        player: true,
+      },
+    })
+
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      profilePhoto: user.profilePhoto,
+      roles: user.roles,
+      player: user.player,
     }
   }
 }

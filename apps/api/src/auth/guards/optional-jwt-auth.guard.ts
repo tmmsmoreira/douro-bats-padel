@@ -9,17 +9,25 @@ export class OptionalJwtAuthGuard extends AuthGuard("jwt") {
     super()
   }
 
-  canActivate(context: ExecutionContext) {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
     ])
 
     if (isPublic) {
+      // For public endpoints, try to validate the token if present, but don't fail if invalid
+      try {
+        await super.canActivate(context)
+      } catch (err) {
+        // Ignore authentication errors for public endpoints
+        // The request will proceed without user context
+      }
       return true
     }
 
-    return super.canActivate(context)
+    // For protected endpoints, enforce authentication
+    return super.canActivate(context) as Promise<boolean>
   }
 
   handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
@@ -28,12 +36,14 @@ export class OptionalJwtAuthGuard extends AuthGuard("jwt") {
       context.getClass(),
     ])
 
-    // If the endpoint is public, allow the request even without a valid token
+    // If the endpoint is public, allow the request even with an invalid token
+    // This allows both authenticated and unauthenticated users to access public endpoints
     if (isPublic) {
+      // Return user if valid, null if not - don't throw errors for public endpoints
       return user || null
     }
 
-    // For protected endpoints, throw error if no user
+    // For protected endpoints, throw error if no user or if there's an error
     if (err || !user) {
       throw err || new Error("Unauthorized")
     }

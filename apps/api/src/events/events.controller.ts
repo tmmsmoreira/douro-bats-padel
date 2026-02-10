@@ -19,19 +19,43 @@ export class EventsController {
 
   @Public()
   @Get()
-  async findAll(@Request() req: any, @Query("from") from?: string, @Query("to") to?: string) {
+  async findAll(
+    @Request() req: any,
+    @Query("from") from?: string,
+    @Query("to") to?: string,
+    @Query("includeUnpublished") includeUnpublished?: string,
+  ) {
     const fromDate = from ? new Date(from) : undefined
     const toDate = to ? new Date(to) : undefined
     const userId = req.user?.sub
 
-    return this.eventsService.findAll(fromDate, toDate, userId)
+    // Check if request explicitly asks for unpublished events (admin view)
+    // AND verify user has admin or editor role
+    const userRoles = req.user?.roles || []
+    const isAdminOrEditor = userRoles.includes(Role.ADMIN) || userRoles.includes(Role.EDITOR)
+    const shouldIncludeUnpublished = includeUnpublished === "true" && isAdminOrEditor
+
+    // Debug logging
+    if (process.env.NODE_ENV === "development") {
+      console.log("GET /events - User:", req.user ? { sub: req.user.sub, email: req.user.email, roles: userRoles } : "not authenticated")
+      console.log("GET /events - includeUnpublished:", shouldIncludeUnpublished)
+    }
+
+    return this.eventsService.findAll(fromDate, toDate, userId, shouldIncludeUnpublished)
   }
 
   @Public()
   @Get(":id")
-  async findOne(@Param("id") id: string, @Request() req: any) {
+  async findOne(@Param("id") id: string, @Request() req: any, @Query("includeUnpublished") includeUnpublished?: string) {
     const userId = req.user?.sub
-    return this.eventsService.findOne(id, userId)
+
+    // Check if request explicitly asks for unpublished events (admin view)
+    // AND verify user has admin or editor role
+    const userRoles = req.user?.roles || []
+    const isAdminOrEditor = userRoles.includes(Role.ADMIN) || userRoles.includes(Role.EDITOR)
+    const shouldIncludeUnpublished = includeUnpublished === "true" && isAdminOrEditor
+
+    return this.eventsService.findOne(id, userId, shouldIncludeUnpublished)
   }
 
   @Post()

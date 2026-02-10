@@ -29,13 +29,20 @@ export class EventsService {
     return event
   }
 
-  async findAll(from?: Date, to?: Date, userId?: string) {
+  async findAll(from?: Date, to?: Date, userId?: string, includeUnpublished = false) {
     const where: any = {}
 
     if (from || to) {
       where.date = {}
       if (from) where.date.gte = from
       if (to) where.date.lte = to
+    }
+
+    // Only show published events to non-admin users
+    if (!includeUnpublished) {
+      where.state = {
+        in: [EventState.OPEN, EventState.FROZEN, EventState.DRAWN, EventState.PUBLISHED],
+      }
     }
 
     const events = await this.prisma.event.findMany({
@@ -90,7 +97,7 @@ export class EventsService {
     })
   }
 
-  async findOne(id: string, userId?: string) {
+  async findOne(id: string, userId?: string, includeUnpublished = false) {
     const event = await this.prisma.event.findUnique({
       where: { id },
       include: {
@@ -109,6 +116,11 @@ export class EventsService {
     })
 
     if (!event) {
+      throw new NotFoundException("Event not found")
+    }
+
+    // If not admin/editor, only allow access to published events
+    if (!includeUnpublished && event.state === EventState.DRAFT) {
       throw new NotFoundException("Event not found")
     }
 

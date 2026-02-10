@@ -39,14 +39,31 @@ export class RSVPService {
       throw new BadRequestException("RSVP window has closed")
     }
 
-    // Get player profile
-    const player = await this.prisma.playerProfile.findUnique({
+    // Get player profile - create one if it doesn't exist
+    let player = await this.prisma.playerProfile.findUnique({
       where: { userId },
       include: { user: true },
     })
 
     if (!player) {
-      throw new NotFoundException("Player profile not found")
+      // Auto-create player profile for users who don't have one
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+      })
+
+      if (!user) {
+        throw new NotFoundException("User not found")
+      }
+
+      player = await this.prisma.playerProfile.create({
+        data: {
+          userId,
+          rating: 0,
+          tier: "EXPLORERS",
+          status: "ACTIVE",
+        },
+        include: { user: true },
+      })
     }
 
     // Handle IN request

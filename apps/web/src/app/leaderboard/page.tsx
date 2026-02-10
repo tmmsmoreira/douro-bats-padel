@@ -1,10 +1,10 @@
-import { Leaderboard } from "@/components/player/leaderboard"
-import { PlayerNav } from "@/components/player/player-nav"
+import { Leaderboard } from "@/components/leaderboard"
+import { HomeNav } from "@/components/home-nav"
 
 export default function LeaderboardPage() {
   return (
     <div className="min-h-screen bg-background">
-      <PlayerNav />
+      <HomeNav />
       <main className="container mx-auto px-4 py-8">
         <div className="space-y-6">
           <div>

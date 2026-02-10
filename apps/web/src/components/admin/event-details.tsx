@@ -1,30 +1,86 @@
 "use client"
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { apiClient } from "@/lib/api-client"
+import { useSession } from "next-auth/react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { formatDate, formatTime } from "@/lib/utils"
 import Link from "next/link"
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
+
 export function EventDetails({ eventId }: { eventId: string }) {
+  const { data: session } = useSession()
   const queryClient = useQueryClient()
 
   const { data: event, isLoading } = useQuery({
-    queryKey: ["event", eventId],
-    queryFn: () => apiClient.get(`/events/${eventId}`),
+    queryKey: ["event", eventId, session?.accessToken],
+    queryFn: async () => {
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      }
+
+      if (session?.accessToken) {
+        headers.Authorization = `Bearer ${session.accessToken}`
+      }
+
+      // Add includeUnpublished=true query parameter for admin view
+      const res = await fetch(`${API_URL}/events/${eventId}?includeUnpublished=true`, { headers })
+
+      if (!res.ok) {
+        throw new Error(`API Error: ${res.statusText}`)
+      }
+
+      return res.json()
+    },
   })
 
   const freezeMutation = useMutation({
-    mutationFn: () => apiClient.post(`/events/${eventId}/freeze`),
+    mutationFn: async () => {
+      if (!session?.accessToken) {
+        throw new Error("Not authenticated")
+      }
+
+      const res = await fetch(`${API_URL}/events/${eventId}/freeze`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.accessToken}`,
+        },
+      })
+
+      if (!res.ok) {
+        throw new Error(`API Error: ${res.statusText}`)
+      }
+
+      return res.json()
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["event", eventId] })
     },
   })
 
   const publishMutation = useMutation({
-    mutationFn: () => apiClient.post(`/events/${eventId}/publish`),
+    mutationFn: async () => {
+      if (!session?.accessToken) {
+        throw new Error("Not authenticated")
+      }
+
+      const res = await fetch(`${API_URL}/events/${eventId}/publish`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.accessToken}`,
+        },
+      })
+
+      if (!res.ok) {
+        throw new Error(`API Error: ${res.statusText}`)
+      }
+
+      return res.json()
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["event", eventId] })
     },

@@ -1,7 +1,7 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query"
-import { apiClient } from "@/lib/api-client"
+import { useSession } from "next-auth/react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -9,10 +9,31 @@ import { formatDate, formatTime } from "@/lib/utils"
 import Link from "next/link"
 import type { EventWithRSVP } from "@padel/types"
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
+
 export function EventsList() {
+  const { data: session } = useSession()
+
   const { data: events, isLoading } = useQuery({
-    queryKey: ["admin-events"],
-    queryFn: () => apiClient.get<EventWithRSVP[]>("/events"),
+    queryKey: ["admin-events", session?.accessToken],
+    queryFn: async () => {
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      }
+
+      if (session?.accessToken) {
+        headers.Authorization = `Bearer ${session.accessToken}`
+      }
+
+      // Add includeUnpublished=true query parameter for admin view
+      const res = await fetch(`${API_URL}/events?includeUnpublished=true`, { headers })
+
+      if (!res.ok) {
+        throw new Error(`API Error: ${res.statusText}`)
+      }
+
+      return res.json() as Promise<EventWithRSVP[]>
+    },
   })
 
   if (isLoading) {

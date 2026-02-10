@@ -1,5 +1,6 @@
 import { ResultsView } from "@/components/player/results-view"
 
-export default function ResultsPage({ params }: { params: { id: string } }) {
-  return <ResultsView eventId={params.id} />
+export default async function ResultsPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  return <ResultsView eventId={id} />
 }

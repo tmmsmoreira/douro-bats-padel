@@ -14,6 +14,8 @@ export default auth((req) => {
 
   // Public pages that don't require authentication
   const isPublicPage =
+    req.nextUrl.pathname === "/" ||
+    req.nextUrl.pathname === "/leaderboard" ||
     req.nextUrl.pathname === "/events" ||
     req.nextUrl.pathname.startsWith("/events/")
 

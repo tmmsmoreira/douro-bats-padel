@@ -7,6 +7,7 @@ declare module "next-auth" {
     user: {
       id: string
       roles: string[]
+      profilePhoto?: string
     } & DefaultSession["user"]
   }
 
@@ -14,6 +15,7 @@ declare module "next-auth" {
     accessToken?: string
     refreshToken?: string
     roles?: string[]
+    profilePhoto?: string
   }
 }
 
@@ -22,5 +24,6 @@ declare module "next-auth/jwt" {
     accessToken?: string
     refreshToken?: string
     roles?: string[]
+    profilePhoto?: string
   }
 }

@@ -3,6 +3,52 @@ import Credentials from "next-auth/providers/credentials"
 import Google from "next-auth/providers/google"
 import type { AuthTokens, AuthUser } from "@padel/types"
 
+/**
+ * Token refresh strategy:
+ * - Access tokens expire after 24 hours (configured in API .env)
+ * - We refresh 5 minutes before expiration to avoid edge cases
+ * - Refresh tokens are valid for 7 days (configured in API .env)
+ * - After 7 days of inactivity, user must log in again
+ * - If user is active, tokens are automatically refreshed
+ */
+
+/**
+ * Refresh the access token using the refresh token
+ */
+async function refreshAccessToken(token: any) {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token.refreshToken}`,
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error("Failed to refresh token")
+    }
+
+    const tokens: AuthTokens = await response.json()
+
+    return {
+      ...token,
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      // Set expiration time: current time + token lifetime (24h in ms)
+      // We subtract 5 minutes as a buffer to refresh before actual expiration
+      accessTokenExpires: Date.now() + 24 * 60 * 60 * 1000 - 5 * 60 * 1000,
+      error: undefined,
+    }
+  } catch (error) {
+    console.error("Error refreshing access token:", error)
+    return {
+      ...token,
+      error: "RefreshAccessTokenError",
+    }
+  }
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Google({
@@ -105,17 +151,30 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return true
     },
     async jwt({ token, user, account }) {
+      // Initial sign in - store tokens and set expiration
       if (user) {
         token.accessToken = user.accessToken
         token.refreshToken = user.refreshToken
         token.roles = user.roles
         token.profilePhoto = user.profilePhoto
+        // Set expiration time: current time + token lifetime (24h in ms)
+        // We subtract 5 minutes as a buffer to refresh before actual expiration
+        token.accessTokenExpires = Date.now() + 24 * 60 * 60 * 1000 - 5 * 60 * 1000
         // For Google OAuth, use the backend user ID
         if (account?.provider === "google") {
           token.sub = user.id
         }
+        return token
       }
-      return token
+
+      // Return previous token if the access token has not expired yet
+      if (Date.now() < (token.accessTokenExpires as number)) {
+        return token
+      }
+
+      // Access token has expired (or is about to), try to refresh it
+      console.log("Access token expired, refreshing...")
+      return refreshAccessToken(token)
     },
     async session({ session, token }) {
       session.user.id = token.sub!
@@ -123,6 +182,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       session.refreshToken = token.refreshToken as string
       session.user.roles = token.roles as string[]
       session.user.profilePhoto = token.profilePhoto as string | undefined
+
+      // Pass error to the client so we can handle it (e.g., force logout)
+      if (token.error) {
+        session.error = token.error as string
+      }
+
       return session
     },
   },

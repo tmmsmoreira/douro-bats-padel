@@ -5,7 +5,8 @@ export interface CreateEventDto {
   date: Date
   startsAt: Date
   endsAt: Date
-  venueId?: string
+  venueId: string
+  courtIds: string[]
   capacity: number
   rsvpOpensAt: Date
   rsvpClosesAt: Date

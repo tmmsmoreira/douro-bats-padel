@@ -20,9 +20,19 @@ export class EventsService {
         rsvpClosesAt: new Date(dto.rsvpClosesAt),
         state: EventState.DRAFT,
         tierRules: dto.tierRules || {},
+        eventCourts: {
+          create: dto.courtIds.map((courtId) => ({
+            courtId,
+          })),
+        },
       },
       include: {
         venue: true,
+        eventCourts: {
+          include: {
+            court: true,
+          },
+        },
       },
     })
 

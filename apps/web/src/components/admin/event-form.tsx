@@ -1,31 +1,82 @@
 "use client"
 
-import { useState } from "react"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useState, useEffect } from "react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { DatePicker } from "@/components/ui/date-picker"
+import { TimePicker } from "@/components/ui/time-picker"
+import { DateTimePicker } from "@/components/ui/datetime-picker"
 import type { CreateEventDto } from "@padel/types"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
+
+interface Venue {
+  id: string
+  name: string
+  address?: string
+  courts: Court[]
+}
+
+interface Court {
+  id: string
+  label: string
+  venueId: string
+}
 
 export function EventForm() {
   const { data: session } = useSession()
   const router = useRouter()
   const queryClient = useQueryClient()
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string
+    date?: Date
+    startsAt?: Date
+    endsAt?: Date
+    capacity: string
+    rsvpOpensAt?: Date
+    rsvpClosesAt?: Date
+    venueId: string
+    courtIds: string[]
+  }>({
     title: "",
-    date: "",
-    startsAt: "",
-    endsAt: "",
-    capacity: "24",
-    rsvpOpensAt: "",
-    rsvpClosesAt: "",
+    date: undefined,
+    startsAt: undefined,
+    endsAt: undefined,
+    capacity: "0",
+    rsvpOpensAt: undefined,
+    rsvpClosesAt: undefined,
+    venueId: "",
+    courtIds: [],
   })
+
+  // Fetch venues with courts
+  const { data: venues, isLoading: venuesLoading } = useQuery<Venue[]>({
+    queryKey: ["venues"],
+    queryFn: async () => {
+      const res = await fetch(`${API_URL}/venues`)
+      if (!res.ok) throw new Error("Failed to fetch venues")
+      return res.json()
+    },
+  })
+
+  const selectedVenue = venues?.find((v) => v.id === formData.venueId)
+
+  // Auto-calculate capacity based on number of courts selected (4 players per court)
+  useEffect(() => {
+    const calculatedCapacity = formData.courtIds.length * 4
+    setFormData((prev) => ({
+      ...prev,
+      capacity: calculatedCapacity.toString(),
+    }))
+  }, [formData.courtIds.length])
 
   const createMutation = useMutation({
     mutationFn: async (data: CreateEventDto) => {
@@ -58,32 +109,67 @@ export function EventForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
+    // Validation
+    if (!formData.venueId) {
+      alert("Please select a venue")
+      return
+    }
+    if (formData.courtIds.length === 0) {
+      alert("Please select at least one court")
+      return
+    }
+    if (!formData.date) {
+      alert("Please select an event date")
+      return
+    }
+    if (!formData.startsAt) {
+      alert("Please select a start time")
+      return
+    }
+    if (!formData.endsAt) {
+      alert("Please select an end time")
+      return
+    }
+    if (!formData.rsvpOpensAt) {
+      alert("Please select RSVP opens date/time")
+      return
+    }
+    if (!formData.rsvpClosesAt) {
+      alert("Please select RSVP closes date/time")
+      return
+    }
+
     // Combine date and time for startsAt and endsAt
     const eventDate = new Date(formData.date)
-    const [startHours, startMinutes] = formData.startsAt.split(":")
-    const [endHours, endMinutes] = formData.endsAt.split(":")
 
     const startsAt = new Date(eventDate)
-    startsAt.setHours(parseInt(startHours), parseInt(startMinutes))
+    startsAt.setHours(formData.startsAt.getHours(), formData.startsAt.getMinutes())
 
     const endsAt = new Date(eventDate)
-    endsAt.setHours(parseInt(endHours), parseInt(endMinutes))
-
-    // Parse RSVP dates
-    const rsvpOpensAt = new Date(formData.rsvpOpensAt)
-    const rsvpClosesAt = new Date(formData.rsvpClosesAt)
+    endsAt.setHours(formData.endsAt.getHours(), formData.endsAt.getMinutes())
 
     const dto: CreateEventDto = {
       title: formData.title,
       date: eventDate,
       startsAt,
       endsAt,
+      venueId: formData.venueId,
+      courtIds: formData.courtIds,
       capacity: parseInt(formData.capacity),
-      rsvpOpensAt,
-      rsvpClosesAt,
+      rsvpOpensAt: formData.rsvpOpensAt,
+      rsvpClosesAt: formData.rsvpClosesAt,
     }
 
     createMutation.mutate(dto)
+  }
+
+  const handleCourtToggle = (courtId: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      courtIds: prev.courtIds.includes(courtId)
+        ? prev.courtIds.filter((id) => id !== courtId)
+        : [...prev.courtIds, courtId],
+    }))
   }
 
   return (
@@ -107,12 +193,11 @@ export function EventForm() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="date">Event Date</Label>
-              <Input
+              <DatePicker
                 id="date"
-                type="date"
                 value={formData.date}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                required
+                onChange={(date) => setFormData({ ...formData, date })}
+                placeholder="Select event date"
               />
             </div>
 
@@ -122,56 +207,107 @@ export function EventForm() {
                 id="capacity"
                 type="number"
                 value={formData.capacity}
-                onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
+                readOnly
+                className="bg-muted cursor-not-allowed"
                 required
               />
+              <p className="text-xs text-muted-foreground">
+                Auto-calculated: 4 players per court
+              </p>
             </div>
           </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="venue">Venue</Label>
+            {venuesLoading ? (
+              <div className="text-sm text-muted-foreground">Loading venues...</div>
+            ) : (
+              <Select
+                value={formData.venueId}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, venueId: value, courtIds: [] })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a venue" />
+                </SelectTrigger>
+                <SelectContent>
+                  {venues?.map((venue) => (
+                    <SelectItem key={venue.id} value={venue.id}>
+                      {venue.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
+
+          {selectedVenue && selectedVenue.courts.length > 0 && (
+            <div className="space-y-2">
+              <Label>Courts (select at least one)</Label>
+              <div className="grid grid-cols-2 gap-3 rounded-md border p-4">
+                {selectedVenue.courts.map((court) => (
+                  <div key={court.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`court-${court.id}`}
+                      checked={formData.courtIds.includes(court.id)}
+                      onCheckedChange={() => handleCourtToggle(court.id)}
+                    />
+                    <label
+                      htmlFor={`court-${court.id}`}
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                    >
+                      {court.label}
+                    </label>
+                  </div>
+                ))}
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {formData.courtIds.length} court(s) selected
+              </p>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="startsAt">Start Time</Label>
-              <Input
+              <TimePicker
                 id="startsAt"
-                type="time"
                 value={formData.startsAt}
-                onChange={(e) => setFormData({ ...formData, startsAt: e.target.value })}
-                required
+                onChange={(time) => setFormData({ ...formData, startsAt: time })}
+                placeholder="Select start time"
               />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="endsAt">End Time</Label>
-              <Input
+              <TimePicker
                 id="endsAt"
-                type="time"
                 value={formData.endsAt}
-                onChange={(e) => setFormData({ ...formData, endsAt: e.target.value })}
-                required
+                onChange={(time) => setFormData({ ...formData, endsAt: time })}
+                placeholder="Select end time"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="rsvpOpensAt">RSVP Opens At</Label>
-              <Input
+              <DateTimePicker
                 id="rsvpOpensAt"
-                type="datetime-local"
                 value={formData.rsvpOpensAt}
-                onChange={(e) => setFormData({ ...formData, rsvpOpensAt: e.target.value })}
-                required
+                onChange={(datetime) => setFormData({ ...formData, rsvpOpensAt: datetime })}
+                placeholder="Select RSVP open date and time"
               />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="rsvpClosesAt">RSVP Closes At</Label>
-              <Input
+              <DateTimePicker
                 id="rsvpClosesAt"
-                type="datetime-local"
                 value={formData.rsvpClosesAt}
-                onChange={(e) => setFormData({ ...formData, rsvpClosesAt: e.target.value })}
-                required
+                onChange={(datetime) => setFormData({ ...formData, rsvpClosesAt: datetime })}
+                placeholder="Select RSVP close date and time"
               />
             </div>
           </div>

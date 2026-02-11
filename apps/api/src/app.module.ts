@@ -6,6 +6,7 @@ import { EventsModule } from "./events/events.module"
 import { RankingModule } from "./ranking/ranking.module"
 import { DrawModule } from "./draw/draw.module"
 import { MatchesModule } from "./matches/matches.module"
+import { VenuesModule } from "./venues/venues.module"
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { MatchesModule } from "./matches/matches.module"
     PrismaModule,
     AuthModule,
     EventsModule,
+    VenuesModule,
     RankingModule,
     DrawModule,
     MatchesModule,

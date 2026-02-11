@@ -52,29 +52,42 @@ model Court {
   label       String
   assignments Assignment[]
   matches     Match[]
+  eventCourts EventCourt[]
 }
 
 model Event {
-  id            String      @id @default(cuid())
+  id            String       @id @default(cuid())
   title         String?
   date          DateTime
   startsAt      DateTime
   endsAt        DateTime
   venueId       String?
-  venue         Venue?      @relation(fields: [venueId], references: [id])
+  venue         Venue?       @relation(fields: [venueId], references: [id])
   capacity      Int
   seed          String?
   rsvpOpensAt   DateTime
   rsvpClosesAt  DateTime
-  state         EventState  @default(DRAFT)
+  state         EventState   @default(DRAFT)
   tierRules     Json?
   draws         Draw[]
   matches       Match[]
   rsvps         RSVP[]
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  eventCourts   EventCourt[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 
   @@index([date, state])
+}
+
+model EventCourt {
+  id       String @id @default(cuid())
+  eventId  String
+  event    Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  courtId  String
+  court    Court  @relation(fields: [courtId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, courtId])
+  @@index([eventId])
 }
 
 model RSVP {

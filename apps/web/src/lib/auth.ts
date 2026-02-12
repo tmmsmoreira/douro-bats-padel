@@ -26,7 +26,13 @@ async function refreshAccessToken(token: any) {
     })
 
     if (!response.ok) {
-      throw new Error("Failed to refresh token")
+      const errorText = await response.text()
+      console.error(`Failed to refresh token: ${response.status} - ${errorText}`)
+      // Don't throw - return error state instead so JWT callback can handle it
+      return {
+        ...token,
+        error: "RefreshAccessTokenError",
+      }
     }
 
     const tokens: AuthTokens = await response.json()
@@ -165,6 +171,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           token.sub = user.id
         }
         return token
+      }
+
+      // If there's a refresh error, return null to clear the session
+      if (token.error === "RefreshAccessTokenError") {
+        return null
       }
 
       // Return previous token if the access token has not expired yet

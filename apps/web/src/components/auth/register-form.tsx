@@ -17,6 +17,8 @@ export function RegisterForm() {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const [success, setSuccess] = useState(false)
+  const [verificationToken, setVerificationToken] = useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -48,19 +50,82 @@ export function RegisterForm() {
         }),
       })
 
+      const data = await res.json()
+
       if (!res.ok) {
-        const data = await res.json()
         setError(data.message || "Registration failed")
         setIsLoading(false)
         return
       }
 
-      // Registration successful, redirect to login
-      router.push("/login?registered=true")
+      // Registration successful, show success message
+      setSuccess(true)
+      // For development: show the token
+      if (data.token) {
+        setVerificationToken(data.token)
+      }
+      setIsLoading(false)
     } catch (err) {
       setError("An error occurred during registration")
       setIsLoading(false)
     }
+  }
+
+  if (success) {
+    return (
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle>Check Your Email</CardTitle>
+          <CardDescription>Registration successful!</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex justify-center py-4">
+            <svg
+              className="h-16 w-16 text-green-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <p className="text-sm text-muted-foreground text-center">
+            We've sent a verification email to <strong>{email}</strong>. Please check your inbox and click the
+            verification link to activate your account.
+          </p>
+          {verificationToken && (
+            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+              <p className="text-sm font-medium text-yellow-800 mb-2">Development Mode - Verification Token:</p>
+              <code className="text-xs bg-white p-2 block rounded border break-all">{verificationToken}</code>
+              <Link
+                href={`/verify-email?token=${verificationToken}`}
+                className="text-sm text-yellow-800 hover:underline mt-2 inline-block"
+              >
+                Click here to verify
+              </Link>
+            </div>
+          )}
+          <Link href="/login" className="block">
+            <Button variant="outline" className="w-full">
+              Go to Login
+            </Button>
+          </Link>
+          <div className="text-center text-sm text-muted-foreground">
+            <p>
+              Didn't receive the email?{" "}
+              <Link href="/resend-verification" className="text-primary hover:underline">
+                Resend verification
+              </Link>
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    )
   }
 
   return (

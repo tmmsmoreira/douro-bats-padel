@@ -9,7 +9,7 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post("signup")
-  async signup(@Body() dto: SignupDto): Promise<AuthTokens> {
+  async signup(@Body() dto: SignupDto) {
     return this.authService.signup(dto)
   }
 
@@ -49,5 +49,15 @@ export class AuthController {
   @Patch("profile-photo")
   async updateProfilePhoto(@Req() req: any, @Body() body: { profilePhoto: string }) {
     return this.authService.updateProfilePhoto(req.user.sub, body.profilePhoto)
+  }
+
+  @Post("verify-email")
+  async verifyEmail(@Body() body: { token: string }) {
+    return this.authService.verifyEmail(body.token)
+  }
+
+  @Post("resend-verification")
+  async resendVerification(@Body() body: { email: string }) {
+    return this.authService.resendVerificationEmail(body.email)
   }
 }

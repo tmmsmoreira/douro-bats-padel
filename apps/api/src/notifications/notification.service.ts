@@ -1,12 +1,15 @@
 import { Injectable } from "@nestjs/common"
+import { EmailService } from "./email.service"
 
 @Injectable()
 export class NotificationService {
-  // Email service stub - integrate with Postmark/SendGrid in production
+  constructor(private emailService: EmailService) {}
+
   async sendRSVPConfirmation(email: string, name: string, event: any) {
+    // For now, keep console.log for backward compatibility
+    // TODO: Create proper HTML email template
     console.log(`[EMAIL] RSVP Confirmation to ${email}`)
     console.log(`Hi ${name}, you are confirmed for ${event.title} on ${event.date}`)
-    // TODO: Integrate with Postmark
   }
 
   async sendWaitlistNotification(email: string, name: string, event: any, position: number) {

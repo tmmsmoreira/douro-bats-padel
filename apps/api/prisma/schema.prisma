@@ -8,17 +8,20 @@ datasource db {
 }
 
 model User {
-  id                   String         @id @default(cuid())
-  email                String         @unique
-  name                 String?
-  passwordHash         String?
-  profilePhoto         String?
-  roles                Role[]
-  resetPasswordToken   String?        @unique
-  resetPasswordExpires DateTime?
-  player               PlayerProfile?
-  createdAt            DateTime       @default(now())
-  updatedAt            DateTime       @updatedAt
+  id                        String         @id @default(cuid())
+  email                     String         @unique
+  name                      String?
+  passwordHash              String?
+  profilePhoto              String?
+  roles                     Role[]
+  emailVerified             Boolean        @default(false)
+  emailVerificationToken    String?        @unique
+  emailVerificationExpires  DateTime?
+  resetPasswordToken        String?        @unique
+  resetPasswordExpires      DateTime?
+  player                    PlayerProfile?
+  createdAt                 DateTime       @default(now())
+  updatedAt                 DateTime       @updatedAt
 }
 
 model PlayerProfile {

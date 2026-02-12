@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
@@ -9,12 +9,22 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import type { CreateVenueDto } from "@padel/types"
+import type { CreateVenueDto, UpdateVenueDto } from "@padel/types"
 import { X } from "lucide-react"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
 
-export function VenueForm() {
+interface VenueFormProps {
+  venueId?: string
+  initialData?: {
+    name: string
+    address?: string
+    logo?: string
+    courts: Array<{ label: string }>
+  }
+}
+
+export function VenueForm({ venueId, initialData }: VenueFormProps) {
   const { data: session } = useSession()
   const router = useRouter()
   const queryClient = useQueryClient()
@@ -31,16 +41,31 @@ export function VenueForm() {
     courts: [],
   })
 
+  // Load initial data for edit mode
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        name: initialData.name,
+        address: initialData.address || "",
+        logo: initialData.logo || "",
+        courts: initialData.courts.map((c) => c.label),
+      })
+    }
+  }, [initialData])
+
   const [courtInput, setCourtInput] = useState("")
 
-  const createMutation = useMutation({
-    mutationFn: async (data: CreateVenueDto) => {
+  const saveMutation = useMutation({
+    mutationFn: async (data: CreateVenueDto | UpdateVenueDto) => {
       if (!session?.accessToken) {
         throw new Error("Not authenticated")
       }
 
-      const res = await fetch(`${API_URL}/venues`, {
-        method: "POST",
+      const url = venueId ? `${API_URL}/venues/${venueId}` : `${API_URL}/venues`
+      const method = venueId ? "PATCH" : "POST"
+
+      const res = await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${session.accessToken}`,
@@ -57,6 +82,9 @@ export function VenueForm() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["venues"] })
+      if (venueId) {
+        queryClient.invalidateQueries({ queryKey: ["venue", venueId] })
+      }
       router.push("/admin/venues")
     },
   })
@@ -92,14 +120,14 @@ export function VenueForm() {
       return
     }
 
-    const dto: CreateVenueDto = {
+    const dto: CreateVenueDto | UpdateVenueDto = {
       name: formData.name.trim(),
       address: formData.address.trim() || undefined,
       logo: formData.logo.trim() || undefined,
       courts: formData.courts,
     }
 
-    createMutation.mutate(dto)
+    saveMutation.mutate(dto)
   }
 
   return (
@@ -196,14 +224,14 @@ export function VenueForm() {
             <Button type="button" variant="outline" onClick={() => router.push("/admin/venues")}>
               Cancel
             </Button>
-            <Button type="submit" disabled={createMutation.isPending}>
-              {createMutation.isPending ? "Creating..." : "Create Venue"}
+            <Button type="submit" disabled={saveMutation.isPending}>
+              {saveMutation.isPending ? (venueId ? "Updating..." : "Creating...") : (venueId ? "Update Venue" : "Create Venue")}
             </Button>
           </div>
 
-          {createMutation.isError && (
+          {saveMutation.isError && (
             <div className="text-sm text-destructive">
-              Error: {createMutation.error instanceof Error ? createMutation.error.message : "Failed to create venue"}
+              Error: {saveMutation.error instanceof Error ? saveMutation.error.message : `Failed to ${venueId ? "update" : "create"} venue`}
             </div>
           )}
         </CardContent>

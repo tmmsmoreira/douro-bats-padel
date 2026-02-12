@@ -1,8 +1,12 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Pencil, Trash2 } from "lucide-react"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
 
@@ -21,6 +25,10 @@ interface Court {
 }
 
 export function VenuesList() {
+  const { data: session } = useSession()
+  const router = useRouter()
+  const queryClient = useQueryClient()
+
   const { data: venues, isLoading } = useQuery<Venue[]>({
     queryKey: ["venues"],
     queryFn: async () => {
@@ -29,6 +37,41 @@ export function VenuesList() {
       return res.json()
     },
   })
+
+  const deleteMutation = useMutation({
+    mutationFn: async (venueId: string) => {
+      if (!session?.accessToken) {
+        throw new Error("Not authenticated")
+      }
+
+      const res = await fetch(`${API_URL}/venues/${venueId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${session.accessToken}`,
+        },
+      })
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ message: res.statusText }))
+        throw new Error(errorData.message || "Failed to delete venue")
+      }
+
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["venues"] })
+    },
+  })
+
+  const handleEdit = (venueId: string) => {
+    router.push(`/admin/venues/${venueId}/edit`)
+  }
+
+  const handleDelete = (venueId: string, venueName: string) => {
+    if (confirm(`Are you sure you want to delete "${venueName}"? This will also delete all associated courts.`)) {
+      deleteMutation.mutate(venueId)
+    }
+  }
 
   if (isLoading) {
     return <div className="text-center py-8">Loading venues...</div>
@@ -61,6 +104,19 @@ export function VenuesList() {
               <div className="flex-1">
                 <CardTitle>{venue.name}</CardTitle>
                 {venue.address && <p className="text-sm text-muted-foreground mt-1">{venue.address}</p>}
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => handleEdit(venue.id)}>
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleDelete(venue.id, venue.name)}
+                  disabled={deleteMutation.isPending}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           </CardHeader>

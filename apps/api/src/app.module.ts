@@ -7,6 +7,7 @@ import { RankingModule } from "./ranking/ranking.module"
 import { DrawModule } from "./draw/draw.module"
 import { MatchesModule } from "./matches/matches.module"
 import { VenuesModule } from "./venues/venues.module"
+import { PlayersModule } from "./players/players.module"
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { VenuesModule } from "./venues/venues.module"
     AuthModule,
     EventsModule,
     VenuesModule,
+    PlayersModule,
     RankingModule,
     DrawModule,
     MatchesModule,

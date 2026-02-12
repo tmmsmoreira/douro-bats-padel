@@ -5,6 +5,7 @@ import { apiClient } from "@/lib/api-client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { PlayerNav } from "./player-nav"
+import { Footer } from "@/components/footer"
 
 export function ResultsView({ eventId }: { eventId: string }) {
   const { data: matches, isLoading } = useQuery({
@@ -14,22 +15,24 @@ export function ResultsView({ eventId }: { eventId: string }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background flex flex-col">
         <PlayerNav />
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl">
           <div className="text-center py-8">Loading results...</div>
         </main>
+        <Footer />
       </div>
     )
   }
 
   if (!matches || matches.length === 0) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background flex flex-col">
         <PlayerNav />
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl">
           <div className="text-center py-8">Results not available yet</div>
         </main>
+        <Footer />
       </div>
     )
   }
@@ -44,9 +47,9 @@ export function ResultsView({ eventId }: { eventId: string }) {
   }, {})
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <PlayerNav />
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl">
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold">Match Results</h1>
@@ -106,6 +109,7 @@ export function ResultsView({ eventId }: { eventId: string }) {
           ))}
         </div>
       </main>
+      <Footer />
     </div>
   )
 }

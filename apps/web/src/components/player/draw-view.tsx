@@ -1,10 +1,11 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
+import { useQuery } from "@tantml:react-query"
 import { apiClient } from "@/lib/api-client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { PlayerNav } from "./player-nav"
+import { Footer } from "@/components/footer"
 
 export function DrawView({ eventId }: { eventId: string }) {
   const { data: draw, isLoading } = useQuery({
@@ -14,22 +15,24 @@ export function DrawView({ eventId }: { eventId: string }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background flex flex-col">
         <PlayerNav />
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl">
           <div className="text-center py-8">Loading draw...</div>
         </main>
+        <Footer />
       </div>
     )
   }
 
   if (!draw) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background flex flex-col">
         <PlayerNav />
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl">
           <div className="text-center py-8">Draw not available yet</div>
         </main>
+        <Footer />
       </div>
     )
   }
@@ -44,9 +47,9 @@ export function DrawView({ eventId }: { eventId: string }) {
   }, {})
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <PlayerNav />
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl">
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold">Game Draw</h1>
@@ -98,6 +101,7 @@ export function DrawView({ eventId }: { eventId: string }) {
           ))}
         </div>
       </main>
+      <Footer />
     </div>
   )
 }

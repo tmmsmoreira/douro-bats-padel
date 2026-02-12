@@ -44,6 +44,7 @@ model Venue {
   id      String  @id @default(cuid())
   name    String
   address String?
+  logo    String?
   courts  Court[]
   events  Event[]
 }

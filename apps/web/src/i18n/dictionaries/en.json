@@ -1,0 +1,157 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "actions": "Actions",
+    "confirm": "Confirm",
+    "close": "Close"
+  },
+  "nav": {
+    "home": "Home",
+    "events": "Events",
+    "ranking": "Ranking",
+    "leaderboard": "Leaderboard",
+    "profile": "Profile",
+    "admin": "Admin Panel",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "about": "About Us",
+    "contact": "Contact",
+    "faq": "FAQ"
+  },
+  "home": {
+    "title": "Upcoming Events",
+    "description": "Register for game nights and check your status",
+    "descriptionGuest": "Sign in to register for game nights",
+    "noEvents": "No upcoming events",
+    "viewDetails": "View Details"
+  },
+  "leaderboard": {
+    "title": "Ranking",
+    "description": "Player rankings based on last 5 weeks performance",
+    "rank": "Rank",
+    "player": "Player",
+    "tier": "Tier",
+    "points": "Points",
+    "wins": "Wins",
+    "losses": "Losses",
+    "winRate": "Win Rate"
+  },
+  "profile": {
+    "title": "My Profile",
+    "editProfile": "Edit Profile",
+    "stats": "Statistics",
+    "recentMatches": "Recent Matches",
+    "achievements": "Achievements"
+  },
+  "admin": {
+    "eventsManagement": "Events Management",
+    "eventsDescription": "Manage game nights, RSVPs, and draws",
+    "createEvent": "Create Event",
+    "playersManagement": "Players Management",
+    "playersDescription": "View and manage all registered players",
+    "venuesManagement": "Venues Management",
+    "venuesDescription": "Manage venues and courts",
+    "createVenue": "Create Venue",
+    "editVenue": "Edit Venue",
+    "deleteVenue": "Delete Venue",
+    "confirmDelete": "Are you sure you want to delete this venue?"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "name": "Name",
+    "forgotPassword": "Forgot Password?",
+    "resetPassword": "Reset Password",
+    "sendResetLink": "Send Reset Link",
+    "backToLogin": "Back to Login",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?",
+    "verifyEmail": "Verify Email",
+    "resendVerification": "Resend Verification",
+    "emailVerified": "Email Verified",
+    "checkEmail": "Check your email for verification link"
+  },
+  "footer": {
+    "about": "About",
+    "description": "Your premier padel tournament management platform in Porto",
+    "quickLinks": "Quick Links",
+    "legal": "Legal",
+    "contact": "Contact",
+    "termsAndConditions": "Terms & Conditions",
+    "privacyPolicy": "Privacy Policy",
+    "cookiePolicy": "Cookie Policy",
+    "address": "Porto, Portugal",
+    "phone": "+351 123 456 789",
+    "madeWith": "Made with ❤️ in Porto",
+    "allRightsReserved": "All rights reserved"
+  },
+  "about": {
+    "title": "About Douro Bats Padel",
+    "subtitle": "Your premier padel tournament management platform",
+    "mission": "Our Mission",
+    "missionText": "To provide the best padel tournament experience in Porto",
+    "features": "Features",
+    "competitiveTournaments": "Competitive Tournaments",
+    "playerRankings": "Player Rankings",
+    "communityDriven": "Community Driven",
+    "easyEventManagement": "Easy Event Management",
+    "ourStory": "Our Story",
+    "ourValues": "Our Values",
+    "fairPlay": "Fair Play",
+    "community": "Community",
+    "excellence": "Excellence",
+    "innovation": "Innovation"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "Get in touch with us",
+    "getInTouch": "Get In Touch",
+    "description": "Have questions? We'd love to hear from you",
+    "sendMessage": "Send us a message",
+    "yourName": "Your Name",
+    "yourEmail": "Your Email",
+    "subject": "Subject",
+    "message": "Message",
+    "send": "Send Message",
+    "contactInfo": "Contact Information",
+    "visitUs": "Visit Us",
+    "emailUs": "Email Us",
+    "callUs": "Call Us",
+    "businessHours": "Business Hours",
+    "hours": "Mon-Fri: 9:00 AM - 6:00 PM"
+  },
+  "terms": {
+    "title": "Terms and Conditions",
+    "lastUpdated": "Last updated: February 2026"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated: February 2026"
+  },
+  "cookies": {
+    "title": "Cookie Policy",
+    "lastUpdated": "Last updated: February 2026"
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "Find answers to common questions about Douro Bats Padel"
+  }
+}
+

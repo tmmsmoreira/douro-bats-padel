@@ -1,8 +1,14 @@
+"use client"
+
 import Link from "next/link"
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from "lucide-react"
+import { useDictionary } from "@/components/dictionary-provider"
+import { useLocale } from "@/hooks/use-locale"
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
+  const dict = useDictionary()
+  const locale = useLocale()
 
   return (
     <footer className="border-t bg-card mt-auto">
@@ -10,9 +16,9 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* About Section */}
           <div className="space-y-4">
-            <h3 className="text-lg font-bold">Douro Bats Padel</h3>
+            <h3 className="text-lg font-bold">{dict.footer.title || "Douro Bats Padel"}</h3>
             <p className="text-sm text-muted-foreground">
-              Your premier padel tournament management platform. Join our community and compete in exciting tournaments.
+              {dict.footer.description}
             </p>
             <div className="flex gap-4">
               <a
@@ -47,26 +53,26 @@ export function Footer() {
 
           {/* Quick Links */}
           <div className="space-y-4">
-            <h3 className="text-lg font-bold">Quick Links</h3>
+            <h3 className="text-lg font-bold">{dict.footer.quickLinks}</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/" className="text-muted-foreground hover:text-primary transition-colors">
-                  Home
+                <Link href={`/${locale}`} className="text-muted-foreground hover:text-primary transition-colors">
+                  {dict.nav.home}
                 </Link>
               </li>
               <li>
-                <Link href="/events" className="text-muted-foreground hover:text-primary transition-colors">
-                  Events
+                <Link href={`/${locale}`} className="text-muted-foreground hover:text-primary transition-colors">
+                  {dict.nav.events}
                 </Link>
               </li>
               <li>
-                <Link href="/ranking" className="text-muted-foreground hover:text-primary transition-colors">
-                  Rankings
+                <Link href={`/${locale}/leaderboard`} className="text-muted-foreground hover:text-primary transition-colors">
+                  {dict.nav.ranking}
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="text-muted-foreground hover:text-primary transition-colors">
-                  About Us
+                <Link href={`/${locale}/about`} className="text-muted-foreground hover:text-primary transition-colors">
+                  {dict.nav.about}
                 </Link>
               </li>
             </ul>
@@ -74,26 +80,26 @@ export function Footer() {
 
           {/* Legal */}
           <div className="space-y-4">
-            <h3 className="text-lg font-bold">Legal</h3>
+            <h3 className="text-lg font-bold">{dict.footer.legal}</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/terms" className="text-muted-foreground hover:text-primary transition-colors">
-                  Terms & Conditions
+                <Link href={`/${locale}/terms`} className="text-muted-foreground hover:text-primary transition-colors">
+                  {dict.footer.termsAndConditions}
                 </Link>
               </li>
               <li>
-                <Link href="/privacy" className="text-muted-foreground hover:text-primary transition-colors">
-                  Privacy Policy
+                <Link href={`/${locale}/privacy`} className="text-muted-foreground hover:text-primary transition-colors">
+                  {dict.footer.privacyPolicy}
                 </Link>
               </li>
               <li>
-                <Link href="/cookies" className="text-muted-foreground hover:text-primary transition-colors">
-                  Cookie Policy
+                <Link href={`/${locale}/cookies`} className="text-muted-foreground hover:text-primary transition-colors">
+                  {dict.footer.cookiePolicy}
                 </Link>
               </li>
               <li>
-                <Link href="/faq" className="text-muted-foreground hover:text-primary transition-colors">
-                  FAQ
+                <Link href={`/${locale}/faq`} className="text-muted-foreground hover:text-primary transition-colors">
+                  {dict.nav.faq}
                 </Link>
               </li>
             </ul>
@@ -101,11 +107,11 @@ export function Footer() {
 
           {/* Contact */}
           <div className="space-y-4">
-            <h3 className="text-lg font-bold">Contact Us</h3>
+            <h3 className="text-lg font-bold">{dict.footer.contact}</h3>
             <ul className="space-y-3 text-sm">
               <li className="flex items-start gap-2">
                 <MapPin className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
-                <span className="text-muted-foreground">Porto, Portugal</span>
+                <span className="text-muted-foreground">{dict.footer.address}</span>
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
@@ -119,12 +125,12 @@ export function Footer() {
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 <a href="tel:+351123456789" className="text-muted-foreground hover:text-primary transition-colors">
-                  +351 123 456 789
+                  {dict.footer.phone}
                 </a>
               </li>
               <li>
-                <Link href="/contact" className="text-primary hover:underline font-medium">
-                  Contact Form →
+                <Link href={`/${locale}/contact`} className="text-primary hover:underline font-medium">
+                  {dict.contact.sendMessage} →
                 </Link>
               </li>
             </ul>
@@ -134,9 +140,9 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-            <p>© {currentYear} Douro Bats Padel. All rights reserved.</p>
+            <p>© {currentYear} Douro Bats Padel. {dict.footer.allRightsReserved}</p>
             <p>
-              Made with ❤️ in Porto
+              {dict.footer.madeWith}
             </p>
           </div>
         </div>

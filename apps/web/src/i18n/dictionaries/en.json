@@ -30,7 +30,10 @@
     "signOut": "Sign Out",
     "about": "About Us",
     "contact": "Contact",
-    "faq": "FAQ"
+    "faq": "FAQ",
+    "players": "Players",
+    "venues": "Venues",
+    "playerView": "Player View"
   },
   "home": {
     "title": "Upcoming Events",

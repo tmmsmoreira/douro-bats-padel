@@ -15,22 +15,27 @@ import {
 import { signOut, useSession } from "next-auth/react"
 import { User, LogOut } from "lucide-react"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
-
-const navItems = [
-  { href: "/admin", label: "Events" },
-  { href: "/admin/players", label: "Players" },
-  { href: "/admin/venues", label: "Venues" },
-]
+import { LanguageSwitcher } from "@/components/language-switcher"
+import { useDictionary } from "@/components/dictionary-provider"
+import { useLocale } from "@/hooks/use-locale"
 
 export function AdminNav() {
   const pathname = usePathname()
   const { data: session } = useSession()
+  const dict = useDictionary()
+  const locale = useLocale()
+
+  const navItems = [
+    { href: `/${locale}/admin`, label: dict.nav.events },
+    { href: `/${locale}/admin/players`, label: dict.nav.players },
+    { href: `/${locale}/admin/venues`, label: dict.nav.venues },
+  ]
 
   return (
     <nav className="border-b bg-card">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-6">
-          <Link href="/admin" className="text-lg font-bold">
+          <Link href={`/${locale}/admin`} className="text-lg font-bold">
             Padel Manager
           </Link>
           <div className="flex gap-1">
@@ -50,10 +55,11 @@ export function AdminNav() {
             ))}
           </div>
         </div>
-        <div className="flex items-center gap-4">
-          <Link href="/">
+        <div className="flex items-center gap-2">
+          <LanguageSwitcher />
+          <Link href={`/${locale}`}>
             <Button variant="ghost" size="sm">
-              Player View
+              {dict.nav.playerView}
             </Button>
           </Link>
           <DropdownMenu>
@@ -88,16 +94,16 @@ export function AdminNav() {
               </div>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href="/profile" className="cursor-pointer">
+                <Link href={`/${locale}/profile`} className="cursor-pointer">
                   <User className="mr-2 h-4 w-4" />
-                  <span>Profile</span>
+                  <span>{dict.nav.profile}</span>
                 </Link>
               </DropdownMenuItem>
               <ThemeToggle />
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer">
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>Sign out</span>
+                <span>{dict.nav.signOut}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

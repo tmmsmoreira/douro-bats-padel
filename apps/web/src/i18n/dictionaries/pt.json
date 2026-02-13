@@ -30,7 +30,10 @@
     "signOut": "Sair",
     "about": "Sobre Nós",
     "contact": "Contacto",
-    "faq": "FAQ"
+    "faq": "FAQ",
+    "players": "Jogadores",
+    "venues": "Clubes",
+    "playerView": "Vista de Jogador"
   },
   "home": {
     "title": "Próximos Eventos",

@@ -1,0 +1,16 @@
+[build]
+builder = "nixpacks"
+
+[build.nixpacksPlan.phases.install]
+cmds = ["pnpm install --frozen-lockfile"]
+
+[build.nixpacksPlan.phases.build]
+cmds = [
+  "pnpm --filter @padel/types build",
+  "pnpm --filter @padel/api prisma generate",
+  "pnpm --filter @padel/api build"
+]
+
+[deploy]
+startCommand = "pnpm --filter @padel/api start"
+

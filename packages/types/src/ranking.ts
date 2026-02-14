@@ -84,6 +84,10 @@ export function computeRanking(i: ComputeInput): ComputeOutput {
   return { weeklyScore, newRatings }
 }
 
+// NOTE: Tier is NOT determined by rating. It's assigned dynamically per event
+// based on sorted ratings and court availability for event organization only.
+// This function is kept for backward compatibility but should not be used.
+/** @deprecated Tier is assigned dynamically per event, not based on rating threshold */
 export const toTier = (rating: number): Tier => (rating >= 300 ? Tier.MASTERS : Tier.EXPLORERS)
 
 export interface LeaderboardEntry {

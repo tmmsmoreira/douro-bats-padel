@@ -1,22 +1,17 @@
 "use client"
 
-import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { apiClient } from "@/lib/api-client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import type { LeaderboardEntry } from "@padel/types"
 import { ArrowUp, ArrowDown, Minus } from "lucide-react"
 
 export function Leaderboard() {
-  const [tier, setTier] = useState<"MASTERS" | "EXPLORERS" | "ALL">("ALL")
-
   const { data: leaderboard, isLoading } = useQuery({
-    queryKey: ["leaderboard", tier],
+    queryKey: ["leaderboard"],
     queryFn: () => {
-      const tierParam = tier === "ALL" ? "" : `?tier=${tier}`
-      return apiClient.get<LeaderboardEntry[]>(`/rankings/leaderboard${tierParam}`)
+      return apiClient.get<LeaderboardEntry[]>(`/rankings/leaderboard`)
     },
   })
 
@@ -26,18 +21,6 @@ export function Leaderboard() {
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-2">
-        <Button variant={tier === "ALL" ? "default" : "outline"} size="sm" onClick={() => setTier("ALL")}>
-          All Players
-        </Button>
-        <Button variant={tier === "MASTERS" ? "default" : "outline"} size="sm" onClick={() => setTier("MASTERS")}>
-          Masters
-        </Button>
-        <Button variant={tier === "EXPLORERS" ? "default" : "outline"} size="sm" onClick={() => setTier("EXPLORERS")}>
-          Explorers
-        </Button>
-      </div>
-
       <Card>
         <CardHeader>
           <CardTitle>Leaderboard</CardTitle>

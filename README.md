@@ -103,8 +103,8 @@ After seeding, you can login with:
 
 **Scoring Rules:**
 
-- **Masters**: Winner = 300 + 20×sets_won | Loser = 20×sets_won
-- **Explorers**: Winner = 200 + 15×sets_won | Loser = 15×sets_won
+- **Masters Matches**: Winner = 300 + 20×sets_won | Loser = 20×sets_won
+- **Explorers Matches**: Winner = 200 + 15×sets_won | Loser = 15×sets_won
 - **Ties**: No base points, only per-set points
 - Points split equally between team members
 
@@ -112,7 +112,19 @@ After seeding, you can login with:
 
 - Weekly score = average points per round played
 - Rating = simple average of last 5 weeks (scores > 0)
-- Tier promotion at 300+ rating
+
+**Tier Assignment (Event Organization Only):**
+
+- Tiers (Masters/Explorers) are **NOT** a ranking category
+- Tiers are assigned **dynamically per event** based on:
+  - Players sorted by rating (highest to lowest)
+  - Court availability and time slots
+  - Top-rated players → Masters tier (e.g., 8PM-9:30PM courts)
+  - Lower-rated players → Explorers tier (e.g., 9:30PM-11PM courts)
+- A player can be in Masters one week and Explorers the next, depending on:
+  - Who else is playing that week
+  - Their current rating relative to other participants
+- Tier determines which point system is used for matches in that time slot
 
 ### 4. Role-Based Access
 

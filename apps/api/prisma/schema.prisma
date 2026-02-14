@@ -29,6 +29,8 @@ model PlayerProfile {
   userId           String             @unique
   user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   rating           Int                @default(0)
+  // NOTE: tier is NOT used for ranking. It's assigned dynamically per event based on
+  // sorted ratings and court availability for event organization purposes only.
   tier             Tier               @default(EXPLORERS)
   status           String             @default("ACTIVE")
   rsvps            RSVP[]
@@ -142,6 +144,8 @@ model Match {
   round       Int
   setsA       Int       @default(0)
   setsB       Int       @default(0)
+  // NOTE: tier determines which point system to use for this match
+  // (MASTERS: 300 base + 20/set, EXPLORERS: 200 base + 15/set)
   tier        Tier
   reportedBy  String?
   publishedAt DateTime?

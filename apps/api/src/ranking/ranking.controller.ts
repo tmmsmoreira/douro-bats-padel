@@ -5,7 +5,7 @@ import { OptionalJwtAuthGuard } from "../auth/guards/optional-jwt-auth.guard"
 import { RolesGuard } from "../auth/guards/roles.guard"
 import { Roles } from "../auth/decorators/roles.decorator"
 import { Public } from "../auth/decorators/public.decorator"
-import { Role, type Tier } from "@padel/types"
+import { Role } from "@padel/types"
 
 @Controller("rankings")
 @UseGuards(OptionalJwtAuthGuard)
@@ -21,10 +21,9 @@ export class RankingController {
 
   @Public()
   @Get("leaderboard")
-  async getLeaderboard(@Query("tier") tier?: string, @Query("limit") limit?: string) {
-    const tierEnum = tier ? (tier.toUpperCase() as Tier) : undefined
+  async getLeaderboard(@Query("limit") limit?: string) {
     const limitNum = limit ? Number.parseInt(limit, 10) : 50
-    return this.rankingService.getLeaderboard(tierEnum, limitNum)
+    return this.rankingService.getLeaderboard(limitNum)
   }
 
   @Public()

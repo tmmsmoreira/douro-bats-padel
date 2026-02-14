@@ -69,12 +69,23 @@ export class DrawService {
       throw new BadRequestException("Event must be frozen before generating draw")
     }
 
-    const players: Player[] = event.rsvps.map((rsvp) => ({
-      id: rsvp.player.id,
-      name: rsvp.player.user.name || "Unknown",
-      rating: rsvp.player.rating,
-      tier: rsvp.player.tier as Tier,
-    }))
+    // Sort players by rating (descending) to assign tiers dynamically
+    const sortedRsvps = [...event.rsvps].sort((a, b) => b.player.rating - a.player.rating)
+
+    // Assign tiers dynamically based on rating order and court availability
+    // Top-rated players get MASTERS tier, lower-rated get EXPLORERS
+    const players: Player[] = sortedRsvps.map((rsvp, index) => {
+      // For now, assign tier based on position in sorted list
+      // This will be refined based on court/time slot configuration
+      const tier = this.assignTierForEvent(index, sortedRsvps.length, event)
+
+      return {
+        id: rsvp.player.id,
+        name: rsvp.player.user.name || "Unknown",
+        rating: rsvp.player.rating,
+        tier,
+      }
+    })
 
     if (players.length < 4) {
       throw new BadRequestException("Need at least 4 players to generate draw")
@@ -373,6 +384,33 @@ export class DrawService {
     return history
   }
 
+  /**
+   * Assign tier dynamically based on player position in sorted rating list
+   * Top half of players get MASTERS, bottom half get EXPLORERS
+   * This can be customized per event using tierRules if needed
+   */
+  private assignTierForEvent(playerIndex: number, totalPlayers: number, event: any): Tier {
+    // Check if event has custom tier rules
+    if (event.tierRules && typeof event.tierRules === "object") {
+      const rules = event.tierRules as any
+
+      // If tierRules specifies a split point (e.g., { masterCount: 12 })
+      if (rules.masterCount && typeof rules.masterCount === "number") {
+        return playerIndex < rules.masterCount ? Tier.MASTERS : Tier.EXPLORERS
+      }
+
+      // If tierRules specifies a percentage (e.g., { masterPercentage: 50 })
+      if (rules.masterPercentage && typeof rules.masterPercentage === "number") {
+        const splitPoint = Math.floor((totalPlayers * rules.masterPercentage) / 100)
+        return playerIndex < splitPoint ? Tier.MASTERS : Tier.EXPLORERS
+      }
+    }
+
+    // Default: split evenly - top half are MASTERS, bottom half are EXPLORERS
+    const splitPoint = Math.floor(totalPlayers / 2)
+    return playerIndex < splitPoint ? Tier.MASTERS : Tier.EXPLORERS
+  }
+
   private playerInMatch(player: Player, match: Match): boolean {
     return (
       match.teamA.player1.id === player.id ||
@@ -392,6 +430,7 @@ export class DrawService {
           },
           orderBy: [{ round: "asc" }, { courtId: "asc" }],
         },
+        event: true,
       },
       orderBy: {
         createdAt: "desc",
@@ -414,6 +453,13 @@ export class DrawService {
       include: { user: true },
     })
 
+    // Sort players by rating to recalculate tier assignment for this event
+    const sortedPlayers = [...players].sort((a, b) => b.rating - a.rating)
+    const playerIndexMap = new Map<string, number>()
+    sortedPlayers.forEach((p, index) => {
+      playerIndexMap.set(p.id, index)
+    })
+
     type PlayerWithUser = typeof players[0]
     const playerMap = new Map<string, PlayerWithUser>(players.map((p) => [p.id, p]))
 
@@ -424,21 +470,25 @@ export class DrawService {
         teamA: a.teamA.map((id) => {
           const p = playerMap.get(id)
           if (!p) throw new Error(`Player with id ${id} not found`)
+          const playerIndex = playerIndexMap.get(id) || 0
+          const tier = this.assignTierForEvent(playerIndex, players.length, draw.event)
           return {
             id: p.id,
             name: p.user.name,
             rating: p.rating,
-            tier: p.tier,
+            tier,
           }
         }),
         teamB: a.teamB.map((id) => {
           const p = playerMap.get(id)
           if (!p) throw new Error(`Player with id ${id} not found`)
+          const playerIndex = playerIndexMap.get(id) || 0
+          const tier = this.assignTierForEvent(playerIndex, players.length, draw.event)
           return {
             id: p.id,
             name: p.user.name,
             rating: p.rating,
-            tier: p.tier,
+            tier,
           }
         }),
       })),

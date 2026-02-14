@@ -1,22 +1,19 @@
 "use client"
 
-import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import type { LeaderboardEntry } from "@padel/types"
 import { ArrowUp, ArrowDown, Minus } from "lucide-react"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
 
 export function Leaderboard() {
-  const [tier, setTier] = useState<"MASTERS" | "EXPLORERS" | "ALL">("ALL")
   const { data: session } = useSession()
 
   const { data: leaderboard, isLoading } = useQuery({
-    queryKey: ["leaderboard", tier, session?.accessToken],
+    queryKey: ["leaderboard", session?.accessToken],
     queryFn: async () => {
       const headers: HeadersInit = {
         "Content-Type": "application/json",
@@ -27,8 +24,7 @@ export function Leaderboard() {
         headers.Authorization = `Bearer ${session.accessToken}`
       }
 
-      const tierParam = tier === "ALL" ? "" : `?tier=${tier}`
-      const res = await fetch(`${API_URL}/rankings/leaderboard${tierParam}`, { headers })
+      const res = await fetch(`${API_URL}/rankings/leaderboard`, { headers })
 
       if (!res.ok) {
         throw new Error(`API Error: ${res.statusText}`)
@@ -44,18 +40,6 @@ export function Leaderboard() {
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-2">
-        <Button variant={tier === "ALL" ? "default" : "outline"} size="sm" onClick={() => setTier("ALL")}>
-          All Players
-        </Button>
-        <Button variant={tier === "MASTERS" ? "default" : "outline"} size="sm" onClick={() => setTier("MASTERS")}>
-          Masters
-        </Button>
-        <Button variant={tier === "EXPLORERS" ? "default" : "outline"} size="sm" onClick={() => setTier("EXPLORERS")}>
-          Explorers
-        </Button>
-      </div>
-
       <Card>
         <CardHeader>
           <CardTitle>Leaderboard</CardTitle>

@@ -18,26 +18,10 @@ interface Player {
   player: {
     id: string
     rating: number
-    tier: string
+    tier: string // Still exists in DB but not displayed (used only for event organization)
     status: string
     createdAt: string
   } | null
-}
-
-const tierColors: Record<string, string> = {
-  EXPLORERS: "bg-green-500/10 text-green-700 dark:text-green-400",
-  NAVIGATORS: "bg-blue-500/10 text-blue-700 dark:text-blue-400",
-  PIONEERS: "bg-purple-500/10 text-purple-700 dark:text-purple-400",
-  CHAMPIONS: "bg-orange-500/10 text-orange-700 dark:text-orange-400",
-  LEGENDS: "bg-red-500/10 text-red-700 dark:text-red-400",
-}
-
-const tierLabels: Record<string, string> = {
-  EXPLORERS: "Explorers",
-  NAVIGATORS: "Navigators",
-  PIONEERS: "Pioneers",
-  CHAMPIONS: "Champions",
-  LEGENDS: "Legends",
 }
 
 export function PlayersList() {
@@ -97,8 +81,8 @@ export function PlayersList() {
               </div>
               {player.player && (
                 <div className="flex flex-col items-end gap-2">
-                  <Badge className={tierColors[player.player.tier] || ""}>{tierLabels[player.player.tier] || player.player.tier}</Badge>
-                  <div className="text-sm font-medium">Rating: {player.player.rating}</div>
+                  <div className="text-2xl font-bold text-primary">{player.player.rating}</div>
+                  <div className="text-xs text-muted-foreground">Rating</div>
                 </div>
               )}
             </div>

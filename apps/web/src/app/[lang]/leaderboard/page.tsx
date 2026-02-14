@@ -1,7 +1,7 @@
 import { Leaderboard } from "@/components/leaderboard"
-import { HomeNav } from "@/components/home-nav"
 import { Footer } from "@/components/footer"
 import { getDictionary, type Locale } from "@/i18n"
+import { HomeNavClient } from "@/components/client-nav-wrapper"
 
 export default async function LeaderboardPage({ params }: { params: Promise<{ lang: string }> }) {
   const { lang } = await params
@@ -9,7 +9,7 @@ export default async function LeaderboardPage({ params }: { params: Promise<{ la
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <HomeNav />
+      <HomeNavClient />
       <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl">
         <div className="space-y-6">
           <div>

@@ -1,5 +1,32 @@
 import type { EventState, RSVPStatus } from "./common"
 
+/**
+ * Time slot for a tier with court assignments
+ */
+export interface TierTimeSlot {
+  /** Start time for this tier (e.g., "20:00" for 8PM) */
+  startsAt: string
+  /** End time for this tier (e.g., "21:30" for 9:30PM) */
+  endsAt: string
+  /** Court IDs available for this time slot */
+  courtIds: string[]
+}
+
+/**
+ * Tier rules for event organization
+ * Determines how players are split into MASTERS and EXPLORERS tiers
+ */
+export interface TierRules {
+  /** Fixed number of players assigned to MASTERS tier (top-rated players) */
+  masterCount?: number
+  /** Percentage of players assigned to MASTERS tier (0-100) */
+  masterPercentage?: number
+  /** Time slot for MASTERS tier */
+  mastersTimeSlot?: TierTimeSlot
+  /** Time slot for EXPLORERS tier */
+  explorersTimeSlot?: TierTimeSlot
+}
+
 export interface CreateEventDto {
   title?: string
   date: Date
@@ -10,7 +37,7 @@ export interface CreateEventDto {
   capacity: number
   rsvpOpensAt: Date
   rsvpClosesAt: Date
-  tierRules?: Record<string, any>
+  tierRules?: TierRules
 }
 
 export interface RSVPDto {

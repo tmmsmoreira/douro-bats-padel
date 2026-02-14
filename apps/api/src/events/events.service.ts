@@ -1,13 +1,82 @@
 import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common"
 import { PrismaService } from "../prisma/prisma.service"
-import type { CreateEventDto, EventWithRSVP } from "@padel/types"
+import type { CreateEventDto, EventWithRSVP, TierRules } from "@padel/types"
 import { EventState } from "@padel/types"
 
 @Injectable()
 export class EventsService {
   constructor(private prisma: PrismaService) {}
 
+  /**
+   * Validate tier rules configuration
+   */
+  private validateTierRules(tierRules: TierRules | undefined, capacity: number): void {
+    if (!tierRules) {
+      throw new BadRequestException("Tier rules are required")
+    }
+
+    // Ensure only one rule is specified
+    if (tierRules.masterCount !== undefined && tierRules.masterPercentage !== undefined) {
+      throw new BadRequestException("Cannot specify both masterCount and masterPercentage in tier rules")
+    }
+
+    // Validate masterCount
+    if (tierRules.masterCount !== undefined) {
+      if (!Number.isInteger(tierRules.masterCount) || tierRules.masterCount < 0) {
+        throw new BadRequestException("masterCount must be a non-negative integer")
+      }
+      if (tierRules.masterCount > capacity) {
+        throw new BadRequestException(`masterCount (${tierRules.masterCount}) cannot exceed event capacity (${capacity})`)
+      }
+    }
+
+    // Validate masterPercentage
+    if (tierRules.masterPercentage !== undefined) {
+      if (typeof tierRules.masterPercentage !== "number" || tierRules.masterPercentage < 0 || tierRules.masterPercentage > 100) {
+        throw new BadRequestException("masterPercentage must be a number between 0 and 100")
+      }
+    }
+
+    // Validate time slots (now required)
+    if (!tierRules.mastersTimeSlot) {
+      throw new BadRequestException("MASTERS time slot is required")
+    }
+    if (!tierRules.explorersTimeSlot) {
+      throw new BadRequestException("EXPLORERS time slot is required")
+    }
+
+    // Validate MASTERS time slot
+    const { startsAt: mastersStart, endsAt: mastersEnd, courtIds: mastersCourts } = tierRules.mastersTimeSlot
+
+    const timeRegex = /^([0-1][0-9]|2[0-3]):[0-5][0-9]$/
+    if (!timeRegex.test(mastersStart)) {
+      throw new BadRequestException(`Invalid MASTERS start time format: ${mastersStart}. Expected HH:MM format.`)
+    }
+    if (!timeRegex.test(mastersEnd)) {
+      throw new BadRequestException(`Invalid MASTERS end time format: ${mastersEnd}. Expected HH:MM format.`)
+    }
+    if (!mastersCourts || mastersCourts.length === 0) {
+      throw new BadRequestException("MASTERS time slot must have at least one court assigned")
+    }
+
+    // Validate EXPLORERS time slot
+    const { startsAt: explorersStart, endsAt: explorersEnd, courtIds: explorersCourts } = tierRules.explorersTimeSlot
+
+    if (!timeRegex.test(explorersStart)) {
+      throw new BadRequestException(`Invalid EXPLORERS start time format: ${explorersStart}. Expected HH:MM format.`)
+    }
+    if (!timeRegex.test(explorersEnd)) {
+      throw new BadRequestException(`Invalid EXPLORERS end time format: ${explorersEnd}. Expected HH:MM format.`)
+    }
+    if (!explorersCourts || explorersCourts.length === 0) {
+      throw new BadRequestException("EXPLORERS time slot must have at least one court assigned")
+    }
+  }
+
   async create(dto: CreateEventDto, createdBy: string) {
+    // Validate tier rules
+    this.validateTierRules(dto.tierRules, dto.capacity)
+
     const event = await this.prisma.event.create({
       data: {
         title: dto.title,
@@ -19,7 +88,7 @@ export class EventsService {
         rsvpOpensAt: new Date(dto.rsvpOpensAt),
         rsvpClosesAt: new Date(dto.rsvpClosesAt),
         state: EventState.DRAFT,
-        tierRules: dto.tierRules || {},
+        tierRules: (dto.tierRules || {}) as any,
         eventCourts: {
           create: dto.courtIds.map((courtId) => ({
             courtId,
@@ -175,6 +244,12 @@ export class EventsService {
       throw new NotFoundException("Event not found")
     }
 
+    // Validate tier rules if provided
+    const capacity = dto.capacity ?? event.capacity
+    if (dto.tierRules !== undefined) {
+      this.validateTierRules(dto.tierRules, capacity)
+    }
+
     return this.prisma.event.update({
       where: { id },
       data: {
@@ -186,7 +261,7 @@ export class EventsService {
         capacity: dto.capacity,
         rsvpOpensAt: dto.rsvpOpensAt ? new Date(dto.rsvpOpensAt) : undefined,
         rsvpClosesAt: dto.rsvpClosesAt ? new Date(dto.rsvpClosesAt) : undefined,
-        tierRules: dto.tierRules,
+        tierRules: dto.tierRules as any,
       },
     })
   }

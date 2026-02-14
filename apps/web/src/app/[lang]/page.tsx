@@ -1,8 +1,8 @@
 import { auth } from "@/lib/auth"
-import { HomeNav } from "@/components/home-nav"
 import { EventsList } from "@/components/events-list"
 import { Footer } from "@/components/footer"
 import { getDictionary, type Locale } from "@/i18n"
+import { HomeNavClient } from "@/components/client-nav-wrapper"
 
 export default async function HomePage({ params }: { params: Promise<{ lang: string }> }) {
   const session = await auth()
@@ -11,7 +11,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <HomeNav />
+      <HomeNavClient />
       <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl">
         <div className="space-y-6">
           <div>

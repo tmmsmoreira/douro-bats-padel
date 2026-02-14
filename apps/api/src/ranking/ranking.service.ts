@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common"
 import { PrismaService } from "../prisma/prisma.service"
-import { computeRanking, toTier, type MatchResult, type LeaderboardEntry, type PlayerHistory } from "@padel/types"
+import { computeRanking, type MatchResult, type LeaderboardEntry, type PlayerHistory } from "@padel/types"
 import { EventState, type Tier } from "@padel/types"
 import { NotificationService } from "../notifications/notification.service"
 
@@ -132,16 +132,14 @@ export class RankingService {
       })
     }
 
-    // Update player ratings and tiers
+    // Update player ratings (tier is assigned dynamically per event, not stored)
     for (const [playerId, newRating] of Object.entries(newRatings)) {
       const oldRating = currentRatings[playerId] || 0
-      const newTier = toTier(newRating)
 
       await this.prisma.playerProfile.update({
         where: { id: playerId },
         data: {
           rating: newRating,
-          tier: newTier,
         },
       })
 
@@ -174,17 +172,11 @@ export class RankingService {
     }
   }
 
-  async getLeaderboard(tier?: Tier, limit = 50): Promise<LeaderboardEntry[]> {
-    const where: any = {
-      status: "ACTIVE",
-    }
-
-    if (tier) {
-      where.tier = tier
-    }
-
+  async getLeaderboard(limit = 50): Promise<LeaderboardEntry[]> {
     const players = await this.prisma.playerProfile.findMany({
-      where,
+      where: {
+        status: "ACTIVE",
+      },
       include: {
         user: true,
         weeklyScores: {
@@ -238,7 +230,7 @@ export class RankingService {
     }
 
     // Build history with ratings over time
-    const history = player.weeklyScores.map((ws, index) => {
+    const history = player.weeklyScores.map((ws) => {
       const snapshot = player.rankingSnapshots.find((rs) => {
         const rsWeek = this.getWeekStart(rs.createdAt)
         return rsWeek.getTime() === ws.weekStart.getTime()

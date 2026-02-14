@@ -1,12 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Trophy, Users, Calendar, TrendingUp } from "lucide-react"
-import { HomeNav } from "@/components/home-nav"
 import { Footer } from "@/components/footer"
+import { HomeNavClient } from "@/components/client-nav-wrapper"
 
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <HomeNav />
+      <HomeNavClient />
       <main className="container mx-auto px-4 py-12 max-w-4xl flex-1">
       <div className="space-y-8">
         {/* Header */}

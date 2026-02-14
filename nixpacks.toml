@@ -2,11 +2,7 @@
 cmds = ["pnpm install --frozen-lockfile"]
 
 [phases.build]
-cmds = [
-  "pnpm --filter @padel/types build",
-  "pnpm --filter @padel/api prisma generate",
-  "pnpm --filter @padel/api build"
-]
+cmd = "pnpm --filter @padel/types build && pnpm --filter @padel/api prisma generate && pnpm --filter @padel/api build"
 
 [start]
 cmd = "pnpm --filter @padel/api start"

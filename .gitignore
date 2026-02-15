@@ -42,9 +42,6 @@ lerna-debug.log*
 # Turbo
 .turbo
 
-# Prisma
-apps/api/prisma/migrations/
-
 # IDE
 .vscode/*
 !.vscode/extensions.json

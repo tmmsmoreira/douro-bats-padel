@@ -1,36 +1,38 @@
 import { Injectable } from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
-import * as nodemailer from "nodemailer"
-import type { Transporter } from "nodemailer"
+import { Resend } from "resend"
 
 @Injectable()
 export class EmailService {
-  private transporter: Transporter
+  private resend: Resend
 
   constructor(private configService: ConfigService) {
-    this.transporter = nodemailer.createTransport({
-      host: this.configService.get<string>("SMTP_HOST"),
-      port: this.configService.get<number>("SMTP_PORT", 587),
-      secure: this.configService.get<boolean>("SMTP_SECURE", false), // true for 465, false for other ports
-      auth: {
-        user: this.configService.get<string>("SMTP_USER"),
-        pass: this.configService.get<string>("SMTP_PASS"),
-      },
-    })
+    const apiKey = this.configService.get<string>("RESEND_API_KEY")
+    if (!apiKey) {
+      console.warn("[EMAIL] RESEND_API_KEY not configured. Email sending will fail.")
+    }
+    this.resend = new Resend(apiKey)
   }
 
   async sendEmail(to: string, subject: string, html: string, text?: string) {
     try {
-      const info = await this.transporter.sendMail({
-        from: this.configService.get<string>("SMTP_FROM", '"Douro Bats Padel" <noreply@dourobats.com>'),
+      const from = this.configService.get<string>("EMAIL_FROM", "Douro Bats Padel <onboarding@resend.dev>")
+
+      const { data, error } = await this.resend.emails.send({
+        from,
         to,
         subject,
-        text,
         html,
+        text,
       })
 
-      console.log(`[EMAIL] Message sent to ${to}: ${info.messageId}`)
-      return info
+      if (error) {
+        console.error(`[EMAIL] Failed to send email to ${to}:`, error)
+        throw error
+      }
+
+      console.log(`[EMAIL] Message sent to ${to}: ${data?.id}`)
+      return data
     } catch (error) {
       console.error(`[EMAIL] Failed to send email to ${to}:`, error)
       throw error

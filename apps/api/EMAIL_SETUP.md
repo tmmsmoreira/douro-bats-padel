@@ -7,66 +7,47 @@ This guide will help you configure email verification for the Padel Manager appl
 1. ✅ Database schema updated with email verification fields
 2. ✅ Database migration applied successfully
 3. ✅ 23 existing users marked as verified
-4. ✅ Email service implemented with Nodemailer
+4. ✅ Email service implemented with Resend
 5. ✅ Frontend pages created for verification flow
 
-## 🔧 SMTP Configuration Required
+## 🔧 Resend Configuration (Recommended)
 
-You need to configure SMTP settings in `apps/api/.env` to send actual emails.
+The application now uses **Resend** for email delivery - a modern, developer-friendly email API.
 
-### Option 1: Gmail (Recommended for Development)
+### Setup Resend (5 minutes)
 
-1. **Enable 2-Factor Authentication** on your Google account
-2. **Generate an App Password**:
-   - Go to https://myaccount.google.com/apppasswords
-   - Select "Mail" and your device
-   - Copy the generated 16-character password
+1. **Sign up at https://resend.com** (free tier: 3,000 emails/month, 100/day)
+2. **Get your API key**:
+   - Go to API Keys in the dashboard
+   - Click "Create API Key"
+   - Copy the key (starts with `re_`)
 
-3. **Update `.env` file**:
+3. **Add to `.env` file** (local) or **Railway environment variables** (production):
    ```env
-   SMTP_HOST="smtp.gmail.com"
-   SMTP_PORT="587"
-   SMTP_SECURE="false"
-   SMTP_USER="your-email@gmail.com"
-   SMTP_PASS="your-16-char-app-password"
-   SMTP_FROM="Padel Manager <noreply@padelmanager.com>"
+   RESEND_API_KEY="re_your_api_key_here"
+   EMAIL_FROM="Douro Bats Padel <onboarding@resend.dev>"
    ```
 
-### Option 2: Other SMTP Providers
+4. **Optional: Use your own domain**:
+   - Verify your domain in Resend dashboard
+   - Update `EMAIL_FROM` to use your domain:
+   ```env
+   EMAIL_FROM="Douro Bats Padel <noreply@yourdomain.com>"
+   ```
 
-#### SendGrid
-```env
-SMTP_HOST="smtp.sendgrid.net"
-SMTP_PORT="587"
-SMTP_SECURE="false"
-SMTP_USER="apikey"
-SMTP_PASS="your-sendgrid-api-key"
-SMTP_FROM="Padel Manager <noreply@yourdomain.com>"
-```
+### Why Resend?
 
-#### Mailgun
-```env
-SMTP_HOST="smtp.mailgun.org"
-SMTP_PORT="587"
-SMTP_SECURE="false"
-SMTP_USER="postmaster@your-domain.mailgun.org"
-SMTP_PASS="your-mailgun-password"
-SMTP_FROM="Padel Manager <noreply@yourdomain.com>"
-```
-
-#### AWS SES
-```env
-SMTP_HOST="email-smtp.us-east-1.amazonaws.com"
-SMTP_PORT="587"
-SMTP_SECURE="false"
-SMTP_USER="your-ses-smtp-username"
-SMTP_PASS="your-ses-smtp-password"
-SMTP_FROM="Padel Manager <noreply@yourdomain.com>"
-```
+- ✅ **3,000 free emails/month** (100/day)
+- ✅ **No credit card required**
+- ✅ **Excellent deliverability**
+- ✅ **Simple API** (no SMTP configuration needed)
+- ✅ **Great developer experience**
 
 ## 🧪 Testing Email Verification
 
-### Development Mode Testing
+### Local Development Testing
+
+In development mode, the verification token is returned in the API response for easy testing:
 
 In development mode (`NODE_ENV=development`), the API returns verification tokens in the response, so you can test without actual email delivery:
 
@@ -114,35 +95,30 @@ pnpm dev
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `SMTP_HOST` | SMTP server hostname | `smtp.gmail.com` |
-| `SMTP_PORT` | SMTP server port | `587` (TLS) or `465` (SSL) |
-| `SMTP_SECURE` | Use SSL/TLS | `false` for port 587, `true` for 465 |
-| `SMTP_USER` | SMTP username/email | `your-email@gmail.com` |
-| `SMTP_PASS` | SMTP password | App password or API key |
-| `SMTP_FROM` | From address | `"App Name <noreply@domain.com>"` |
-| `FRONTEND_URL` | Frontend URL | `http://localhost:3000` |
+| `RESEND_API_KEY` | Resend API key | `re_123abc...` |
+| `EMAIL_FROM` | From address | `"Douro Bats Padel <onboarding@resend.dev>"` |
+| `FRONTEND_URL` | Frontend URL for email links | `http://localhost:3000` or `https://yourdomain.com` |
 | `NODE_ENV` | Environment | `development` or `production` |
 
 ## ❓ Troubleshooting
 
 ### Emails not sending?
 
-1. Check SMTP credentials are correct
-2. Check firewall/network allows SMTP connections
-3. Check API server logs for error messages
-4. Try using Gmail with App Password first
-5. Verify `NODE_ENV` is set correctly
+1. **Check Resend API key is set**: Verify `RESEND_API_KEY` in Railway environment variables
+2. **Check API server logs**: Look for `[EMAIL]` messages in Railway logs
+3. **Verify email domain**: If using custom domain, make sure it's verified in Resend
+4. **Check Resend dashboard**: View email logs at https://resend.com/emails
 
-### "Invalid credentials" error?
+### "Invalid API key" error?
 
-- For Gmail: Make sure you're using an App Password, not your regular password
-- Check username/password have no extra spaces
-- Verify 2FA is enabled for Gmail
+- Make sure you copied the full API key (starts with `re_`)
+- Check there are no extra spaces in the environment variable
+- Verify the API key is active in Resend dashboard
 
 ### Verification link not working?
 
 - Check token hasn't expired (24 hours)
-- Verify `FRONTEND_URL` is correct in `.env`
+- Verify `FRONTEND_URL` is correct in environment variables
 - Check browser console for errors
 
 ## 🎉 You're All Set!

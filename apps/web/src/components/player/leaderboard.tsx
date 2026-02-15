@@ -3,7 +3,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { apiClient } from "@/lib/api-client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import type { LeaderboardEntry } from "@padel/types"
 import { ArrowUp, ArrowDown, Minus } from "lucide-react"
 
@@ -36,12 +35,7 @@ export function Leaderboard() {
                   <span className="text-2xl font-bold text-muted-foreground w-8">#{index + 1}</span>
                   <div>
                     <p className="font-medium">{entry.playerName}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Badge variant="outline" className="text-xs">
-                        {entry.tier}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">{entry.weeklyScores.length} weeks played</span>
-                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">{entry.weeklyScores.length} weeks played</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">

@@ -8,5 +8,5 @@ cmd = "pnpm install --frozen-lockfile"
 cmd = "pnpm --filter @padel/types build && pnpm --filter @padel/api prisma generate && pnpm --filter @padel/api build"
 
 [deploy]
-startCommand = "cd apps/api && pnpm prisma migrate deploy && cd ../.. && pnpm --filter @padel/api start"
+startCommand = "chmod +x apps/api/scripts/migrate-and-start.sh && bash apps/api/scripts/migrate-and-start.sh"
 

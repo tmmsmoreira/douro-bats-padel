@@ -1,7 +1,0 @@
-{
-  "buildCommand": "pnpm turbo run build --filter=@padel/web",
-  "installCommand": "pnpm install --frozen-lockfile",
-  "framework": "nextjs",
-  "outputDirectory": "apps/web/.next"
-}
-

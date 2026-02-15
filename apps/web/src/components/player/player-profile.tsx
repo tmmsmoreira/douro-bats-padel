@@ -198,15 +198,6 @@ export function PlayerProfile() {
               <p className="text-3xl font-bold">{profile.player?.rating || 0}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Tier</p>
-              <Badge
-                variant={profile.player?.tier === "MASTERS" ? "default" : "secondary"}
-                className="text-lg px-3 py-1"
-              >
-                {profile.player?.tier || "EXPLORERS"}
-              </Badge>
-            </div>
-            <div>
               <p className="text-sm text-muted-foreground">Status</p>
               <Badge variant="outline">{profile.player?.status || "ACTIVE"}</Badge>
             </div>

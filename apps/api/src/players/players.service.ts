@@ -15,18 +15,11 @@ export class PlayersService {
       include: {
         player: true,
       },
-      orderBy: [
-        {
-          player: {
-            tier: "asc",
-          },
+      orderBy: {
+        player: {
+          rating: "desc",
         },
-        {
-          player: {
-            rating: "desc",
-          },
-        },
-      ],
+      },
     })
 
     return users.map((user) => ({
@@ -40,7 +33,6 @@ export class PlayersService {
         ? {
             id: user.player.id,
             rating: user.player.rating,
-            tier: user.player.tier,
             status: user.player.status,
             createdAt: user.player.createdAt,
           }

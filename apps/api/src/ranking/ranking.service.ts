@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common"
 import { PrismaService } from "../prisma/prisma.service"
-import { computeRanking, type MatchResult, type LeaderboardEntry, type PlayerHistory } from "@padel/types"
+import { computeRanking, type MatchResult, type LeaderboardEntry, type PlayerHistory, toTier } from "@padel/types"
 import { EventState, type Tier } from "@padel/types"
 import { NotificationService } from "../notifications/notification.service"
 
@@ -202,7 +202,9 @@ export class RankingService {
         playerId: player.id,
         playerName: player.user.name || "Unknown",
         rating: player.rating,
-        tier: player.tier as Tier,
+        // Calculate display tier based on rating (for leaderboard display only)
+        // Actual tier assignment happens per event in draw generation
+        tier: toTier(player.rating),
         delta,
         weeklyScores: player.weeklyScores.map((ws) => ws.score),
       }
@@ -246,7 +248,9 @@ export class RankingService {
     return {
       playerId: player.id,
       playerName: player.user.name || "Unknown",
-      tier: player.tier as Tier,
+      // Calculate display tier based on rating (for display only)
+      // Actual tier assignment happens per event in draw generation
+      tier: toTier(player.rating),
       currentRating: player.rating,
       history,
     }

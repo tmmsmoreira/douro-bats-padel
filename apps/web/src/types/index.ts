@@ -14,7 +14,6 @@ export interface PlayerProfile {
   id: string
   userId: string
   rating: number
-  tier: Tier
   status: string
 }
 

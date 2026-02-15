@@ -45,7 +45,6 @@ export class AuthService {
         player: {
           create: {
             rating: 0,
-            tier: "EXPLORERS",
             status: "ACTIVE",
           },
         },
@@ -111,7 +110,6 @@ export class AuthService {
           player: {
             create: {
               rating: 0,
-              tier: "EXPLORERS",
               status: "ACTIVE",
             },
           },

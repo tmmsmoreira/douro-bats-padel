@@ -1,7 +1,7 @@
-import type { NextConfig } from "next"
-import withPWA from "next-pwa"
+const withPWA = require("next-pwa")
 
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   transpilePackages: ["@padel/types"],
   experimental: {
     optimizePackageImports: ["lucide-react"],
@@ -15,7 +15,7 @@ const nextConfig: NextConfig = {
   turbopack: {},
 }
 
-export default withPWA({
+module.exports = withPWA({
   dest: "public",
   register: true,
   skipWaiting: true,

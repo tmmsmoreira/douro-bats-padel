@@ -15,6 +15,7 @@ import {
 import { signOut, useSession } from "next-auth/react"
 import { User, LogOut } from "lucide-react"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
+import { ThemeToggleButton } from "@/components/ui/theme-toggle-button"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { useDictionary } from "@/components/dictionary-provider"
 import { useLocale } from "@/hooks/use-locale"
@@ -57,6 +58,7 @@ export function HomeNav() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <ThemeToggleButton />
           <LanguageSwitcher />
           {session ? (
             <>

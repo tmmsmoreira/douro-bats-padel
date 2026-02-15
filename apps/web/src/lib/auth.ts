@@ -141,10 +141,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           const backendUser: AuthUser = await userRes.json()
 
-          // Store tokens and roles in the user object so they can be accessed in jwt callback
+          // Store tokens, roles, and profile photo in the user object so they can be accessed in jwt callback
           user.accessToken = tokens.accessToken
           user.refreshToken = tokens.refreshToken
           user.roles = backendUser.roles
+          user.profilePhoto = backendUser.profilePhoto
           user.id = backendUser.id
 
           return true

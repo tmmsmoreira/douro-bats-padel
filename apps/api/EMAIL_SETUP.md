@@ -8,7 +8,8 @@ This guide will help you configure email verification for the Padel Manager appl
 2. ✅ Database migration applied successfully
 3. ✅ 23 existing users marked as verified
 4. ✅ Email service implemented with Resend
-5. ✅ Frontend pages created for verification flow
+5. ✅ React Email templates created for professional emails
+6. ✅ Frontend pages created for verification flow
 
 ## 🔧 Resend Configuration (Recommended)
 
@@ -42,6 +43,27 @@ The application now uses **Resend** for email delivery - a modern, developer-fri
 - ✅ **Excellent deliverability**
 - ✅ **Simple API** (no SMTP configuration needed)
 - ✅ **Great developer experience**
+- ✅ **React Email templates** for beautiful, responsive emails
+
+## 📧 Email Templates
+
+The application uses **React Email** templates for professional, responsive emails:
+
+- **Verification Email** (`apps/api/emails/verification-email.tsx`)
+  - Welcome message with branded design
+  - Clear call-to-action button
+  - 24-hour expiration notice
+
+- **Password Reset Email** (`apps/api/emails/password-reset-email.tsx`)
+  - Security-focused messaging
+  - Reset password button
+  - 1-hour expiration notice
+
+All templates use:
+- Responsive design for mobile and desktop
+- Douro Bats Padel branding (#2563eb blue)
+- Professional typography and spacing
+- Accessible HTML structure
 
 ## 🧪 Testing Email Verification
 

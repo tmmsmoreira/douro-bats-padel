@@ -32,22 +32,23 @@ export function LanguageToggleButton() {
 
   if (!mounted) {
     return (
-      <Button variant="ghost" size="sm" disabled className="font-medium">
-        EN
+      <Button variant="ghost" size="sm" disabled className="text-xl">
+        🇬🇧
       </Button>
     )
   }
 
-  const displayText = currentLocale === "en" ? "EN" : "PT"
+  const displayFlag = currentLocale === "en" ? "🇬🇧" : "🇵🇹"
 
   return (
-    <Button 
-      variant="ghost" 
-      size="sm" 
+    <Button
+      variant="ghost"
+      size="sm"
       onClick={toggleLanguage}
-      className="font-medium min-w-[3rem]"
+      className="text-xl min-w-[3rem]"
+      aria-label={`Switch to ${currentLocale === "en" ? "Portuguese" : "English"}`}
     >
-      {displayText}
+      {displayFlag}
     </Button>
   )
 }

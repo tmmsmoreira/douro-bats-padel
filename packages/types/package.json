@@ -5,7 +5,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "test -d dist && echo 'Using pre-built types' || tsc",
     "lint": "eslint .",
     "type-check": "tsc --noEmit"
   },

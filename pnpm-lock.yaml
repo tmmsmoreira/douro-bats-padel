@@ -162,6 +162,15 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.62.11
         version: 5.90.5(react@19.2.0)
+      '@types/node':
+        specifier: ^20.17.10
+        version: 20.19.24
+      '@types/react':
+        specifier: ^19.0.6
+        version: 19.2.2
+      '@types/react-dom':
+        specifier: ^19.0.2
+        version: 19.2.2(@types/react@19.2.2)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -213,6 +222,9 @@ importers:
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@4.1.16)
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
       zod:
         specifier: ^3.24.1
         version: 3.25.76
@@ -220,24 +232,12 @@ importers:
         specifier: ^5.0.2
         version: 5.0.8(@types/react@19.2.2)(react@19.2.0)
     devDependencies:
-      '@types/node':
-        specifier: ^20.17.10
-        version: 20.19.24
-      '@types/react':
-        specifier: ^19.0.6
-        version: 19.2.2
-      '@types/react-dom':
-        specifier: ^19.0.2
-        version: 19.2.2(@types/react@19.2.2)
       baseline-browser-mapping:
         specifier: ^2.9.19
         version: 2.9.19
       tw-animate-css:
         specifier: ^1.4.0
         version: 1.4.0
-      typescript:
-        specifier: ^5.7.2
-        version: 5.9.3
 
   packages/config:
     devDependencies:

@@ -32,7 +32,7 @@ export function LanguageToggleButton() {
 
   if (!mounted) {
     return (
-      <Button variant="ghost" size="sm" disabled className="text-xl">
+      <Button variant="ghost" size="icon" disabled className="text-xl">
         🇬🇧
       </Button>
     )
@@ -43,9 +43,9 @@ export function LanguageToggleButton() {
   return (
     <Button
       variant="ghost"
-      size="sm"
+      size="icon"
       onClick={toggleLanguage}
-      className="text-xl min-w-[3rem]"
+      className="text-xl"
       aria-label={`Switch to ${currentLocale === "en" ? "Portuguese" : "English"}`}
     >
       {displayFlag}

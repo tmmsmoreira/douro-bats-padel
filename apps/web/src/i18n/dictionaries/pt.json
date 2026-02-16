@@ -40,7 +40,15 @@
     "description": "Registe-se para noites de jogo e verifique o seu estado",
     "descriptionGuest": "Inicie sessão para se registar em noites de jogo",
     "noEvents": "Sem eventos próximos",
-    "viewDetails": "Ver Detalhes"
+    "viewDetails": "Ver Detalhes",
+    "pastEventsTitle": "Eventos Passados",
+    "pastEventsDescription": "Ver as últimas 10 noites de jogo",
+    "noPastEvents": "Sem eventos passados disponíveis",
+    "participated": "Participou",
+    "waitlisted": "Em Lista de Espera",
+    "confirmed": "confirmados",
+    "viewResults": "Ver Resultados",
+    "viewDraw": "Ver Sorteio"
   },
   "leaderboard": {
     "title": "Classificação",
@@ -51,7 +59,8 @@
     "points": "Pontos",
     "wins": "Vitórias",
     "losses": "Derrotas",
-    "winRate": "Taxa de Vitória"
+    "winRate": "Taxa de Vitória",
+    "playedGames": "{value} jogos jogados"
   },
   "profile": {
     "title": "O Meu Perfil",

@@ -1,4 +1,4 @@
-import { PrismaClient, Role, Tier, EventState } from "@prisma/client"
+import { PrismaClient, Role, EventState } from "@prisma/client"
 import * as bcrypt from "bcrypt"
 
 const prisma = new PrismaClient()
@@ -16,10 +16,10 @@ async function main() {
       name: "Admin User",
       passwordHash: adminPassword,
       roles: [Role.ADMIN, Role.EDITOR, Role.VIEWER],
+      emailVerified: true,
       player: {
         create: {
           rating: 350,
-          tier: Tier.MASTERS,
           status: "ACTIVE",
         },
       },
@@ -38,10 +38,10 @@ async function main() {
         name: "Tiago Moreira",
         passwordHash: editorPassword,
         roles: [Role.EDITOR, Role.VIEWER],
+        emailVerified: true,
         player: {
           create: {
             rating: 320,
-            tier: Tier.MASTERS,
             status: "ACTIVE",
           },
         },
@@ -55,10 +55,10 @@ async function main() {
         name: "Pablo Silva",
         passwordHash: editorPassword,
         roles: [Role.EDITOR, Role.VIEWER],
+        emailVerified: true,
         player: {
           create: {
             rating: 305,
-            tier: Tier.MASTERS,
             status: "ACTIVE",
           },
         },
@@ -93,7 +93,7 @@ async function main() {
   ]
 
   const viewers = await Promise.all(
-    playerNames.map((name, index) => {
+    playerNames.map((name) => {
       const rating = 150 + Math.floor(Math.random() * 200) // 150-350
       return prisma.user.upsert({
         where: { email: `${name.toLowerCase().replace(" ", ".")}@dorobats.com` },
@@ -103,10 +103,10 @@ async function main() {
           name,
           passwordHash: viewerPassword,
           roles: [Role.VIEWER],
+          emailVerified: true,
           player: {
             create: {
               rating,
-              tier: rating >= 300 ? Tier.MASTERS : Tier.EXPLORERS,
               status: "ACTIVE",
             },
           },

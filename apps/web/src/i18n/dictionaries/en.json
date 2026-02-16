@@ -40,7 +40,15 @@
     "description": "Register for game nights and check your status",
     "descriptionGuest": "Sign in to register for game nights",
     "noEvents": "No upcoming events",
-    "viewDetails": "View Details"
+    "viewDetails": "View Details",
+    "pastEventsTitle": "Past Events",
+    "pastEventsDescription": "View the last 10 game nights",
+    "noPastEvents": "No past events available",
+    "participated": "Participated",
+    "waitlisted": "Waitlisted",
+    "confirmed": "confirmed",
+    "viewResults": "View Results",
+    "viewDraw": "View Draw"
   },
   "leaderboard": {
     "title": "Ranking",
@@ -51,7 +59,8 @@
     "points": "Points",
     "wins": "Wins",
     "losses": "Losses",
-    "winRate": "Win Rate"
+    "winRate": "Win Rate",
+    "playedGames": "{value} played games"
   },
   "profile": {
     "title": "My Profile",

@@ -2,8 +2,8 @@ import { Injectable } from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
 import { Resend } from "resend"
 import { render } from "@react-email/components"
-import VerificationEmail from "../../emails/verification-email"
-import PasswordResetEmail from "../../emails/password-reset-email"
+import VerificationEmail from "../emails/verification-email"
+import PasswordResetEmail from "../emails/password-reset-email"
 
 @Injectable()
 export class EmailService {

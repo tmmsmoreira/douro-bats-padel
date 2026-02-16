@@ -15,8 +15,7 @@ import {
 import { signOut, useSession } from "next-auth/react"
 import { User, LogOut } from "lucide-react"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
-import { ThemeToggleButton } from "@/components/ui/theme-toggle-button"
-import { LanguageToggleButton } from "@/components/language-toggle-button"
+import { LanguageMenuItems } from "@/components/language-menu-items"
 import { useDictionary } from "@/components/dictionary-provider"
 import { useLocale } from "@/hooks/use-locale"
 
@@ -58,8 +57,6 @@ export function PlayerNav() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <LanguageToggleButton />
-          <ThemeToggleButton />
           {isEditor && (
             <Link href={`/${locale}/admin`}>
               <Button variant="ghost" size="sm">
@@ -104,6 +101,9 @@ export function PlayerNav() {
                   <span>{dict.nav.profile}</span>
                 </Link>
               </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <LanguageMenuItems />
+              <DropdownMenuSeparator />
               <ThemeToggle />
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer">

@@ -17,6 +17,7 @@ import { User, LogOut } from "lucide-react"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { ThemeToggleButton } from "@/components/ui/theme-toggle-button"
 import { LanguageToggleButton } from "@/components/language-toggle-button"
+import { LanguageMenuItems } from "@/components/language-menu-items"
 import { useDictionary } from "@/components/dictionary-provider"
 import { useLocale } from "@/hooks/use-locale"
 
@@ -58,8 +59,12 @@ export function HomeNav() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <LanguageToggleButton />
-          <ThemeToggleButton />
+          {!session && (
+            <>
+              <LanguageToggleButton />
+              <ThemeToggleButton />
+            </>
+          )}
           {session ? (
             <>
               {isEditor && (
@@ -106,6 +111,9 @@ export function HomeNav() {
                       <span>{dict.nav.profile}</span>
                     </Link>
                   </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <LanguageMenuItems />
+                  <DropdownMenuSeparator />
                   <ThemeToggle />
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer">

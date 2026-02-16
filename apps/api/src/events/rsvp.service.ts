@@ -59,7 +59,6 @@ export class RSVPService {
         data: {
           userId,
           rating: 0,
-          tier: "EXPLORERS",
           status: "ACTIVE",
         },
         include: { user: true },

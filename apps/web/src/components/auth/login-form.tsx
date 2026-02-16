@@ -141,11 +141,13 @@ export function LoginForm() {
                 Create account
               </Link>
             </p>
-            <div className="pt-2 border-t">
-              <p className="font-medium">Demo credentials:</p>
-              <p>Editor: tiago@dorobats.com / editor123</p>
-              <p>Admin: admin@dorobats.com / admin123</p>
-            </div>
+            {process.env.NODE_ENV === "development" && (
+              <div className="pt-2 border-t">
+                <p className="font-medium">Demo credentials:</p>
+                <p>Editor: tiago@dorobats.com / editor123</p>
+                <p>Admin: admin@dorobats.com / admin123</p>
+              </div>
+            )}
           </div>
         </form>
       </CardContent>

@@ -59,7 +59,7 @@ export function ForgotPasswordForm() {
             If an account exists with the email <strong>{email}</strong>, you will receive password reset
             instructions.
           </p>
-          {resetToken && (
+          {process.env.NODE_ENV === "development" && resetToken && (
             <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
               <p className="text-sm font-medium text-yellow-800 mb-2">Development Mode - Reset Token:</p>
               <code className="text-xs bg-white p-2 block rounded border break-all">{resetToken}</code>

@@ -98,7 +98,7 @@ export function RegisterForm() {
             We've sent a verification email to <strong>{email}</strong>. Please check your inbox and click the
             verification link to activate your account.
           </p>
-          {verificationToken && (
+          {process.env.NODE_ENV === "development" && verificationToken && (
             <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
               <p className="text-sm font-medium text-yellow-800 mb-2">Development Mode - Verification Token:</p>
               <code className="text-xs bg-white p-2 block rounded border break-all">{verificationToken}</code>

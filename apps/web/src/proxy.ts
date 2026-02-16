@@ -1,61 +1,42 @@
+import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
-import { NextResponse } from "next/server"
-import { i18n } from "./i18n/config"
+import createMiddleware from 'next-intl/middleware'
+import { routing } from './i18n/routing'
 
-function getLocale(request: any): string {
-  // First priority: Check Accept-Language header from browser
-  const acceptLanguage = request.headers.get('accept-language')
-  if (acceptLanguage) {
-    // Parse the accept-language header
-    const languages = acceptLanguage
-      .split(',')
-      .map((lang: string) => {
-        const [locale, q = '1'] = lang.trim().split(';q=')
-        // Extract just the language code (e.g., 'pt' from 'pt-BR' or 'pt-PT')
-        const langCode = locale.split('-')[0].toLowerCase()
-        return { locale: langCode, quality: parseFloat(q) }
-      })
-      .sort((a: any, b: any) => b.quality - a.quality)
+// Create the next-intl middleware
+const handleI18nRouting = createMiddleware(routing)
 
-    // Find the first matching locale from browser preferences
-    for (const { locale } of languages) {
-      if (i18n.locales.includes(locale as any)) {
-        return locale
-      }
-    }
-  }
-
-  // Second priority: Check if there's a locale cookie (for manual language switching)
-  const localeCookie = request.cookies.get('NEXT_LOCALE')?.value
-  if (localeCookie && i18n.locales.includes(localeCookie as any)) {
-    return localeCookie
-  }
-
-  // Fallback to English
-  return i18n.defaultLocale
-}
-
-export default auth((req) => {
+export default async function proxy(req: NextRequest) {
   const pathname = req.nextUrl.pathname
 
-  // Check if the pathname already has a locale
-  const pathnameHasLocale = i18n.locales.some(
-    (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
-  )
-
-  // If no locale in pathname, redirect to locale-prefixed path
-  if (!pathnameHasLocale) {
-    const locale = getLocale(req)
-    const newUrl = new URL(`/${locale}${pathname}`, req.url)
-    newUrl.search = req.nextUrl.search
-    return NextResponse.redirect(newUrl)
+  // Skip middleware for API routes and static files
+  if (
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/favicon') ||
+    pathname.startsWith('/icons') ||
+    pathname.includes('/manifest.json') ||
+    pathname.includes('/offline.html')
+  ) {
+    return NextResponse.next()
   }
+
+  // Step 1: Run next-intl middleware first
+  const intlResponse = handleI18nRouting(req)
+
+  // Step 2: If next-intl is redirecting, return that response immediately
+  if (!intlResponse.ok) {
+    return intlResponse
+  }
+
+  // Step 3: Get the session for auth checks
+  const session = await auth()
 
   // Extract locale from pathname for auth checks
   const locale = pathname.split('/')[1]
   const pathnameWithoutLocale = pathname.replace(`/${locale}`, '') || '/'
 
-  const isLoggedIn = !!req.auth
+  const isLoggedIn = !!session
 
   // Auth pages (login, register, etc.)
   const isAuthPage =
@@ -85,21 +66,21 @@ export default auth((req) => {
     if (isLoggedIn) {
       return NextResponse.redirect(new URL(`/${locale}`, req.url))
     }
-    return NextResponse.next()
+    return intlResponse
   }
 
   // Allow access to public pages without authentication
   if (isPublicPage) {
-    return NextResponse.next()
+    return intlResponse
   }
 
   // For all other pages, require authentication
-  if (!isLoggedIn && !pathname.startsWith("/api")) {
+  if (!isLoggedIn) {
     return NextResponse.redirect(new URL(`/${locale}/login`, req.url))
   }
 
-  return NextResponse.next()
-})
+  return intlResponse
+}
 
 export const config = {
   matcher: [

@@ -3,9 +3,10 @@ import type { Metadata, Viewport } from "next"
 import { Inter } from "next/font/google"
 import "../globals.css"
 import { Providers } from "@/components/providers"
-import { DictionaryProvider } from "@/components/dictionary-provider"
-import { i18n, type Locale, getDictionary } from "@/i18n"
+import { NextIntlClientProvider } from "next-intl"
+import { getMessages, setRequestLocale } from "next-intl/server"
 import { notFound } from "next/navigation"
+import { locales, type Locale } from "@/i18n/config"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -35,7 +36,7 @@ export const viewport: Viewport = {
 }
 
 export async function generateStaticParams() {
-  return i18n.locales.map((locale) => ({ lang: locale }))
+  return locales.map((locale) => ({ lang: locale }))
 }
 
 export default async function LangLayout({
@@ -48,11 +49,14 @@ export default async function LangLayout({
   const { lang } = await params
 
   // Validate that the locale is supported
-  if (!i18n.locales.includes(lang as Locale)) {
+  if (!locales.includes(lang as Locale)) {
     notFound()
   }
 
-  const dictionary = await getDictionary(lang as Locale)
+  // Enable static rendering
+  setRequestLocale(lang)
+
+  const messages = await getMessages({ locale: lang })
 
   return (
     <html lang={lang} suppressHydrationWarning>
@@ -69,9 +73,9 @@ export default async function LangLayout({
       </head>
       <body className={inter.className}>
         <Providers>
-          <DictionaryProvider dictionary={dictionary}>
+          <NextIntlClientProvider locale={lang} messages={messages}>
             {children}
-          </DictionaryProvider>
+          </NextIntlClientProvider>
         </Providers>
       </body>
     </html>

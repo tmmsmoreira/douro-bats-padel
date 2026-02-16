@@ -1,11 +1,10 @@
 import { Leaderboard } from "@/components/leaderboard"
 import { Footer } from "@/components/footer"
-import { getDictionary, type Locale } from "@/i18n"
+import { getTranslations } from "next-intl/server"
 import { HomeNavClient } from "@/components/client-nav-wrapper"
 
-export default async function LeaderboardPage({ params }: { params: Promise<{ lang: string }> }) {
-  const { lang } = await params
-  const dict = await getDictionary(lang as Locale)
+export default async function LeaderboardPage() {
+  const t = await getTranslations('leaderboard')
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -13,8 +12,8 @@ export default async function LeaderboardPage({ params }: { params: Promise<{ la
       <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl">
         <div className="space-y-6">
           <div>
-            <h1 className="text-3xl font-bold">{dict.leaderboard.title}</h1>
-            <p className="text-muted-foreground">{dict.leaderboard.description}</p>
+            <h1 className="text-3xl font-bold">{t('title')}</h1>
+            <p className="text-muted-foreground">{t('description')}</p>
           </div>
           <Leaderboard />
         </div>

@@ -1,7 +1,6 @@
 "use client"
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { Link, usePathname } from "@/i18n/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -16,26 +15,24 @@ import { signOut, useSession } from "next-auth/react"
 import { User, LogOut } from "lucide-react"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { LanguageMenuItems } from "@/components/language-menu-items"
-import { useDictionary } from "@/components/dictionary-provider"
-import { useLocale } from "@/hooks/use-locale"
+import { useTranslations } from "next-intl"
 
 export function AdminNav() {
   const pathname = usePathname()
   const { data: session } = useSession()
-  const dict = useDictionary()
-  const locale = useLocale()
+  const t = useTranslations('nav')
 
   const navItems = [
-    { href: `/${locale}/admin`, label: dict.nav.events },
-    { href: `/${locale}/admin/players`, label: dict.nav.players },
-    { href: `/${locale}/admin/venues`, label: dict.nav.venues },
+    { href: "/admin", label: t('events') },
+    { href: "/admin/players", label: t('players') },
+    { href: "/admin/venues", label: t('venues') },
   ]
 
   return (
     <nav className="border-b bg-card">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-6">
-          <Link href={`/${locale}/admin`} className="text-lg font-bold">
+          <Link href="/admin" className="text-lg font-bold">
             Padel Manager
           </Link>
           <div className="flex gap-1">
@@ -56,9 +53,9 @@ export function AdminNav() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Link href={`/${locale}`}>
+          <Link href="/">
             <Button variant="ghost" size="sm">
-              {dict.nav.playerView}
+              {t('playerView')}
             </Button>
           </Link>
           <DropdownMenu>
@@ -93,9 +90,9 @@ export function AdminNav() {
               </div>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href={`/${locale}/profile`} className="cursor-pointer">
+                <Link href="/profile" className="cursor-pointer">
                   <User className="mr-2 h-4 w-4" />
-                  <span>{dict.nav.profile}</span>
+                  <span>{t('profile')}</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -105,7 +102,7 @@ export function AdminNav() {
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer">
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>{dict.nav.signOut}</span>
+                <span>{t('signOut')}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

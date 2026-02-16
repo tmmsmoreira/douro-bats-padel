@@ -1,4 +1,5 @@
 const withPWA = require("next-pwa")
+const withNextIntl = require("next-intl/plugin")("./src/i18n/request.ts")
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -15,9 +16,11 @@ const nextConfig = {
   turbopack: {},
 }
 
-module.exports = withPWA({
-  dest: "public",
-  register: true,
-  skipWaiting: true,
-  disable: process.env.NODE_ENV === "development",
-})(nextConfig)
+module.exports = withNextIntl(
+  withPWA({
+    dest: "public",
+    register: true,
+    skipWaiting: true,
+    disable: process.env.NODE_ENV === "development",
+  })(nextConfig)
+)

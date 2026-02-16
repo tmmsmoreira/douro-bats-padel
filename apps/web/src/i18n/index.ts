@@ -1,5 +1,10 @@
-export { i18n, localeNames, localeFlags } from './config'
+// Export config
+export { i18n, locales, localeNames, localeFlags } from './config'
 export type { Locale } from './config'
-export { getDictionary } from './get-dictionary'
-export type { Dictionary } from './get-dictionary'
+
+// Export routing
+export { routing } from './routing'
+
+// Export navigation helpers
+export { Link, redirect, usePathname, useRouter, getPathname } from './navigation'
 

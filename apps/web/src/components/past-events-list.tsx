@@ -6,16 +6,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { formatDate, formatTime } from "@/lib/utils"
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 import type { EventWithRSVP } from "@padel/types"
-import { useDictionary } from "@/components/dictionary-provider"
-import { useLocale } from "@/hooks/use-locale"
+import { useTranslations } from "next-intl"
+import { useLocale } from "next-intl"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
 
 export function PastEventsList() {
   const { data: session } = useSession()
-  const dict = useDictionary()
+  const t = useTranslations()
   const locale = useLocale()
 
   const { data: events, isLoading } = useQuery({
@@ -52,14 +52,14 @@ export function PastEventsList() {
   })
 
   if (isLoading) {
-    return <div className="text-center py-8">{dict.common.loading}</div>
+    return <div className="text-center py-8">{t('common.loading')}</div>
   }
 
   if (!events || events.length === 0) {
     return (
       <Card>
         <CardContent className="py-8 text-center text-muted-foreground">
-          {dict.home.noPastEvents || "No past events available."}
+          {t('home.noPastEvents')}
         </CardContent>
       </Card>
     )
@@ -87,12 +87,12 @@ export function PastEventsList() {
                   <div className="flex flex-col items-end gap-2">
                     {isConfirmed && (
                       <Badge variant="outline" className="bg-green-50 dark:bg-green-950">
-                        {dict.home.participated || "Participated"}
+                        {t('home.participated')}
                       </Badge>
                     )}
                     {isWaitlisted && (
                       <Badge variant="outline" className="bg-orange-50 dark:bg-orange-950">
-                        {dict.home.waitlisted || "Waitlisted"}
+                        {t('home.waitlisted')}
                       </Badge>
                     )}
                   </div>
@@ -102,24 +102,24 @@ export function PastEventsList() {
                 <div className="flex items-center justify-between">
                   <div className="flex gap-4 text-sm text-muted-foreground">
                     <span>
-                      <strong>{event.confirmedCount}</strong> / {event.capacity} {dict.home.confirmed || "confirmed"}
+                      <strong>{event.confirmedCount}</strong> / {event.capacity} {t('home.confirmed')}
                     </span>
                     {event.waitlistCount > 0 && (
-                      <span>{event.waitlistCount} {dict.home.waitlisted || "waitlisted"}</span>
+                      <span>{event.waitlistCount} {t('home.waitlisted')}</span>
                     )}
                   </div>
                   <div className="flex gap-2">
                     {event.state === "PUBLISHED" && (
-                      <Link href={`/${locale}/events/${event.id}/results`}>
+                      <Link href={`/events/${event.id}/results`}>
                         <Button size="sm" variant="outline">
-                          {dict.home.viewResults || "View Results"}
+                          {t('home.viewResults')}
                         </Button>
                       </Link>
                     )}
                     {event.state === "DRAWN" && (
-                      <Link href={`/${locale}/events/${event.id}/draw`}>
+                      <Link href={`/events/${event.id}/draw`}>
                         <Button size="sm" variant="outline">
-                          {dict.home.viewDraw || "View Draw"}
+                          {t('home.viewDraw')}
                         </Button>
                       </Link>
                     )}

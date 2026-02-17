@@ -9,11 +9,11 @@ export default async function LeaderboardPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <HomeNavClient />
-      <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl">
-        <div className="space-y-6">
+      <main className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-1 max-w-4xl">
+        <div className="space-y-4 sm:space-y-6">
           <div>
-            <h1 className="text-3xl font-bold">{t('title')}</h1>
-            <p className="text-muted-foreground">{t('description')}</p>
+            <h1 className="text-2xl sm:text-3xl font-bold">{t('title')}</h1>
+            <p className="text-sm sm:text-base text-muted-foreground mt-1">{t('description')}</p>
           </div>
           <Leaderboard />
         </div>

@@ -153,8 +153,8 @@ export function EventsList() {
               </div>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="flex items-center justify-between">
-                <div className="flex gap-4 text-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                <div className="flex flex-wrap gap-3 sm:gap-4 text-sm">
                   <span>
                     <strong>{event.confirmedCount}</strong> / {event.capacity} confirmed
                   </span>
@@ -162,7 +162,7 @@ export function EventsList() {
                     <span className="text-muted-foreground">{event.waitlistCount} waitlisted</span>
                   )}
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   {session ? (
                     <>
                       {canRegister && !isConfirmed && !isWaitlisted && (
@@ -170,6 +170,7 @@ export function EventsList() {
                           size="sm"
                           onClick={() => handleRSVP(event.id, "IN")}
                           disabled={rsvpMutation.isPending}
+                          className="flex-1 sm:flex-none"
                         >
                           {isFull ? "Register to Waitlist" : "Register"}
                         </Button>
@@ -180,19 +181,20 @@ export function EventsList() {
                           variant="outline"
                           onClick={() => handleRSVP(event.id, "OUT")}
                           disabled={rsvpMutation.isPending}
+                          className="flex-1 sm:flex-none"
                         >
                           Cancel
                         </Button>
                       )}
                     </>
                   ) : (
-                    <Link href="/login">
-                      <Button size="sm">Sign In to Register</Button>
+                    <Link href="/login" className="flex-1 sm:flex-none">
+                      <Button size="sm" className="w-full">Sign In to Register</Button>
                     </Link>
                   )}
                   {event.state === "DRAWN" && (
-                    <Link href={`/events/${event.id}/draw`}>
-                      <Button size="sm" variant="outline">
+                    <Link href={`/events/${event.id}/draw`} className="flex-1 sm:flex-none">
+                      <Button size="sm" variant="outline" className="w-full">
                         View Draw
                       </Button>
                     </Link>

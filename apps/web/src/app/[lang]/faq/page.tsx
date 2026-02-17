@@ -123,19 +123,19 @@ export default function FAQPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <HomeNav />
-      <main className="container mx-auto px-4 py-12 max-w-4xl flex-1">
-      <div className="space-y-8">
+      <main className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 md:py-12 max-w-4xl flex-1">
+      <div className="space-y-6 sm:space-y-8">
         {/* Header */}
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold">Frequently Asked Questions</h1>
-          <p className="text-xl text-muted-foreground">Find answers to common questions about Douro Bats Padel</p>
+        <div className="text-center space-y-3 sm:space-y-4">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">Frequently Asked Questions</h1>
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground">Find answers to common questions about Douro Bats Padel</p>
         </div>
 
         {/* FAQ by Category */}
         {categories.map((category) => (
-          <div key={category} className="space-y-4">
-            <h2 className="text-2xl font-bold">{category}</h2>
-            <div className="space-y-3">
+          <div key={category} className="space-y-3 sm:space-y-4">
+            <h2 className="text-xl sm:text-2xl font-bold">{category}</h2>
+            <div className="space-y-2 sm:space-y-3">
               {faqs
                 .filter((faq) => faq.category === category)
                 .map((faq, index) => {

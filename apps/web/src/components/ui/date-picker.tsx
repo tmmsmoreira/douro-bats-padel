@@ -100,7 +100,7 @@ export function DatePicker({
             </InputGroupButton>
           </PopoverTrigger>
           <PopoverContent
-            className="w-auto overflow-hidden p-0"
+            className="w-auto p-0"
             align="end"
             alignOffset={-8}
             sideOffset={10}

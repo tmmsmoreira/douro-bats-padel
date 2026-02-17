@@ -38,17 +38,17 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <HomeNav />
-      <main className="container mx-auto px-4 py-12 max-w-6xl flex-1">
-      <div className="space-y-8">
+      <main className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 md:py-12 max-w-6xl flex-1">
+      <div className="space-y-6 sm:space-y-8">
         {/* Header */}
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold">Contact Us</h1>
-          <p className="text-xl text-muted-foreground">
+        <div className="text-center space-y-3 sm:space-y-4">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">Contact Us</h1>
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground">
             Have questions? We'd love to hear from you.
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Contact Information */}
           <div className="lg:col-span-1 space-y-6">
             <Card>

@@ -54,6 +54,7 @@ export default async function proxy(req: NextRequest) {
     pathnameWithoutLocale === "/leaderboard" ||
     pathnameWithoutLocale === "/events" ||
     pathnameWithoutLocale.startsWith("/events/") ||
+    pathnameWithoutLocale.startsWith("/players/") ||
     pathnameWithoutLocale === "/about" ||
     pathnameWithoutLocale === "/contact" ||
     pathnameWithoutLocale === "/faq" ||

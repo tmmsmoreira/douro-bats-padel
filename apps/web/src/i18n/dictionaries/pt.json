@@ -201,7 +201,21 @@
     "waitlisted": "em lista de espera",
     "manage": "Gerir",
     "generateDraw": "Gerar Sorteio",
-    "enterResults": "Inserir Resultados"
+    "enterResults": "Inserir Resultados",
+    "filterByDate": "Filtrar por data:",
+    "selectDate": "Selecionar data",
+    "status": "Estado:",
+    "allStatuses": "Todos os Estados",
+    "statusDraft": "Rascunho",
+    "statusOpen": "Aberto",
+    "statusFrozen": "Congelado",
+    "statusDrawn": "Sorteado",
+    "statusPublished": "Publicado",
+    "clearFilters": "Limpar Filtros",
+    "noEventsMatchFilters": "Nenhum evento corresponde aos seus filtros.",
+    "showingResults": "A mostrar {start}-{end} de {total}",
+    "previous": "Anterior",
+    "next": "Seguinte"
   },
   "playersList": {
     "loadingPlayers": "A carregar jogadores...",
@@ -210,7 +224,17 @@
     "rating": "Classificação",
     "status": "Estado",
     "playerSince": "Jogador desde",
-    "accountCreated": "Conta criada"
+    "accountCreated": "Conta criada",
+    "searchPlayers": "Pesquisar jogadores por nome ou email...",
+    "noPlayersMatchSearch": "Nenhum jogador corresponde à sua pesquisa."
+  },
+  "playerActions": {
+    "actions": "Ações",
+    "actionsDescription": "Gerir esta conta de utilizador. Estas ações são permanentes e não podem ser desfeitas.",
+    "deleteUser": "Eliminar Utilizador",
+    "deleting": "A eliminar...",
+    "deleteConfirmation": "Tem a certeza de que deseja eliminar este utilizador? Esta ação não pode ser desfeita e removerá todos os dados associados, incluindo RSVPs, jogos e classificações.",
+    "deleteError": "Falha ao eliminar utilizador"
   },
   "eventDetails": {
     "loadingEvent": "A carregar evento...",

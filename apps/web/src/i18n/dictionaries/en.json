@@ -201,7 +201,21 @@
     "waitlisted": "waitlisted",
     "manage": "Manage",
     "generateDraw": "Generate Draw",
-    "enterResults": "Enter Results"
+    "enterResults": "Enter Results",
+    "filterByDate": "Filter by date:",
+    "selectDate": "Select date",
+    "status": "Status:",
+    "allStatuses": "All Statuses",
+    "statusDraft": "Draft",
+    "statusOpen": "Open",
+    "statusFrozen": "Frozen",
+    "statusDrawn": "Drawn",
+    "statusPublished": "Published",
+    "clearFilters": "Clear Filters",
+    "noEventsMatchFilters": "No events match your filters.",
+    "showingResults": "Showing {start}-{end} of {total}",
+    "previous": "Previous",
+    "next": "Next"
   },
   "playersList": {
     "loadingPlayers": "Loading players...",
@@ -210,7 +224,17 @@
     "rating": "Rating",
     "status": "Status",
     "playerSince": "Player since",
-    "accountCreated": "Account created"
+    "accountCreated": "Account created",
+    "searchPlayers": "Search players by name or email...",
+    "noPlayersMatchSearch": "No players match your search."
+  },
+  "playerActions": {
+    "actions": "Actions",
+    "actionsDescription": "Manage this user account. These actions are permanent and cannot be undone.",
+    "deleteUser": "Delete User",
+    "deleting": "Deleting...",
+    "deleteConfirmation": "Are you sure you want to delete this user? This action cannot be undone and will remove all associated data including RSVPs, matches, and rankings.",
+    "deleteError": "Failed to delete user"
   },
   "eventDetails": {
     "loadingEvent": "Loading event...",

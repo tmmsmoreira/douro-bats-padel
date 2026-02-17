@@ -54,11 +54,11 @@ export function LoginForm() {
 
   return (
     <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle>Sign In</CardTitle>
-        <CardDescription>Enter your credentials to access Padel Manager</CardDescription>
+      <CardHeader className="space-y-1 px-4 sm:px-6 pt-6">
+        <CardTitle className="text-xl sm:text-2xl">Sign In</CardTitle>
+        <CardDescription className="text-sm">Enter your credentials to access Padel Manager</CardDescription>
       </CardHeader>
-      <CardContent className="pt-0">
+      <CardContent className="pt-0 px-4 sm:px-6 pb-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">
@@ -69,7 +69,7 @@ export function LoginForm() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border rounded-md"
+              className="w-full px-3 py-2 text-base border rounded-md"
               required
             />
           </div>
@@ -87,7 +87,7 @@ export function LoginForm() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border rounded-md"
+              className="w-full px-3 py-2 text-base border rounded-md"
               required
             />
           </div>

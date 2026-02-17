@@ -12,8 +12,8 @@ export function Footer() {
 
   return (
     <footer className="border-t bg-card mt-auto">
-      <div className="container mx-auto px-4 py-12 max-w-4xl">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="container mx-auto px-4 py-8 sm:py-12 max-w-4xl">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           {/* About Section */}
           <div className="space-y-4">
             <h3 className="text-lg font-bold">Douro Bats Padel</h3>
@@ -138,8 +138,8 @@ export function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-12 pt-8 border-t">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
+        <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
             <p>© {currentYear} Douro Bats Padel. {tFooter('allRightsReserved')}</p>
             <p>
               {tFooter('madeWith')}

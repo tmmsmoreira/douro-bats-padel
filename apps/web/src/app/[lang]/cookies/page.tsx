@@ -6,12 +6,12 @@ export default function CookiesPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <HomeNav />
-      <main className="container mx-auto px-4 py-12 max-w-4xl flex-1">
-      <div className="space-y-8">
+      <main className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 md:py-12 max-w-4xl flex-1">
+      <div className="space-y-6 sm:space-y-8">
         {/* Header */}
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold">Cookie Policy</h1>
-          <p className="text-muted-foreground">Last updated: February 2026</p>
+        <div className="text-center space-y-3 sm:space-y-4">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">Cookie Policy</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">Last updated: February 2026</p>
         </div>
 
         {/* Introduction */}

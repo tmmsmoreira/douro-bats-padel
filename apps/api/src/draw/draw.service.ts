@@ -40,7 +40,7 @@ export class DrawService {
     private notificationService: NotificationService,
   ) {}
 
-  async generateDraw(eventId: string, createdBy: string, constraints?: DrawConstraints) {
+  async generateDraw(eventId: string, createdBy: string, constraints?: DrawConstraints, selectedCourts?: { masters?: string[]; explorers?: string[] }) {
     const event = await this.prisma.event.findUnique({
       where: { id: eventId },
       include: {
@@ -73,10 +73,10 @@ export class DrawService {
     // Sort players by rating (descending) to assign tiers dynamically
     const sortedRsvps = [...event.rsvps].sort((a, b) => b.player.rating - a.player.rating)
 
-    // Get available courts from tierRules
+    // Get available courts from tierRules or use selected courts if provided
     const tierRules = (event.tierRules as any) || {}
-    const mastersCourts = tierRules.mastersTimeSlot?.courtIds || []
-    const explorersCourts = tierRules.explorersTimeSlot?.courtIds || []
+    const mastersCourts = selectedCourts?.masters || tierRules.mastersTimeSlot?.courtIds || []
+    const explorersCourts = selectedCourts?.explorers || tierRules.explorersTimeSlot?.courtIds || []
 
     if (mastersCourts.length === 0 && explorersCourts.length === 0) {
       throw new BadRequestException("No courts available in tier time slots")
@@ -659,6 +659,35 @@ export class DrawService {
     })
 
     return { message: "Draw published successfully" }
+  }
+
+  async unpublishDraw(eventId: string) {
+    const event = await this.prisma.event.findUnique({
+      where: { id: eventId },
+      include: {
+        draws: true,
+      },
+    })
+
+    if (!event) {
+      throw new NotFoundException("Event not found")
+    }
+
+    if (event.state !== EventState.PUBLISHED) {
+      throw new BadRequestException("Draw is not published")
+    }
+
+    if (event.draws.length === 0) {
+      throw new BadRequestException("No draw found for this event")
+    }
+
+    // Unpublish by setting state back to FROZEN
+    await this.prisma.event.update({
+      where: { id: eventId },
+      data: { state: EventState.FROZEN },
+    })
+
+    return { message: "Draw unpublished successfully" }
   }
 
   async deleteDraw(eventId: string) {

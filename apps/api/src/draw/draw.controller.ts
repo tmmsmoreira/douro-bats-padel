@@ -13,8 +13,8 @@ export class DrawController {
   @Post("events/:eventId")
   @UseGuards(RolesGuard)
   @Roles(Role.EDITOR, Role.ADMIN)
-  async generateDraw(@Param("eventId") eventId: string, @Body() body: { constraints?: any }, @Request() req: any) {
-    return this.drawService.generateDraw(eventId, req.user.sub, body.constraints)
+  async generateDraw(@Param("eventId") eventId: string, @Body() body: { constraints?: any; selectedCourts?: { masters?: string[]; explorers?: string[] } }, @Request() req: any) {
+    return this.drawService.generateDraw(eventId, req.user.sub, body.constraints, body.selectedCourts)
   }
 
   @Get("events/:eventId")
@@ -34,6 +34,13 @@ export class DrawController {
   @Roles(Role.EDITOR, Role.ADMIN)
   async publishDraw(@Param("eventId") eventId: string) {
     return this.drawService.publishDraw(eventId)
+  }
+
+  @Post("events/:eventId/unpublish")
+  @UseGuards(RolesGuard)
+  @Roles(Role.EDITOR, Role.ADMIN)
+  async unpublishDraw(@Param("eventId") eventId: string) {
+    return this.drawService.unpublishDraw(eventId)
   }
 
   @Delete("events/:eventId")

@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
@@ -8,6 +9,17 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Pencil, Trash2 } from "lucide-react"
 import { useTranslations } from "next-intl"
+import { toast } from "sonner"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
 
@@ -30,6 +42,7 @@ export function VenuesList() {
   const router = useRouter()
   const queryClient = useQueryClient()
   const t = useTranslations("venuesList")
+  const [deleteVenue, setDeleteVenue] = useState<{ id: string; name: string } | null>(null)
 
   const { data: venues, isLoading } = useQuery<Venue[]>({
     queryKey: ["venues"],
@@ -62,6 +75,10 @@ export function VenuesList() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["venues"] })
+      toast.success("Venue deleted successfully")
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to delete venue: ${error.message}`)
     },
   })
 
@@ -70,9 +87,7 @@ export function VenuesList() {
   }
 
   const handleDelete = (venueId: string, venueName: string) => {
-    if (confirm(t("confirmDeleteVenue", { venueName }))) {
-      deleteMutation.mutate(venueId)
-    }
+    setDeleteVenue({ id: venueId, name: venueName })
   }
 
   if (isLoading) {
@@ -140,6 +155,32 @@ export function VenuesList() {
           </CardContent>
         </Card>
       ))}
+
+      {/* Delete Venue Confirmation Dialog */}
+      <AlertDialog open={!!deleteVenue} onOpenChange={(open) => !open && setDeleteVenue(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("confirmDeleteVenue", { venueName: deleteVenue?.name })}</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this venue and all its courts. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (deleteVenue) {
+                  deleteMutation.mutate(deleteVenue.id)
+                  setDeleteVenue(null)
+                }
+              }}
+            >
+              Delete Venue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

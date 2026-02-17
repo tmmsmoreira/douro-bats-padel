@@ -21,6 +21,7 @@ interface PlayerData {
   profilePhoto: string | null
   emailVerified: boolean
   createdAt: string
+  roles: string[]
   player: {
     id: string
     rating: number
@@ -275,10 +276,15 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
           <CardContent>
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">{tActions("actionsDescription")}</p>
+              {player.roles?.includes("ADMIN") && (
+                <div className="text-sm text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950/20 p-3 rounded-md border border-yellow-200 dark:border-yellow-800">
+                  ⚠️ This user is an admin and cannot be deleted.
+                </div>
+              )}
               <Button
                 variant="destructive"
                 onClick={handleDeleteUser}
-                disabled={isDeleting}
+                disabled={isDeleting || player.roles?.includes("ADMIN")}
                 className="w-full sm:w-auto"
               >
                 <Trash2 className="h-4 w-4 mr-2" />

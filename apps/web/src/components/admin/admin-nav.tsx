@@ -98,8 +98,8 @@ export function AdminNav() {
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link href="/profile" className="cursor-pointer">
-                      <User className="mr-2 h-4 w-4" />
+                    <Link href="/profile" className="cursor-pointer flex gap-2">
+                      <User className="h-4 w-4" />
                       <span>{t('profile')}</span>
                     </Link>
                   </DropdownMenuItem>
@@ -108,8 +108,11 @@ export function AdminNav() {
                   <DropdownMenuSeparator />
                   <ThemeToggle />
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer">
-                    <LogOut className="mr-2 h-4 w-4" />
+                  <DropdownMenuItem
+                    onClick={() => signOut()}
+                    className="cursor-pointer flex gap-2"
+                  >
+                    <LogOut className="h-4 w-4" />
                     <span>{t('signOut')}</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>

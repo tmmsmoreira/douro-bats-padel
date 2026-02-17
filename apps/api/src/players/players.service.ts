@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException } from "@nestjs/common"
+import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common"
 import { PrismaService } from "../prisma/prisma.service"
+import { Role } from "@padel/types"
 
 @Injectable()
 export class PlayersService {
@@ -74,6 +75,7 @@ export class PlayersService {
       profilePhoto: user.profilePhoto,
       emailVerified: user.emailVerified,
       createdAt: user.createdAt,
+      roles: user.roles,
       player: user.player,
     }
   }
@@ -85,6 +87,11 @@ export class PlayersService {
 
     if (!user) {
       throw new NotFoundException("User not found")
+    }
+
+    // Safeguard: Prevent deletion of admin users
+    if (user.roles && user.roles.includes(Role.ADMIN)) {
+      throw new BadRequestException("Cannot delete admin users")
     }
 
     // Delete the user (cascade will handle related records)

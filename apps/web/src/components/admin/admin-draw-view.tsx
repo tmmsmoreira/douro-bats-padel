@@ -4,10 +4,11 @@ import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Pencil, Trash2 } from "lucide-react"
+import { Pencil, Trash2, MapPin, Calendar, RefreshCw, Send, ArchiveRestore } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -16,6 +17,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
 
@@ -48,6 +59,7 @@ interface Draw {
     date: string
     startsAt: string
     endsAt: string
+    state: string
     venue?: {
       id: string
       name: string
@@ -77,7 +89,7 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
   const router = useRouter()
   const queryClient = useQueryClient()
   const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null)
-  const [showRegenerateDialog, setShowRegenerateDialog] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   const { data: draw, isLoading } = useQuery<Draw>({
     queryKey: ["draw", eventId],
@@ -97,7 +109,7 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
   const updateAssignmentMutation = useMutation({
     mutationFn: async ({ assignmentId, teamA, teamB }: { assignmentId: string; teamA: string[]; teamB: string[] }) => {
       if (!session?.accessToken) throw new Error("Not authenticated")
-      
+
       const res = await fetch(`${API_URL}/draws/assignments/${assignmentId}`, {
         method: "PATCH",
         headers: {
@@ -106,13 +118,17 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
         },
         body: JSON.stringify({ teamA, teamB }),
       })
-      
+
       if (!res.ok) throw new Error("Failed to update assignment")
       return res.json()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["draw", eventId] })
       setEditingAssignment(null)
+      toast.success("Assignment updated successfully")
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to update assignment: ${error.message}`)
     },
   })
 
@@ -134,6 +150,35 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["draw", eventId] })
       queryClient.invalidateQueries({ queryKey: ["event", eventId] })
+      toast.success("Draw published successfully! Players have been notified.")
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to publish draw: ${error.message}`)
+    },
+  })
+
+  const unpublishDrawMutation = useMutation({
+    mutationFn: async () => {
+      if (!session?.accessToken) throw new Error("Not authenticated")
+
+      const res = await fetch(`${API_URL}/draws/events/${eventId}/unpublish`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.accessToken}`,
+        },
+      })
+
+      if (!res.ok) throw new Error("Failed to unpublish draw")
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["draw", eventId] })
+      queryClient.invalidateQueries({ queryKey: ["event", eventId] })
+      toast.success("Draw unpublished successfully!")
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to unpublish draw: ${error.message}`)
     },
   })
 
@@ -155,8 +200,12 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["draw", eventId] })
       queryClient.invalidateQueries({ queryKey: ["event", eventId] })
+      toast.success("Draw deleted successfully")
       // Redirect to the generate draw page
       router.push(`/admin/events/${eventId}/draw`)
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to delete draw: ${error.message}`)
     },
   })
 
@@ -167,15 +216,6 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
   if (!draw) {
     return <div className="text-center py-8">Draw not available yet</div>
   }
-
-  // Extract courts from tier rules
-  const tierRules = draw.event.tierRules || {}
-  const mastersCourtIds = tierRules.mastersTimeSlot?.courtIds || []
-  const explorersCourtIds = tierRules.explorersTimeSlot?.courtIds || []
-  const allCourtIds = [...new Set([...mastersCourtIds, ...explorersCourtIds])]
-
-  const venueCourts = draw.event.venue?.courts || []
-  const courts = venueCourts.filter((court) => allCourtIds.includes(court.id))
 
   // Group assignments by tier and round
   const masterAssignments = draw.assignments.filter((a) => a.tier === "MASTERS")
@@ -200,55 +240,77 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
         <div>
           <h1 className="text-3xl font-bold">Manage Draw</h1>
           <p className="text-muted-foreground">{draw.event.title}</p>
+          <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <Calendar className="h-4 w-4" />
+              <span>
+                {new Date(draw.event.date).toLocaleDateString("en-US", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </span>
+            </div>
+            {draw.event.venue && (
+              <div className="flex items-center gap-1">
+                <MapPin className="h-4 w-4" />
+                <span>{draw.event.venue.name}</span>
+              </div>
+            )}
+          </div>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => router.push(`/admin/events/${eventId}/draw`)}
-          >
-            Regenerate Draw
-          </Button>
-          <Button
-            onClick={() => publishDrawMutation.mutate()}
-            disabled={publishDrawMutation.isPending}
-          >
-            {publishDrawMutation.isPending ? "Publishing..." : "Publish Draw"}
-          </Button>
+          {draw.event.state !== "PUBLISHED" && (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => router.push(`/admin/events/${eventId}/draw`)}
+              >
+                <RefreshCw className="h-4 w-4" />
+                Generate New
+              </Button>
+              <Button
+                onClick={() => publishDrawMutation.mutate()}
+                disabled={publishDrawMutation.isPending}
+              >
+                <Send className="h-4 w-4" />
+                {publishDrawMutation.isPending ? "Publishing..." : "Publish"}
+              </Button>
+            </>
+          )}
+          {draw.event.state === "PUBLISHED" && (
+            <Button
+              variant="outline"
+              onClick={() => unpublishDrawMutation.mutate()}
+              disabled={unpublishDrawMutation.isPending}
+            >
+              <ArchiveRestore className="h-4 w-4" />
+              {unpublishDrawMutation.isPending ? "Unpublishing..." : "Unpublish"}
+            </Button>
+          )}
           <Button
             variant="destructive"
-            onClick={() => {
-              if (confirm("Are you sure you want to delete this draw? This action cannot be undone.")) {
-                deleteDrawMutation.mutate()
-              }
-            }}
+            onClick={() => setShowDeleteDialog(true)}
             disabled={deleteDrawMutation.isPending}
           >
-            <Trash2 className="h-4 w-4 mr-2" />
-            {deleteDrawMutation.isPending ? "Deleting..." : "Delete Draw"}
+            <Trash2 className="h-4 w-4" />
+            {deleteDrawMutation.isPending ? "Deleting..." : "Delete"}
           </Button>
         </div>
       </div>
 
-      {/* Courts Info */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Courts</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-2">
-            {courts.map((court) => (
-              <Badge key={court.id} variant="outline">
-                {court.label}
-              </Badge>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Masters Assignments */}
       {Object.keys(mastersRounds).length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold">Masters</h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-2xl font-bold">Masters</h2>
+            {draw.event.tierRules?.mastersTimeSlot && (
+              <Badge variant="secondary" className="text-sm">
+                🕐 {draw.event.tierRules.mastersTimeSlot.startsAt} - {draw.event.tierRules.mastersTimeSlot.endsAt}
+              </Badge>
+            )}
+          </div>
           {Object.entries(mastersRounds).map(([round, assignments]) => (
             <Card key={`masters-${round}`}>
               <CardHeader>
@@ -273,7 +335,14 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
       {/* Explorers Assignments */}
       {Object.keys(explorersRounds).length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold">Explorers</h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-2xl font-bold">Explorers</h2>
+            {draw.event.tierRules?.explorersTimeSlot && (
+              <Badge variant="secondary" className="text-sm">
+                🕐 {draw.event.tierRules.explorersTimeSlot.startsAt} - {draw.event.tierRules.explorersTimeSlot.endsAt}
+              </Badge>
+            )}
+          </div>
           {Object.entries(explorersRounds).map(([round, assignments]) => (
             <Card key={`explorers-${round}`}>
               <CardHeader>
@@ -310,6 +379,30 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
           isSaving={updateAssignmentMutation.isPending}
         />
       )}
+
+      {/* Delete Draw Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this draw. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                deleteDrawMutation.mutate()
+                setShowDeleteDialog(false)
+              }}
+            >
+              Delete Draw
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
@@ -379,7 +472,7 @@ function EditAssignmentDialog({
 
   const handleSave = () => {
     if (teamA.length !== 2 || teamB.length !== 2) {
-      alert("Each team must have exactly 2 players")
+      toast.error("Each team must have exactly 2 players")
       return
     }
     onSave(teamA, teamB)

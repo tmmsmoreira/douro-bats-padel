@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "@/i18n/navigation"
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { locales, localeNames, localeFlags, type Locale } from "@/i18n/config"
 import { useLocale } from "next-intl"
+import { cn } from "@/lib/utils";
 
 export function LanguageMenuItems() {
   const pathname = usePathname()
@@ -24,9 +25,12 @@ export function LanguageMenuItems() {
         <DropdownMenuItem
           key={locale}
           onClick={() => switchLocale(locale)}
-          className={currentLocale === locale ? "bg-accent" : ""}
+          className={cn(
+            currentLocale === locale ? "bg-accent" : "",
+            "cursor-pointer flex gap-2"
+          )}
         >
-          <span className="mr-2 text-lg">{localeFlags[locale]}</span>
+          <span className="text-lg">{localeFlags[locale]}</span>
           <span>{localeNames[locale]}</span>
         </DropdownMenuItem>
       ))}

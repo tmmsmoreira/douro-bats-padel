@@ -11,6 +11,17 @@ import { formatDate, formatTime } from "@/lib/utils"
 import Link from "next/link"
 import { Trash2 } from "lucide-react"
 import { useState } from "react"
+import { toast } from "sonner"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
 
@@ -20,6 +31,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
   const router = useRouter()
   const t = useTranslations("eventDetails")
   const [isDeleting, setIsDeleting] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   const { data: event, isLoading } = useQuery({
     queryKey: ["event", eventId, session?.accessToken],
@@ -116,19 +128,17 @@ export function EventDetails({ eventId }: { eventId: string }) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-events"] })
+      toast.success(t("deleteSuccess") || "Event deleted successfully")
       router.push("/admin")
     },
     onError: (error: Error) => {
-      alert(t("deleteError") + ": " + error.message)
+      toast.error(t("deleteError") + ": " + error.message)
       setIsDeleting(false)
     },
   })
 
   const handleDeleteEvent = () => {
-    if (confirm(t("deleteConfirmation"))) {
-      setIsDeleting(true)
-      deleteMutation.mutate()
-    }
+    setShowDeleteDialog(true)
   }
 
   if (isLoading) {
@@ -186,10 +196,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
               {event.confirmedPlayers?.map((player: any) => (
                 <div key={player.id} className="flex items-center justify-between py-2 border-b last:border-0">
                   <span>{player.name}</span>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline">{player.tier}</Badge>
-                    <span className="text-sm text-muted-foreground">{player.rating}</span>
-                  </div>
+                  <span className="text-sm text-muted-foreground">{player.rating}</span>
                 </div>
               ))}
             </div>
@@ -209,16 +216,38 @@ export function EventDetails({ eventId }: { eventId: string }) {
                     <Badge variant="secondary">#{player.position}</Badge>
                     <span>{player.name}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline">{player.tier}</Badge>
-                    <span className="text-sm text-muted-foreground">{player.rating}</span>
-                  </div>
+                  <span className="text-sm text-muted-foreground">{player.rating}</span>
                 </div>
               ))}
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Delete Event Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("deleteConfirmation")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this event and all associated data. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                setIsDeleting(true)
+                deleteMutation.mutate()
+                setShowDeleteDialog(false)
+              }}
+            >
+              {t("deleteEvent")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

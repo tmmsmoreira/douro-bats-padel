@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { PlayerNav } from "./player-nav"
 import { Footer } from "@/components/footer"
 import { cn } from "@/lib/utils"
+import { MapPin, Calendar } from "lucide-react"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
 
@@ -132,16 +133,6 @@ export function DrawView({ eventId }: { eventId: string }) {
   })
   const teams = Array.from(teamsMap.values())
 
-  // Extract courts from tier rules (all available courts for the event)
-  const tierRules = draw.event.tierRules || {}
-  const mastersCourtIds = tierRules.mastersTimeSlot?.courtIds || []
-  const explorersCourtIds = tierRules.explorersTimeSlot?.courtIds || []
-  const allCourtIds = [...new Set([...mastersCourtIds, ...explorersCourtIds])]
-
-  // Get court details from venue
-  const venueCourts = draw.event.venue?.courts || []
-  const courts = venueCourts.filter((court) => allCourtIds.includes(court.id))
-
   // Group assignments by tier and round
   const masterAssignments = draw.assignments.filter((a) => a.tier === "MASTERS")
   const explorerAssignments = draw.assignments.filter((a) => a.tier === "EXPLORERS")
@@ -181,66 +172,58 @@ export function DrawView({ eventId }: { eventId: string }) {
           {/* Header */}
           <div className="text-center">
             <h1 className="text-3xl font-bold mb-2">{draw.event.title || "Game Draw"}</h1>
-            <p className="text-muted-foreground">
-              {new Date(draw.event.date).toLocaleDateString("en-US", {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
-            </p>
-          </div>
-
-          {/* Top Section: Teams and Courts */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Duplas (Teams) */}
-            <Card className="lg:col-span-2">
-              <CardHeader className="bg-blue-50 dark:bg-blue-950/30">
-                <CardTitle>Duplas</CardTitle>
-              </CardHeader>
-              <CardContent className="pt-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {teams.map((team, index) => {
-                    const tier = team[0]?.tier || "EXPLORERS"
-                    return (
-                      <div
-                        key={index}
-                        className={cn(
-                          "p-3 rounded-lg border-2",
-                          getTeamColor(tier)
-                        )}
-                      >
-                        <div className="font-medium text-sm">
-                          {team.map((player, pIndex) => (
-                            <div key={player.id}>
-                              {player.name}
-                              {pIndex < team.length - 1 && " / "}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )
+            <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <Calendar className="h-4 w-4" />
+                <span>
+                  {new Date(draw.event.date).toLocaleDateString("en-US", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
                   })}
+                </span>
+              </div>
+              {draw.event.venue && (
+                <div className="flex items-center gap-1">
+                  <MapPin className="h-4 w-4" />
+                  <span>{draw.event.venue.name}</span>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Campos (Courts) */}
-            <Card>
-              <CardHeader className="bg-gray-50 dark:bg-gray-900/30">
-                <CardTitle>Campos</CardTitle>
-              </CardHeader>
-              <CardContent className="pt-6">
-                <div className="space-y-2">
-                  {courts.map((court) => (
-                    <div key={court.id} className="p-2 border rounded">
-                      {court.label}
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+              )}
+            </div>
           </div>
+
+          {/* Duplas (Teams) */}
+          <Card>
+            <CardHeader className="bg-blue-50 dark:bg-blue-950/30">
+              <CardTitle>Duplas</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                {teams.map((team, index) => {
+                  const tier = team[0]?.tier || "EXPLORERS"
+                  return (
+                    <div
+                      key={index}
+                      className={cn(
+                        "p-3 rounded-lg border-2",
+                        getTeamColor(tier)
+                      )}
+                    >
+                      <div className="font-medium text-sm">
+                        {team.map((player, pIndex) => (
+                          <div key={player.id}>
+                            {player.name}
+                            {pIndex < team.length - 1 && " / "}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Masters Tier Matches */}
           {Object.keys(masterRounds).length > 0 && (
@@ -249,7 +232,7 @@ export function DrawView({ eventId }: { eventId: string }) {
                 <h2 className="text-2xl font-bold">Padeleiras - Masters</h2>
                 {mastersTimeSlot && (
                   <Badge variant="outline" className="text-base px-4 py-1">
-                    {mastersTimeSlot.startsAt} - {mastersTimeSlot.endsAt}
+                    🕐 {mastersTimeSlot.startsAt} - {mastersTimeSlot.endsAt}
                   </Badge>
                 )}
               </div>
@@ -312,7 +295,7 @@ export function DrawView({ eventId }: { eventId: string }) {
                 <h2 className="text-2xl font-bold">Padeleiras - Explorers</h2>
                 {explorersTimeSlot && (
                   <Badge variant="outline" className="text-base px-4 py-1">
-                    {explorersTimeSlot.startsAt} - {explorersTimeSlot.endsAt}
+                    🕐 {explorersTimeSlot.startsAt} - {explorersTimeSlot.endsAt}
                   </Badge>
                 )}
               </div>

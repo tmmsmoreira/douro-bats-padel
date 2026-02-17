@@ -1,16 +1,19 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
+import { toast } from "sonner"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
+import { Checkbox } from "@/components/ui/checkbox"
 import { useTranslations } from "next-intl"
 import { useLocale } from "next-intl"
+import { AlertTriangle } from "lucide-react"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
 
@@ -30,6 +33,10 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
     balanceStrength: true,
     allowTierMixing: false,
   })
+
+  // State for selected courts (initialized after event loads)
+  const [selectedMastersCourts, setSelectedMastersCourts] = useState<string[]>([])
+  const [selectedExplorersCourts, setSelectedExplorersCourts] = useState<string[]>([])
 
   // Fetch event details
   const { data: event, isLoading: eventLoading } = useQuery({
@@ -96,7 +103,11 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["draw", eventId] })
       queryClient.invalidateQueries({ queryKey: ["event", eventId] })
+      toast.success("Draw generated successfully!")
       router.push(`/${locale}/admin/events/${eventId}/draw/view`)
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to generate draw: ${error.message}`)
     },
   })
 
@@ -115,14 +126,26 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
   const mastersCourts = tierRules.mastersTimeSlot?.courtIds || []
   const explorersCourts = tierRules.explorersTimeSlot?.courtIds || []
 
+  // Initialize selected courts when event loads
+  useEffect(() => {
+    if (mastersCourts.length > 0 && selectedMastersCourts.length === 0) {
+      setSelectedMastersCourts(mastersCourts)
+    }
+    if (explorersCourts.length > 0 && selectedExplorersCourts.length === 0) {
+      setSelectedExplorersCourts(explorersCourts)
+    }
+  }, [mastersCourts, explorersCourts, selectedMastersCourts.length, selectedExplorersCourts.length])
+
   // Since MASTERS and EXPLORERS play at different times, capacity is additive
   // Even if the same courts are used, they can accommodate different players at different times
-  const mastersCapacity = mastersCourts.length * 4
-  const explorersCapacity = explorersCourts.length * 4
+  // Use SELECTED courts for capacity calculation
+  const mastersCapacity = selectedMastersCourts.length * 4
+  const explorersCapacity = selectedExplorersCourts.length * 4
   const maxPlayers = mastersCapacity + explorersCapacity
 
   // Get unique courts for display purposes
   const allAvailableCourts = [...new Set([...mastersCourts, ...explorersCourts])]
+  const allSelectedCourts = [...new Set([...selectedMastersCourts, ...selectedExplorersCourts])]
   const maxPlayersPerCourt = 4
 
   // Adjust player count to nearest multiple of 4 (round down)
@@ -152,16 +175,31 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
       </div>
 
       {existingDraw && (
-        <Card className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20">
+        <Card className={event.state === "PUBLISHED" ? "border-red-500 bg-red-50 dark:bg-red-950/20" : "border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20"}>
           <CardHeader>
-            <CardTitle className="text-yellow-800 dark:text-yellow-200">Draw Already Exists</CardTitle>
-            <CardDescription className="text-yellow-700 dark:text-yellow-300">
-              A draw has already been generated for this event. Generating a new draw will replace the existing one.
+            <CardTitle className={event.state === "PUBLISHED" ? "text-red-800 dark:text-red-200 flex items-center gap-2" : "text-yellow-800 dark:text-yellow-200"}>
+              {event.state === "PUBLISHED" && <AlertTriangle className="h-5 w-5" />}
+              Draw Already Exists
+            </CardTitle>
+            <CardDescription className={event.state === "PUBLISHED" ? "text-red-700 dark:text-red-300" : "text-yellow-700 dark:text-yellow-300"}>
+              {event.state === "PUBLISHED" ? (
+                <>
+                  This draw is currently <strong>published</strong> and visible to players.
+                  <br />
+                  To generate a new draw, you must first <strong>unpublish or delete</strong> the existing draw from the draw view page.
+                </>
+              ) : (
+                <>
+                  A draw has already been generated for this event.
+                  <br />
+                  To generate a new draw, you must first <strong>delete</strong> the existing draw from the draw view page.
+                </>
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button variant="outline" onClick={() => router.push(`/${locale}/admin/events/${eventId}/draw/view`)}>
-              View & Edit Draw
+              View & Manage Draw
             </Button>
           </CardContent>
         </Card>
@@ -193,7 +231,10 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
       {hasExcessPlayers && (
         <Card className="border-orange-500 bg-orange-50 dark:bg-orange-950/20">
           <CardHeader>
-            <CardTitle className="text-orange-800 dark:text-orange-200">⚠️ Excess Players Detected</CardTitle>
+            <CardTitle className="text-orange-800 dark:text-orange-200 flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5" />
+              Excess Players Detected
+            </CardTitle>
             <CardDescription className="text-orange-700 dark:text-orange-300">
               You have {confirmedCount} confirmed players but only {mastersCourts.length} courts for MASTERS and {explorersCourts.length} courts for EXPLORERS (max {maxPlayers} players total).
               <br />
@@ -257,7 +298,7 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
           </div>
 
           {/* Time Slots */}
-          <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-4">
             {tierRules.mastersTimeSlot && (
               <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
                 <div className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-1">MASTERS Time Slot</div>
@@ -310,14 +351,30 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
               <span className="font-medium">Status:</span>{" "}
               <Badge variant={event.state === "FROZEN" ? "default" : "secondary"}>{event.state}</Badge>
             </div>
+            {(event.state === "DRAWN" || event.state === "PUBLISHED") && existingDraw && (
+              <div className="text-sm text-destructive mt-2 flex items-center gap-1">
+                <AlertTriangle className="h-4 w-4" />
+                {event.state === "PUBLISHED"
+                  ? "Draw is published. Delete the existing draw first to generate a new one."
+                  : "Draw already exists. Delete the existing draw first to generate a new one."}
+              </div>
+            )}
+            {event.state !== "FROZEN" && event.state !== "DRAWN" && event.state !== "PUBLISHED" && (
+              <div className="text-sm text-destructive mt-2 flex items-center gap-1">
+                <AlertTriangle className="h-4 w-4" />
+                Event must be frozen to generate draw. Go to event details to freeze it.
+              </div>
+            )}
             {playersInDraw < 4 && confirmedCount >= 4 && (
-              <div className="text-sm text-destructive mt-2">
-                ⚠️ Need at least 4 players to generate draw
+              <div className="text-sm text-destructive mt-2 flex items-center gap-1">
+                <AlertTriangle className="h-4 w-4" />
+                Need at least 4 players to generate draw
               </div>
             )}
             {confirmedCount < 4 && (
-              <div className="text-sm text-destructive mt-2">
-                ⚠️ Need at least 4 confirmed players
+              <div className="text-sm text-destructive mt-2 flex items-center gap-1">
+                <AlertTriangle className="h-4 w-4" />
+                Need at least 4 confirmed players
               </div>
             )}
           </CardContent>
@@ -325,38 +382,76 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Available Courts</CardTitle>
+            <CardTitle>Select Courts to Use</CardTitle>
             <CardDescription>
-              {mastersCourts.length} courts for MASTERS + {explorersCourts.length} courts for EXPLORERS (max {maxPlayers} players)
+              Choose which courts to use for the draw. Selected: {selectedMastersCourts.length} MASTERS + {selectedExplorersCourts.length} EXPLORERS (capacity: {maxPlayers} players)
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-4">
               {mastersCourts.length > 0 && (
                 <div>
-                  <div className="text-sm font-medium mb-1">Masters Courts:</div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="text-sm font-medium mb-2 text-yellow-800 dark:text-yellow-200">MASTERS Courts:</div>
+                  <div className="space-y-2">
                     {availableCourts
                       .filter((court: any) => mastersCourts.includes(court.id))
-                      .map((court: any) => (
-                        <Badge key={court.id} variant="outline" className="bg-yellow-100 dark:bg-yellow-900/30">
-                          {court.label}
-                        </Badge>
-                      ))}
+                      .map((court: any) => {
+                        const isSelected = selectedMastersCourts.includes(court.id)
+                        return (
+                          <div key={court.id} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`masters-${court.id}`}
+                              checked={isSelected}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedMastersCourts([...selectedMastersCourts, court.id])
+                                } else {
+                                  setSelectedMastersCourts(selectedMastersCourts.filter((id) => id !== court.id))
+                                }
+                              }}
+                            />
+                            <label
+                              htmlFor={`masters-${court.id}`}
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                            >
+                              {court.label}
+                            </label>
+                          </div>
+                        )
+                      })}
                   </div>
                 </div>
               )}
               {explorersCourts.length > 0 && (
                 <div>
-                  <div className="text-sm font-medium mb-1">Explorers Courts:</div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="text-sm font-medium mb-2 text-green-800 dark:text-green-200">EXPLORERS Courts:</div>
+                  <div className="space-y-2">
                     {availableCourts
                       .filter((court: any) => explorersCourts.includes(court.id))
-                      .map((court: any) => (
-                        <Badge key={court.id} variant="outline" className="bg-green-100 dark:bg-green-900/30">
-                          {court.label}
-                        </Badge>
-                      ))}
+                      .map((court: any) => {
+                        const isSelected = selectedExplorersCourts.includes(court.id)
+                        return (
+                          <div key={court.id} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`explorers-${court.id}`}
+                              checked={isSelected}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedExplorersCourts([...selectedExplorersCourts, court.id])
+                                } else {
+                                  setSelectedExplorersCourts(selectedExplorersCourts.filter((id) => id !== court.id))
+                                }
+                              }}
+                            />
+                            <label
+                              htmlFor={`explorers-${court.id}`}
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                            >
+                              {court.label}
+                            </label>
+                          </div>
+                        )
+                      })}
                   </div>
                 </div>
               )}
@@ -469,7 +564,7 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
             event.state !== "FROZEN"
           }
         >
-          {generateDrawMutation.isPending ? "Generating..." : existingDraw ? "Regenerate Draw" : "Generate Draw"}
+          {generateDrawMutation.isPending ? "Generating..." : existingDraw ? "Generate New Draw" : "Generate Draw"}
         </Button>
       </div>
 

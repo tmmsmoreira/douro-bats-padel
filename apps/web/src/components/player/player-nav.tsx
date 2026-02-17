@@ -101,7 +101,7 @@ export function PlayerNav() {
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link href="/profile" className="cursor-pointer">
+                    <Link href="/profile" className="cursor-pointer flex gap-2">
                       <User className="mr-2 h-4 w-4" />
                       <span>{t('profile')}</span>
                     </Link>
@@ -111,7 +111,7 @@ export function PlayerNav() {
                   <DropdownMenuSeparator />
                   <ThemeToggle />
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer">
+                  <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer flex gap-2">
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>{t('signOut')}</span>
                   </DropdownMenuItem>

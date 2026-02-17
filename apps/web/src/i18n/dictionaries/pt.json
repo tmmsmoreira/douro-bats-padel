@@ -244,10 +244,15 @@
     "publishEvent": "Publicar Evento",
     "freezeRsvps": "Congelar RSVPs",
     "generateDraw": "Gerar Sorteio",
+    "viewEditDraw": "Ver & Editar Sorteio",
     "confirmedPlayers": "Jogadores Confirmados",
     "spotsRemaining": "{count} vagas restantes",
     "waitlist": "Lista de Espera",
-    "playersWaitingForSpot": "Jogadores à espera de vaga"
+    "playersWaitingForSpot": "Jogadores à espera de vaga",
+    "deleteEvent": "Eliminar Evento",
+    "deleting": "A eliminar...",
+    "deleteConfirmation": "Tem a certeza que deseja eliminar este evento? Esta ação não pode ser revertida.",
+    "deleteError": "Falha ao eliminar evento"
   },
   "playerEventsList": {
     "loadingEvents": "A carregar eventos...",
@@ -344,6 +349,32 @@
   "faq": {
     "title": "Perguntas Frequentes",
     "subtitle": "Encontre respostas para questões comuns sobre Douro Bats Padel"
+  },
+  "generateDraw": {
+    "title": "Gerar Sorteio",
+    "description": "Configure e gere o sorteio do torneio",
+    "eventInfo": "Informação do Evento",
+    "confirmedPlayers": "Jogadores Confirmados",
+    "drawConstraints": "Restrições do Sorteio",
+    "balanceStrength": "Equilibrar Força das Equipas",
+    "balanceStrengthDesc": "Criar equipas equilibradas com base nas classificações dos jogadores",
+    "allowTierMixing": "Permitir Mistura de Níveis",
+    "allowTierMixingDesc": "Permitir que Masters e Explorers joguem juntos se necessário",
+    "generateButton": "Gerar Sorteio",
+    "regenerateButton": "Regenerar Sorteio",
+    "generating": "A gerar...",
+    "cancel": "Cancelar",
+    "drawExists": "Sorteio Já Existe",
+    "drawExistsDesc": "Um sorteio já foi gerado para este evento. Gerar um novo sorteio irá substituir o existente.",
+    "viewExisting": "Ver Sorteio Existente",
+    "playerCountError": "O número de jogadores deve ser múltiplo de 4. Atual: {count}",
+    "error": "Erro: {message}",
+    "availableCourts": "Campos Disponíveis",
+    "playersInDraw": "Jogadores no Sorteio",
+    "waitlistedPlayers": "Jogadores em Lista de Espera",
+    "excessPlayersWarning": "Jogadores em Excesso Detectados",
+    "courtOptimization": "Otimização de Campos",
+    "rememberToCancelCourts": "Lembre-se de cancelar os campos não utilizados para evitar custos desnecessários"
   }
 }
 

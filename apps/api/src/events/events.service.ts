@@ -326,4 +326,19 @@ export class EventsService {
       data: { state: EventState.FROZEN },
     })
   }
+
+  async remove(id: string) {
+    const event = await this.prisma.event.findUnique({ where: { id } })
+
+    if (!event) {
+      throw new NotFoundException("Event not found")
+    }
+
+    // Delete the event (cascade will handle related records like RSVPs and EventCourts)
+    await this.prisma.event.delete({
+      where: { id },
+    })
+
+    return { message: "Event deleted successfully" }
+  }
 }

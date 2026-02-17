@@ -244,10 +244,15 @@
     "publishEvent": "Publish Event",
     "freezeRsvps": "Freeze RSVPs",
     "generateDraw": "Generate Draw",
+    "viewEditDraw": "View & Edit Draw",
     "confirmedPlayers": "Confirmed Players",
     "spotsRemaining": "{count} spots remaining",
     "waitlist": "Waitlist",
-    "playersWaitingForSpot": "Players waiting for a spot"
+    "playersWaitingForSpot": "Players waiting for a spot",
+    "deleteEvent": "Delete Event",
+    "deleting": "Deleting...",
+    "deleteConfirmation": "Are you sure you want to delete this event? This action cannot be undone.",
+    "deleteError": "Failed to delete event"
   },
   "playerEventsList": {
     "loadingEvents": "Loading events...",
@@ -344,6 +349,32 @@
   "faq": {
     "title": "Frequently Asked Questions",
     "subtitle": "Find answers to common questions about Douro Bats Padel"
+  },
+  "generateDraw": {
+    "title": "Generate Draw",
+    "description": "Configure and generate the tournament draw",
+    "eventInfo": "Event Information",
+    "confirmedPlayers": "Confirmed Players",
+    "drawConstraints": "Draw Constraints",
+    "balanceStrength": "Balance Team Strength",
+    "balanceStrengthDesc": "Create balanced teams based on player ratings",
+    "allowTierMixing": "Allow Tier Mixing",
+    "allowTierMixingDesc": "Allow Masters and Explorers to play together if needed",
+    "generateButton": "Generate Draw",
+    "regenerateButton": "Regenerate Draw",
+    "generating": "Generating...",
+    "cancel": "Cancel",
+    "drawExists": "Draw Already Exists",
+    "drawExistsDesc": "A draw has already been generated for this event. Generating a new draw will replace the existing one.",
+    "viewExisting": "View Existing Draw",
+    "playerCountError": "Player count must be a multiple of 4. Current: {count}",
+    "error": "Error: {message}",
+    "availableCourts": "Available Courts",
+    "playersInDraw": "Players in Draw",
+    "waitlistedPlayers": "Waitlisted Players",
+    "excessPlayersWarning": "Excess Players Detected",
+    "courtOptimization": "Court Optimization",
+    "rememberToCancelCourts": "Remember to cancel the unused courts to avoid unnecessary costs"
   }
 }
 

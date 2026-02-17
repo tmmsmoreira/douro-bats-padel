@@ -23,6 +23,7 @@ interface Match {
   courtId: string
   teamA: Team
   teamB: Team
+  tier: Tier
 }
 
 interface DrawConstraints {
@@ -72,12 +73,68 @@ export class DrawService {
     // Sort players by rating (descending) to assign tiers dynamically
     const sortedRsvps = [...event.rsvps].sort((a, b) => b.player.rating - a.player.rating)
 
-    // Assign tiers dynamically based on rating order and court availability
-    // Top-rated players get MASTERS tier, lower-rated get EXPLORERS
-    const players: Player[] = sortedRsvps.map((rsvp, index) => {
-      // For now, assign tier based on position in sorted list
-      // This will be refined based on court/time slot configuration
-      const tier = this.assignTierForEvent(index, sortedRsvps.length, event)
+    // Get available courts from tierRules
+    const tierRules = (event.tierRules as any) || {}
+    const mastersCourts = tierRules.mastersTimeSlot?.courtIds || []
+    const explorersCourts = tierRules.explorersTimeSlot?.courtIds || []
+
+    if (mastersCourts.length === 0 && explorersCourts.length === 0) {
+      throw new BadRequestException("No courts available in tier time slots")
+    }
+
+    // Calculate maximum players based on court capacity (4 players per court)
+    // Since tiers play at different times, capacity is ADDITIVE
+    const maxPlayersPerCourt = 4
+    const mastersCapacity = mastersCourts.length * maxPlayersPerCourt
+    const explorersCapacity = explorersCourts.length * maxPlayersPerCourt
+    const maxPlayers = mastersCapacity + explorersCapacity
+
+    // Limit players to court capacity, taking top-rated players
+    const limitedRsvps = sortedRsvps.slice(0, Math.min(sortedRsvps.length, maxPlayers))
+
+    if (limitedRsvps.length < 4) {
+      throw new BadRequestException("Need at least 4 players to generate draw")
+    }
+
+    // Adjust total player count to nearest multiple of 4 (round down)
+    const adjustedPlayerCount = Math.floor(limitedRsvps.length / 4) * 4
+    const adjustedRsvps = limitedRsvps.slice(0, adjustedPlayerCount)
+
+    // Calculate tier split based on court capacity and tier rules
+    let masterCount: number
+
+    if (event.tierRules && typeof event.tierRules === "object") {
+      const rules = event.tierRules as any
+
+      if (rules.masterCount && typeof rules.masterCount === "number") {
+        // Use fixed count from tier rules
+        masterCount = Math.min(rules.masterCount, mastersCapacity, adjustedPlayerCount)
+      } else if (rules.masterPercentage && typeof rules.masterPercentage === "number") {
+        // Use percentage from tier rules
+        masterCount = Math.floor((adjustedPlayerCount * rules.masterPercentage) / 100)
+        masterCount = Math.min(masterCount, mastersCapacity)
+      } else {
+        // Default: 50/50 split, respecting court capacity
+        masterCount = Math.min(Math.floor(adjustedPlayerCount / 2), mastersCapacity)
+      }
+    } else {
+      // Default: 50/50 split, respecting court capacity
+      masterCount = Math.min(Math.floor(adjustedPlayerCount / 2), mastersCapacity)
+    }
+
+    // Ensure both tiers have at least 4 players (minimum for 2 teams)
+    // Adjust to nearest multiple of 4 for each tier
+    masterCount = Math.floor(masterCount / 4) * 4
+    const explorerCount = adjustedPlayerCount - masterCount
+
+    if (masterCount < 4 && explorerCount < 4) {
+      throw new BadRequestException("Not enough players to form teams in any tier")
+    }
+
+    // Assign tiers based on rating order and calculated split
+    // Top masterCount players → MASTERS, rest → EXPLORERS
+    const players: Player[] = adjustedRsvps.map((rsvp, index) => {
+      const tier = index < masterCount ? Tier.MASTERS : Tier.EXPLORERS
 
       return {
         id: rsvp.player.id,
@@ -87,13 +144,12 @@ export class DrawService {
       }
     })
 
-    if (players.length < 4) {
-      throw new BadRequestException("Need at least 4 players to generate draw")
-    }
+    console.log(`Tier assignment: ${masterCount} MASTERS, ${explorerCount} EXPLORERS (Total: ${players.length})`)
 
-    // Ensure players count is multiple of 4
-    if (players.length % 4 !== 0) {
-      throw new BadRequestException(`Player count must be multiple of 4. Current: ${players.length}`)
+    const finalPlayers = players
+
+    if (finalPlayers.length === 0) {
+      throw new BadRequestException("Not enough players to form complete teams")
     }
 
     const courts = event.venue?.courts || []
@@ -101,17 +157,28 @@ export class DrawService {
       throw new BadRequestException("No courts available at venue")
     }
 
+    // Get tier-specific courts from tierRules
+    const mastersCourtObjects = courts.filter((c) => mastersCourts.includes(c.id))
+    const explorersCourtObjects = courts.filter((c) => explorersCourts.includes(c.id))
+
     // Generate seed for reproducibility
     const seed = `${eventId}-${Date.now()}-${Math.random()}`
 
     // Get recent match history for constraints
     const recentHistory = await this.getRecentMatchHistory(
-      players.map((p) => p.id),
+      finalPlayers.map((p) => p.id),
       constraints?.avoidRecentSessions || 4,
     )
 
-    // Generate matches
-    const matches = this.createMatches(players, courts, seed, recentHistory, constraints)
+    // Generate matches with tier-specific courts
+    const matches = this.createMatches(
+      finalPlayers,
+      mastersCourtObjects,
+      explorersCourtObjects,
+      seed,
+      recentHistory,
+      constraints,
+    )
 
     // Save draw to database
     const draw = await this.prisma.draw.create({
@@ -125,6 +192,7 @@ export class DrawService {
             courtId: match.courtId,
             teamA: [match.teamA.player1.id, match.teamA.player2.id],
             teamB: [match.teamB.player1.id, match.teamB.player2.id],
+            tier: match.tier,
           })),
         },
       },
@@ -151,7 +219,8 @@ export class DrawService {
 
   private createMatches(
     players: Player[],
-    courts: any[],
+    mastersCourts: any[],
+    explorersCourts: any[],
     seed: string,
     recentHistory: Map<string, Set<string>>,
     constraints?: DrawConstraints,
@@ -163,37 +232,46 @@ export class DrawService {
     const masterPlayers = players.filter((p) => p.tier === Tier.MASTERS)
     const explorerPlayers = players.filter((p) => p.tier === Tier.EXPLORERS)
 
-    // Generate matches for each tier
+    // Generate matches for each tier with their specific courts
+    // Each tier has its own round numbering starting from 1
     if (masterPlayers.length >= 4) {
-      const masterMatches = this.generateTierMatches(masterPlayers, courts, rng, recentHistory, constraints, 0)
+      const masterMatches = this.generateTierMatches(
+        masterPlayers,
+        mastersCourts,
+        rng,
+        recentHistory,
+        constraints,
+        Tier.MASTERS,
+      )
       matches.push(...masterMatches)
     }
 
     if (explorerPlayers.length >= 4) {
       const explorerMatches = this.generateTierMatches(
         explorerPlayers,
-        courts,
+        explorersCourts,
         rng,
         recentHistory,
         constraints,
-        masterPlayers.length >= 4 ? Math.ceil(masterPlayers.length / 4) : 0,
+        Tier.EXPLORERS,
       )
       matches.push(...explorerMatches)
     }
 
-    // Handle mixed tier if needed and allowed
+    // Handle mixed tier if needed and allowed (use all available courts)
     const remainingPlayers = [...masterPlayers, ...explorerPlayers].filter(
       (p) => !matches.some((m) => this.playerInMatch(p, m)),
     )
 
     if (remainingPlayers.length >= 4 && constraints?.allowTierMixing) {
+      const allCourts = [...mastersCourts, ...explorersCourts]
       const mixedMatches = this.generateTierMatches(
         remainingPlayers,
-        courts,
+        allCourts,
         rng,
         recentHistory,
         constraints,
-        matches.length,
+        Tier.EXPLORERS, // Use EXPLORERS tier for mixed matches
       )
       matches.push(...mixedMatches)
     }
@@ -207,25 +285,31 @@ export class DrawService {
     rng: () => number,
     recentHistory: Map<string, Set<string>>,
     constraints?: DrawConstraints,
-    startRound = 0,
+    tier: Tier = Tier.EXPLORERS,
   ): Match[] {
     const matches: Match[] = []
     const numTeams = players.length / 2
-    const numCourts = Math.min(courts.length, Math.floor(numTeams / 2))
 
-    // Create teams
+    // Maximum simultaneous matches = min(available courts, max possible simultaneous matches)
+    // Max simultaneous matches = numTeams / 2 (since each match uses 2 teams)
+    const maxSimultaneousMatches = Math.min(courts.length, Math.floor(numTeams / 2))
+
+    // Create balanced teams (pairs of players) - only from the same tier
     const teams = this.createBalancedTeams(players, rng, recentHistory, constraints)
 
-    // Generate round-robin matches (5 rounds for 6 teams)
-    const rounds = this.generateRoundRobin(teams, numCourts)
+    // Generate complete round-robin schedule
+    // All teams play against each other, distributed across multiple rounds
+    const rounds = this.generateRoundRobin(teams, maxSimultaneousMatches)
 
+    // Each tier has its own round numbering starting from 1
     rounds.forEach((round, roundIndex) => {
       round.forEach((matchup, courtIndex) => {
         matches.push({
-          round: startRound + roundIndex + 1,
+          round: roundIndex + 1, // Round numbering starts at 1 for each tier
           courtId: courts[courtIndex % courts.length].id,
           teamA: matchup.teamA,
           teamB: matchup.teamB,
+          tier, // Add tier information to the match
         })
       })
     })
@@ -244,6 +328,9 @@ export class DrawService {
 
     const teams: Team[] = []
     const used = new Set<string>()
+
+    // Log player tiers for debugging
+    console.log('Creating teams for players:', sortedPlayers.map(p => ({ name: p.name, tier: p.tier })))
 
     // Try to create balanced teams avoiding recent partners
     for (let i = 0; i < sortedPlayers.length; i++) {
@@ -283,6 +370,7 @@ export class DrawService {
       }
 
       if (bestPartner) {
+        console.log(`Paired ${player1.name} with ${bestPartner.name}`)
         teams.push({
           player1,
           player2: bestPartner,
@@ -290,37 +378,45 @@ export class DrawService {
         })
         used.add(player1.id)
         used.add(bestPartner.id)
+      } else {
+        console.log(`WARNING: Could not find partner for ${player1.name} (${player1.tier})`)
       }
     }
 
+    console.log(`Created ${teams.length} teams from ${players.length} players`)
     return teams
   }
 
   private generateRoundRobin(teams: Team[], numCourts: number): Array<Array<{ teamA: Team; teamB: Team }>> {
-    const rounds: Array<Array<{ teamA: Team; teamB: Team }>> = []
     const n = teams.length
+    const allMatches: Array<{ teamA: Team; teamB: Team }> = []
 
-    // Round-robin algorithm
+    // Generate all possible matchups using round-robin algorithm
+    const teamsCopy = [...teams]
+
     for (let round = 0; round < n - 1; round++) {
-      const roundMatches: Array<{ teamA: Team; teamB: Team }> = []
-
       for (let i = 0; i < n / 2; i++) {
         const team1Index = i
         const team2Index = n - 1 - i
 
         if (team1Index !== team2Index) {
-          roundMatches.push({
-            teamA: teams[team1Index],
-            teamB: teams[team2Index],
+          allMatches.push({
+            teamA: teamsCopy[team1Index],
+            teamB: teamsCopy[team2Index],
           })
         }
       }
 
-      rounds.push(roundMatches.slice(0, numCourts))
-
       // Rotate teams (keep first team fixed)
-      const lastTeam = teams.pop()!
-      teams.splice(1, 0, lastTeam)
+      const lastTeam = teamsCopy.pop()!
+      teamsCopy.splice(1, 0, lastTeam)
+    }
+
+    // Distribute all matches across rounds based on available courts
+    const rounds: Array<Array<{ teamA: Team; teamB: Team }>> = []
+
+    for (let i = 0; i < allMatches.length; i += numCourts) {
+      rounds.push(allMatches.slice(i, i + numCourts))
     }
 
     return rounds
@@ -420,7 +516,7 @@ export class DrawService {
     )
   }
 
-  async getDraw(eventId: string) {
+  async getDraw(eventId: string, user?: any) {
     const draw = await this.prisma.draw.findFirst({
       where: { eventId },
       include: {
@@ -430,7 +526,15 @@ export class DrawService {
           },
           orderBy: [{ round: "asc" }, { courtId: "asc" }],
         },
-        event: true,
+        event: {
+          include: {
+            venue: {
+              include: {
+                courts: true,
+              },
+            },
+          },
+        },
       },
       orderBy: {
         createdAt: "desc",
@@ -439,6 +543,14 @@ export class DrawService {
 
     if (!draw) {
       throw new NotFoundException("Draw not found for this event")
+    }
+
+    // Check if user is admin/editor
+    const isAdmin = user?.roles?.includes("ADMIN") || user?.roles?.includes("EDITOR")
+
+    // If user is not admin and event is not published, don't show the draw
+    if (!isAdmin && draw.event.state !== EventState.PUBLISHED) {
+      throw new NotFoundException("Draw not available yet")
     }
 
     // Enrich with player details
@@ -543,9 +655,44 @@ export class DrawService {
 
     await this.prisma.event.update({
       where: { id: eventId },
-      data: { state: EventState.DRAWN },
+      data: { state: EventState.PUBLISHED },
     })
 
     return { message: "Draw published successfully" }
+  }
+
+  async deleteDraw(eventId: string) {
+    const event = await this.prisma.event.findUnique({
+      where: { id: eventId },
+      include: {
+        draws: true,
+      },
+    })
+
+    if (!event) {
+      throw new NotFoundException("Event not found")
+    }
+
+    if (event.draws.length === 0) {
+      throw new BadRequestException("No draw found for this event")
+    }
+
+    // Delete all assignments first (cascade should handle this, but being explicit)
+    await this.prisma.assignment.deleteMany({
+      where: { drawId: event.draws[0].id },
+    })
+
+    // Delete the draw
+    await this.prisma.draw.delete({
+      where: { id: event.draws[0].id },
+    })
+
+    // Reset event state to FROZEN so admin can regenerate
+    await this.prisma.event.update({
+      where: { id: eventId },
+      data: { state: EventState.FROZEN },
+    })
+
+    return { message: "Draw deleted successfully" }
   }
 }

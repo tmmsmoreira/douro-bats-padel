@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards, Request } from "@nestjs/common"
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards, Request } from "@nestjs/common"
 import { EventsService } from "./events.service"
 import { RSVPService } from "./rsvp.service"
 import type { CreateEventDto, RSVPDto } from "@padel/types"
@@ -96,5 +96,12 @@ export class EventsController {
   @Roles(Role.EDITOR, Role.ADMIN)
   async promoteWaitlist(@Param("id") id: string) {
     return this.rsvpService.autoPromoteWaitlist(id)
+  }
+
+  @Delete(":id")
+  @UseGuards(RolesGuard)
+  @Roles(Role.EDITOR, Role.ADMIN)
+  async remove(@Param("id") id: string) {
+    return this.eventsService.remove(id)
   }
 }

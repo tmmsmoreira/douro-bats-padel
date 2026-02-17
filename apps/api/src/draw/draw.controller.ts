@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, UseGuards, Param, Body, Request } from "@nestjs/common"
+import { Controller, Get, Post, Patch, Delete, UseGuards, Param, Body, Request } from "@nestjs/common"
 import { DrawService } from "./draw.service"
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard"
 import { RolesGuard } from "../auth/guards/roles.guard"
@@ -18,8 +18,8 @@ export class DrawController {
   }
 
   @Get("events/:eventId")
-  async getDraw(@Param("eventId") eventId: string) {
-    return this.drawService.getDraw(eventId)
+  async getDraw(@Param("eventId") eventId: string, @Request() req: any) {
+    return this.drawService.getDraw(eventId, req.user)
   }
 
   @Patch("assignments/:assignmentId")
@@ -34,5 +34,12 @@ export class DrawController {
   @Roles(Role.EDITOR, Role.ADMIN)
   async publishDraw(@Param("eventId") eventId: string) {
     return this.drawService.publishDraw(eventId)
+  }
+
+  @Delete("events/:eventId")
+  @UseGuards(RolesGuard)
+  @Roles(Role.EDITOR, Role.ADMIN)
+  async deleteDraw(@Param("eventId") eventId: string) {
+    return this.drawService.deleteDraw(eventId)
   }
 }

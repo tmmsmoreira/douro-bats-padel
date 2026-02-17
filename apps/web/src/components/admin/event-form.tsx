@@ -17,7 +17,7 @@ import { TimePicker } from "@/components/ui/time-picker"
 import { DateTimePicker } from "@/components/ui/datetime-picker"
 import type { CreateEventDto, TierRules, TierTimeSlot } from "@padel/types"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
 
 interface Venue {
   id: string
@@ -67,9 +67,9 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
     rsvpOpensAt: undefined,
     rsvpClosesAt: undefined,
     venueId: "",
-    tierRuleType: "auto",
+    tierRuleType: "percentage",
     masterCount: "",
-    masterPercentage: "",
+    masterPercentage: "50",
     mastersStartTime: undefined,
     mastersEndTime: undefined,
     mastersCourtIds: [],

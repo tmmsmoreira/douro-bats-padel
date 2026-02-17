@@ -1,8 +1,8 @@
 "use client"
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useSession } from "next-auth/react"
 import { useTranslations } from "next-intl"
-import { apiClient } from "@/lib/api-client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -10,18 +10,41 @@ import { formatDate, formatTime } from "@/lib/utils"
 import Link from "next/link"
 import type { EventWithRSVP } from "@padel/types"
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
+
 export function EventsList() {
+  const { data: session } = useSession()
   const queryClient = useQueryClient()
   const t = useTranslations("playerEventsList")
 
   const { data: events, isLoading } = useQuery({
     queryKey: ["player-events"],
-    queryFn: () => apiClient.get<EventWithRSVP[]>("/events"),
+    queryFn: async () => {
+      const headers: HeadersInit = { "Content-Type": "application/json" }
+      if (session?.accessToken) {
+        headers.Authorization = `Bearer ${session.accessToken}`
+      }
+      const res = await fetch(`${API_URL}/events`, { headers })
+      if (!res.ok) throw new Error("Failed to fetch events")
+      return res.json() as Promise<EventWithRSVP[]>
+    },
+    enabled: !!session,
   })
 
   const rsvpMutation = useMutation({
-    mutationFn: ({ eventId, status }: { eventId: string; status: "IN" | "OUT" }) =>
-      apiClient.post(`/events/${eventId}/rsvp`, { status }),
+    mutationFn: async ({ eventId, status }: { eventId: string; status: "IN" | "OUT" }) => {
+      if (!session?.accessToken) throw new Error("Not authenticated")
+      const res = await fetch(`${API_URL}/events/${eventId}/rsvp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.accessToken}`,
+        },
+        body: JSON.stringify({ status }),
+      })
+      if (!res.ok) throw new Error("Failed to update RSVP")
+      return res.json()
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["player-events"] })
     },

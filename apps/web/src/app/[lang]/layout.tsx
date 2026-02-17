@@ -71,7 +71,7 @@ export default async function LangLayout({
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <link rel="manifest" href="/manifest.json" />
       </head>
-      <body className={inter.className}>
+      <body className={inter.className} suppressHydrationWarning>
         <Providers>
           <NextIntlClientProvider locale={lang} messages={messages}>
             {children}

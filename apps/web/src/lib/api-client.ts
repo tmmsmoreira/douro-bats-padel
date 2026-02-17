@@ -4,7 +4,7 @@ class ApiClient {
   private baseUrl: string
 
   constructor() {
-    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
+    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
   }
 
   private async getHeaders(): Promise<HeadersInit> {

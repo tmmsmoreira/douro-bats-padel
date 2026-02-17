@@ -1,16 +1,29 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query"
-import { apiClient } from "@/lib/api-client"
+import { useSession } from "next-auth/react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { PlayerNav } from "./player-nav"
 import { Footer } from "@/components/footer"
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
+
 export function ResultsView({ eventId }: { eventId: string }) {
+  const { data: session } = useSession()
+
   const { data: matches, isLoading } = useQuery({
     queryKey: ["matches", eventId],
-    queryFn: () => apiClient.get(`/matches/events/${eventId}`),
+    queryFn: async () => {
+      const headers: HeadersInit = { "Content-Type": "application/json" }
+      if (session?.accessToken) {
+        headers.Authorization = `Bearer ${session.accessToken}`
+      }
+      const res = await fetch(`${API_URL}/matches/events/${eventId}`, { headers })
+      if (!res.ok) throw new Error("Failed to fetch matches")
+      return res.json()
+    },
+    enabled: !!session,
   })
 
   if (isLoading) {

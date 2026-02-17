@@ -3,18 +3,23 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
 import { useTranslations } from "next-intl"
+import { useRouter } from "@/i18n/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { formatDate, formatTime } from "@/lib/utils"
 import Link from "next/link"
+import { Trash2 } from "lucide-react"
+import { useState } from "react"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
 
 export function EventDetails({ eventId }: { eventId: string }) {
   const { data: session } = useSession()
   const queryClient = useQueryClient()
+  const router = useRouter()
   const t = useTranslations("eventDetails")
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const { data: event, isLoading } = useQuery({
     queryKey: ["event", eventId, session?.accessToken],
@@ -88,6 +93,44 @@ export function EventDetails({ eventId }: { eventId: string }) {
     },
   })
 
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      if (!session?.accessToken) {
+        throw new Error("Not authenticated")
+      }
+
+      const res = await fetch(`${API_URL}/events/${eventId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.accessToken}`,
+        },
+      })
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ message: res.statusText }))
+        throw new Error(errorData.message || "Failed to delete event")
+      }
+
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-events"] })
+      router.push("/admin")
+    },
+    onError: (error: Error) => {
+      alert(t("deleteError") + ": " + error.message)
+      setIsDeleting(false)
+    },
+  })
+
+  const handleDeleteEvent = () => {
+    if (confirm(t("deleteConfirmation"))) {
+      setIsDeleting(true)
+      deleteMutation.mutate()
+    }
+  }
+
   if (isLoading) {
     return <div className="text-center py-8">{t("loadingEvent")}</div>
   }
@@ -116,6 +159,19 @@ export function EventDetails({ eventId }: { eventId: string }) {
               <Button>{t("generateDraw")}</Button>
             </Link>
           )}
+          {(event.state === "DRAWN" || event.state === "PUBLISHED") && (
+            <Link href={`/admin/events/${eventId}/draw/view`}>
+              <Button variant="outline">{t("viewEditDraw")}</Button>
+            </Link>
+          )}
+          <Button
+            variant="destructive"
+            onClick={handleDeleteEvent}
+            disabled={isDeleting}
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            {isDeleting ? t("deleting") : t("deleteEvent")}
+          </Button>
         </div>
       </div>
 

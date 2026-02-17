@@ -1,16 +1,19 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query"
-import { apiClient } from "@/lib/api-client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { LeaderboardEntry } from "@padel/types"
 import { ArrowUp, ArrowDown, Minus } from "lucide-react"
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
+
 export function Leaderboard() {
   const { data: leaderboard, isLoading } = useQuery({
     queryKey: ["leaderboard"],
-    queryFn: () => {
-      return apiClient.get<LeaderboardEntry[]>(`/rankings/leaderboard`)
+    queryFn: async () => {
+      const res = await fetch(`${API_URL}/rankings/leaderboard`)
+      if (!res.ok) throw new Error("Failed to fetch leaderboard")
+      return res.json() as Promise<LeaderboardEntry[]>
     },
   })
 

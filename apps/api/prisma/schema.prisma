@@ -128,8 +128,10 @@ model Assignment {
   round   Int
   teamA   String[]
   teamB   String[]
+  tier    Tier    @default(EXPLORERS)
 
   @@index([drawId, round])
+  @@index([drawId, tier, round])
 }
 
 model Match {

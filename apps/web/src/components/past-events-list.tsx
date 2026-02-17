@@ -98,7 +98,7 @@ export function PastEventsList() {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-0">
                 <div className="flex items-center justify-between">
                   <div className="flex gap-4 text-sm text-muted-foreground">
                     <span>

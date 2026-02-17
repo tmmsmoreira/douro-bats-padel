@@ -174,7 +174,7 @@ export default function FAQPage() {
           <CardHeader>
             <CardTitle>Still have questions?</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             <p className="text-muted-foreground mb-4">
               If you couldn't find the answer you're looking for, feel free to reach out to our support team.
             </p>

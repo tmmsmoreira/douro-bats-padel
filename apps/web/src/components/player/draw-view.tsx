@@ -61,7 +61,7 @@ export function DrawView({ eventId }: { eventId: string }) {
               <CardHeader>
                 <CardTitle>Round {round}</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-0">
                 <div className="space-y-4">
                   {assignments.map((assignment: any) => (
                     <div key={assignment.id} className="border rounded-lg p-4">

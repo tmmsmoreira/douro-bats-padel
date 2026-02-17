@@ -54,7 +54,7 @@ export function ForgotPasswordForm() {
           <CardTitle>Check Your Email</CardTitle>
           <CardDescription>Password reset instructions have been sent</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="pt-0 space-y-4">
           <p className="text-sm text-muted-foreground">
             If an account exists with the email <strong>{email}</strong>, you will receive password reset
             instructions.
@@ -87,7 +87,7 @@ export function ForgotPasswordForm() {
         <CardTitle>Forgot Password</CardTitle>
         <CardDescription>Enter your email to reset your password</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-0">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">

@@ -54,7 +54,7 @@ export function ResendVerificationForm() {
           <CardTitle>Check Your Email</CardTitle>
           <CardDescription>Verification email has been sent</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="pt-0 space-y-4">
           <p className="text-sm text-muted-foreground">
             If an account exists with the email <strong>{email}</strong> and is not yet verified, you will
             receive a verification email.
@@ -87,7 +87,7 @@ export function ResendVerificationForm() {
         <CardTitle>Resend Verification Email</CardTitle>
         <CardDescription>Enter your email to receive a new verification link</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-0">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">

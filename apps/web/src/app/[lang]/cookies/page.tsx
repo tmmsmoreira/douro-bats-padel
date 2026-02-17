@@ -19,7 +19,7 @@ export default function CookiesPage() {
           <CardHeader>
             <CardTitle>1. What Are Cookies?</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="pt-0 space-y-4">
             <p className="text-muted-foreground">
               Cookies are small text files that are placed on your device when you visit our platform. They help us
               provide you with a better experience by remembering your preferences and understanding how you use our
@@ -33,7 +33,7 @@ export default function CookiesPage() {
           <CardHeader>
             <CardTitle>2. Types of Cookies We Use</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="pt-0 space-y-4">
             <h3 className="font-semibold">Essential Cookies</h3>
             <p className="text-muted-foreground">
               These cookies are necessary for the platform to function properly. They enable core functionality such as
@@ -80,7 +80,7 @@ export default function CookiesPage() {
           <CardHeader>
             <CardTitle>3. Third-Party Cookies</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="pt-0 space-y-4">
             <p className="text-muted-foreground">
               We may use third-party services that set cookies on your device. These include:
             </p>
@@ -104,7 +104,7 @@ export default function CookiesPage() {
           <CardHeader>
             <CardTitle>4. How Long Do Cookies Last?</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="pt-0 space-y-4">
             <h3 className="font-semibold">Session Cookies</h3>
             <p className="text-muted-foreground">
               These are temporary cookies that expire when you close your browser. They are used to maintain your session
@@ -129,7 +129,7 @@ export default function CookiesPage() {
           <CardHeader>
             <CardTitle>5. How to Manage Cookies</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="pt-0 space-y-4">
             <p className="text-muted-foreground">
               You have the right to decide whether to accept or reject cookies. You can manage your cookie preferences
               through your browser settings:
@@ -175,7 +175,7 @@ export default function CookiesPage() {
           <CardHeader>
             <CardTitle>6. Changes to This Cookie Policy</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="pt-0 space-y-4">
             <p className="text-muted-foreground">
               We may update this Cookie Policy from time to time to reflect changes in our practices or for other
               operational, legal, or regulatory reasons. Please check this page periodically for updates.
@@ -188,7 +188,7 @@ export default function CookiesPage() {
           <CardHeader>
             <CardTitle>7. Contact Us</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             <p className="text-muted-foreground">
               If you have questions about our use of cookies, please contact us at{" "}
               <a href="mailto:privacy@dourobatspadel.com" className="text-primary hover:underline">

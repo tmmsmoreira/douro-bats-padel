@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
+import { useTranslations } from "next-intl"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -13,6 +14,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
 
 export function EventsList() {
   const { data: session } = useSession()
+  const t = useTranslations("eventsList")
 
   const { data: events, isLoading } = useQuery({
     queryKey: ["admin-events", session?.accessToken],
@@ -37,14 +39,14 @@ export function EventsList() {
   })
 
   if (isLoading) {
-    return <div className="text-center py-8">Loading events...</div>
+    return <div className="text-center py-8">{t("loadingEvents")}</div>
   }
 
   if (!events || events.length === 0) {
     return (
       <Card>
         <CardContent className="py-8 text-center text-muted-foreground">
-          No events found. Create your first event to get started.
+          {t("noEventsFound")}
         </CardContent>
       </Card>
     )
@@ -57,7 +59,7 @@ export function EventsList() {
           <CardHeader>
             <div className="flex items-start justify-between">
               <div>
-                <CardTitle>{event.title || "Untitled Event"}</CardTitle>
+                <CardTitle>{event.title || t("untitledEvent")}</CardTitle>
                 <CardDescription>
                   {formatDate(event.date)} • {formatTime(event.startsAt)} - {formatTime(event.endsAt)}
                 </CardDescription>
@@ -65,30 +67,30 @@ export function EventsList() {
               <Badge variant={event.state === "PUBLISHED" ? "default" : "secondary"}>{event.state}</Badge>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             <div className="flex items-center justify-between">
               <div className="flex gap-4 text-sm">
                 <span>
-                  <strong>{event.confirmedCount}</strong> / {event.capacity} confirmed
+                  <strong>{event.confirmedCount}</strong> / {event.capacity} {t("confirmed")}
                 </span>
                 {event.waitlistCount > 0 && (
-                  <span className="text-muted-foreground">{event.waitlistCount} waitlisted</span>
+                  <span className="text-muted-foreground">{event.waitlistCount} {t("waitlisted")}</span>
                 )}
               </div>
               <div className="flex gap-2">
                 <Link href={`/admin/events/${event.id}`}>
                   <Button variant="outline" size="sm">
-                    Manage
+                    {t("manage")}
                   </Button>
                 </Link>
                 {event.state === "FROZEN" && (
                   <Link href={`/admin/events/${event.id}/draw`}>
-                    <Button size="sm">Generate Draw</Button>
+                    <Button size="sm">{t("generateDraw")}</Button>
                   </Link>
                 )}
                 {event.state === "DRAWN" && (
                   <Link href={`/admin/events/${event.id}/results`}>
-                    <Button size="sm">Enter Results</Button>
+                    <Button size="sm">{t("enterResults")}</Button>
                   </Link>
                 )}
               </div>

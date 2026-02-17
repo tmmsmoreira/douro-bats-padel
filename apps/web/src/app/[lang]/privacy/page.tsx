@@ -212,7 +212,7 @@ export default function PrivacyPage() {
           <CardHeader>
             <CardTitle>12. Contact Us</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             <p className="text-muted-foreground">
               If you have questions or concerns about this Privacy Policy, please contact us at{" "}
               <a href="mailto:privacy@dourobatspadel.com" className="text-primary hover:underline">

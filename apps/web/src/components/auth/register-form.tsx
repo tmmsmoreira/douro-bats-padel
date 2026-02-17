@@ -78,7 +78,7 @@ export function RegisterForm() {
           <CardTitle>Check Your Email</CardTitle>
           <CardDescription>Registration successful!</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="pt-0 space-y-4">
           <div className="flex justify-center py-4">
             <svg
               className="h-16 w-16 text-green-500"
@@ -134,7 +134,7 @@ export function RegisterForm() {
         <CardTitle>Create Account</CardTitle>
         <CardDescription>Register to access Padel Manager</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-0">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="name" className="text-sm font-medium">

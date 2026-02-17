@@ -69,7 +69,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         <CardTitle>Reset Password</CardTitle>
         <CardDescription>Enter your new password</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-0">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="password" className="text-sm font-medium">

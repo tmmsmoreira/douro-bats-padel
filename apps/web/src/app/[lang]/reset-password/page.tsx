@@ -17,7 +17,7 @@ function ResetPasswordContent() {
           <CardTitle>Invalid Reset Link</CardTitle>
           <CardDescription>This password reset link is invalid or has expired</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           <p className="text-sm text-muted-foreground mb-4">
             Please request a new password reset link.
           </p>

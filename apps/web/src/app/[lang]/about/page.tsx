@@ -22,7 +22,7 @@ export default function AboutPage() {
           <CardHeader>
             <CardTitle>Our Mission</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="pt-0 space-y-4">
             <p className="text-muted-foreground">
               Douro Bats Padel is dedicated to bringing the padel community together through organized, competitive, and
               fun tournaments. We believe in creating an inclusive environment where players of all skill levels can
@@ -46,7 +46,7 @@ export default function AboutPage() {
                 <CardTitle>Competitive Tournaments</CardTitle>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               <p className="text-muted-foreground">
                 Participate in professionally organized tournaments with fair matchmaking and transparent scoring systems.
               </p>
@@ -62,7 +62,7 @@ export default function AboutPage() {
                 <CardTitle>Player Rankings</CardTitle>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               <p className="text-muted-foreground">
                 Track your progress with our comprehensive ranking system that rewards consistent performance and skill
                 development.
@@ -79,7 +79,7 @@ export default function AboutPage() {
                 <CardTitle>Community Driven</CardTitle>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               <p className="text-muted-foreground">
                 Join a vibrant community of padel enthusiasts, make new friends, and connect with players who share your
                 passion.
@@ -96,7 +96,7 @@ export default function AboutPage() {
                 <CardTitle>Easy Event Management</CardTitle>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               <p className="text-muted-foreground">
                 Simple registration, automated draws, and real-time updates make participating in events hassle-free.
               </p>
@@ -109,7 +109,7 @@ export default function AboutPage() {
           <CardHeader>
             <CardTitle>Our Story</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="pt-0 space-y-4">
             <p className="text-muted-foreground">
               Founded in Porto, Portugal, Douro Bats Padel emerged from a passion for the sport and a desire to create a
               better tournament experience for players and organizers alike.
@@ -130,7 +130,7 @@ export default function AboutPage() {
           <CardHeader>
             <CardTitle>Our Values</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             <ul className="space-y-3">
               <li className="flex items-start gap-2">
                 <span className="text-primary font-bold">•</span>

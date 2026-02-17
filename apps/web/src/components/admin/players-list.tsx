@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Mail, CheckCircle, XCircle } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
 
@@ -25,6 +26,8 @@ interface Player {
 }
 
 export function PlayersList() {
+  const t = useTranslations("playersList")
+
   const { data: players, isLoading } = useQuery<Player[]>({
     queryKey: ["players"],
     queryFn: async () => {
@@ -35,13 +38,13 @@ export function PlayersList() {
   })
 
   if (isLoading) {
-    return <div className="text-center py-8">Loading players...</div>
+    return <div className="text-center py-8">{t("loadingPlayers")}</div>
   }
 
   if (!players || players.length === 0) {
     return (
       <Card>
-        <CardContent className="py-8 text-center text-muted-foreground">No players found.</CardContent>
+        <CardContent className="py-8 text-center text-muted-foreground">{t("noPlayersFound")}</CardContent>
       </Card>
     )
   }
@@ -67,7 +70,7 @@ export function PlayersList() {
               </Avatar>
               <div className="flex-1">
                 <CardTitle className="flex items-center gap-2">
-                  {player.name || "No name"}
+                  {player.name || t("noName")}
                   {player.emailVerified ? (
                     <CheckCircle className="h-4 w-4 text-green-600" />
                   ) : (
@@ -82,24 +85,24 @@ export function PlayersList() {
               {player.player && (
                 <div className="flex flex-col items-end gap-2">
                   <div className="text-2xl font-bold text-primary">{player.player.rating}</div>
-                  <div className="text-xs text-muted-foreground">Rating</div>
+                  <div className="text-xs text-muted-foreground">{t("rating")}</div>
                 </div>
               )}
             </div>
           </CardHeader>
           {player.player && (
-            <CardContent>
+            <CardContent className="pt-0">
               <div className="flex gap-4 text-sm">
                 <div>
-                  <span className="text-muted-foreground">Status:</span>{" "}
+                  <span className="text-muted-foreground">{t("status")}:</span>{" "}
                   <Badge variant={player.player.status === "ACTIVE" ? "default" : "secondary"}>{player.player.status}</Badge>
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Player since:</span>{" "}
+                  <span className="text-muted-foreground">{t("playerSince")}:</span>{" "}
                   {new Date(player.player.createdAt).toLocaleDateString()}
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Account created:</span> {new Date(player.createdAt).toLocaleDateString()}
+                  <span className="text-muted-foreground">{t("accountCreated")}:</span> {new Date(player.createdAt).toLocaleDateString()}
                 </div>
               </div>
             </CardContent>

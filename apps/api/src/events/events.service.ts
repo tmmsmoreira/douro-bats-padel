@@ -180,7 +180,16 @@ export class EventsService {
     const event = await this.prisma.event.findUnique({
       where: { id },
       include: {
-        venue: true,
+        venue: {
+          include: {
+            courts: true,
+          },
+        },
+        eventCourts: {
+          include: {
+            court: true,
+          },
+        },
         rsvps: {
           include: {
             player: {
@@ -248,6 +257,22 @@ export class EventsService {
       this.validateTierRules(dto.tierRules, capacity)
     }
 
+    // If courtIds are provided, update the eventCourts relationship
+    if (dto.courtIds) {
+      // Delete existing court associations
+      await this.prisma.eventCourt.deleteMany({
+        where: { eventId: id },
+      })
+
+      // Create new court associations
+      await this.prisma.eventCourt.createMany({
+        data: dto.courtIds.map((courtId) => ({
+          eventId: id,
+          courtId,
+        })),
+      })
+    }
+
     return this.prisma.event.update({
       where: { id },
       data: {
@@ -260,6 +285,14 @@ export class EventsService {
         rsvpOpensAt: dto.rsvpOpensAt ? new Date(dto.rsvpOpensAt) : undefined,
         rsvpClosesAt: dto.rsvpClosesAt ? new Date(dto.rsvpClosesAt) : undefined,
         tierRules: dto.tierRules as any,
+      },
+      include: {
+        venue: true,
+        eventCourts: {
+          include: {
+            court: true,
+          },
+        },
       },
     })
   }

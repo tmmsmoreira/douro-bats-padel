@@ -43,7 +43,7 @@ export function Leaderboard() {
         <CardHeader>
           <CardTitle>Leaderboard</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           <div className="space-y-2">
             {leaderboard?.map((entry, index) => (
               <div

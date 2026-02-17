@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import type { CreateVenueDto, UpdateVenueDto } from "@padel/types"
 import { X } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
 
@@ -28,6 +29,7 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
   const { data: session } = useSession()
   const router = useRouter()
   const queryClient = useQueryClient()
+  const t = useTranslations("venueForm")
 
   const [formData, setFormData] = useState<{
     name: string
@@ -111,12 +113,12 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
     e.preventDefault()
 
     if (!formData.name.trim()) {
-      alert("Please enter a venue name")
+      alert(t("pleaseEnterVenueName"))
       return
     }
 
     if (formData.courts.length === 0) {
-      alert("Please add at least one court")
+      alert(t("pleaseAddAtLeastOneCourt"))
       return
     }
 
@@ -134,46 +136,46 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
     <form onSubmit={handleSubmit}>
       <Card>
         <CardHeader>
-          <CardTitle>Venue Details</CardTitle>
-          <CardDescription>Enter the venue information and add courts</CardDescription>
+          <CardTitle>{t("venueDetails")}</CardTitle>
+          <CardDescription>{t("venueDetailsDescription")}</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="pt-0 space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="name">Venue Name *</Label>
+            <Label htmlFor="name">{t("venueName")} *</Label>
             <Input
               id="name"
               value={formData.name}
               onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-              placeholder="e.g., Clube Dorobats"
+              placeholder={t("venueNamePlaceholder")}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="address">Address</Label>
+            <Label htmlFor="address">{t("address")}</Label>
             <Input
               id="address"
               value={formData.address}
               onChange={(e) => setFormData((prev) => ({ ...prev, address: e.target.value }))}
-              placeholder="e.g., Rua do Padel, 123, Lisboa"
+              placeholder={t("addressPlaceholder")}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="logo">Logo URL</Label>
+            <Label htmlFor="logo">{t("logoUrl")}</Label>
             <Input
               id="logo"
               value={formData.logo}
               onChange={(e) => setFormData((prev) => ({ ...prev, logo: e.target.value }))}
-              placeholder="e.g., https://example.com/logo.png"
+              placeholder={t("logoUrlPlaceholder")}
               type="url"
             />
             {formData.logo && (
               <div className="mt-2">
-                <p className="text-sm text-muted-foreground mb-2">Logo Preview:</p>
+                <p className="text-sm text-muted-foreground mb-2">{t("logoPreview")}</p>
                 <img
                   src={formData.logo}
-                  alt="Venue logo preview"
+                  alt={t("logoPreviewAlt")}
                   className="h-16 w-16 object-contain border rounded"
                   onError={(e) => {
                     e.currentTarget.style.display = "none"
@@ -184,7 +186,7 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="court">Courts *</Label>
+            <Label htmlFor="court">{t("courtsLabel")} *</Label>
             <div className="flex gap-2">
               <Input
                 id="court"
@@ -196,10 +198,10 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
                     handleAddCourt()
                   }
                 }}
-                placeholder="e.g., Court 1, Court A"
+                placeholder={t("courtLabelPlaceholder")}
               />
               <Button type="button" onClick={handleAddCourt}>
-                Add Court
+                {t("addCourt")}
               </Button>
             </div>
             {formData.courts.length > 0 && (
@@ -222,16 +224,16 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
 
           <div className="flex gap-2 justify-end">
             <Button type="button" variant="outline" onClick={() => router.push("/admin/venues")}>
-              Cancel
+              {t("cancel")}
             </Button>
             <Button type="submit" disabled={saveMutation.isPending}>
-              {saveMutation.isPending ? (venueId ? "Updating..." : "Creating...") : (venueId ? "Update Venue" : "Create Venue")}
+              {saveMutation.isPending ? (venueId ? t("updating") : t("creating")) : (venueId ? t("updateVenue") : t("createVenue"))}
             </Button>
           </div>
 
           {saveMutation.isError && (
             <div className="text-sm text-destructive">
-              Error: {saveMutation.error instanceof Error ? saveMutation.error.message : `Failed to ${venueId ? "update" : "create"} venue`}
+              {t("errorPrefix")} {saveMutation.error instanceof Error ? saveMutation.error.message : (venueId ? t("failedToUpdate") : t("failedToCreate"))}
             </div>
           )}
         </CardContent>

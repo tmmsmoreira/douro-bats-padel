@@ -65,7 +65,7 @@ export function VerifyEmailForm() {
           <CardTitle>Verifying Email</CardTitle>
           <CardDescription>Please wait while we verify your email address...</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           <div className="flex justify-center py-8">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           </div>
@@ -81,7 +81,7 @@ export function VerifyEmailForm() {
           <CardTitle>Email Verified!</CardTitle>
           <CardDescription>Your email has been successfully verified</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="pt-0 space-y-4">
           <div className="flex justify-center py-4">
             <svg
               className="h-16 w-16 text-green-500"
@@ -115,7 +115,7 @@ export function VerifyEmailForm() {
         <CardTitle>Verification Failed</CardTitle>
         <CardDescription>We couldn't verify your email address</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="pt-0 space-y-4">
         <div className="flex justify-center py-4">
           <svg
             className="h-16 w-16 text-destructive"

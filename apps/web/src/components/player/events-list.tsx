@@ -1,6 +1,7 @@
 "use client"
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useTranslations } from "next-intl"
 import { apiClient } from "@/lib/api-client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -11,6 +12,7 @@ import type { EventWithRSVP } from "@padel/types"
 
 export function EventsList() {
   const queryClient = useQueryClient()
+  const t = useTranslations("playerEventsList")
 
   const { data: events, isLoading } = useQuery({
     queryKey: ["player-events"],
@@ -26,13 +28,13 @@ export function EventsList() {
   })
 
   if (isLoading) {
-    return <div className="text-center py-8">Loading events...</div>
+    return <div className="text-center py-8">{t("loadingEvents")}</div>
   }
 
   if (!events || events.length === 0) {
     return (
       <Card>
-        <CardContent className="py-8 text-center text-muted-foreground">No upcoming events available.</CardContent>
+        <CardContent className="py-8 text-center text-muted-foreground">{t("noUpcomingEvents")}</CardContent>
       </Card>
     )
   }
@@ -54,30 +56,30 @@ export function EventsList() {
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div>
-                  <CardTitle>{event.title || "Game Night"}</CardTitle>
+                  <CardTitle>{event.title || t("gameNight")}</CardTitle>
                   <CardDescription>
                     {formatDate(event.date)} • {formatTime(event.startsAt)} - {formatTime(event.endsAt)}
                   </CardDescription>
                   {event.venue && <p className="text-sm text-muted-foreground mt-1">{event.venue.name}</p>}
                 </div>
-                {isConfirmed && <Badge variant="default">Confirmed</Badge>}
-                {isWaitlisted && <Badge variant="secondary">Waitlist #{event.userRSVP?.position}</Badge>}
+                {isConfirmed && <Badge variant="default">{t("confirmed")}</Badge>}
+                {isWaitlisted && <Badge variant="secondary">{t("waitlist")} #{event.userRSVP?.position}</Badge>}
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               <div className="flex items-center justify-between">
                 <div className="flex gap-4 text-sm">
                   <span>
-                    <strong>{event.confirmedCount}</strong> / {event.capacity} confirmed
+                    <strong>{event.confirmedCount}</strong> / {event.capacity} {t("confirmedCount")}
                   </span>
                   {event.waitlistCount > 0 && (
-                    <span className="text-muted-foreground">{event.waitlistCount} waitlisted</span>
+                    <span className="text-muted-foreground">{event.waitlistCount} {t("waitlisted")}</span>
                   )}
                 </div>
                 <div className="flex gap-2">
                   {canRegister && !isConfirmed && !isWaitlisted && (
                     <Button size="sm" onClick={() => handleRSVP(event.id, "IN")} disabled={rsvpMutation.isPending}>
-                      Register
+                      {t("register")}
                     </Button>
                   )}
                   {(isConfirmed || isWaitlisted) && (
@@ -87,20 +89,20 @@ export function EventsList() {
                       onClick={() => handleRSVP(event.id, "OUT")}
                       disabled={rsvpMutation.isPending}
                     >
-                      Cancel
+                      {t("cancel")}
                     </Button>
                   )}
                   {event.state === "DRAWN" && (
                     <Link href={`/events/${event.id}/draw`}>
                       <Button size="sm" variant="outline">
-                        View Draw
+                        {t("viewDraw")}
                       </Button>
                     </Link>
                   )}
                   {event.state === "PUBLISHED" && (
                     <Link href={`/events/${event.id}/results`}>
                       <Button size="sm" variant="outline">
-                        View Results
+                        {t("viewResults")}
                       </Button>
                     </Link>
                   )}

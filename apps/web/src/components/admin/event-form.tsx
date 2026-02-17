@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -31,10 +32,17 @@ interface Court {
   venueId: string
 }
 
-export function EventForm() {
+interface EventFormProps {
+  eventId?: string
+  initialData?: any
+}
+
+export function EventForm({ eventId, initialData }: EventFormProps = {}) {
   const { data: session } = useSession()
   const router = useRouter()
   const queryClient = useQueryClient()
+  const t = useTranslations("eventForm")
+  const isEditMode = !!eventId
 
   const [formData, setFormData] = useState<{
     title: string
@@ -82,19 +90,66 @@ export function EventForm() {
 
   const selectedVenue = venues?.find((v) => v.id === formData.venueId)
 
-  // Auto-calculate capacity based on time slot court assignments
-  // Capacity = max players that can play across all time slots
+  // Populate form with initial data when editing
   useEffect(() => {
-    // Use unique courts from both time slots
-    const allTimeSlotCourts = new Set([...formData.mastersCourtIds, ...formData.explorersCourtIds])
-    const totalCourts = allTimeSlotCourts.size
+    if (initialData && isEditMode) {
+      const tierRules = initialData.tierRules || {}
 
-    const calculatedCapacity = totalCourts * 4
+      // Parse time slots
+      const mastersTimeSlot = tierRules.mastersTimeSlot
+      const explorersTimeSlot = tierRules.explorersTimeSlot
+
+      // Parse time strings to Date objects
+      const parseTime = (timeStr: string) => {
+        if (!timeStr) return undefined
+        const [hours, minutes] = timeStr.split(':').map(Number)
+        const date = new Date()
+        date.setHours(hours, minutes, 0, 0)
+        return date
+      }
+
+      // Determine tier rule type
+      let tierRuleType: "auto" | "count" | "percentage" = "auto"
+      if (tierRules.masterCount !== undefined) {
+        tierRuleType = "count"
+      } else if (tierRules.masterPercentage !== undefined) {
+        tierRuleType = "percentage"
+      }
+
+      setFormData({
+        title: initialData.title || "",
+        date: initialData.date ? new Date(initialData.date) : undefined,
+        capacity: initialData.capacity?.toString() || "0",
+        rsvpOpensAt: initialData.rsvpOpensAt ? new Date(initialData.rsvpOpensAt) : undefined,
+        rsvpClosesAt: initialData.rsvpClosesAt ? new Date(initialData.rsvpClosesAt) : undefined,
+        venueId: initialData.venueId || "",
+        tierRuleType,
+        masterCount: tierRules.masterCount?.toString() || "",
+        masterPercentage: tierRules.masterPercentage?.toString() || "",
+        mastersStartTime: mastersTimeSlot?.startsAt ? parseTime(mastersTimeSlot.startsAt) : undefined,
+        mastersEndTime: mastersTimeSlot?.endsAt ? parseTime(mastersTimeSlot.endsAt) : undefined,
+        mastersCourtIds: mastersTimeSlot?.courtIds || [],
+        explorersStartTime: explorersTimeSlot?.startsAt ? parseTime(explorersTimeSlot.startsAt) : undefined,
+        explorersEndTime: explorersTimeSlot?.endsAt ? parseTime(explorersTimeSlot.endsAt) : undefined,
+        explorersCourtIds: explorersTimeSlot?.courtIds || [],
+      })
+    }
+  }, [initialData, isEditMode])
+
+  // Auto-calculate capacity based on time slot court assignments
+  // Capacity = total players across both time slots (they play at different times)
+  useEffect(() => {
+    // Calculate capacity as sum of both time slots since they're separate
+    // MASTERS courts * 4 + EXPLORERS courts * 4
+    const mastersCapacity = formData.mastersCourtIds.length * 4
+    const explorersCapacity = formData.explorersCourtIds.length * 4
+    const calculatedCapacity = mastersCapacity + explorersCapacity
+
     setFormData((prev) => ({
       ...prev,
       capacity: calculatedCapacity.toString(),
     }))
-  }, [formData.mastersCourtIds.length, formData.explorersCourtIds.length])
+  }, [formData.mastersCourtIds, formData.explorersCourtIds])
 
   const createMutation = useMutation({
     mutationFn: async (data: CreateEventDto) => {
@@ -124,42 +179,71 @@ export function EventForm() {
     },
   })
 
+  const updateMutation = useMutation({
+    mutationFn: async (data: Partial<CreateEventDto>) => {
+      if (!session?.accessToken) {
+        throw new Error("Not authenticated")
+      }
+
+      const res = await fetch(`${API_URL}/events/${eventId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.accessToken}`,
+        },
+        body: JSON.stringify(data),
+      })
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ message: res.statusText }))
+        throw new Error(errorData.message || `API Error: ${res.statusText}`)
+      }
+
+      return res.json()
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-events"] })
+      queryClient.invalidateQueries({ queryKey: ["event", eventId] })
+      router.push(`/admin/events/${eventId}`)
+    },
+  })
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
     // Validation
     if (!formData.venueId) {
-      alert("Please select a venue")
+      alert(t("validationSelectVenue"))
       return
     }
     if (!formData.date) {
-      alert("Please select an event date")
+      alert(t("validationSelectDate"))
       return
     }
     if (!formData.rsvpOpensAt) {
-      alert("Please select RSVP opens date/time")
+      alert(t("validationRsvpOpens"))
       return
     }
     if (!formData.rsvpClosesAt) {
-      alert("Please select RSVP closes date/time")
+      alert(t("validationRsvpCloses"))
       return
     }
 
     // Validate time slots are provided
     if (!formData.mastersStartTime || !formData.mastersEndTime) {
-      alert("Please configure MASTERS time slot (start and end time)")
+      alert(t("validationMastersTime"))
       return
     }
     if (formData.mastersCourtIds.length === 0) {
-      alert("Please select at least one court for MASTERS time slot")
+      alert(t("validationMastersCourts"))
       return
     }
     if (!formData.explorersStartTime || !formData.explorersEndTime) {
-      alert("Please configure EXPLORERS time slot (start and end time)")
+      alert(t("validationExplorersTime"))
       return
     }
     if (formData.explorersCourtIds.length === 0) {
-      alert("Please select at least one court for EXPLORERS time slot")
+      alert(t("validationExplorersCourts"))
       return
     }
 
@@ -187,18 +271,18 @@ export function EventForm() {
     if (formData.tierRuleType === "count") {
       const masterCount = parseInt(formData.masterCount)
       if (isNaN(masterCount) || masterCount < 0) {
-        alert("Please enter a valid master count (non-negative number)")
+        alert(t("validationMasterCount"))
         return
       }
       if (masterCount > parseInt(formData.capacity)) {
-        alert(`Master count (${masterCount}) cannot exceed event capacity (${formData.capacity})`)
+        alert(t("validationMasterCountExceeds", { count: masterCount, capacity: formData.capacity }))
         return
       }
       tierRules = { masterCount }
     } else if (formData.tierRuleType === "percentage") {
       const masterPercentage = parseFloat(formData.masterPercentage)
       if (isNaN(masterPercentage) || masterPercentage < 0 || masterPercentage > 100) {
-        alert("Please enter a valid master percentage (0-100)")
+        alert(t("validationMasterPercentage"))
         return
       }
       tierRules = { masterPercentage }
@@ -243,40 +327,40 @@ export function EventForm() {
       tierRules,
     }
 
-    createMutation.mutate(dto)
+    if (isEditMode) {
+      updateMutation.mutate(dto)
+    } else {
+      createMutation.mutate(dto)
+    }
   }
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Create New Event</CardTitle>
-        <CardDescription>Fill in the details to create a new game night</CardDescription>
-      </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Event Title</Label>
+            <Label htmlFor="title">{t("eventTitle")}</Label>
             <Input
               id="title"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              placeholder="e.g., Friday Night - Explorers & Masters"
+              placeholder={t("eventTitlePlaceholder")}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="date">Event Date</Label>
+              <Label htmlFor="date">{t("eventDate")}</Label>
               <DatePicker
                 id="date"
                 value={formData.date}
                 onChange={(date) => setFormData({ ...formData, date })}
-                placeholder="Select event date"
+                placeholder={t("selectEventDate")}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="capacity">Capacity</Label>
+              <Label htmlFor="capacity">{t("capacity")}</Label>
               <Input
                 id="capacity"
                 type="number"
@@ -286,15 +370,15 @@ export function EventForm() {
                 required
               />
               <p className="text-xs text-muted-foreground">
-                Auto-calculated: 4 players per court
+                {t("autoCalculated")}
               </p>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="venue">Venue</Label>
+            <Label htmlFor="venue">{t("venue")}</Label>
             {venuesLoading ? (
-              <div className="text-sm text-muted-foreground">Loading venues...</div>
+              <div className="text-sm text-muted-foreground">{t("loadingVenues")}</div>
             ) : (
               <Select
                 value={formData.venueId}
@@ -303,7 +387,7 @@ export function EventForm() {
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a venue" />
+                  <SelectValue placeholder={t("selectVenue")} />
                 </SelectTrigger>
                 <SelectContent>
                   {venues?.map((venue) => (
@@ -318,31 +402,31 @@ export function EventForm() {
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="rsvpOpensAt">RSVP Opens At</Label>
+              <Label htmlFor="rsvpOpensAt">{t("rsvpOpensAt")}</Label>
               <DateTimePicker
                 id="rsvpOpensAt"
                 value={formData.rsvpOpensAt}
                 onChange={(datetime) => setFormData({ ...formData, rsvpOpensAt: datetime })}
-                placeholder="Select RSVP open date and time"
+                placeholder={t("rsvpOpensAtPlaceholder")}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="rsvpClosesAt">RSVP Closes At</Label>
+              <Label htmlFor="rsvpClosesAt">{t("rsvpClosesAt")}</Label>
               <DateTimePicker
                 id="rsvpClosesAt"
                 value={formData.rsvpClosesAt}
                 onChange={(datetime) => setFormData({ ...formData, rsvpClosesAt: datetime })}
-                placeholder="Select RSVP close date and time"
+                placeholder={t("rsvpClosesAtPlaceholder")}
               />
             </div>
           </div>
 
           <div className="space-y-4 rounded-lg border p-4 bg-muted/50">
             <div className="space-y-2">
-              <Label>Tier Assignment Rules</Label>
+              <Label>{t("tierAssignmentRules")}</Label>
               <p className="text-sm text-muted-foreground">
-                Configure how players are split into MASTERS and EXPLORERS tiers based on their ratings
+                {t("tierAssignmentDescription")}
               </p>
             </div>
 
@@ -355,28 +439,28 @@ export function EventForm() {
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="auto" id="tier-auto" />
                 <Label htmlFor="tier-auto" className="font-normal cursor-pointer">
-                  Auto (50/50 split) - Top 50% of players assigned to MASTERS
+                  {t("tierAuto")}
                 </Label>
               </div>
 
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="count" id="tier-count" />
                 <Label htmlFor="tier-count" className="font-normal cursor-pointer">
-                  Fixed Count - Specify exact number of MASTERS players
+                  {t("tierCount")}
                 </Label>
               </div>
 
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="percentage" id="tier-percentage" />
                 <Label htmlFor="tier-percentage" className="font-normal cursor-pointer">
-                  Percentage - Specify percentage of players for MASTERS tier
+                  {t("tierPercentage")}
                 </Label>
               </div>
             </RadioGroup>
 
             {formData.tierRuleType === "count" && (
               <div className="space-y-2 ml-6">
-                <Label htmlFor="masterCount">Number of MASTERS Players</Label>
+                <Label htmlFor="masterCount">{t("numberOfMastersPlayers")}</Label>
                 <Input
                   id="masterCount"
                   type="number"
@@ -384,17 +468,17 @@ export function EventForm() {
                   max={formData.capacity}
                   value={formData.masterCount}
                   onChange={(e) => setFormData({ ...formData, masterCount: e.target.value })}
-                  placeholder="e.g., 12"
+                  placeholder={t("numberOfMastersPlaceholder")}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Top {formData.masterCount || "X"} rated players will be assigned to MASTERS tier
+                  {t("topRatedPlayers", { count: formData.masterCount || "X" })}
                 </p>
               </div>
             )}
 
             {formData.tierRuleType === "percentage" && (
               <div className="space-y-2 ml-6">
-                <Label htmlFor="masterPercentage">MASTERS Percentage (%)</Label>
+                <Label htmlFor="masterPercentage">{t("mastersPercentage")}</Label>
                 <Input
                   id="masterPercentage"
                   type="number"
@@ -403,52 +487,52 @@ export function EventForm() {
                   step="1"
                   value={formData.masterPercentage}
                   onChange={(e) => setFormData({ ...formData, masterPercentage: e.target.value })}
-                  placeholder="e.g., 40"
+                  placeholder={t("mastersPercentagePlaceholder")}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Top {formData.masterPercentage || "X"}% of players will be assigned to MASTERS tier
+                  {t("topPercentagePlayers", { percentage: formData.masterPercentage || "X" })}
                 </p>
               </div>
             )}
 
             <div className="space-y-4 pt-4 border-t">
               <div className="space-y-2">
-                <Label className="text-base">Time Slots & Court Assignment</Label>
+                <Label className="text-base">{t("timeSlotsAndCourts")}</Label>
                 <p className="text-sm text-muted-foreground">
-                  Configure when each tier plays and which courts are available. Both MASTERS and EXPLORERS time slots are required.
+                  {t("timeSlotsDescription")}
                 </p>
               </div>
 
               <div className="space-y-3 p-3 rounded-lg border bg-card">
-                <Label className="text-sm font-medium">MASTERS Time Slot</Label>
+                <Label className="text-sm font-medium">{t("mastersTimeSlot")}</Label>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="mastersStartTime" className="text-xs text-muted-foreground">
-                      Start Time
+                      {t("startTime")}
                     </Label>
                     <TimePicker
                       id="mastersStartTime"
                       value={formData.mastersStartTime}
                       onChange={(time) => setFormData({ ...formData, mastersStartTime: time })}
-                      placeholder="e.g., 8:00 PM"
+                      placeholder={t("startTimePlaceholder")}
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="mastersEndTime" className="text-xs text-muted-foreground">
-                      End Time
+                      {t("endTime")}
                     </Label>
                     <TimePicker
                       id="mastersEndTime"
                       value={formData.mastersEndTime}
                       onChange={(time) => setFormData({ ...formData, mastersEndTime: time })}
-                      placeholder="e.g., 9:30 PM"
+                      placeholder={t("endTimePlaceholder")}
                     />
                   </div>
                 </div>
 
                 {selectedVenue && selectedVenue.courts.length > 0 && (
                   <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">Courts Available</Label>
+                    <Label className="text-xs text-muted-foreground">{t("courtsAvailable")}</Label>
                     <div className="grid grid-cols-2 gap-2">
                       {selectedVenue.courts.map((court) => (
                         <div key={court.id} className="flex items-center space-x-2">
@@ -474,42 +558,42 @@ export function EventForm() {
                       ))}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {formData.mastersCourtIds.length} court(s) selected
+                      {t("courtsSelected", { count: formData.mastersCourtIds.length })}
                     </p>
                   </div>
                 )}
               </div>
 
               <div className="space-y-3 p-3 rounded-lg border bg-card">
-                <Label className="text-sm font-medium">EXPLORERS Time Slot</Label>
+                <Label className="text-sm font-medium">{t("explorersTimeSlot")}</Label>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="explorersStartTime" className="text-xs text-muted-foreground">
-                      Start Time
+                      {t("startTime")}
                     </Label>
                     <TimePicker
                       id="explorersStartTime"
                       value={formData.explorersStartTime}
                       onChange={(time) => setFormData({ ...formData, explorersStartTime: time })}
-                      placeholder="e.g., 9:30 PM"
+                      placeholder={t("explorersStartTimePlaceholder")}
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="explorersEndTime" className="text-xs text-muted-foreground">
-                      End Time
+                      {t("endTime")}
                     </Label>
                     <TimePicker
                       id="explorersEndTime"
                       value={formData.explorersEndTime}
                       onChange={(time) => setFormData({ ...formData, explorersEndTime: time })}
-                      placeholder="e.g., 11:00 PM"
+                      placeholder={t("explorersEndTimePlaceholder")}
                     />
                   </div>
                 </div>
 
                 {selectedVenue && selectedVenue.courts.length > 0 && (
                   <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">Courts Available</Label>
+                    <Label className="text-xs text-muted-foreground">{t("courtsAvailable")}</Label>
                     <div className="grid grid-cols-2 gap-2">
                       {selectedVenue.courts.map((court) => (
                         <div key={court.id} className="flex items-center space-x-2">
@@ -535,7 +619,7 @@ export function EventForm() {
                       ))}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {formData.explorersCourtIds.length} court(s) selected
+                      {t("courtsSelected", { count: formData.explorersCourtIds.length })}
                     </p>
                   </div>
                 )}
@@ -543,18 +627,28 @@ export function EventForm() {
             </div>
           </div>
 
-          {createMutation.isError && (
+          {(createMutation.isError || updateMutation.isError) && (
             <div className="text-sm text-destructive">
-              Error: {(createMutation.error as Error).message}
+              {t("error")}: {((createMutation.error || updateMutation.error) as Error)?.message}
             </div>
           )}
 
           <div className="flex gap-2">
-            <Button type="submit" disabled={createMutation.isPending}>
-              {createMutation.isPending ? "Creating..." : "Create Event"}
+            <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
+              {isEditMode
+                ? updateMutation.isPending
+                  ? t("updating")
+                  : t("updateEvent")
+                : createMutation.isPending
+                  ? t("creating")
+                  : t("createEvent")}
             </Button>
-            <Button type="button" variant="outline" onClick={() => router.push("/admin")}>
-              Cancel
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.push(isEditMode ? `/admin/events/${eventId}` : "/admin")}
+            >
+              {t("cancel")}
             </Button>
           </div>
         </form>

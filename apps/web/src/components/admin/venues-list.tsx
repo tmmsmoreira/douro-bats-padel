@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Pencil, Trash2 } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
 
@@ -28,6 +29,7 @@ export function VenuesList() {
   const { data: session } = useSession()
   const router = useRouter()
   const queryClient = useQueryClient()
+  const t = useTranslations("venuesList")
 
   const { data: venues, isLoading } = useQuery<Venue[]>({
     queryKey: ["venues"],
@@ -68,19 +70,19 @@ export function VenuesList() {
   }
 
   const handleDelete = (venueId: string, venueName: string) => {
-    if (confirm(`Are you sure you want to delete "${venueName}"? This will also delete all associated courts.`)) {
+    if (confirm(t("confirmDeleteVenue", { venueName }))) {
       deleteMutation.mutate(venueId)
     }
   }
 
   if (isLoading) {
-    return <div className="text-center py-8">Loading venues...</div>
+    return <div className="text-center py-8">{t("loadingVenues")}</div>
   }
 
   if (!venues || venues.length === 0) {
     return (
       <Card>
-        <CardContent className="py-8 text-center text-muted-foreground">No venues available.</CardContent>
+        <CardContent className="py-8 text-center text-muted-foreground">{t("noVenuesAvailable")}</CardContent>
       </Card>
     )
   }
@@ -94,7 +96,7 @@ export function VenuesList() {
               {venue.logo && (
                 <img
                   src={venue.logo}
-                  alt={`${venue.name} logo`}
+                  alt={t("logo", { venueName: venue.name })}
                   className="h-16 w-16 object-contain rounded border"
                   onError={(e) => {
                     e.currentTarget.style.display = "none"
@@ -120,9 +122,9 @@ export function VenuesList() {
               </div>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             <div>
-              <p className="text-sm font-medium mb-2">Courts:</p>
+              <p className="text-sm font-medium mb-2">{t("courts")}</p>
               {venue.courts.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {venue.courts.map((court) => (
@@ -132,7 +134,7 @@ export function VenuesList() {
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">No courts available</p>
+                <p className="text-sm text-muted-foreground">{t("noCourtsAvailable")}</p>
               )}
             </div>
           </CardContent>

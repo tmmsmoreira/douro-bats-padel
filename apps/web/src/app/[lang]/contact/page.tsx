@@ -56,7 +56,7 @@ export default function ContactPage() {
                 <CardTitle>Get in Touch</CardTitle>
                 <CardDescription>We're here to help and answer any questions you might have</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="pt-0 space-y-4">
                 <div className="flex items-start gap-3">
                   <div className="p-2 bg-primary/10 rounded-lg">
                     <MapPin className="h-5 w-5 text-primary" />
@@ -115,7 +115,7 @@ export default function ContactPage() {
                 <CardTitle>Send us a Message</CardTitle>
                 <CardDescription>Fill out the form below and we'll get back to you as soon as possible</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-0">
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">

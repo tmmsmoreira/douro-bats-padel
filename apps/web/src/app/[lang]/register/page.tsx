@@ -1,9 +1,17 @@
 import { RegisterForm } from "@/components/auth/register-form"
+import { LanguageToggleButton } from "@/components/language-toggle-button"
+import { ThemeToggleButton } from "@/components/ui/theme-toggle-button"
 import Image from "next/image"
 
 export default function RegisterPage() {
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex relative">
+      {/* Top-right controls */}
+      <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+        <ThemeToggleButton />
+        <LanguageToggleButton />
+      </div>
+
       {/* Left side - Image */}
       <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         <div className="absolute inset-0 bg-black/20" />

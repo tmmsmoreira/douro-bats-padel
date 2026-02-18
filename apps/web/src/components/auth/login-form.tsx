@@ -9,11 +9,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useTranslations, useLocale } from "next-intl"
 import Link from "next/link"
 
 export function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const locale = useLocale()
+  const t = useTranslations("auth.login")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -22,12 +25,12 @@ export function LoginForm() {
 
   useEffect(() => {
     if (searchParams.get("registered") === "true") {
-      setSuccessMessage("Account created successfully! Please sign in.")
+      setSuccessMessage(t("accountCreatedSuccess"))
     }
     if (searchParams.get("reset") === "true") {
-      setSuccessMessage("Password reset successfully! Please sign in with your new password.")
+      setSuccessMessage(t("passwordResetSuccess"))
     }
-  }, [searchParams])
+  }, [searchParams, t])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -42,13 +45,13 @@ export function LoginForm() {
       })
 
       if (result?.error) {
-        setError("Invalid credentials")
+        setError(t("invalidCredentials"))
       } else {
-        router.push("/")
+        router.push(`/${locale}`)
         router.refresh()
       }
     } catch (err) {
-      setError("An error occurred")
+      setError(t("errorOccurred"))
     } finally {
       setIsLoading(false)
     }
@@ -57,17 +60,17 @@ export function LoginForm() {
   return (
     <Card className="w-full max-w-md border-0 shadow-none sm:border sm:shadow-sm">
       <CardHeader className="space-y-1 px-4 sm:px-6 pt-6">
-        <CardTitle className="text-2xl sm:text-3xl font-bold">Welcome back!</CardTitle>
-        <CardDescription className="text-sm">Enter your credentials to access your account</CardDescription>
+        <CardTitle className="text-2xl sm:text-3xl font-bold">{t("title")}</CardTitle>
+        <CardDescription className="text-sm">{t("description")}</CardDescription>
       </CardHeader>
       <CardContent className="pt-0 px-4 sm:px-6 pb-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t("email")}</Label>
             <Input
               id="email"
               type="email"
-              placeholder="hello@example.com"
+              placeholder={t("emailPlaceholder")}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="h-11"
@@ -76,15 +79,15 @@ export function LoginForm() {
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="password">Password</Label>
-              <Link href="/forgot-password" className="text-xs text-primary hover:underline">
-                Forgot password?
+              <Label htmlFor="password">{t("password")}</Label>
+              <Link href={`/${locale}/forgot-password`} className="text-xs text-primary hover:underline">
+                {t("forgotPassword")}
               </Link>
             </div>
             <Input
               id="password"
               type="password"
-              placeholder="••••••••"
+              placeholder={t("passwordPlaceholder")}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="h-11"
@@ -102,7 +105,7 @@ export function LoginForm() {
             </div>
           )}
           <Button type="submit" className="w-full h-11 text-base" disabled={isLoading}>
-            {isLoading ? "Signing in..." : "Sign In"}
+            {isLoading ? t("signingIn") : t("signIn")}
           </Button>
 
           <div className="relative">
@@ -110,7 +113,7 @@ export function LoginForm() {
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+              <span className="bg-background px-2 text-muted-foreground">{t("orContinueWith")}</span>
             </div>
           </div>
 
@@ -118,7 +121,7 @@ export function LoginForm() {
             type="button"
             variant="outline"
             className="w-full h-11"
-            onClick={() => signIn("google", { callbackUrl: "/" })}
+            onClick={() => signIn("google", { callbackUrl: `/${locale}` })}
             disabled={isLoading}
           >
             <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
@@ -139,22 +142,22 @@ export function LoginForm() {
                 fill="#EA4335"
               />
             </svg>
-            Sign in with Google
+            {t("signInWithGoogle")}
           </Button>
 
           <div className="text-center text-sm text-muted-foreground space-y-2">
             <p>
-              Don't have an account?{" "}
-              <Link href="/register" className="text-primary hover:underline font-medium">
-                Create account
+              {t("noAccount")}{" "}
+              <Link href={`/${locale}/register`} className="text-primary hover:underline font-medium">
+                {t("createAccount")}
               </Link>
             </p>
             {process.env.NODE_ENV === "development" && (
               <div className="pt-2 border-t mt-4">
-                <p className="font-medium text-foreground mb-2">Demo credentials:</p>
+                <p className="font-medium text-foreground mb-2">{t("demoCredentials")}</p>
                 <div className="text-xs space-y-1">
-                  <p>Editor: tiago@dorobats.com / editor123</p>
-                  <p>Admin: admin@dorobats.com / admin123</p>
+                  <p>{t("demoEditor")}</p>
+                  <p>{t("demoAdmin")}</p>
                 </div>
               </div>
             )}

@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { PlayerNav } from "./player-nav"
 import { Footer } from "@/components/footer"
 import { cn } from "@/lib/utils"
-import { MapPin, Calendar } from "lucide-react"
+import { MapPin, Calendar, Clock } from "lucide-react"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
 
@@ -82,6 +82,23 @@ export function DrawView({ eventId }: { eventId: string }) {
     },
     retry: false, // Don't retry if draw doesn't exist
     enabled: !!session, // Only run query when session is available
+  })
+
+  // Fetch event data to get waitlist
+  const { data: event } = useQuery({
+    queryKey: ["event", eventId],
+    queryFn: async () => {
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      }
+      if (session?.accessToken) {
+        headers.Authorization = `Bearer ${session.accessToken}`
+      }
+      const res = await fetch(`${API_URL}/events/${eventId}`, { headers })
+      if (!res.ok) return null
+      return res.json()
+    },
+    enabled: !!session,
   })
 
   if (isLoading) {
@@ -232,7 +249,7 @@ export function DrawView({ eventId }: { eventId: string }) {
                 <h2 className="text-2xl font-bold">Padeleiras - Masters</h2>
                 {mastersTimeSlot && (
                   <Badge variant="outline" className="text-base px-4 py-1">
-                    🕐 {mastersTimeSlot.startsAt} - {mastersTimeSlot.endsAt}
+                    <Clock className="mr-2 h-4 w-4" /> {mastersTimeSlot.startsAt} - {mastersTimeSlot.endsAt}
                   </Badge>
                 )}
               </div>
@@ -295,7 +312,7 @@ export function DrawView({ eventId }: { eventId: string }) {
                 <h2 className="text-2xl font-bold">Padeleiras - Explorers</h2>
                 {explorersTimeSlot && (
                   <Badge variant="outline" className="text-base px-4 py-1">
-                    🕐 {explorersTimeSlot.startsAt} - {explorersTimeSlot.endsAt}
+                    <Clock className="mr-2 h-4 w-4" /> {explorersTimeSlot.startsAt} - {explorersTimeSlot.endsAt}
                   </Badge>
                 )}
               </div>
@@ -349,6 +366,28 @@ export function DrawView({ eventId }: { eventId: string }) {
                 </CardContent>
               </Card>
             </div>
+          )}
+
+          {/* Waitlist Section */}
+          {event && event.waitlistedPlayers && event.waitlistedPlayers.length > 0 && (
+            <Card>
+              <CardHeader className="bg-amber-50 dark:bg-amber-950/30">
+                <CardTitle>Lista de Espera ({event.waitlistedPlayers.length})</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="space-y-2">
+                  {event.waitlistedPlayers.map((player: any) => (
+                    <div key={player.id} className="flex items-center justify-between py-2 border-b last:border-0">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary">#{player.position}</Badge>
+                        <span>{player.name}</span>
+                      </div>
+                      <span className="text-sm text-muted-foreground">{player.rating}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           )}
         </div>
       </main>

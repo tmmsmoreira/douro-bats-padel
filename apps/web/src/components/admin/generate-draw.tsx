@@ -78,6 +78,21 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
     },
   })
 
+  // Get available courts from tierRules (must be before useEffect)
+  const tierRules = event?.tierRules || {}
+  const mastersCourts = tierRules.mastersTimeSlot?.courtIds || []
+  const explorersCourts = tierRules.explorersTimeSlot?.courtIds || []
+
+  // Initialize selected courts when event loads (must be before early returns)
+  useEffect(() => {
+    if (mastersCourts.length > 0 && selectedMastersCourts.length === 0) {
+      setSelectedMastersCourts(mastersCourts)
+    }
+    if (explorersCourts.length > 0 && selectedExplorersCourts.length === 0) {
+      setSelectedExplorersCourts(explorersCourts)
+    }
+  }, [mastersCourts, explorersCourts, selectedMastersCourts.length, selectedExplorersCourts.length])
+
   const generateDrawMutation = useMutation({
     mutationFn: async () => {
       if (!session?.accessToken) {
@@ -90,7 +105,13 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
           "Content-Type": "application/json",
           Authorization: `Bearer ${session.accessToken}`,
         },
-        body: JSON.stringify({ constraints }),
+        body: JSON.stringify({
+          constraints,
+          selectedCourts: {
+            masters: selectedMastersCourts,
+            explorers: selectedExplorersCourts,
+          },
+        }),
       })
 
       if (!res.ok) {
@@ -120,21 +141,6 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
   }
 
   const confirmedCount = event.confirmedCount || 0
-
-  // Get available courts from tierRules
-  const tierRules = event.tierRules || {}
-  const mastersCourts = tierRules.mastersTimeSlot?.courtIds || []
-  const explorersCourts = tierRules.explorersTimeSlot?.courtIds || []
-
-  // Initialize selected courts when event loads
-  useEffect(() => {
-    if (mastersCourts.length > 0 && selectedMastersCourts.length === 0) {
-      setSelectedMastersCourts(mastersCourts)
-    }
-    if (explorersCourts.length > 0 && selectedExplorersCourts.length === 0) {
-      setSelectedExplorersCourts(explorersCourts)
-    }
-  }, [mastersCourts, explorersCourts, selectedMastersCourts.length, selectedExplorersCourts.length])
 
   // Since MASTERS and EXPLORERS play at different times, capacity is additive
   // Even if the same courts are used, they can accommodate different players at different times
@@ -351,14 +357,6 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
               <span className="font-medium">Status:</span>{" "}
               <Badge variant={event.state === "FROZEN" ? "default" : "secondary"}>{event.state}</Badge>
             </div>
-            {(event.state === "DRAWN" || event.state === "PUBLISHED") && existingDraw && (
-              <div className="text-sm text-destructive mt-2 flex items-center gap-1">
-                <AlertTriangle className="h-4 w-4" />
-                {event.state === "PUBLISHED"
-                  ? "Draw is published. Delete the existing draw first to generate a new one."
-                  : "Draw already exists. Delete the existing draw first to generate a new one."}
-              </div>
-            )}
             {event.state !== "FROZEN" && event.state !== "DRAWN" && event.state !== "PUBLISHED" && (
               <div className="text-sm text-destructive mt-2 flex items-center gap-1">
                 <AlertTriangle className="h-4 w-4" />

@@ -84,7 +84,7 @@ export function VerifyEmailForm() {
         <CardContent className="pt-0 space-y-4">
           <div className="flex justify-center py-4">
             <svg
-              className="h-16 w-16 text-green-500"
+              className="h-16 w-16 text-success"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"

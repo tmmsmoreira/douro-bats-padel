@@ -8,7 +8,7 @@ import { toast } from "sonner"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Pencil, Trash2, MapPin, Calendar, RefreshCw, Send, ArchiveRestore } from "lucide-react"
+import { Pencil, Trash2, MapPin, Calendar, RefreshCw, Send, ArchiveRestore, Clock } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -102,6 +102,22 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
       }
       const res = await fetch(`${API_URL}/draws/events/${eventId}`, { headers })
       if (!res.ok) throw new Error("Failed to fetch draw")
+      return res.json()
+    },
+  })
+
+  // Fetch event data to get waitlist
+  const { data: event } = useQuery({
+    queryKey: ["event", eventId],
+    queryFn: async () => {
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      }
+      if (session?.accessToken) {
+        headers.Authorization = `Bearer ${session.accessToken}`
+      }
+      const res = await fetch(`${API_URL}/events/${eventId}?includeUnpublished=true`, { headers })
+      if (!res.ok) return null
       return res.json()
     },
   })
@@ -307,7 +323,7 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
             <h2 className="text-2xl font-bold">Masters</h2>
             {draw.event.tierRules?.mastersTimeSlot && (
               <Badge variant="secondary" className="text-sm">
-                🕐 {draw.event.tierRules.mastersTimeSlot.startsAt} - {draw.event.tierRules.mastersTimeSlot.endsAt}
+                <Clock className="mr-2 h-4 w-4" /> {draw.event.tierRules.mastersTimeSlot.startsAt} - {draw.event.tierRules.mastersTimeSlot.endsAt}
               </Badge>
             )}
           </div>
@@ -317,7 +333,7 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
                 <CardTitle>Round {round}</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {assignments.map((assignment) => (
                     <AssignmentCard
                       key={assignment.id}
@@ -339,7 +355,7 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
             <h2 className="text-2xl font-bold">Explorers</h2>
             {draw.event.tierRules?.explorersTimeSlot && (
               <Badge variant="secondary" className="text-sm">
-                🕐 {draw.event.tierRules.explorersTimeSlot.startsAt} - {draw.event.tierRules.explorersTimeSlot.endsAt}
+                <Clock className="mr-2 h-4 w-4" />{draw.event.tierRules.explorersTimeSlot.startsAt} - {draw.event.tierRules.explorersTimeSlot.endsAt}
               </Badge>
             )}
           </div>
@@ -349,7 +365,7 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
                 <CardTitle>Round {round}</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {assignments.map((assignment) => (
                     <AssignmentCard
                       key={assignment.id}
@@ -362,6 +378,32 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
             </Card>
           ))}
         </div>
+      )}
+
+      {/* Waitlist Section */}
+      {event && (event.waitlistCount > 0 || event.waitlistedPlayers?.length > 0) && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Waitlist ({event.waitlistCount || event.waitlistedPlayers?.length || 0})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {event.waitlistedPlayers && event.waitlistedPlayers.length > 0 ? (
+              <div className="space-y-2">
+                {event.waitlistedPlayers.map((player: any) => (
+                  <div key={player.id} className="flex items-center justify-between py-2 border-b last:border-0">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary">#{player.position}</Badge>
+                      <span>{player.name}</span>
+                    </div>
+                    <span className="text-sm text-muted-foreground">{player.rating}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No players on waitlist</p>
+            )}
+          </CardContent>
+        </Card>
       )}
 
       {/* Edit Dialog */}
@@ -416,8 +458,8 @@ function AssignmentCard({ assignment, onEdit }: { assignment: Assignment; onEdit
           <Pencil className="h-4 w-4" />
         </Button>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
+      <div className="grid grid-cols-2 divide-x">
+        <div className="pr-4">
           <p className="text-sm font-medium mb-2">Team A</p>
           <div className="space-y-1">
             {assignment.teamA.map((player) => (
@@ -428,7 +470,7 @@ function AssignmentCard({ assignment, onEdit }: { assignment: Assignment; onEdit
             ))}
           </div>
         </div>
-        <div>
+        <div className="pl-4">
           <p className="text-sm font-medium mb-2">Team B</p>
           <div className="space-y-1">
             {assignment.teamB.map((player) => (

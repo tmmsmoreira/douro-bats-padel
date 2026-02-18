@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { formatDate, formatTime } from "@/lib/utils"
 import Link from "next/link"
-import { Trash2 } from "lucide-react"
+import { Calendar, Clock, MapPin, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import {
@@ -53,6 +53,27 @@ export function EventDetails({ eventId }: { eventId: string }) {
 
       return res.json()
     },
+  })
+
+  // Fetch draw if event has one
+  const { data: draw } = useQuery({
+    queryKey: ["draw", eventId],
+    queryFn: async () => {
+      try {
+        const headers: HeadersInit = {
+          "Content-Type": "application/json",
+        }
+        if (session?.accessToken) {
+          headers.Authorization = `Bearer ${session.accessToken}`
+        }
+        const res = await fetch(`${API_URL}/draws/events/${eventId}`, { headers })
+        if (!res.ok) return null
+        return res.json()
+      } catch {
+        return null
+      }
+    },
+    enabled: event?.state === "DRAWN" || event?.state === "PUBLISHED",
   })
 
   const freezeMutation = useMutation({
@@ -149,29 +170,61 @@ export function EventDetails({ eventId }: { eventId: string }) {
     return <div className="text-center py-8">{t("eventNotFound")}</div>
   }
 
+  // Check if event has passed
+  const eventEndTime = new Date(event.endsAt)
+  const hasEventPassed = eventEndTime < new Date()
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">{event.title || t("untitledEvent")}</h1>
-          <p className="text-muted-foreground">
-            {formatDate(event.date)} • {formatTime(event.startsAt)} - {formatTime(event.endsAt)}
-          </p>
+          <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <Calendar className="h-4 w-4" />
+              <span>
+                {new Date(event.date).toLocaleDateString("en-US", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </span>
+            </div>
+            {event.venue && (
+              <div className="flex items-center gap-1">
+                <MapPin className="h-4 w-4" />
+                <span>{event.venue.name}</span>
+              </div>
+            )}
+          </div>
         </div>
         <div className="flex gap-2">
-          <Link href={`/admin/events/${eventId}/edit`}>
-            <Button variant="outline">{t("editEvent")}</Button>
-          </Link>
-          {event.state === "DRAFT" && <Button onClick={() => publishMutation.mutate()}>{t("publishEvent")}</Button>}
-          {event.state === "OPEN" && <Button onClick={() => freezeMutation.mutate()}>{t("freezeRsvps")}</Button>}
-          {event.state === "FROZEN" && (
+          {!hasEventPassed && (
+            <Link href={`/admin/events/${eventId}/edit`}>
+              <Button variant="outline">{t("editEvent")}</Button>
+            </Link>
+          )}
+          {event.state === "DRAFT" && !hasEventPassed && <Button onClick={() => publishMutation.mutate()}>{t("publishEvent")}</Button>}
+          {event.state === "OPEN" && !hasEventPassed && <Button onClick={() => freezeMutation.mutate()}>{t("freezeRsvps")}</Button>}
+          {event.state === "FROZEN" && !hasEventPassed && (
             <Link href={`/admin/events/${eventId}/draw`}>
               <Button>{t("generateDraw")}</Button>
             </Link>
           )}
-          {(event.state === "DRAWN" || event.state === "PUBLISHED") && (
+          {event.state === "DRAWN" && !hasEventPassed && (
             <Link href={`/admin/events/${eventId}/draw/view`}>
               <Button variant="outline">{t("viewEditDraw")}</Button>
+            </Link>
+          )}
+          {event.state === "PUBLISHED" && !hasEventPassed && (
+            <Link href={`/admin/events/${eventId}/draw/view`}>
+              <Button variant="outline">{t("viewEditDraw")}</Button>
+            </Link>
+          )}
+          {event.state === "PUBLISHED" && hasEventPassed && (
+            <Link href={`/admin/events/${eventId}/results`}>
+              <Button>{t("enterResults")}</Button>
             </Link>
           )}
           <Button
@@ -179,50 +232,84 @@ export function EventDetails({ eventId }: { eventId: string }) {
             onClick={handleDeleteEvent}
             disabled={isDeleting}
           >
-            <Trash2 className="h-4 w-4 mr-2" />
+            <Trash2 className="h-4 w-4" />
             {isDeleting ? t("deleting") : t("deleteEvent")}
           </Button>
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("confirmedPlayers")} ({event.confirmedCount})</CardTitle>
-            <CardDescription>{t("spotsRemaining", { count: event.capacity - event.confirmedCount })}</CardDescription>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="space-y-2">
-              {event.confirmedPlayers?.map((player: any) => (
-                <div key={player.id} className="flex items-center justify-between py-2 border-b last:border-0">
-                  <span>{player.name}</span>
-                  <span className="text-sm text-muted-foreground">{player.rating}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+      {/* Show draw if it exists, otherwise show confirmed players */}
+      {draw ? (
+        <div className="space-y-6">
+          <DrawSummary draw={draw} />
 
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("waitlist")} ({event.waitlistCount})</CardTitle>
-            <CardDescription>{t("playersWaitingForSpot")}</CardDescription>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="space-y-2">
-              {event.waitlistedPlayers?.map((player: any) => (
-                <div key={player.id} className="flex items-center justify-between py-2 border-b last:border-0">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary">#{player.position}</Badge>
-                    <span>{player.name}</span>
+          {/* Always show waitlist if there are waitlisted players */}
+          {(event.waitlistCount > 0 || event.waitlistedPlayers?.length > 0) && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("waitlist")} ({event.waitlistCount || event.waitlistedPlayers?.length || 0})</CardTitle>
+                <CardDescription>{t("playersWaitingForSpot")}</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0">
+                {event.waitlistedPlayers && event.waitlistedPlayers.length > 0 ? (
+                  <div className="space-y-2">
+                    {event.waitlistedPlayers.map((player: any) => (
+                      <div key={player.id} className="flex items-center justify-between py-2 border-b last:border-0">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary">#{player.position}</Badge>
+                          <span>{player.name}</span>
+                        </div>
+                        <span className="text-sm text-muted-foreground">{player.rating}</span>
+                      </div>
+                    ))}
                   </div>
-                  <span className="text-sm text-muted-foreground">{player.rating}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No players on waitlist</p>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      ) : (
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("confirmedPlayers")} ({event.confirmedCount})</CardTitle>
+              <CardDescription>{t("spotsRemaining", { count: event.capacity - event.confirmedCount })}</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-2">
+                {event.confirmedPlayers?.map((player: any) => (
+                  <div key={player.id} className="flex items-center justify-between py-2 border-b last:border-0">
+                    <span>{player.name}</span>
+                    <span className="text-sm text-muted-foreground">{player.rating}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("waitlist")} ({event.waitlistCount})</CardTitle>
+              <CardDescription>{t("playersWaitingForSpot")}</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-2">
+                {event.waitlistedPlayers?.map((player: any) => (
+                  <div key={player.id} className="flex items-center justify-between py-2 border-b last:border-0">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary">#{player.position}</Badge>
+                      <span>{player.name}</span>
+                    </div>
+                    <span className="text-sm text-muted-foreground">{player.rating}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Delete Event Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
@@ -248,6 +335,124 @@ export function EventDetails({ eventId }: { eventId: string }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    </div>
+  )
+}
+
+// Draw Summary Component
+function DrawSummary({ draw }: { draw: any }) {
+  // Group assignments by tier and round
+  const masterAssignments = draw.assignments?.filter((a: any) => a.tier === "MASTERS") || []
+  const explorerAssignments = draw.assignments?.filter((a: any) => a.tier === "EXPLORERS") || []
+
+  const mastersRounds: Record<number, any[]> = {}
+  masterAssignments.forEach((assignment: any) => {
+    if (!mastersRounds[assignment.round]) {
+      mastersRounds[assignment.round] = []
+    }
+    mastersRounds[assignment.round].push(assignment)
+  })
+
+  const explorersRounds: Record<number, any[]> = {}
+  explorerAssignments.forEach((assignment: any) => {
+    if (!explorersRounds[assignment.round]) {
+      explorersRounds[assignment.round] = []
+    }
+    explorersRounds[assignment.round].push(assignment)
+  })
+
+  return (
+    <div className="space-y-6">
+      {/* Masters Draw */}
+      {Object.keys(mastersRounds).length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <h2 className="text-2xl font-bold">Masters</h2>
+            {draw.event?.tierRules?.mastersTimeSlot && (
+              <Badge variant="secondary" className="text-sm">
+                <Clock className="mr-2 h-4 w-4" /> {draw.event.tierRules.mastersTimeSlot.startsAt} - {draw.event.tierRules.mastersTimeSlot.endsAt}
+              </Badge>
+            )}
+          </div>
+          {Object.entries(mastersRounds).map(([round, assignments]) => (
+            <Card key={`masters-${round}`}>
+              <CardHeader>
+                <CardTitle>Round {round}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {assignments.map((assignment: any) => (
+                    <AssignmentSummaryCard key={assignment.id} assignment={assignment} />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Explorers Draw */}
+      {Object.keys(explorersRounds).length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <h2 className="text-2xl font-bold">Explorers</h2>
+            {draw.event?.tierRules?.explorersTimeSlot && (
+              <Badge variant="secondary" className="text-sm">
+                <Clock className="mr-2 h-4 w-4" /> {draw.event.tierRules.explorersTimeSlot.startsAt} - {draw.event.tierRules.explorersTimeSlot.endsAt}
+              </Badge>
+            )}
+          </div>
+          {Object.entries(explorersRounds).map(([round, assignments]) => (
+            <Card key={`explorers-${round}`}>
+              <CardHeader>
+                <CardTitle>Round {round}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {assignments.map((assignment: any) => (
+                    <AssignmentSummaryCard key={assignment.id} assignment={assignment} />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// Assignment Summary Card (simplified, read-only version)
+function AssignmentSummaryCard({ assignment }: { assignment: any }) {
+  return (
+    <div className="border rounded-lg p-4">
+      <div className="mb-3">
+        <Badge variant="outline">{assignment.court?.label || `Court ${assignment.courtId}`}</Badge>
+      </div>
+      <div className="grid grid-cols-2 divide-x">
+        <div className="pr-4">
+          <p className="text-sm font-medium mb-2">Team A</p>
+          <div className="space-y-1">
+            {assignment.teamA?.map((player: any) => (
+              <div key={player.id} className="flex items-center justify-between text-sm">
+                <span>{player.name}</span>
+                <span className="text-xs text-muted-foreground">{player.rating}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="pl-4">
+          <p className="text-sm font-medium mb-2">Team B</p>
+          <div className="space-y-1">
+            {assignment.teamB?.map((player: any) => (
+              <div key={player.id} className="flex items-center justify-between text-sm">
+                <span>{player.name}</span>
+                <span className="text-xs text-muted-foreground">{player.rating}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

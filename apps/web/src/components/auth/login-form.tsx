@@ -7,6 +7,8 @@ import { signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import Link from "next/link"
 
 export function LoginForm() {
@@ -53,47 +55,53 @@ export function LoginForm() {
   }
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full max-w-md border-0 shadow-none sm:border sm:shadow-sm">
       <CardHeader className="space-y-1 px-4 sm:px-6 pt-6">
-        <CardTitle className="text-xl sm:text-2xl">Sign In</CardTitle>
-        <CardDescription className="text-sm">Enter your credentials to access Padel Manager</CardDescription>
+        <CardTitle className="text-2xl sm:text-3xl font-bold">Welcome back!</CardTitle>
+        <CardDescription className="text-sm">Enter your credentials to access your account</CardDescription>
       </CardHeader>
       <CardContent className="pt-0 px-4 sm:px-6 pb-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium">
-              Email
-            </label>
-            <input
+            <Label htmlFor="email">Email</Label>
+            <Input
               id="email"
               type="email"
+              placeholder="hello@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 text-base border rounded-md"
+              className="h-11"
               required
             />
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <label htmlFor="password" className="text-sm font-medium">
-                Password
-              </label>
+              <Label htmlFor="password">Password</Label>
               <Link href="/forgot-password" className="text-xs text-primary hover:underline">
                 Forgot password?
               </Link>
             </div>
-            <input
+            <Input
               id="password"
               type="password"
+              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 text-base border rounded-md"
+              className="h-11"
               required
             />
           </div>
-          {successMessage && <p className="text-sm text-green-600">{successMessage}</p>}
-          {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          {successMessage && (
+            <div className="bg-success/10 border border-success/20 text-success px-4 py-3 rounded-md text-sm">
+              {successMessage}
+            </div>
+          )}
+          {error && (
+            <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-md text-sm">
+              {error}
+            </div>
+          )}
+          <Button type="submit" className="w-full h-11 text-base" disabled={isLoading}>
             {isLoading ? "Signing in..." : "Sign In"}
           </Button>
 
@@ -109,7 +117,7 @@ export function LoginForm() {
           <Button
             type="button"
             variant="outline"
-            className="w-full"
+            className="w-full h-11"
             onClick={() => signIn("google", { callbackUrl: "/" })}
             disabled={isLoading}
           >
@@ -137,15 +145,17 @@ export function LoginForm() {
           <div className="text-center text-sm text-muted-foreground space-y-2">
             <p>
               Don't have an account?{" "}
-              <Link href="/register" className="text-primary hover:underline">
+              <Link href="/register" className="text-primary hover:underline font-medium">
                 Create account
               </Link>
             </p>
             {process.env.NODE_ENV === "development" && (
-              <div className="pt-2 border-t">
-                <p className="font-medium">Demo credentials:</p>
-                <p>Editor: tiago@dorobats.com / editor123</p>
-                <p>Admin: admin@dorobats.com / admin123</p>
+              <div className="pt-2 border-t mt-4">
+                <p className="font-medium text-foreground mb-2">Demo credentials:</p>
+                <div className="text-xs space-y-1">
+                  <p>Editor: tiago@dorobats.com / editor123</p>
+                  <p>Admin: admin@dorobats.com / admin123</p>
+                </div>
               </div>
             )}
           </div>

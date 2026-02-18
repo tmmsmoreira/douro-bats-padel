@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation"
 import { signIn } from "next-auth/react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import Link from "next/link"
 
 export function RegisterForm() {
@@ -81,7 +83,7 @@ export function RegisterForm() {
         <CardContent className="pt-0 space-y-4">
           <div className="flex justify-center py-4">
             <svg
-              className="h-16 w-16 text-green-500"
+              className="h-16 w-16 text-success"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -129,69 +131,69 @@ export function RegisterForm() {
   }
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full max-w-md border-0 shadow-none sm:border sm:shadow-sm">
       <CardHeader className="space-y-1 px-4 sm:px-6 pt-6">
-        <CardTitle className="text-xl sm:text-2xl">Create Account</CardTitle>
-        <CardDescription className="text-sm">Register to access Padel Manager</CardDescription>
+        <CardTitle className="text-2xl sm:text-3xl font-bold">Create Account</CardTitle>
+        <CardDescription className="text-sm">Join the Douro Bats Padel community</CardDescription>
       </CardHeader>
       <CardContent className="pt-0 px-4 sm:px-6 pb-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <label htmlFor="name" className="text-sm font-medium">
-              Name
-            </label>
-            <input
+            <Label htmlFor="name">Name</Label>
+            <Input
               id="name"
               type="text"
+              placeholder="John Doe"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 text-base border rounded-md"
+              className="h-11"
               required
             />
           </div>
           <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium">
-              Email
-            </label>
-            <input
+            <Label htmlFor="email">Email</Label>
+            <Input
               id="email"
               type="email"
+              placeholder="hello@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 text-base border rounded-md"
+              className="h-11"
               required
             />
           </div>
           <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium">
-              Password
-            </label>
-            <input
+            <Label htmlFor="password">Password</Label>
+            <Input
               id="password"
               type="password"
+              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 text-base border rounded-md"
+              className="h-11"
               required
               minLength={6}
             />
           </div>
           <div className="space-y-2">
-            <label htmlFor="confirmPassword" className="text-sm font-medium">
-              Confirm Password
-            </label>
-            <input
+            <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <Input
               id="confirmPassword"
               type="password"
+              placeholder="••••••••"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-3 py-2 text-base border rounded-md"
+              className="h-11"
               required
               minLength={6}
             />
           </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          {error && (
+            <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-md text-sm">
+              {error}
+            </div>
+          )}
+          <Button type="submit" className="w-full h-11 text-base" disabled={isLoading}>
             {isLoading ? "Creating account..." : "Create Account"}
           </Button>
 
@@ -207,7 +209,7 @@ export function RegisterForm() {
           <Button
             type="button"
             variant="outline"
-            className="w-full"
+            className="w-full h-11"
             onClick={() => signIn("google", { callbackUrl: "/" })}
             disabled={isLoading}
           >
@@ -235,7 +237,7 @@ export function RegisterForm() {
           <div className="text-center text-sm text-muted-foreground">
             <p>
               Already have an account?{" "}
-              <Link href="/login" className="text-primary hover:underline">
+              <Link href="/login" className="text-primary hover:underline font-medium">
                 Sign in
               </Link>
             </p>

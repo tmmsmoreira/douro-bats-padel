@@ -210,6 +210,40 @@ export class DrawService {
       },
     })
 
+    // Move excess CONFIRMED players to WAITLISTED status
+    // Players who were CONFIRMED but didn't make it into the draw due to capacity limits
+    const playersInDraw = new Set(adjustedRsvps.map((r) => r.player.id))
+    const excessPlayers = sortedRsvps.filter((r) => !playersInDraw.has(r.player.id))
+
+    if (excessPlayers.length > 0) {
+      console.log(`Moving ${excessPlayers.length} excess players to waitlist`)
+
+      // Get current max position in waitlist (if any existing waitlisted players)
+      const existingWaitlist = await this.prisma.rSVP.findMany({
+        where: {
+          eventId,
+          status: "WAITLISTED",
+        },
+        orderBy: {
+          position: "desc",
+        },
+        take: 1,
+      })
+
+      let nextPosition = existingWaitlist.length > 0 && existingWaitlist[0].position ? existingWaitlist[0].position + 1 : 1
+
+      // Update each excess player to WAITLISTED status with position
+      for (const rsvp of excessPlayers) {
+        await this.prisma.rSVP.update({
+          where: { id: rsvp.id },
+          data: {
+            status: "WAITLISTED",
+            position: nextPosition++,
+          },
+        })
+      }
+    }
+
     // Notify players
     const emails = event.rsvps.map((r) => r.player.user.email).filter(Boolean) as string[]
     await this.notificationService.announceEventOpen(emails, event)
@@ -695,6 +729,9 @@ export class DrawService {
       where: { id: eventId },
       include: {
         draws: true,
+        rsvps: {
+          where: { status: "WAITLISTED" },
+        },
       },
     })
 
@@ -715,6 +752,23 @@ export class DrawService {
     await this.prisma.draw.delete({
       where: { id: event.draws[0].id },
     })
+
+    // Move all WAITLISTED players back to CONFIRMED status
+    // This allows them to be included in a new draw if regenerated
+    if (event.rsvps.length > 0) {
+      console.log(`Restoring ${event.rsvps.length} waitlisted players to CONFIRMED status`)
+
+      await this.prisma.rSVP.updateMany({
+        where: {
+          eventId,
+          status: "WAITLISTED",
+        },
+        data: {
+          status: "CONFIRMED",
+          position: null,
+        },
+      })
+    }
 
     // Reset event state to FROZEN so admin can regenerate
     await this.prisma.event.update({

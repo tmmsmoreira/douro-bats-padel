@@ -1,6 +1,6 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
 import { useTranslations } from "next-intl"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -13,6 +13,7 @@ import Link from "next/link"
 import type { EventWithRSVP } from "@padel/types"
 import { useState, useMemo } from "react"
 import { Trash2 } from "lucide-react"
+import { toast } from "sonner"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
 
@@ -22,6 +23,7 @@ const EVENTS_PER_PAGE = 10
 
 export function EventsList() {
   const { data: session } = useSession()
+  const queryClient = useQueryClient()
   const t = useTranslations("eventsList")
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
   const [statusFilter, setStatusFilter] = useState<EventState>("ALL")
@@ -46,6 +48,30 @@ export function EventsList() {
       }
 
       return res.json() as Promise<EventWithRSVP[]>
+    },
+  })
+
+  const publishDrawMutation = useMutation({
+    mutationFn: async (eventId: string) => {
+      if (!session?.accessToken) throw new Error("Not authenticated")
+
+      const res = await fetch(`${API_URL}/draws/events/${eventId}/publish`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.accessToken}`,
+        },
+      })
+
+      if (!res.ok) throw new Error("Failed to publish draw")
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-events"] })
+      toast.success("Draw published successfully! Players have been notified.")
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to publish draw: ${error.message}`)
     },
   })
 
@@ -156,7 +182,12 @@ export function EventsList() {
       ) : (
         <>
           <div className="grid gap-4">
-            {paginatedEvents.map((event) => (
+            {paginatedEvents.map((event) => {
+              // Check if event has passed
+              const eventEndTime = new Date(event.endsAt)
+              const hasEventPassed = eventEndTime < new Date()
+
+              return (
         <Card key={event.id}>
           <CardHeader>
             <div className="flex items-start justify-between">
@@ -185,12 +216,21 @@ export function EventsList() {
                     {t("manage")}
                   </Button>
                 </Link>
-                {event.state === "FROZEN" && (
+                {event.state === "FROZEN" && !hasEventPassed && (
                   <Link href={`/admin/events/${event.id}/draw`}>
                     <Button size="sm">{t("generateDraw")}</Button>
                   </Link>
                 )}
-                {event.state === "DRAWN" && (
+                {event.state === "DRAWN" && !hasEventPassed && (
+                  <Button
+                    size="sm"
+                    onClick={() => publishDrawMutation.mutate(event.id)}
+                    disabled={publishDrawMutation.isPending}
+                  >
+                    {publishDrawMutation.isPending ? "Publishing..." : t("publish")}
+                  </Button>
+                )}
+                {event.state === "PUBLISHED" && hasEventPassed && (
                   <Link href={`/admin/events/${event.id}/results`}>
                     <Button size="sm">{t("enterResults")}</Button>
                   </Link>
@@ -199,7 +239,8 @@ export function EventsList() {
             </div>
           </CardContent>
         </Card>
-          ))}
+              )
+            })}
           </div>
 
           {/* Pagination */}

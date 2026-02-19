@@ -7,7 +7,6 @@ import { useRouter } from '@/i18n/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { formatDate, formatTime } from '@/lib/utils';
 import Link from 'next/link';
 import { Calendar, Clock, MapPin, Trash2 } from 'lucide-react';
 import { useState } from 'react';

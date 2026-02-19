@@ -32,6 +32,7 @@ pnpm format
 
 ```bash
 pnpm lint
+
 ```
 
 ### Lint Specific Package
@@ -56,6 +57,7 @@ cd packages/types && pnpm lint
 - **Settings**:
   - Single quotes
   - Semicolons enabled
+
   - 2-space indentation
   - 100 character line width
   - ES5 trailing commas
@@ -63,6 +65,7 @@ cd packages/types && pnpm lint
 ### ESLint
 
 - **Shared config**: `packages/config/eslint-preset.js`
+
 - **Package configs**:
   - `apps/web/.eslintrc.json`
   - `apps/api/.eslintrc.json`
@@ -71,16 +74,18 @@ cd packages/types && pnpm lint
 ### EditorConfig
 
 - **Config**: `.editorconfig`
+
 - Ensures consistent settings across different editors
 
-## 🪝 Git Hooks (Pre-commit)
+## 🪝 Git Hooks (Pre-commit) - Optional
 
-The project uses **Husky** and **lint-staged** to automatically format and lint staged files before commit.
+The project has **Husky** and **lint-staged** configured to automatically format staged files before commit.
+
+**Note**: ESLint auto-fix is currently disabled in the pre-commit hook due to existing linting errors in the web package. Once those are fixed, you can add ESLint back to `.lintstagedrc.js`.
 
 ### What happens on commit:
 
 1. **Staged `.ts`, `.tsx`, `.js`, `.jsx` files**:
-   - ESLint auto-fix
    - Prettier formatting
 
 2. **Staged `.json`, `.md`, `.yml`, `.yaml` files**:
@@ -126,6 +131,7 @@ The workspace settings (`.vscode/settings.json`) include:
 2. **Check ESLint output**:
    - Open Output panel (`Cmd+Shift+U`)
    - Select "ESLint" from dropdown
+
 3. **Restart ESLint server**:
    - Open Command Palette (`Cmd+Shift+P`)
    - Type "ESLint: Restart ESLint Server"

@@ -52,7 +52,7 @@ export function VerifyEmailForm() {
       setTimeout(() => {
         router.push('/login');
       }, 3000);
-    } catch (err) {
+    } catch {
       setError('An error occurred during verification');
       setIsLoading(false);
     }
@@ -113,7 +113,7 @@ export function VerifyEmailForm() {
     <Card className="w-full max-w-md">
       <CardHeader>
         <CardTitle>Verification Failed</CardTitle>
-        <CardDescription>We couldn't verify your email address</CardDescription>
+        <CardDescription>We couldn&apos;t verify your email address</CardDescription>
       </CardHeader>
       <CardContent className="pt-0 space-y-4">
         <div className="flex justify-center py-4">

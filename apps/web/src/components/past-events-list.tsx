@@ -9,14 +9,12 @@ import { formatDate, formatTime } from '@/lib/utils';
 import { Link } from '@/i18n/navigation';
 import type { EventWithRSVP } from '@padel/types';
 import { useTranslations } from 'next-intl';
-import { useLocale } from 'next-intl';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export function PastEventsList() {
   const { data: session } = useSession();
   const t = useTranslations();
-  const locale = useLocale();
 
   const { data: events, isLoading } = useQuery({
     queryKey: ['past-events', session?.accessToken],

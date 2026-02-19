@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { HomeNav } from '@/components/home-nav';
@@ -142,7 +143,7 @@ export default function FAQPage() {
               <div className="space-y-2 sm:space-y-3">
                 {faqs
                   .filter((faq) => faq.category === category)
-                  .map((faq, index) => {
+                  .map((faq) => {
                     const globalIndex = faqs.indexOf(faq);
                     const isOpen = openIndex === globalIndex;
 
@@ -180,15 +181,15 @@ export default function FAQPage() {
             </CardHeader>
             <CardContent className="pt-0">
               <p className="text-muted-foreground mb-4">
-                If you couldn't find the answer you're looking for, feel free to reach out to our
-                support team.
+                If you couldn&apos;t find the answer you&apos;re looking for, feel free to reach out
+                to our support team.
               </p>
-              <a
+              <Link
                 href="/contact"
                 className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
               >
                 Contact Us
-              </a>
+              </Link>
             </CardContent>
           </Card>
         </div>

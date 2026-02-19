@@ -11,7 +11,6 @@ import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useTranslations } from 'next-intl';
 import { useLocale } from 'next-intl';
 import { AlertTriangle } from 'lucide-react';
 
@@ -26,7 +25,6 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const locale = useLocale();
-  const t = useTranslations('generateDraw');
 
   const [constraints, setConstraints] = useState({
     avoidRecentSessions: 4,
@@ -156,7 +154,6 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
 
   // Get unique courts for display purposes
   const allAvailableCourts = [...new Set([...mastersCourts, ...explorersCourts])];
-  const allSelectedCourts = [...new Set([...selectedMastersCourts, ...selectedExplorersCourts])];
   const maxPlayersPerCourt = 4;
 
   // Adjust player count to nearest multiple of 4 (round down)

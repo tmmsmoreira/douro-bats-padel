@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Footer } from '@/components/footer';
 import { HomeNavClient } from '@/components/client-nav-wrapper';
@@ -170,9 +171,9 @@ export default function PrivacyPage() {
                 We use cookies and similar tracking technologies to enhance your experience on our
                 platform. You can control cookie settings through your browser preferences. For more
                 information, see our{' '}
-                <a href="/cookies" className="text-primary hover:underline">
+                <Link href="/cookies" className="text-primary hover:underline">
                   Cookie Policy
-                </a>
+                </Link>
                 .
               </p>
             </CardContent>
@@ -195,7 +196,7 @@ export default function PrivacyPage() {
           {/* Children's Privacy */}
           <Card>
             <CardHeader>
-              <CardTitle>10. Children's Privacy</CardTitle>
+              <CardTitle>10. Children&apos;s Privacy</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-muted-foreground">
@@ -214,8 +215,8 @@ export default function PrivacyPage() {
             <CardContent className="space-y-4">
               <p className="text-muted-foreground">
                 We may update this Privacy Policy from time to time. We will notify you of any
-                changes by posting the new Privacy Policy on this page and updating the "Last
-                updated" date.
+                changes by posting the new Privacy Policy on this page and updating the &quot;Last
+                updated&quot; date.
               </p>
             </CardContent>
           </Card>

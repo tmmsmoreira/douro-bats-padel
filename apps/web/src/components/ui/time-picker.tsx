@@ -50,7 +50,7 @@ export function TimePicker({
   id,
 }: TimePickerProps) {
   const [open, setOpen] = React.useState(false);
-  const [time, setTime] = React.useState<Date | undefined>(value);
+  const [_time, setTime] = React.useState<Date | undefined>(value);
   const [inputValue, setInputValue] = React.useState(formatTime(value));
 
   // Sync with external value changes

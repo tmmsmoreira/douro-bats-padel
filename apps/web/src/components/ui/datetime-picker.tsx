@@ -15,7 +15,7 @@ interface DateTimePickerProps {
 export function DateTimePicker({
   value,
   onChange,
-  placeholder = 'Select date and time',
+  placeholder: _placeholder = 'Select date and time',
   disabled,
   id,
 }: DateTimePickerProps) {

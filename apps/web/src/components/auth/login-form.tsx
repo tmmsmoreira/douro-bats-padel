@@ -50,7 +50,7 @@ export function LoginForm() {
         router.push(`/${locale}`);
         router.refresh();
       }
-    } catch (err) {
+    } catch {
       setError(t('errorOccurred'));
     } finally {
       setIsLoading(false);

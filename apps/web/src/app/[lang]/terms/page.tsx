@@ -107,7 +107,7 @@ export default function TermsPage() {
                 <li>Use offensive, abusive, or inappropriate language</li>
                 <li>Attempt to manipulate rankings or tournament results</li>
                 <li>Share account credentials with others</li>
-                <li>Interfere with the platform's operation or security</li>
+                <li>Interfere with the platform&apos;s operation or security</li>
                 <li>Violate any applicable laws or regulations</li>
               </ul>
             </CardContent>

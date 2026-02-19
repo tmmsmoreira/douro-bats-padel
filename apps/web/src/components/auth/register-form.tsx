@@ -3,7 +3,6 @@
 import type React from 'react';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,7 +11,6 @@ import { Label } from '@/components/ui/label';
 import Link from 'next/link';
 
 export function RegisterForm() {
-  const router = useRouter();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -67,7 +65,7 @@ export function RegisterForm() {
         setVerificationToken(data.token);
       }
       setIsLoading(false);
-    } catch (err) {
+    } catch {
       setError('An error occurred during registration');
       setIsLoading(false);
     }
@@ -97,8 +95,8 @@ export function RegisterForm() {
             </svg>
           </div>
           <p className="text-sm text-muted-foreground text-center">
-            We've sent a verification email to <strong>{email}</strong>. Please check your inbox and
-            click the verification link to activate your account.
+            We&apos;ve sent a verification email to <strong>{email}</strong>. Please check your
+            inbox and click the verification link to activate your account.
           </p>
           {process.env.NODE_ENV === 'development' && verificationToken && (
             <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
@@ -123,7 +121,7 @@ export function RegisterForm() {
           </Link>
           <div className="text-center text-sm text-muted-foreground">
             <p>
-              Didn't receive the email?{' '}
+              Didn&apos;t receive the email?{' '}
               <Link href="/resend-verification" className="text-primary hover:underline">
                 Resend verification
               </Link>

@@ -44,7 +44,7 @@ export default function ContactPage() {
           <div className="text-center space-y-3 sm:space-y-4">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">Contact Us</h1>
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground">
-              Have questions? We'd love to hear from you.
+              Have questions? We&apos;d love to hear from you.
             </p>
           </div>
 
@@ -55,7 +55,7 @@ export default function ContactPage() {
                 <CardHeader>
                   <CardTitle>Get in Touch</CardTitle>
                   <CardDescription>
-                    We're here to help and answer any questions you might have
+                    We&apos;re here to help and answer any questions you might have
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-0 space-y-4">
@@ -119,7 +119,7 @@ export default function ContactPage() {
                 <CardHeader>
                   <CardTitle>Send us a Message</CardTitle>
                   <CardDescription>
-                    Fill out the form below and we'll get back to you as soon as possible
+                    Fill out the form below and we&apos;ll get back to you as soon as possible
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-0">
@@ -186,7 +186,7 @@ export default function ContactPage() {
 
                     {submitted && (
                       <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg text-green-700 dark:text-green-400">
-                        Thank you for your message! We'll get back to you soon.
+                        Thank you for your message! We&apos;ll get back to you soon.
                       </div>
                     )}
                   </form>

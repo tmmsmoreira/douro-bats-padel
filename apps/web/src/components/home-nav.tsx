@@ -133,11 +133,6 @@ export function HomeNav() {
                 </>
               ) : (
                 <div className="flex items-center gap-2">
-                  <Link href="/register">
-                    <Button variant="outline" size="sm">
-                      {t('signUp')}
-                    </Button>
-                  </Link>
                   <Link href="/login">
                     <Button size="sm">{t('signIn')}</Button>
                   </Link>
@@ -221,11 +216,6 @@ export function HomeNav() {
               </div>
             ) : (
               <div className="flex flex-col gap-2 pt-3 border-t">
-                <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="outline" className="w-full">
-                    {t('signUp')}
-                  </Button>
-                </Link>
                 <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
                   <Button className="w-full">{t('signIn')}</Button>
                 </Link>

@@ -30,6 +30,7 @@ export function AdminNav() {
     { href: '/admin', label: t('events') },
     { href: '/admin/players', label: t('players') },
     { href: '/admin/venues', label: t('venues') },
+    { href: '/admin/invitations', label: t('invitations') },
   ];
 
   return (

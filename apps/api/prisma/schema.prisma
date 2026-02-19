@@ -20,6 +20,7 @@ model User {
   resetPasswordToken        String?        @unique
   resetPasswordExpires      DateTime?
   player                    PlayerProfile?
+  invitationsSent           Invitation[]
   createdAt                 DateTime       @default(now())
   updatedAt                 DateTime       @updatedAt
 }
@@ -178,10 +179,34 @@ model RankingSnapshot {
   @@index([playerId, createdAt])
 }
 
+model Invitation {
+  id          String           @id @default(cuid())
+  email       String
+  token       String           @unique
+  status      InvitationStatus @default(PENDING)
+  invitedBy   String
+  invitedByUser User?          @relation(fields: [invitedBy], references: [id], onDelete: SetNull)
+  expiresAt   DateTime
+  usedAt      DateTime?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([email, status])
+  @@index([token])
+  @@index([status, expiresAt])
+}
+
 enum Role {
   VIEWER
   EDITOR
   ADMIN
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+  EXPIRED
 }
 
 enum Tier {

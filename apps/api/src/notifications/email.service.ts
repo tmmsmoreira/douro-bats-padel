@@ -4,6 +4,7 @@ import { Resend } from 'resend';
 import { render } from '@react-email/components';
 import VerificationEmail from '../emails/verification-email';
 import PasswordResetEmail from '../emails/password-reset-email';
+import InvitationEmail from '../emails/invitation-email';
 
 @Injectable()
 export class EmailService {
@@ -59,5 +60,13 @@ export class EmailService {
     const html = await render(PasswordResetEmail({ name, resetUrl }));
 
     return this.sendEmail(email, 'Reset Your Password - Douro Bats Padel', html);
+  }
+
+  async sendInvitationEmail(email: string, token: string, invitedByName: string) {
+    const invitationUrl = `${this.configService.get<string>('FRONTEND_URL')}/register?invitation=${token}`;
+
+    const html = await render(InvitationEmail({ invitationUrl, invitedByName }));
+
+    return this.sendEmail(email, "You're Invited to Join Douro Bats Padel", html);
   }
 }

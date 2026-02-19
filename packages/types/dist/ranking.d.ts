@@ -1,4 +1,4 @@
-import { Tier } from "./common";
+import { Tier } from './common';
 export type MatchResult = {
     matchId: string;
     tier: Tier;

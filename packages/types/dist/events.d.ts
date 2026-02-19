@@ -1,4 +1,4 @@
-import type { EventState, RSVPStatus } from "./common";
+import type { EventState, RSVPStatus } from './common';
 /**
  * Time slot for a tier with court assignments
  */
@@ -37,7 +37,7 @@ export interface CreateEventDto {
     tierRules?: TierRules;
 }
 export interface RSVPDto {
-    status: "IN" | "OUT";
+    status: 'IN' | 'OUT';
 }
 export interface RSVPResponse {
     status: RSVPStatus;

@@ -150,26 +150,15 @@ export function LoginForm() {
             {t('signInWithGoogle')}
           </Button>
 
-          <div className="text-center text-sm text-muted-foreground space-y-2">
-            <p>
-              {t('noAccount')}{' '}
-              <Link
-                href={`/${locale}/register`}
-                className="text-primary hover:underline font-medium"
-              >
-                {t('createAccount')}
-              </Link>
-            </p>
-            {process.env.NODE_ENV === 'development' && (
-              <div className="pt-2 border-t mt-4">
-                <p className="font-medium text-foreground mb-2">{t('demoCredentials')}</p>
-                <div className="text-xs space-y-1">
-                  <p>{t('demoEditor')}</p>
-                  <p>{t('demoAdmin')}</p>
-                </div>
+          {process.env.NODE_ENV === 'development' && (
+            <div className="text-center text-sm text-muted-foreground pt-2 border-t mt-4">
+              <p className="font-medium text-foreground mb-2">{t('demoCredentials')}</p>
+              <div className="text-xs space-y-1">
+                <p>{t('demoEditor')}</p>
+                <p>{t('demoAdmin')}</p>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </form>
       </CardContent>
     </Card>

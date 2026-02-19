@@ -18,7 +18,7 @@ const faqs: FAQItem[] = [
     category: 'Getting Started',
     question: 'How do I create an account?',
     answer:
-      'Click the "Sign Up" button in the top right corner and fill in your details. You can also sign up using your Google account for faster registration.',
+      'Douro Bats Padel is an invitation-only platform for association members. To create an account, you must receive an invitation email from an administrator. The email will contain a unique registration link. Click the link and complete the registration form with your details.',
   },
   {
     category: 'Getting Started',

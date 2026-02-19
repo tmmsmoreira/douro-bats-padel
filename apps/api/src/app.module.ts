@@ -8,12 +8,14 @@ import { DrawModule } from './draw/draw.module';
 import { MatchesModule } from './matches/matches.module';
 import { VenuesModule } from './venues/venues.module';
 import { PlayersModule } from './players/players.module';
+import { InvitationsModule } from './invitations/invitations.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     AuthModule,
+    InvitationsModule,
     EventsModule,
     VenuesModule,
     PlayersModule,

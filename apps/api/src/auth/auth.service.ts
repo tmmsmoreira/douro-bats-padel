@@ -3,6 +3,8 @@ import {
   UnauthorizedException,
   ConflictException,
   BadRequestException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -19,6 +21,7 @@ import type {
 } from '@padel/types';
 import { Role } from '@padel/types';
 import { EmailService } from '../notifications/email.service';
+import { InvitationsService } from '../invitations/invitations.service';
 
 @Injectable()
 export class AuthService {
@@ -26,10 +29,28 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private configService: ConfigService,
-    private emailService: EmailService
+    private emailService: EmailService,
+    @Inject(forwardRef(() => InvitationsService))
+    private invitationsService: InvitationsService
   ) {}
 
   async signup(dto: SignupDto): Promise<{ message: string; token?: string }> {
+    // Validate invitation token
+    if (!dto.invitationToken) {
+      throw new BadRequestException('Invitation token is required');
+    }
+
+    const invitationValidation = await this.invitationsService.validate(dto.invitationToken);
+
+    if (!invitationValidation.valid) {
+      throw new BadRequestException(invitationValidation.message || 'Invalid invitation');
+    }
+
+    // Verify email matches invitation
+    if (invitationValidation.email !== dto.email) {
+      throw new BadRequestException('Email does not match the invitation');
+    }
+
     const existingUser = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
@@ -68,6 +89,14 @@ export class AuthService {
         player: true,
       },
     });
+
+    // Mark invitation as used
+    try {
+      await this.invitationsService.markAsUsed(dto.invitationToken);
+    } catch (error) {
+      console.error('Failed to mark invitation as used:', error);
+      // Don't fail registration if this fails
+    }
 
     // Send verification email
     try {
@@ -122,6 +151,22 @@ export class AuthService {
 
     // If user doesn't exist, create them
     if (!user) {
+      // Validate invitation token for new users
+      if (!dto.invitationToken) {
+        throw new BadRequestException('Invitation token is required for new users');
+      }
+
+      const invitationValidation = await this.invitationsService.validate(dto.invitationToken);
+
+      if (!invitationValidation.valid) {
+        throw new BadRequestException(invitationValidation.message || 'Invalid invitation');
+      }
+
+      // Verify email matches invitation
+      if (invitationValidation.email !== dto.email) {
+        throw new BadRequestException('Email does not match the invitation');
+      }
+
       user = await this.prisma.user.create({
         data: {
           email: dto.email,
@@ -140,6 +185,14 @@ export class AuthService {
           player: true,
         },
       });
+
+      // Mark invitation as used
+      try {
+        await this.invitationsService.markAsUsed(dto.invitationToken);
+      } catch (error) {
+        console.error('Failed to mark invitation as used:', error);
+        // Don't fail registration if this fails
+      }
     } else {
       // Update profile photo and mark email as verified if provided
       const updateData: any = { emailVerified: true };

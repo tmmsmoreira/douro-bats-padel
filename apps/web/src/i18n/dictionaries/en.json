@@ -33,7 +33,8 @@
     "faq": "FAQ",
     "players": "Players",
     "venues": "Venues",
-    "playerView": "Player View"
+    "playerView": "Player View",
+    "invitations": "Invitations"
   },
   "auth": {
     "login": {
@@ -212,7 +213,31 @@
     "deleteVenue": "Delete Venue",
     "confirmDelete": "Are you sure you want to delete this venue?",
     "updateVenueDescription": "Update venue information and courts",
-    "createVenueDescription": "Add a new venue with courts"
+    "createVenueDescription": "Add a new venue with courts",
+    "invitationsManagement": "Invitations Management",
+    "invitationsDescription": "Send and manage member invitations",
+    "createInvitation": "Send Invitation",
+    "invitationEmail": "Email Address",
+    "invitationEmailPlaceholder": "member@example.com",
+    "expirationDays": "Expiration Days",
+    "expirationDaysPlaceholder": "7",
+    "sendInvitation": "Send Invitation",
+    "invitationSent": "Invitation sent successfully",
+    "invitationError": "Failed to send invitation",
+    "copyLink": "Copy Link",
+    "linkCopied": "Link copied to clipboard",
+    "revokeInvitation": "Revoke",
+    "invitationRevoked": "Invitation revoked successfully",
+    "confirmRevokeInvitation": "Are you sure you want to revoke this invitation?",
+    "invitationStatus": "Status",
+    "invitationPending": "Pending",
+    "invitationAccepted": "Accepted",
+    "invitationRevoked": "Revoked",
+    "invitationExpired": "Expired",
+    "invitedBy": "Invited By",
+    "expiresAt": "Expires At",
+    "usedAt": "Used At",
+    "noInvitations": "No invitations found"
   },
   "venuesList": {
     "loadingVenues": "Loading venues...",

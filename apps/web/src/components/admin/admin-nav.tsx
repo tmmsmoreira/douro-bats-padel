@@ -1,36 +1,36 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { Link, usePathname } from "@/i18n/navigation"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useState } from 'react';
+import { Link, usePathname } from '@/i18n/navigation';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { signOut, useSession } from "next-auth/react"
-import { User, LogOut, Menu, X } from "lucide-react"
-import { ThemeToggle } from "@/components/ui/theme-toggle"
-import { ThemeToggleButton } from "@/components/ui/theme-toggle-button"
-import { LanguageToggleButton } from "@/components/language-toggle-button"
-import { LanguageMenuItems } from "@/components/language-menu-items"
-import { useTranslations } from "next-intl"
+} from '@/components/ui/dropdown-menu';
+import { signOut, useSession } from 'next-auth/react';
+import { User, LogOut, Menu, X } from 'lucide-react';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { ThemeToggleButton } from '@/components/ui/theme-toggle-button';
+import { LanguageToggleButton } from '@/components/language-toggle-button';
+import { LanguageMenuItems } from '@/components/language-menu-items';
+import { useTranslations } from 'next-intl';
 
 export function AdminNav() {
-  const pathname = usePathname()
-  const { data: session } = useSession()
-  const t = useTranslations('nav')
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const pathname = usePathname();
+  const { data: session } = useSession();
+  const t = useTranslations('nav');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
-    { href: "/admin", label: t('events') },
-    { href: "/admin/players", label: t('players') },
-    { href: "/admin/venues", label: t('venues') },
-  ]
+    { href: '/admin', label: t('events') },
+    { href: '/admin/players', label: t('players') },
+    { href: '/admin/venues', label: t('venues') },
+  ];
 
   return (
     <nav className="border-b bg-card sticky top-0 z-50">
@@ -49,10 +49,10 @@ export function AdminNav() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "px-3 py-2 text-sm font-medium rounded-md transition-colors",
+                    'px-3 py-2 text-sm font-medium rounded-md transition-colors',
                     pathname === item.href
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                   )}
                 >
                   {item.label}
@@ -72,17 +72,17 @@ export function AdminNav() {
                     <Avatar className="h-10 w-10">
                       <AvatarImage
                         src={(session?.user as any)?.profilePhoto || undefined}
-                        alt={session?.user?.name || "User"}
+                        alt={session?.user?.name || 'User'}
                       />
                       <AvatarFallback className="bg-primary text-primary-foreground">
                         {session?.user?.name
                           ? session.user.name
-                              .split(" ")
+                              .split(' ')
                               .map((n) => n[0])
-                              .join("")
+                              .join('')
                               .toUpperCase()
                               .slice(0, 2)
-                          : session?.user?.email?.[0]?.toUpperCase() || "U"}
+                          : session?.user?.email?.[0]?.toUpperCase() || 'U'}
                       </AvatarFallback>
                     </Avatar>
                   </Button>
@@ -92,7 +92,9 @@ export function AdminNav() {
                     <div className="flex flex-col space-y-1 leading-none">
                       {session?.user?.name && <p className="font-medium">{session.user.name}</p>}
                       {session?.user?.email && (
-                        <p className="w-[200px] truncate text-sm text-muted-foreground">{session.user.email}</p>
+                        <p className="w-[200px] truncate text-sm text-muted-foreground">
+                          {session.user.email}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -108,10 +110,7 @@ export function AdminNav() {
                   <DropdownMenuSeparator />
                   <ThemeToggle />
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => signOut()}
-                    className="cursor-pointer flex gap-2"
-                  >
+                  <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer flex gap-2">
                     <LogOut className="h-4 w-4" />
                     <span>{t('signOut')}</span>
                   </DropdownMenuItem>
@@ -140,10 +139,10 @@ export function AdminNav() {
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
                 className={cn(
-                  "block px-3 py-2 text-base font-medium rounded-md transition-colors",
+                  'block px-3 py-2 text-base font-medium rounded-md transition-colors',
                   pathname === item.href
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                 )}
               >
                 {item.label}
@@ -174,8 +173,8 @@ export function AdminNav() {
                 size="sm"
                 className="w-full justify-start text-destructive hover:text-destructive"
                 onClick={() => {
-                  setMobileMenuOpen(false)
-                  signOut()
+                  setMobileMenuOpen(false);
+                  signOut();
                 }}
               >
                 <LogOut className="mr-2 h-4 w-4" />
@@ -186,5 +185,5 @@ export function AdminNav() {
         )}
       </div>
     </nav>
-  )
+  );
 }

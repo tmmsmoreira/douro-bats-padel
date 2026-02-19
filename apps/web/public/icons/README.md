@@ -5,6 +5,7 @@ This directory contains the icons for the Progressive Web App (PWA).
 ## Required Icons
 
 The following icon sizes are required:
+
 - 72x72
 - 96x96
 - 128x128
@@ -47,4 +48,3 @@ done
 ⚠️ **Placeholder icons needed**: Please generate the PNG icons using one of the methods above.
 
 The app will work without icons, but users won't be able to install it as a PWA until proper icons are provided.
-

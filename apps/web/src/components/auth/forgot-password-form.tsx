@@ -1,51 +1,51 @@
-"use client"
+'use client';
 
-import type React from "react"
+import type React from 'react';
 
-import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 export function ForgotPasswordForm() {
-  const [email, setEmail] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [success, setSuccess] = useState(false)
-  const [resetToken, setResetToken] = useState("")
+  const [email, setEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+  const [resetToken, setResetToken] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
-    setSuccess(false)
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+    setSuccess(false);
 
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/forgot-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
-      })
+      });
 
       if (!res.ok) {
-        const data = await res.json()
-        setError(data.message || "Failed to send reset email")
-        setIsLoading(false)
-        return
+        const data = await res.json();
+        setError(data.message || 'Failed to send reset email');
+        setIsLoading(false);
+        return;
       }
 
-      const data = await res.json()
-      setSuccess(true)
+      const data = await res.json();
+      setSuccess(true);
       // For development: show the token
       if (data.token) {
-        setResetToken(data.token)
+        setResetToken(data.token);
       }
-      setIsLoading(false)
+      setIsLoading(false);
     } catch (err) {
-      setError("An error occurred. Please try again.")
-      setIsLoading(false)
+      setError('An error occurred. Please try again.');
+      setIsLoading(false);
     }
-  }
+  };
 
   if (success) {
     return (
@@ -56,13 +56,17 @@ export function ForgotPasswordForm() {
         </CardHeader>
         <CardContent className="pt-0 space-y-4">
           <p className="text-sm text-muted-foreground">
-            If an account exists with the email <strong>{email}</strong>, you will receive password reset
-            instructions.
+            If an account exists with the email <strong>{email}</strong>, you will receive password
+            reset instructions.
           </p>
-          {process.env.NODE_ENV === "development" && resetToken && (
+          {process.env.NODE_ENV === 'development' && resetToken && (
             <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-              <p className="text-sm font-medium text-yellow-800 mb-2">Development Mode - Reset Token:</p>
-              <code className="text-xs bg-white p-2 block rounded border break-all">{resetToken}</code>
+              <p className="text-sm font-medium text-yellow-800 mb-2">
+                Development Mode - Reset Token:
+              </p>
+              <code className="text-xs bg-white p-2 block rounded border break-all">
+                {resetToken}
+              </code>
               <Link
                 href={`/reset-password?token=${resetToken}`}
                 className="text-sm text-primary hover:underline mt-2 inline-block"
@@ -78,7 +82,7 @@ export function ForgotPasswordForm() {
           </div>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -104,11 +108,11 @@ export function ForgotPasswordForm() {
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Sending..." : "Send Reset Link"}
+            {isLoading ? 'Sending...' : 'Send Reset Link'}
           </Button>
           <div className="text-center text-sm text-muted-foreground">
             <p>
-              Remember your password?{" "}
+              Remember your password?{' '}
               <Link href="/login" className="text-primary hover:underline">
                 Sign in
               </Link>
@@ -117,6 +121,5 @@ export function ForgotPasswordForm() {
         </form>
       </CardContent>
     </Card>
-  )
+  );
 }
-

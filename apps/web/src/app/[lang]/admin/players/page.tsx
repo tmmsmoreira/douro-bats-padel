@@ -1,8 +1,8 @@
-import { PlayersList } from "@/components/admin/players-list"
-import { getTranslations } from "next-intl/server"
+import { PlayersList } from '@/components/admin/players-list';
+import { getTranslations } from 'next-intl/server';
 
 export default async function PlayersPage() {
-  const t = await getTranslations('admin')
+  const t = await getTranslations('admin');
 
   return (
     <div className="space-y-6">
@@ -14,6 +14,5 @@ export default async function PlayersPage() {
       </div>
       <PlayersList />
     </div>
-  )
+  );
 }
-

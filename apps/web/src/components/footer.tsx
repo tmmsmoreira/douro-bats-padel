@@ -1,14 +1,14 @@
-"use client"
+'use client';
 
-import { Link } from "@/i18n/navigation"
-import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from "lucide-react"
-import { useTranslations } from "next-intl"
+import { Link } from '@/i18n/navigation';
+import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export function Footer() {
-  const currentYear = new Date().getFullYear()
-  const tFooter = useTranslations('footer')
-  const tNav = useTranslations('nav')
-  const tContact = useTranslations('contact')
+  const currentYear = new Date().getFullYear();
+  const tFooter = useTranslations('footer');
+  const tNav = useTranslations('nav');
+  const tContact = useTranslations('contact');
 
   return (
     <footer className="border-t bg-card mt-auto">
@@ -17,9 +17,7 @@ export function Footer() {
           {/* About Section */}
           <div className="space-y-4">
             <h3 className="text-lg font-bold">Douro Bats Padel</h3>
-            <p className="text-sm text-muted-foreground">
-              {tFooter('description')}
-            </p>
+            <p className="text-sm text-muted-foreground">{tFooter('description')}</p>
             <div className="flex gap-4">
               <a
                 href="https://facebook.com"
@@ -56,22 +54,34 @@ export function Footer() {
             <h3 className="text-lg font-bold">{tFooter('quickLinks')}</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  href="/"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
                   {tNav('home')}
                 </Link>
               </li>
               <li>
-                <Link href="/" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  href="/"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
                   {tNav('events')}
                 </Link>
               </li>
               <li>
-                <Link href="/leaderboard" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  href="/leaderboard"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
                   {tNav('ranking')}
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  href="/about"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
                   {tNav('about')}
                 </Link>
               </li>
@@ -83,22 +93,34 @@ export function Footer() {
             <h3 className="text-lg font-bold">{tFooter('legal')}</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/terms" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  href="/terms"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
                   {tFooter('termsAndConditions')}
                 </Link>
               </li>
               <li>
-                <Link href="/privacy" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  href="/privacy"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
                   {tFooter('privacyPolicy')}
                 </Link>
               </li>
               <li>
-                <Link href="/cookies" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  href="/cookies"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
                   {tFooter('cookiePolicy')}
                 </Link>
               </li>
               <li>
-                <Link href="/faq" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  href="/faq"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
                   {tNav('faq')}
                 </Link>
               </li>
@@ -124,7 +146,10 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                <a href="tel:+351123456789" className="text-muted-foreground hover:text-primary transition-colors">
+                <a
+                  href="tel:+351123456789"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
                   {tFooter('phone')}
                 </a>
               </li>
@@ -140,14 +165,13 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
-            <p>© {currentYear} Douro Bats Padel. {tFooter('allRightsReserved')}</p>
             <p>
-              {tFooter('madeWith')}
+              © {currentYear} Douro Bats Padel. {tFooter('allRightsReserved')}
             </p>
+            <p>{tFooter('madeWith')}</p>
           </div>
         </div>
       </div>
     </footer>
-  )
+  );
 }
-

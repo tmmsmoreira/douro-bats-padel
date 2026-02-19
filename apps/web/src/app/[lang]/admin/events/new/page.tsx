@@ -1,4 +1,4 @@
-import { EventForm } from "@/components/admin/event-form"
+import { EventForm } from '@/components/admin/event-form';
 
 export default function NewEventPage() {
   return (
@@ -9,6 +9,5 @@ export default function NewEventPage() {
       </div>
       <EventForm />
     </div>
-  )
+  );
 }
-

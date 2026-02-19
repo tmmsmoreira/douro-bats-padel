@@ -1,24 +1,24 @@
-"use client"
+'use client';
 
-import { useQuery } from "@tanstack/react-query"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import type { LeaderboardEntry } from "@padel/types"
-import { ArrowUp, ArrowDown, Minus } from "lucide-react"
+import { useQuery } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import type { LeaderboardEntry } from '@padel/types';
+import { ArrowUp, ArrowDown, Minus } from 'lucide-react';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 export function Leaderboard() {
   const { data: leaderboard, isLoading } = useQuery({
-    queryKey: ["leaderboard"],
+    queryKey: ['leaderboard'],
     queryFn: async () => {
-      const res = await fetch(`${API_URL}/rankings/leaderboard`)
-      if (!res.ok) throw new Error("Failed to fetch leaderboard")
-      return res.json() as Promise<LeaderboardEntry[]>
+      const res = await fetch(`${API_URL}/rankings/leaderboard`);
+      if (!res.ok) throw new Error('Failed to fetch leaderboard');
+      return res.json() as Promise<LeaderboardEntry[]>;
     },
-  })
+  });
 
   if (isLoading) {
-    return <div className="text-center py-8">Loading rankings...</div>
+    return <div className="text-center py-8">Loading rankings...</div>;
   }
 
   return (
@@ -38,7 +38,9 @@ export function Leaderboard() {
                   <span className="text-2xl font-bold text-muted-foreground w-8">#{index + 1}</span>
                   <div>
                     <p className="font-medium">{entry.playerName}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{entry.weeklyScores.length} weeks played</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {entry.weeklyScores.length} weeks played
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
@@ -72,5 +74,5 @@ export function Leaderboard() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

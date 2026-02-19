@@ -9,11 +9,11 @@ This is a **Turborepo monorepo** with the following structure:
 \`\`\`
 padel-game-manager/
 ├── apps/
-│   ├── web/          # Next.js 16 frontend (App Router)
-│   └── api/          # NestJS backend
+│ ├── web/ # Next.js 16 frontend (App Router)
+│ └── api/ # NestJS backend
 ├── packages/
-│   ├── types/        # Shared TypeScript types
-│   └── config/       # Shared ESLint & TypeScript configs
+│ ├── types/ # Shared TypeScript types
+│ └── config/ # Shared ESLint & TypeScript configs
 \`\`\`
 
 ## 🚀 Quick Start
@@ -41,10 +41,13 @@ docker-compose up -d
 3. **Setup environment variables:**
 
 \`\`\`bash
+
 # API
+
 cp apps/api/.env.example apps/api/.env
 
 # Web
+
 cp apps/web/.env.example apps/web/.env
 \`\`\`
 
@@ -67,7 +70,9 @@ pnpm prisma db seed
 6. **Start development servers:**
 
 \`\`\`bash
+
 # From root directory
+
 pnpm dev
 \`\`\`
 
@@ -159,16 +164,19 @@ After seeding, you can login with:
 ## 📝 Available Scripts
 
 \`\`\`bash
+
 # Development
-pnpm dev              # Start all apps in dev mode
-pnpm build            # Build all apps
-pnpm lint             # Lint all packages
-pnpm format           # Format code with Prettier
+
+pnpm dev # Start all apps in dev mode
+pnpm build # Build all apps
+pnpm lint # Lint all packages
+pnpm format # Format code with Prettier
 
 # Database
-pnpm db:migrate       # Run Prisma migrations
-pnpm db:seed          # Seed database with test data
-pnpm db:studio        # Open Prisma Studio
+
+pnpm db:migrate # Run Prisma migrations
+pnpm db:seed # Seed database with test data
+pnpm db:studio # Open Prisma Studio
 \`\`\`
 
 ## 🎨 Design System
@@ -248,10 +256,13 @@ Email notifications for:
 ## 🧪 Testing
 
 \`\`\`bash
+
 # Unit tests
+
 pnpm test
 
 # E2E tests
+
 pnpm test:e2e
 \`\`\`
 
@@ -268,7 +279,9 @@ vercel
 
 \`\`\`bash
 cd apps/api
+
 # Follow platform-specific deployment guide
+
 \`\`\`
 
 ## 🤝 Contributing

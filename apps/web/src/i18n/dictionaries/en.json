@@ -135,18 +135,30 @@
   },
   "home": {
     "title": "Upcoming Events",
-    "description": "Register for game nights and check your status",
-    "descriptionGuest": "Sign in to register for game nights",
+    "description": "Register for games and check your status",
+    "descriptionGuest": "Sign in to register for games",
     "noEvents": "No upcoming events",
-    "viewDetails": "View Details",
-    "pastEventsTitle": "Past Events",
-    "pastEventsDescription": "View the last 10 game nights",
-    "noPastEvents": "No past events available",
-    "participated": "Participated",
-    "waitlisted": "Waitlisted",
+    "noEventsAvailable": "No upcoming events available.",
+    "loadingEvents": "Loading events...",
+    "gameNight": "Game Night",
+    "confirmedBadge": "Confirmed",
+    "waitlistedBadge": "Waitlisted",
+    "waitlistedPosition": "Waitlisted #{position}",
     "confirmed": "confirmed",
+    "waitlisted": "waitlisted",
+    "register": "Register",
+    "registerToWaitlist": "Register to Waitlist",
+    "unregister": "Unregister",
+    "signInToRegister": "Sign In to Register",
+    "viewDetails": "View Details",
+    "viewDraw": "View Draw",
     "viewResults": "View Results",
-    "viewDraw": "View Draw"
+    "rsvpSuccess": "RSVP updated successfully",
+    "rsvpError": "Failed to update RSVP",
+    "pastEventsTitle": "Past Events",
+    "pastEventsDescription": "View the last games",
+    "noPastEvents": "No past events available",
+    "participated": "Participated"
   },
   "leaderboard": {
     "title": "Ranking",
@@ -339,6 +351,7 @@
     "loadingEvent": "Loading event...",
     "eventNotFound": "Event not found",
     "untitledEvent": "Untitled Event",
+    "backToEvents": "Back to Events",
     "editEvent": "Edit Event",
     "publishEvent": "Publish Event",
     "freezeRsvps": "Freeze RSVPs",
@@ -346,8 +359,11 @@
     "viewEditDraw": "View & Edit Draw",
     "confirmedPlayers": "Confirmed Players",
     "spotsRemaining": "{count} spots remaining",
+    "fullCapacity": "Event is at full capacity",
     "waitlist": "Waitlist",
     "playersWaitingForSpot": "Players waiting for a spot",
+    "noConfirmedPlayers": "No confirmed players yet",
+    "noWaitlistedPlayers": "No waitlisted players",
     "deleteEvent": "Delete Event",
     "deleting": "Deleting...",
     "deleteConfirmation": "Are you sure you want to delete this event? This action cannot be undone.",
@@ -364,7 +380,8 @@
     "register": "Register",
     "cancel": "Cancel",
     "viewDraw": "View Draw",
-    "viewResults": "View Results"
+    "viewResults": "View Results",
+    "viewDetails": "View Details"
   },
   "footer": {
     "about": "About",
@@ -458,4 +475,3 @@
     "rememberToCancelCourts": "Remember to cancel the unused courts to avoid unnecessary costs"
   }
 }
-

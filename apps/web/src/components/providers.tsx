@@ -1,12 +1,12 @@
-"use client"
+'use client';
 
-import type React from "react"
+import type React from 'react';
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { SessionProvider } from "next-auth/react"
-import { useState } from "react"
-import { ThemeProvider } from "./theme-provider"
-import { Toaster } from "sonner"
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { SessionProvider } from 'next-auth/react';
+import { useState } from 'react';
+import { ThemeProvider } from './theme-provider';
+import { Toaster } from 'sonner';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -18,8 +18,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
             refetchOnWindowFocus: false,
           },
         },
-      }),
-  )
+      })
+  );
 
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
@@ -30,5 +30,5 @@ export function Providers({ children }: { children: React.ReactNode }) {
         </QueryClientProvider>
       </SessionProvider>
     </ThemeProvider>
-  )
+  );
 }

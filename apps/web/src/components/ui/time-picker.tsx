@@ -1,80 +1,76 @@
-"use client"
+'use client';
 
-import * as React from "react"
+import * as React from 'react';
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
-} from "@/components/ui/input-group"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { Clock, Check } from "lucide-react"
-import { cn } from "@/lib/utils"
+} from '@/components/ui/input-group';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Clock, Check } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 function formatTime(date: Date | undefined) {
   if (!date) {
-    return ""
+    return '';
   }
 
-  return date.toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
+  return date.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
     hour12: false,
-  })
+  });
 }
 
 function parseTimeString(timeString: string): Date | undefined {
-  if (!timeString) return undefined
-  
-  const [hours, minutes] = timeString.split(":").map(Number)
-  if (isNaN(hours) || isNaN(minutes)) return undefined
-  
-  const date = new Date()
-  date.setHours(hours, minutes, 0, 0)
-  return date
+  if (!timeString) return undefined;
+
+  const [hours, minutes] = timeString.split(':').map(Number);
+  if (isNaN(hours) || isNaN(minutes)) return undefined;
+
+  const date = new Date();
+  date.setHours(hours, minutes, 0, 0);
+  return date;
 }
 
 interface TimePickerProps {
-  value?: Date
-  onChange?: (date: Date | undefined) => void
-  placeholder?: string
-  disabled?: boolean
-  id?: string
+  value?: Date;
+  onChange?: (date: Date | undefined) => void;
+  placeholder?: string;
+  disabled?: boolean;
+  id?: string;
 }
 
-export function TimePicker({ 
-  value, 
-  onChange, 
-  placeholder = "Select time",
+export function TimePicker({
+  value,
+  onChange,
+  placeholder = 'Select time',
   disabled,
-  id
+  id,
 }: TimePickerProps) {
-  const [open, setOpen] = React.useState(false)
-  const [time, setTime] = React.useState<Date | undefined>(value)
-  const [inputValue, setInputValue] = React.useState(formatTime(value))
+  const [open, setOpen] = React.useState(false);
+  const [time, setTime] = React.useState<Date | undefined>(value);
+  const [inputValue, setInputValue] = React.useState(formatTime(value));
 
   // Sync with external value changes
   React.useEffect(() => {
-    setTime(value)
-    setInputValue(formatTime(value))
-  }, [value])
+    setTime(value);
+    setInputValue(formatTime(value));
+  }, [value]);
 
   // Generate time options (every 15 minutes)
   const timeOptions = React.useMemo(() => {
-    const options: string[] = []
+    const options: string[] = [];
     for (let hour = 0; hour < 24; hour++) {
       for (let minute = 0; minute < 60; minute += 15) {
-        const h = hour.toString().padStart(2, "0")
-        const m = minute.toString().padStart(2, "0")
-        options.push(`${h}:${m}`)
+        const h = hour.toString().padStart(2, '0');
+        const m = minute.toString().padStart(2, '0');
+        options.push(`${h}:${m}`);
       }
     }
-    return options
-  }, [])
+    return options;
+  }, []);
 
   return (
     <InputGroup>
@@ -84,19 +80,19 @@ export function TimePicker({
         placeholder={placeholder}
         disabled={disabled}
         onChange={(e) => {
-          setInputValue(e.target.value)
-          const parsedTime = parseTimeString(e.target.value)
+          setInputValue(e.target.value);
+          const parsedTime = parseTimeString(e.target.value);
           if (parsedTime) {
-            setTime(parsedTime)
+            setTime(parsedTime);
             if (onChange) {
-              onChange(parsedTime)
+              onChange(parsedTime);
             }
           }
         }}
         onKeyDown={(e) => {
-          if (e.key === "ArrowDown") {
-            e.preventDefault()
-            setOpen(true)
+          if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            setOpen(true);
           }
         }}
       />
@@ -121,35 +117,34 @@ export function TimePicker({
           >
             <div className="max-h-[300px] overflow-y-auto p-1">
               {timeOptions.map((timeOption) => {
-                const isSelected = inputValue === timeOption
+                const isSelected = inputValue === timeOption;
                 return (
                   <button
                     key={timeOption}
                     type="button"
                     className={cn(
-                      "relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-                      isSelected && "bg-accent text-accent-foreground font-medium"
+                      'relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+                      isSelected && 'bg-accent text-accent-foreground font-medium'
                     )}
                     onClick={() => {
-                      setInputValue(timeOption)
-                      const parsedTime = parseTimeString(timeOption)
-                      setTime(parsedTime)
+                      setInputValue(timeOption);
+                      const parsedTime = parseTimeString(timeOption);
+                      setTime(parsedTime);
                       if (onChange) {
-                        onChange(parsedTime)
+                        onChange(parsedTime);
                       }
-                      setOpen(false)
+                      setOpen(false);
                     }}
                   >
                     <span className="flex-1">{timeOption}</span>
                     {isSelected && <Check className="h-4 w-4" />}
                   </button>
-                )
+                );
               })}
             </div>
           </PopoverContent>
         </Popover>
       </InputGroupAddon>
     </InputGroup>
-  )
+  );
 }
-

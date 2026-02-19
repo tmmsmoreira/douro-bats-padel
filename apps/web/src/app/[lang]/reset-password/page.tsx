@@ -1,16 +1,16 @@
-"use client"
+'use client';
 
-import { Suspense } from "react"
-import { useSearchParams } from "next/navigation"
-import { ResetPasswordForm } from "@/components/auth/reset-password-form"
-import { LanguageToggleButton } from "@/components/language-toggle-button"
-import { ThemeToggleButton } from "@/components/ui/theme-toggle-button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import Link from "next/link"
+import { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { ResetPasswordForm } from '@/components/auth/reset-password-form';
+import { LanguageToggleButton } from '@/components/language-toggle-button';
+import { ThemeToggleButton } from '@/components/ui/theme-toggle-button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import Link from 'next/link';
 
 function ResetPasswordContent() {
-  const searchParams = useSearchParams()
-  const token = searchParams.get("token")
+  const searchParams = useSearchParams();
+  const token = searchParams.get('token');
 
   if (!token) {
     return (
@@ -28,10 +28,10 @@ function ResetPasswordContent() {
           </Link>
         </CardContent>
       </Card>
-    )
+    );
   }
 
-  return <ResetPasswordForm token={token} />
+  return <ResetPasswordForm token={token} />;
 }
 
 export default function ResetPasswordPage() {
@@ -47,6 +47,5 @@ export default function ResetPasswordPage() {
         <ResetPasswordContent />
       </Suspense>
     </div>
-  )
+  );
 }
-

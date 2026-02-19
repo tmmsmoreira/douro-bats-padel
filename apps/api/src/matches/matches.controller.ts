@@ -1,11 +1,11 @@
-import { Controller, Get, Post, Param, UseGuards, Request, Body } from "@nestjs/common"
-import { MatchesService } from "./matches.service"
-import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard"
-import { RolesGuard } from "../auth/guards/roles.guard"
-import { Roles } from "../auth/decorators/roles.decorator"
-import { Role } from "@padel/types"
+import { Controller, Get, Post, Param, UseGuards, Request, Body } from '@nestjs/common';
+import { MatchesService } from './matches.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { Role } from '@padel/types';
 
-@Controller("matches")
+@Controller('matches')
 @UseGuards(JwtAuthGuard)
 export class MatchesController {
   constructor(private matchesService: MatchesService) {}
@@ -14,18 +14,18 @@ export class MatchesController {
   @UseGuards(RolesGuard)
   @Roles(Role.EDITOR, Role.ADMIN)
   async submitMatch(@Body() dto: any, @Request() req: any) {
-    return this.matchesService.submitMatch(dto, req.user.sub)
+    return this.matchesService.submitMatch(dto, req.user.sub);
   }
 
-  @Post("events/:eventId/publish")
+  @Post('events/:eventId/publish')
   @UseGuards(RolesGuard)
   @Roles(Role.EDITOR, Role.ADMIN)
-  async publishMatches(@Param("eventId") eventId: string) {
-    return this.matchesService.publishMatches(eventId)
+  async publishMatches(@Param('eventId') eventId: string) {
+    return this.matchesService.publishMatches(eventId);
   }
 
-  @Get("events/:eventId")
-  async getMatches(@Param("eventId") eventId: string) {
-    return this.matchesService.getMatches(eventId)
+  @Get('events/:eventId')
+  async getMatches(@Param('eventId') eventId: string) {
+    return this.matchesService.getMatches(eventId);
   }
 }

@@ -135,18 +135,30 @@
   },
   "home": {
     "title": "Próximos Eventos",
-    "description": "Registe-se para noites de jogo e verifique o seu estado",
-    "descriptionGuest": "Inicie sessão para se registar em noites de jogo",
+    "description": "Registe-se para participar nos jogos e verifique o seu estado",
+    "descriptionGuest": "Inicie sessão para se registar nos jogos",
     "noEvents": "Sem eventos próximos",
-    "viewDetails": "Ver Detalhes",
-    "pastEventsTitle": "Eventos Passados",
-    "pastEventsDescription": "Ver as últimas 10 noites de jogo",
-    "noPastEvents": "Sem eventos passados disponíveis",
-    "participated": "Participou",
-    "waitlisted": "Em Lista de Espera",
+    "noEventsAvailable": "Sem eventos próximos disponíveis.",
+    "loadingEvents": "A carregar eventos...",
+    "gameNight": "Noite de Jogo",
+    "confirmedBadge": "Confirmado",
+    "waitlistedBadge": "Em Lista de Espera",
+    "waitlistedPosition": "Em Lista de Espera #{position}",
     "confirmed": "confirmados",
+    "waitlisted": "em lista de espera",
+    "register": "Registar",
+    "registerToWaitlist": "Registar em Lista de Espera",
+    "unregister": "Cancelar Registo",
+    "signInToRegister": "Iniciar Sessão para Registar",
+    "viewDetails": "Ver Detalhes",
+    "viewDraw": "Ver Sorteio",
     "viewResults": "Ver Resultados",
-    "viewDraw": "Ver Sorteio"
+    "rsvpSuccess": "RSVP atualizado com sucesso",
+    "rsvpError": "Falha ao atualizar RSVP",
+    "pastEventsTitle": "Eventos Passados",
+    "pastEventsDescription": "Ver os últimos jogos",
+    "noPastEvents": "Sem eventos passados disponíveis",
+    "participated": "Participou"
   },
   "leaderboard": {
     "title": "Classificação",
@@ -339,6 +351,7 @@
     "loadingEvent": "A carregar evento...",
     "eventNotFound": "Evento não encontrado",
     "untitledEvent": "Evento Sem Título",
+    "backToEvents": "Voltar aos Eventos",
     "editEvent": "Editar Evento",
     "publishEvent": "Publicar Evento",
     "freezeRsvps": "Congelar RSVPs",
@@ -346,8 +359,11 @@
     "viewEditDraw": "Ver & Editar Sorteio",
     "confirmedPlayers": "Jogadores Confirmados",
     "spotsRemaining": "{count} vagas restantes",
+    "fullCapacity": "Evento com lotação esgotada",
     "waitlist": "Lista de Espera",
     "playersWaitingForSpot": "Jogadores à espera de vaga",
+    "noConfirmedPlayers": "Ainda sem jogadores confirmados",
+    "noWaitlistedPlayers": "Sem jogadores em lista de espera",
     "deleteEvent": "Eliminar Evento",
     "deleting": "A eliminar...",
     "deleteConfirmation": "Tem a certeza que deseja eliminar este evento? Esta ação não pode ser revertida.",
@@ -364,7 +380,8 @@
     "register": "Registar",
     "cancel": "Cancelar",
     "viewDraw": "Ver Sorteio",
-    "viewResults": "Ver Resultados"
+    "viewResults": "Ver Resultados",
+    "viewDetails": "Ver Detalhes"
   },
   "footer": {
     "about": "Sobre",
@@ -458,4 +475,3 @@
     "rememberToCancelCourts": "Lembre-se de cancelar os campos não utilizados para evitar custos desnecessários"
   }
 }
-

@@ -17,12 +17,7 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"],
-      "env": [
-        "NODE_ENV",
-        "FRONTEND_URL",
-        "NEXTAUTH_URL",
-        "NEXTAUTH_SECRET"
-      ]
+      "env": ["NODE_ENV", "FRONTEND_URL", "NEXTAUTH_URL", "NEXTAUTH_SECRET"]
     },
     "dev": {
       "dependsOn": ["^build"],

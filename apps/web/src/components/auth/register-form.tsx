@@ -1,77 +1,77 @@
-"use client"
+'use client';
 
-import type React from "react"
+import type React from 'react';
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { signIn } from "next-auth/react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import Link from "next/link"
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import Link from 'next/link';
 
 export function RegisterForm() {
-  const router = useRouter()
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [success, setSuccess] = useState(false)
-  const [verificationToken, setVerificationToken] = useState("")
+  const router = useRouter();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+  const [verificationToken, setVerificationToken] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
 
     // Validate passwords match
     if (password !== confirmPassword) {
-      setError("Passwords do not match")
-      setIsLoading(false)
-      return
+      setError('Passwords do not match');
+      setIsLoading(false);
+      return;
     }
 
     // Validate password length
     if (password.length < 6) {
-      setError("Password must be at least 6 characters")
-      setIsLoading(false)
-      return
+      setError('Password must be at least 6 characters');
+      setIsLoading(false);
+      return;
     }
 
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/signup`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name,
           email,
           password,
         }),
-      })
+      });
 
-      const data = await res.json()
+      const data = await res.json();
 
       if (!res.ok) {
-        setError(data.message || "Registration failed")
-        setIsLoading(false)
-        return
+        setError(data.message || 'Registration failed');
+        setIsLoading(false);
+        return;
       }
 
       // Registration successful, show success message
-      setSuccess(true)
+      setSuccess(true);
       // For development: show the token
       if (data.token) {
-        setVerificationToken(data.token)
+        setVerificationToken(data.token);
       }
-      setIsLoading(false)
+      setIsLoading(false);
     } catch (err) {
-      setError("An error occurred during registration")
-      setIsLoading(false)
+      setError('An error occurred during registration');
+      setIsLoading(false);
     }
-  }
+  };
 
   if (success) {
     return (
@@ -97,13 +97,17 @@ export function RegisterForm() {
             </svg>
           </div>
           <p className="text-sm text-muted-foreground text-center">
-            We've sent a verification email to <strong>{email}</strong>. Please check your inbox and click the
-            verification link to activate your account.
+            We've sent a verification email to <strong>{email}</strong>. Please check your inbox and
+            click the verification link to activate your account.
           </p>
-          {process.env.NODE_ENV === "development" && verificationToken && (
+          {process.env.NODE_ENV === 'development' && verificationToken && (
             <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-              <p className="text-sm font-medium text-yellow-800 mb-2">Development Mode - Verification Token:</p>
-              <code className="text-xs bg-white p-2 block rounded border break-all">{verificationToken}</code>
+              <p className="text-sm font-medium text-yellow-800 mb-2">
+                Development Mode - Verification Token:
+              </p>
+              <code className="text-xs bg-white p-2 block rounded border break-all">
+                {verificationToken}
+              </code>
               <Link
                 href={`/verify-email?token=${verificationToken}`}
                 className="text-sm text-yellow-800 hover:underline mt-2 inline-block"
@@ -119,7 +123,7 @@ export function RegisterForm() {
           </Link>
           <div className="text-center text-sm text-muted-foreground">
             <p>
-              Didn't receive the email?{" "}
+              Didn't receive the email?{' '}
               <Link href="/resend-verification" className="text-primary hover:underline">
                 Resend verification
               </Link>
@@ -127,7 +131,7 @@ export function RegisterForm() {
           </div>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -194,7 +198,7 @@ export function RegisterForm() {
             </div>
           )}
           <Button type="submit" className="w-full h-11 text-base" disabled={isLoading}>
-            {isLoading ? "Creating account..." : "Create Account"}
+            {isLoading ? 'Creating account...' : 'Create Account'}
           </Button>
 
           <div className="relative">
@@ -210,7 +214,7 @@ export function RegisterForm() {
             type="button"
             variant="outline"
             className="w-full h-11"
-            onClick={() => signIn("google", { callbackUrl: "/" })}
+            onClick={() => signIn('google', { callbackUrl: '/' })}
             disabled={isLoading}
           >
             <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
@@ -236,7 +240,7 @@ export function RegisterForm() {
 
           <div className="text-center text-sm text-muted-foreground">
             <p>
-              Already have an account?{" "}
+              Already have an account?{' '}
               <Link href="/login" className="text-primary hover:underline font-medium">
                 Sign in
               </Link>
@@ -245,6 +249,5 @@ export function RegisterForm() {
         </form>
       </CardContent>
     </Card>
-  )
+  );
 }
-

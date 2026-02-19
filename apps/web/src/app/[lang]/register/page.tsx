@@ -1,7 +1,7 @@
-import { RegisterForm } from "@/components/auth/register-form"
-import { LanguageToggleButton } from "@/components/language-toggle-button"
-import { ThemeToggleButton } from "@/components/ui/theme-toggle-button"
-import Image from "next/image"
+import { RegisterForm } from '@/components/auth/register-form';
+import { LanguageToggleButton } from '@/components/language-toggle-button';
+import { ThemeToggleButton } from '@/components/ui/theme-toggle-button';
+import Image from 'next/image';
 
 export default function RegisterPage() {
   return (
@@ -41,6 +41,5 @@ export default function RegisterPage() {
         <RegisterForm />
       </div>
     </div>
-  )
+  );
 }
-

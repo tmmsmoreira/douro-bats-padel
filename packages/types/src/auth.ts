@@ -1,40 +1,40 @@
-import type { Role } from "./common"
+import type { Role } from './common';
 
 export interface AuthUser {
-  id: string
-  email: string
-  name: string | null
-  roles: Role[]
-  profilePhoto?: string
+  id: string;
+  email: string;
+  name: string | null;
+  roles: Role[];
+  profilePhoto?: string;
 }
 
 export interface LoginDto {
-  email: string
-  password: string
+  email: string;
+  password: string;
 }
 
 export interface SignupDto {
-  email: string
-  password: string
-  name?: string
+  email: string;
+  password: string;
+  name?: string;
 }
 
 export interface AuthTokens {
-  accessToken: string
-  refreshToken: string
+  accessToken: string;
+  refreshToken: string;
 }
 
 export interface ForgotPasswordDto {
-  email: string
+  email: string;
 }
 
 export interface ResetPasswordDto {
-  token: string
-  password: string
+  token: string;
+  password: string;
 }
 
 export interface GoogleAuthDto {
-  email: string
-  name?: string | null
-  profilePhoto?: string | null
+  email: string;
+  name?: string | null;
+  profilePhoto?: string | null;
 }

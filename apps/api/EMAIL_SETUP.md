@@ -24,6 +24,7 @@ The application now uses **Resend** for email delivery - a modern, developer-fri
    - Copy the key (starts with `re_`)
 
 3. **Add to `.env` file** (local) or **Railway environment variables** (production):
+
    ```env
    RESEND_API_KEY="re_your_api_key_here"
    EMAIL_FROM="Douro Bats Padel <onboarding@resend.dev>"
@@ -60,6 +61,7 @@ The application uses **React Email** templates for professional, responsive emai
   - 1-hour expiration notice
 
 All templates use:
+
 - Responsive design for mobile and desktop
 - Douro Bats Padel branding (#2563eb blue)
 - Professional typography and spacing
@@ -115,12 +117,12 @@ pnpm dev
 
 ## 📝 Environment Variables Reference
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `RESEND_API_KEY` | Resend API key | `re_123abc...` |
-| `EMAIL_FROM` | From address | `"Douro Bats Padel <onboarding@resend.dev>"` |
-| `FRONTEND_URL` | Frontend URL for email links | `http://localhost:3000` or `https://yourdomain.com` |
-| `NODE_ENV` | Environment | `development` or `production` |
+| Variable         | Description                  | Example                                             |
+| ---------------- | ---------------------------- | --------------------------------------------------- |
+| `RESEND_API_KEY` | Resend API key               | `re_123abc...`                                      |
+| `EMAIL_FROM`     | From address                 | `"Douro Bats Padel <onboarding@resend.dev>"`        |
+| `FRONTEND_URL`   | Frontend URL for email links | `http://localhost:3000` or `https://yourdomain.com` |
+| `NODE_ENV`       | Environment                  | `development` or `production`                       |
 
 ## ❓ Troubleshooting
 
@@ -146,4 +148,3 @@ pnpm dev
 ## 🎉 You're All Set!
 
 The email verification system is now fully configured and ready to use!
-

@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common"
-import { PrismaService } from "../prisma/prisma.service"
-import { Role } from "@padel/types"
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { Role } from '@padel/types';
 
 @Injectable()
 export class PlayersService {
@@ -18,10 +18,10 @@ export class PlayersService {
       },
       orderBy: {
         player: {
-          rating: "desc",
+          rating: 'desc',
         },
       },
-    })
+    });
 
     return users.map((user) => ({
       id: user.id,
@@ -38,7 +38,7 @@ export class PlayersService {
             createdAt: user.player.createdAt,
           }
         : null,
-    }))
+    }));
   }
 
   async findOne(id: string) {
@@ -49,23 +49,23 @@ export class PlayersService {
           include: {
             weeklyScores: {
               orderBy: {
-                createdAt: "desc",
+                createdAt: 'desc',
               },
               take: 10,
             },
             rankingSnapshots: {
               orderBy: {
-                createdAt: "desc",
+                createdAt: 'desc',
               },
               take: 10,
             },
           },
         },
       },
-    })
+    });
 
     if (!user) {
-      return null
+      return null;
     }
 
     return {
@@ -77,29 +77,28 @@ export class PlayersService {
       createdAt: user.createdAt,
       roles: user.roles,
       player: user.player,
-    }
+    };
   }
 
   async remove(id: string) {
     const user = await this.prisma.user.findUnique({
       where: { id },
-    })
+    });
 
     if (!user) {
-      throw new NotFoundException("User not found")
+      throw new NotFoundException('User not found');
     }
 
     // Safeguard: Prevent deletion of admin users
     if (user.roles && user.roles.includes(Role.ADMIN)) {
-      throw new BadRequestException("Cannot delete admin users")
+      throw new BadRequestException('Cannot delete admin users');
     }
 
     // Delete the user (cascade will handle related records)
     await this.prisma.user.delete({
       where: { id },
-    })
+    });
 
-    return { message: "User deleted successfully" }
+    return { message: 'User deleted successfully' };
   }
 }
-

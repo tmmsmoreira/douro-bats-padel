@@ -14,9 +14,8 @@
     "dev": "turbo run dev",
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
     "lint": "turbo run lint",
-    "prepare": "husky install || true"
+    "prepare": "husky"
   },
-
   "devDependencies": {
     "@turbo/gen": "^2.3.3",
     "@types/node": "^22",

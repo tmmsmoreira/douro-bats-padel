@@ -1,15 +1,15 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Pencil, Trash2 } from "lucide-react"
-import { useTranslations } from "next-intl"
-import { toast } from "sonner"
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Pencil, Trash2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,87 +19,89 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+} from '@/components/ui/alert-dialog';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 interface Venue {
-  id: string
-  name: string
-  address?: string
-  logo?: string
-  courts: Court[]
+  id: string;
+  name: string;
+  address?: string;
+  logo?: string;
+  courts: Court[];
 }
 
 interface Court {
-  id: string
-  label: string
-  venueId: string
+  id: string;
+  label: string;
+  venueId: string;
 }
 
 export function VenuesList() {
-  const { data: session } = useSession()
-  const router = useRouter()
-  const queryClient = useQueryClient()
-  const t = useTranslations("venuesList")
-  const [deleteVenue, setDeleteVenue] = useState<{ id: string; name: string } | null>(null)
+  const { data: session } = useSession();
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const t = useTranslations('venuesList');
+  const [deleteVenue, setDeleteVenue] = useState<{ id: string; name: string } | null>(null);
 
   const { data: venues, isLoading } = useQuery<Venue[]>({
-    queryKey: ["venues"],
+    queryKey: ['venues'],
     queryFn: async () => {
-      const res = await fetch(`${API_URL}/venues`)
-      if (!res.ok) throw new Error("Failed to fetch venues")
-      return res.json()
+      const res = await fetch(`${API_URL}/venues`);
+      if (!res.ok) throw new Error('Failed to fetch venues');
+      return res.json();
     },
-  })
+  });
 
   const deleteMutation = useMutation({
     mutationFn: async (venueId: string) => {
       if (!session?.accessToken) {
-        throw new Error("Not authenticated")
+        throw new Error('Not authenticated');
       }
 
       const res = await fetch(`${API_URL}/venues/${venueId}`, {
-        method: "DELETE",
+        method: 'DELETE',
         headers: {
           Authorization: `Bearer ${session.accessToken}`,
         },
-      })
+      });
 
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({ message: res.statusText }))
-        throw new Error(errorData.message || "Failed to delete venue")
+        const errorData = await res.json().catch(() => ({ message: res.statusText }));
+        throw new Error(errorData.message || 'Failed to delete venue');
       }
 
-      return res.json()
+      return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["venues"] })
-      toast.success("Venue deleted successfully")
+      queryClient.invalidateQueries({ queryKey: ['venues'] });
+      toast.success('Venue deleted successfully');
     },
     onError: (error: Error) => {
-      toast.error(`Failed to delete venue: ${error.message}`)
+      toast.error(`Failed to delete venue: ${error.message}`);
     },
-  })
+  });
 
   const handleEdit = (venueId: string) => {
-    router.push(`/admin/venues/${venueId}/edit`)
-  }
+    router.push(`/admin/venues/${venueId}/edit`);
+  };
 
   const handleDelete = (venueId: string, venueName: string) => {
-    setDeleteVenue({ id: venueId, name: venueName })
-  }
+    setDeleteVenue({ id: venueId, name: venueName });
+  };
 
   if (isLoading) {
-    return <div className="text-center py-8">{t("loadingVenues")}</div>
+    return <div className="text-center py-8">{t('loadingVenues')}</div>;
   }
 
   if (!venues || venues.length === 0) {
     return (
       <Card>
-        <CardContent className="py-8 text-center text-muted-foreground">{t("noVenuesAvailable")}</CardContent>
+        <CardContent className="py-8 text-center text-muted-foreground">
+          {t('noVenuesAvailable')}
+        </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -111,16 +113,18 @@ export function VenuesList() {
               {venue.logo && (
                 <img
                   src={venue.logo}
-                  alt={t("logo", { venueName: venue.name })}
+                  alt={t('logo', { venueName: venue.name })}
                   className="h-16 w-16 object-contain rounded border"
                   onError={(e) => {
-                    e.currentTarget.style.display = "none"
+                    e.currentTarget.style.display = 'none';
                   }}
                 />
               )}
               <div className="flex-1">
                 <CardTitle>{venue.name}</CardTitle>
-                {venue.address && <p className="text-sm text-muted-foreground mt-1">{venue.address}</p>}
+                {venue.address && (
+                  <p className="text-sm text-muted-foreground mt-1">{venue.address}</p>
+                )}
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={() => handleEdit(venue.id)}>
@@ -139,7 +143,7 @@ export function VenuesList() {
           </CardHeader>
           <CardContent className="pt-0">
             <div>
-              <p className="text-sm font-medium mb-2">{t("courts")}</p>
+              <p className="text-sm font-medium mb-2">{t('courts')}</p>
               {venue.courts.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {venue.courts.map((court) => (
@@ -149,7 +153,7 @@ export function VenuesList() {
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">{t("noCourtsAvailable")}</p>
+                <p className="text-sm text-muted-foreground">{t('noCourtsAvailable')}</p>
               )}
             </div>
           </CardContent>
@@ -160,9 +164,12 @@ export function VenuesList() {
       <AlertDialog open={!!deleteVenue} onOpenChange={(open) => !open && setDeleteVenue(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t("confirmDeleteVenue", { venueName: deleteVenue?.name })}</AlertDialogTitle>
+            <AlertDialogTitle>
+              {t('confirmDeleteVenue', { venueName: deleteVenue?.name })}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete this venue and all its courts. This action cannot be undone.
+              This will permanently delete this venue and all its courts. This action cannot be
+              undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -171,8 +178,8 @@ export function VenuesList() {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => {
                 if (deleteVenue) {
-                  deleteMutation.mutate(deleteVenue.id)
-                  setDeleteVenue(null)
+                  deleteMutation.mutate(deleteVenue.id);
+                  setDeleteVenue(null);
                 }
               }}
             >
@@ -182,6 +189,5 @@ export function VenuesList() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  )
+  );
 }
-

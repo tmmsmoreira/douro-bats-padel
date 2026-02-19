@@ -1,15 +1,15 @@
-import type { EventState, RSVPStatus } from "./common"
+import type { EventState, RSVPStatus } from './common';
 
 /**
  * Time slot for a tier with court assignments
  */
 export interface TierTimeSlot {
   /** Start time for this tier (e.g., "20:00" for 8PM) */
-  startsAt: string
+  startsAt: string;
   /** End time for this tier (e.g., "21:30" for 9:30PM) */
-  endsAt: string
+  endsAt: string;
   /** Court IDs available for this time slot */
-  courtIds: string[]
+  courtIds: string[];
 }
 
 /**
@@ -18,56 +18,56 @@ export interface TierTimeSlot {
  */
 export interface TierRules {
   /** Fixed number of players assigned to MASTERS tier (top-rated players) */
-  masterCount?: number
+  masterCount?: number;
   /** Percentage of players assigned to MASTERS tier (0-100) */
-  masterPercentage?: number
+  masterPercentage?: number;
   /** Time slot for MASTERS tier */
-  mastersTimeSlot?: TierTimeSlot
+  mastersTimeSlot?: TierTimeSlot;
   /** Time slot for EXPLORERS tier */
-  explorersTimeSlot?: TierTimeSlot
+  explorersTimeSlot?: TierTimeSlot;
 }
 
 export interface CreateEventDto {
-  title?: string
-  date: Date
-  startsAt: Date
-  endsAt: Date
-  venueId: string
-  courtIds: string[]
-  capacity: number
-  rsvpOpensAt: Date
-  rsvpClosesAt: Date
-  tierRules?: TierRules
+  title?: string;
+  date: Date;
+  startsAt: Date;
+  endsAt: Date;
+  venueId: string;
+  courtIds: string[];
+  capacity: number;
+  rsvpOpensAt: Date;
+  rsvpClosesAt: Date;
+  tierRules?: TierRules;
 }
 
 export interface RSVPDto {
-  status: "IN" | "OUT"
+  status: 'IN' | 'OUT';
 }
 
 export interface RSVPResponse {
-  status: RSVPStatus
-  position?: number
-  message: string
+  status: RSVPStatus;
+  position?: number;
+  message: string;
 }
 
 export interface EventWithRSVP {
-  id: string
-  title: string | null
-  date: Date
-  startsAt: Date
-  endsAt: Date
-  capacity: number
-  state: EventState
-  rsvpOpensAt: Date
-  rsvpClosesAt: Date
+  id: string;
+  title: string | null;
+  date: Date;
+  startsAt: Date;
+  endsAt: Date;
+  capacity: number;
+  state: EventState;
+  rsvpOpensAt: Date;
+  rsvpClosesAt: Date;
   venue?: {
-    id: string
-    name: string
-  }
-  confirmedCount: number
-  waitlistCount: number
+    id: string;
+    name: string;
+  };
+  confirmedCount: number;
+  waitlistCount: number;
   userRSVP?: {
-    status: RSVPStatus
-    position: number
-  }
+    status: RSVPStatus;
+    position: number;
+  };
 }

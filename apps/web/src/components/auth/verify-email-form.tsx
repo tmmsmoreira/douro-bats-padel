@@ -1,62 +1,62 @@
-"use client"
+'use client';
 
-import type React from "react"
+import type React from 'react';
 
-import { useState, useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 export function VerifyEmailForm() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState("")
-  const [success, setSuccess] = useState(false)
-  const [message, setMessage] = useState("")
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
-    const token = searchParams.get("token")
+    const token = searchParams.get('token');
 
     if (!token) {
-      setError("Invalid verification link")
-      setIsLoading(false)
-      return
+      setError('Invalid verification link');
+      setIsLoading(false);
+      return;
     }
 
-    verifyEmail(token)
-  }, [searchParams])
+    verifyEmail(token);
+  }, [searchParams]);
 
   const verifyEmail = async (token: string) => {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/verify-email`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token }),
-      })
+      });
 
-      const data = await res.json()
+      const data = await res.json();
 
       if (!res.ok) {
-        setError(data.message || "Verification failed")
-        setIsLoading(false)
-        return
+        setError(data.message || 'Verification failed');
+        setIsLoading(false);
+        return;
       }
 
-      setSuccess(true)
-      setMessage(data.message)
-      setIsLoading(false)
+      setSuccess(true);
+      setMessage(data.message);
+      setIsLoading(false);
 
       // Redirect to login after 3 seconds
       setTimeout(() => {
-        router.push("/login")
-      }, 3000)
+        router.push('/login');
+      }, 3000);
     } catch (err) {
-      setError("An error occurred during verification")
-      setIsLoading(false)
+      setError('An error occurred during verification');
+      setIsLoading(false);
     }
-  }
+  };
 
   if (isLoading) {
     return (
@@ -71,7 +71,7 @@ export function VerifyEmailForm() {
           </div>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   if (success) {
@@ -106,7 +106,7 @@ export function VerifyEmailForm() {
           </Link>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -147,6 +147,5 @@ export function VerifyEmailForm() {
         </Link>
       </CardContent>
     </Card>
-  )
+  );
 }
-

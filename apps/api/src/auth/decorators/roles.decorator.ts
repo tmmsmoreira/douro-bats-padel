@@ -1,4 +1,4 @@
-import { SetMetadata } from "@nestjs/common"
-import type { Role } from "@padel/types"
+import { SetMetadata } from '@nestjs/common';
+import type { Role } from '@padel/types';
 
-export const Roles = (...roles: Role[]) => SetMetadata("roles", roles)
+export const Roles = (...roles: Role[]) => SetMetadata('roles', roles);

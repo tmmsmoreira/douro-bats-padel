@@ -5,7 +5,7 @@
     "dev": "nest start --watch",
     "build": "pnpm --filter @padel/types build && prisma generate && nest build",
     "start": "node dist/main",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint \"{src,apps,libs,test}/**/*.ts\"",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "tsx prisma/seed.ts"

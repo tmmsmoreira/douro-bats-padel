@@ -1,6 +1,6 @@
-import { PlayerProfile } from "@/components/player/player-profile"
-import { Footer } from "@/components/footer"
-import { PlayerNavClient } from "@/components/client-nav-wrapper"
+import { PlayerProfile } from '@/components/player/player-profile';
+import { Footer } from '@/components/footer';
+import { PlayerNavClient } from '@/components/client-nav-wrapper';
 
 export default function ProfilePage() {
   return (
@@ -11,5 +11,5 @@ export default function ProfilePage() {
       </main>
       <Footer />
     </div>
-  )
+  );
 }

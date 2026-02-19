@@ -1,51 +1,51 @@
-"use client"
+'use client';
 
-import type React from "react"
+import type React from 'react';
 
-import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 export function ResendVerificationForm() {
-  const [email, setEmail] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [success, setSuccess] = useState(false)
-  const [verificationToken, setVerificationToken] = useState("")
+  const [email, setEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+  const [verificationToken, setVerificationToken] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
-    setSuccess(false)
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+    setSuccess(false);
 
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/resend-verification`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
-      })
+      });
 
-      const data = await res.json()
+      const data = await res.json();
 
       if (!res.ok) {
-        setError(data.message || "Failed to send verification email")
-        setIsLoading(false)
-        return
+        setError(data.message || 'Failed to send verification email');
+        setIsLoading(false);
+        return;
       }
 
-      setSuccess(true)
+      setSuccess(true);
       // For development: show the token
       if (data.token) {
-        setVerificationToken(data.token)
+        setVerificationToken(data.token);
       }
-      setIsLoading(false)
+      setIsLoading(false);
     } catch (err) {
-      setError("An error occurred. Please try again.")
-      setIsLoading(false)
+      setError('An error occurred. Please try again.');
+      setIsLoading(false);
     }
-  }
+  };
 
   if (success) {
     return (
@@ -56,13 +56,17 @@ export function ResendVerificationForm() {
         </CardHeader>
         <CardContent className="pt-0 space-y-4">
           <p className="text-sm text-muted-foreground">
-            If an account exists with the email <strong>{email}</strong> and is not yet verified, you will
-            receive a verification email.
+            If an account exists with the email <strong>{email}</strong> and is not yet verified,
+            you will receive a verification email.
           </p>
           {verificationToken && (
             <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-              <p className="text-sm font-medium text-yellow-800 mb-2">Development Mode - Verification Token:</p>
-              <code className="text-xs bg-white p-2 block rounded border break-all">{verificationToken}</code>
+              <p className="text-sm font-medium text-yellow-800 mb-2">
+                Development Mode - Verification Token:
+              </p>
+              <code className="text-xs bg-white p-2 block rounded border break-all">
+                {verificationToken}
+              </code>
               <Link
                 href={`/verify-email?token=${verificationToken}`}
                 className="text-sm text-yellow-800 hover:underline mt-2 inline-block"
@@ -78,7 +82,7 @@ export function ResendVerificationForm() {
           </Link>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -104,11 +108,11 @@ export function ResendVerificationForm() {
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Sending..." : "Resend Verification Email"}
+            {isLoading ? 'Sending...' : 'Resend Verification Email'}
           </Button>
           <div className="text-center text-sm text-muted-foreground">
             <p>
-              Already verified?{" "}
+              Already verified?{' '}
               <Link href="/login" className="text-primary hover:underline">
                 Sign in
               </Link>
@@ -117,6 +121,5 @@ export function ResendVerificationForm() {
         </form>
       </CardContent>
     </Card>
-  )
+  );
 }
-

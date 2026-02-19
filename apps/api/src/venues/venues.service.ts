@@ -1,6 +1,6 @@
-import { Injectable } from "@nestjs/common"
-import { PrismaService } from "../prisma/prisma.service"
-import type { CreateVenueDto, UpdateVenueDto } from "@padel/types"
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import type { CreateVenueDto, UpdateVenueDto } from '@padel/types';
 
 @Injectable()
 export class VenuesService {
@@ -11,14 +11,14 @@ export class VenuesService {
       include: {
         courts: {
           orderBy: {
-            label: "asc",
+            label: 'asc',
           },
         },
       },
       orderBy: {
-        name: "asc",
+        name: 'asc',
       },
-    })
+    });
   }
 
   async findOne(id: string) {
@@ -27,11 +27,11 @@ export class VenuesService {
       include: {
         courts: {
           orderBy: {
-            label: "asc",
+            label: 'asc',
           },
         },
       },
-    })
+    });
   }
 
   async create(dto: CreateVenueDto) {
@@ -49,11 +49,11 @@ export class VenuesService {
       include: {
         courts: {
           orderBy: {
-            label: "asc",
+            label: 'asc',
           },
         },
       },
-    })
+    });
   }
 
   async update(id: string, dto: UpdateVenueDto) {
@@ -62,7 +62,7 @@ export class VenuesService {
       // Delete existing courts and create new ones
       await this.prisma.court.deleteMany({
         where: { venueId: id },
-      })
+      });
 
       return this.prisma.venue.update({
         where: { id },
@@ -79,11 +79,11 @@ export class VenuesService {
         include: {
           courts: {
             orderBy: {
-              label: "asc",
+              label: 'asc',
             },
           },
         },
-      })
+      });
     }
 
     // If only updating venue details (no courts)
@@ -97,18 +97,17 @@ export class VenuesService {
       include: {
         courts: {
           orderBy: {
-            label: "asc",
+            label: 'asc',
           },
         },
       },
-    })
+    });
   }
 
   async delete(id: string) {
     // Prisma will cascade delete courts automatically
     return this.prisma.venue.delete({
       where: { id },
-    })
+    });
   }
 }
-

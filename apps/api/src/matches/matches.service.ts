@@ -1,14 +1,14 @@
-import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common"
-import { PrismaService } from "../prisma/prisma.service"
-import type { Tier } from "@padel/types"
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import type { Tier } from '@padel/types';
 
 interface SubmitMatchDto {
-  eventId: string
-  courtId: string
-  round: number
-  setsA: number
-  setsB: number
-  tier: Tier
+  eventId: string;
+  courtId: string;
+  round: number;
+  setsA: number;
+  setsB: number;
+  tier: Tier;
 }
 
 @Injectable()
@@ -18,19 +18,19 @@ export class MatchesService {
   async submitMatch(dto: SubmitMatchDto, reportedBy: string) {
     const event = await this.prisma.event.findUnique({
       where: { id: dto.eventId },
-    })
+    });
 
     if (!event) {
-      throw new NotFoundException("Event not found")
+      throw new NotFoundException('Event not found');
     }
 
     // Validate sets
     if (dto.setsA < 0 || dto.setsB < 0) {
-      throw new BadRequestException("Sets cannot be negative")
+      throw new BadRequestException('Sets cannot be negative');
     }
 
     if (dto.setsA > 6 || dto.setsB > 6) {
-      throw new BadRequestException("Sets cannot exceed 6")
+      throw new BadRequestException('Sets cannot exceed 6');
     }
 
     // Check if match already exists
@@ -40,7 +40,7 @@ export class MatchesService {
         courtId: dto.courtId,
         round: dto.round,
       },
-    })
+    });
 
     if (existingMatch) {
       // Update existing match
@@ -52,7 +52,7 @@ export class MatchesService {
           tier: dto.tier,
           reportedBy,
         },
-      })
+      });
     }
 
     // Create new match
@@ -66,7 +66,7 @@ export class MatchesService {
         tier: dto.tier,
         reportedBy,
       },
-    })
+    });
   }
 
   async publishMatches(eventId: string) {
@@ -75,14 +75,14 @@ export class MatchesService {
       include: {
         matches: true,
       },
-    })
+    });
 
     if (!event) {
-      throw new NotFoundException("Event not found")
+      throw new NotFoundException('Event not found');
     }
 
     if (event.matches.length === 0) {
-      throw new BadRequestException("No matches to publish")
+      throw new BadRequestException('No matches to publish');
     }
 
     // Publish all unpublished matches
@@ -94,12 +94,12 @@ export class MatchesService {
       data: {
         publishedAt: new Date(),
       },
-    })
+    });
 
     return {
-      message: "Matches published successfully",
+      message: 'Matches published successfully',
       count: event.matches.length,
-    }
+    };
   }
 
   async getMatches(eventId: string) {
@@ -108,8 +108,8 @@ export class MatchesService {
       include: {
         court: true,
       },
-      orderBy: [{ round: "asc" }, { courtId: "asc" }],
-    })
+      orderBy: [{ round: 'asc' }, { courtId: 'asc' }],
+    });
 
     // Get draw to enrich with player names
     const draw = await this.prisma.draw.findFirst({
@@ -117,29 +117,31 @@ export class MatchesService {
       include: {
         assignments: true,
       },
-    })
+    });
 
     if (!draw) {
-      return matches
+      return matches;
     }
 
     // Get all player IDs
-    const playerIds = new Set<string>()
+    const playerIds = new Set<string>();
     draw.assignments.forEach((a) => {
-      a.teamA.forEach((id) => playerIds.add(id))
-      a.teamB.forEach((id) => playerIds.add(id))
-    })
+      a.teamA.forEach((id) => playerIds.add(id));
+      a.teamB.forEach((id) => playerIds.add(id));
+    });
 
     const players = await this.prisma.playerProfile.findMany({
       where: { id: { in: Array.from(playerIds) } },
       include: { user: true },
-    })
+    });
 
-    type PlayerWithUser = typeof players[0]
-    const playerMap = new Map<string, PlayerWithUser>(players.map((p) => [p.id, p]))
+    type PlayerWithUser = (typeof players)[0];
+    const playerMap = new Map<string, PlayerWithUser>(players.map((p) => [p.id, p]));
 
     return matches.map((match) => {
-      const assignment = draw.assignments.find((a) => a.round === match.round && a.courtId === match.courtId)
+      const assignment = draw.assignments.find(
+        (a) => a.round === match.round && a.courtId === match.courtId
+      );
 
       return {
         ...match,
@@ -151,7 +153,7 @@ export class MatchesService {
           id,
           name: playerMap.get(id)?.user.name,
         })),
-      }
-    })
+      };
+    });
   }
 }

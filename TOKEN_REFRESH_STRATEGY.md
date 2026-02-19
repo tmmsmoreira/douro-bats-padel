@@ -48,7 +48,7 @@ JWT_REFRESH_EXPIRES_IN="7d"
 
 ```typescript
 // Refresh buffer: refresh 5 minutes before expiration
-const REFRESH_BUFFER = 5 * 60 * 1000 // 5 minutes in milliseconds
+const REFRESH_BUFFER = 5 * 60 * 1000; // 5 minutes in milliseconds
 ```
 
 ## Security Considerations
@@ -135,4 +135,3 @@ To monitor token refresh in production:
 2. **Token Revocation**: Add ability to revoke specific refresh tokens (e.g., on password change)
 3. **Device Management**: Track and manage refresh tokens per device
 4. **Rate Limiting**: Prevent abuse of refresh endpoint
-

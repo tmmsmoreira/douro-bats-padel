@@ -1,13 +1,13 @@
-import { auth } from "@/lib/auth"
-import { EventsList } from "@/components/events-list"
-import { PastEventsList } from "@/components/past-events-list"
-import { Footer } from "@/components/footer"
-import { getTranslations } from "next-intl/server"
-import { HomeNavClient } from "@/components/client-nav-wrapper"
+import { auth } from '@/lib/auth';
+import { EventsList } from '@/components/events-list';
+import { PastEventsList } from '@/components/past-events-list';
+import { Footer } from '@/components/footer';
+import { getTranslations } from 'next-intl/server';
+import { HomeNavClient } from '@/components/client-nav-wrapper';
 
 export default async function HomePage() {
-  const session = await auth()
-  const t = await getTranslations('home')
+  const session = await auth();
+  const t = await getTranslations('home');
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -27,7 +27,9 @@ export default async function HomePage() {
           <div className="space-y-4 sm:space-y-6">
             <div>
               <h2 className="text-xl sm:text-2xl font-bold">{t('pastEventsTitle')}</h2>
-              <p className="text-sm sm:text-base text-muted-foreground mt-1">{t('pastEventsDescription')}</p>
+              <p className="text-sm sm:text-base text-muted-foreground mt-1">
+                {t('pastEventsDescription')}
+              </p>
             </div>
             <PastEventsList />
           </div>
@@ -35,5 +37,5 @@ export default async function HomePage() {
       </main>
       <Footer />
     </div>
-  )
+  );
 }

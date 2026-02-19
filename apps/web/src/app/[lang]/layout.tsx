@@ -1,62 +1,62 @@
-import type React from "react"
-import type { Metadata, Viewport } from "next"
-import { Inter } from "next/font/google"
-import "../globals.css"
-import { Providers } from "@/components/providers"
-import { NextIntlClientProvider } from "next-intl"
-import { getMessages, setRequestLocale } from "next-intl/server"
-import { notFound } from "next/navigation"
-import { locales, type Locale } from "@/i18n/config"
+import type React from 'react';
+import type { Metadata, Viewport } from 'next';
+import { Inter } from 'next/font/google';
+import '../globals.css';
+import { Providers } from '@/components/providers';
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages, setRequestLocale } from 'next-intl/server';
+import { notFound } from 'next/navigation';
+import { locales, type Locale } from '@/i18n/config';
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: "Douro Bats Padel",
-  description: "Manage padel game nights, RSVPs, draws, and rankings for Douro Bats Padel Club",
-  manifest: "/manifest.json",
+  title: 'Douro Bats Padel',
+  description: 'Manage padel game nights, RSVPs, draws, and rankings for Douro Bats Padel Club',
+  manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
-    title: "Douro Bats",
+    statusBarStyle: 'default',
+    title: 'Douro Bats',
   },
   formatDetection: {
     telephone: false,
   },
   icons: {
-    icon: "/icons/icon-192x192.png",
-    apple: "/icons/icon-192x192.png",
+    icon: '/icons/icon-192x192.png',
+    apple: '/icons/icon-192x192.png',
   },
-}
+};
 
 export const viewport: Viewport = {
-  width: "device-width",
+  width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-}
+};
 
 export async function generateStaticParams() {
-  return locales.map((locale) => ({ lang: locale }))
+  return locales.map((locale) => ({ lang: locale }));
 }
 
 export default async function LangLayout({
   children,
   params,
 }: {
-  children: React.ReactNode
-  params: Promise<{ lang: string }>
+  children: React.ReactNode;
+  params: Promise<{ lang: string }>;
 }) {
-  const { lang } = await params
+  const { lang } = await params;
 
   // Validate that the locale is supported
   if (!locales.includes(lang as Locale)) {
-    notFound()
+    notFound();
   }
 
   // Enable static rendering
-  setRequestLocale(lang)
+  setRequestLocale(lang);
 
-  const messages = await getMessages({ locale: lang })
+  const messages = await getMessages({ locale: lang });
 
   return (
     <html lang={lang} suppressHydrationWarning>
@@ -79,6 +79,5 @@ export default async function LangLayout({
         </Providers>
       </body>
     </html>
-  )
+  );
 }
-

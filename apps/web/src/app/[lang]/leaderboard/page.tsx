@@ -1,10 +1,10 @@
-import { Leaderboard } from "@/components/leaderboard"
-import { Footer } from "@/components/footer"
-import { getTranslations } from "next-intl/server"
-import { HomeNavClient } from "@/components/client-nav-wrapper"
+import { Leaderboard } from '@/components/leaderboard';
+import { Footer } from '@/components/footer';
+import { getTranslations } from 'next-intl/server';
+import { HomeNavClient } from '@/components/client-nav-wrapper';
 
 export default async function LeaderboardPage() {
-  const t = await getTranslations('leaderboard')
+  const t = await getTranslations('leaderboard');
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -20,5 +20,5 @@ export default async function LeaderboardPage() {
       </main>
       <Footer />
     </div>
-  )
+  );
 }

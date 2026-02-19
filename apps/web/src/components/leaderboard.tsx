@@ -1,40 +1,40 @@
-"use client"
+'use client';
 
-import { useQuery } from "@tanstack/react-query"
-import { useSession } from "next-auth/react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import type { LeaderboardEntry } from "@padel/types"
-import { ArrowUp, ArrowDown, Minus } from "lucide-react"
+import { useQuery } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import type { LeaderboardEntry } from '@padel/types';
+import { ArrowUp, ArrowDown, Minus } from 'lucide-react';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export function Leaderboard() {
-  const { data: session } = useSession()
+  const { data: session } = useSession();
 
   const { data: leaderboard, isLoading } = useQuery({
-    queryKey: ["leaderboard", session?.accessToken],
+    queryKey: ['leaderboard', session?.accessToken],
     queryFn: async () => {
       const headers: HeadersInit = {
-        "Content-Type": "application/json",
-      }
+        'Content-Type': 'application/json',
+      };
 
       // Include auth token if user is logged in
       if (session?.accessToken) {
-        headers.Authorization = `Bearer ${session.accessToken}`
+        headers.Authorization = `Bearer ${session.accessToken}`;
       }
 
-      const res = await fetch(`${API_URL}/rankings/leaderboard`, { headers })
+      const res = await fetch(`${API_URL}/rankings/leaderboard`, { headers });
 
       if (!res.ok) {
-        throw new Error(`API Error: ${res.statusText}`)
+        throw new Error(`API Error: ${res.statusText}`);
       }
 
-      return res.json() as Promise<LeaderboardEntry[]>
+      return res.json() as Promise<LeaderboardEntry[]>;
     },
-  })
+  });
 
   if (isLoading) {
-    return <div className="text-center py-8">Loading rankings...</div>
+    return <div className="text-center py-8">Loading rankings...</div>;
   }
 
   return (
@@ -54,7 +54,9 @@ export function Leaderboard() {
                   <span className="text-2xl font-bold text-muted-foreground w-8">#{index + 1}</span>
                   <div>
                     <p className="font-medium">{entry.playerName}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{entry.weeklyScores.length} weeks played</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {entry.weeklyScores.length} weeks played
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
@@ -88,6 +90,5 @@ export function Leaderboard() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
-

@@ -98,7 +98,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
 
   // Fetch draw if event has one
   const { data: draw } = useQuery({
-    queryKey: ['draw', eventId],
+    queryKey: ['draw', eventId, session?.accessToken],
     queryFn: async () => {
       try {
         const headers: HeadersInit = {
@@ -114,7 +114,9 @@ export function EventDetails({ eventId }: { eventId: string }) {
         return null;
       }
     },
-    enabled: event?.state === 'DRAWN' || event?.state === 'PUBLISHED',
+    enabled:
+      !!session?.accessToken &&
+      (event?.state === 'FROZEN' || event?.state === 'DRAWN' || event?.state === 'PUBLISHED'),
   });
 
   const freezeMutation = useMutation({
@@ -252,9 +254,14 @@ export function EventDetails({ eventId }: { eventId: string }) {
           {event.state === 'OPEN' && !hasEventPassed && (
             <Button onClick={() => freezeMutation.mutate()}>{t('freezeRsvps')}</Button>
           )}
-          {event.state === 'FROZEN' && !hasEventPassed && (
+          {event.state === 'FROZEN' && !hasEventPassed && !draw && (
             <Link href={`/admin/events/${eventId}/draw`}>
               <Button>{t('generateDraw')}</Button>
+            </Link>
+          )}
+          {event.state === 'FROZEN' && !hasEventPassed && draw && (
+            <Link href={`/admin/events/${eventId}/draw/view`}>
+              <Button variant="outline">{t('viewEditDraw')}</Button>
             </Link>
           )}
           {event.state === 'DRAWN' && !hasEventPassed && (

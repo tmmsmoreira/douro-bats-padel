@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
@@ -15,6 +15,22 @@ import { useLocale } from 'next-intl';
 import { AlertTriangle } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+interface Court {
+  id: string;
+  label: string;
+}
+
+interface EventCourt {
+  court: Court;
+}
+
+interface Player {
+  id: string;
+  name: string;
+  rating: number;
+  tier?: string;
+}
 
 interface GenerateDrawProps {
   eventId: string;
@@ -78,8 +94,14 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
 
   // Get available courts from tierRules (must be before useEffect)
   const tierRules = event?.tierRules || {};
-  const mastersCourts = tierRules.mastersTimeSlot?.courtIds || [];
-  const explorersCourts = tierRules.explorersTimeSlot?.courtIds || [];
+  const mastersCourts = useMemo(
+    () => tierRules.mastersTimeSlot?.courtIds || [],
+    [tierRules.mastersTimeSlot?.courtIds]
+  );
+  const explorersCourts = useMemo(
+    () => tierRules.explorersTimeSlot?.courtIds || [],
+    [tierRules.explorersTimeSlot?.courtIds]
+  );
 
   // Initialize selected courts when event loads (must be before early returns)
   useEffect(() => {
@@ -173,8 +195,8 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
     confirmedCount > 0 && playersInDraw < confirmedCount && !hasExcessPlayers;
 
   // Get all courts with details
-  const allCourts = event.eventCourts?.map((ec: any) => ec.court) || [];
-  const availableCourts = allCourts.filter((court: any) => allAvailableCourts.includes(court.id));
+  const allCourts = event.eventCourts?.map((ec: EventCourt) => ec.court) || [];
+  const availableCourts = allCourts.filter((court: Court) => allAvailableCourts.includes(court.id));
 
   return (
     <div className="space-y-6">
@@ -455,8 +477,8 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
                   </div>
                   <div className="space-y-2">
                     {availableCourts
-                      .filter((court: any) => mastersCourts.includes(court.id))
-                      .map((court: any) => {
+                      .filter((court: Court) => mastersCourts.includes(court.id))
+                      .map((court: Court) => {
                         const isSelected = selectedMastersCourts.includes(court.id);
                         return (
                           <div key={court.id} className="flex items-center space-x-2">
@@ -492,8 +514,8 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
                   </div>
                   <div className="space-y-2">
                     {availableCourts
-                      .filter((court: any) => explorersCourts.includes(court.id))
-                      .map((court: any) => {
+                      .filter((court: Court) => explorersCourts.includes(court.id))
+                      .map((court: Court) => {
                         const isSelected = selectedExplorersCourts.includes(court.id);
                         return (
                           <div key={court.id} className="flex items-center space-x-2">
@@ -582,20 +604,25 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-            {event.confirmedPlayers?.slice(0, playersInDraw).map((player: any, index: number) => (
-              <div key={player.id} className="flex items-center justify-between p-2 border rounded">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">#{index + 1}</span>
-                  <span className="text-sm">{player.name}</span>
+            {event.confirmedPlayers
+              ?.slice(0, playersInDraw)
+              .map((player: Player, index: number) => (
+                <div
+                  key={player.id}
+                  className="flex items-center justify-between p-2 border rounded"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">#{index + 1}</span>
+                    <span className="text-sm">{player.name}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs">
+                      {player.tier}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">{player.rating}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-xs">
-                    {player.tier}
-                  </Badge>
-                  <span className="text-xs text-muted-foreground">{player.rating}</span>
-                </div>
-              </div>
-            ))}
+              ))}
           </div>
         </CardContent>
       </Card>
@@ -611,7 +638,7 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-              {event.confirmedPlayers?.slice(playersInDraw).map((player: any, index: number) => (
+              {event.confirmedPlayers?.slice(playersInDraw).map((player: Player, index: number) => (
                 <div
                   key={player.id}
                   className="flex items-center justify-between p-2 border rounded bg-orange-50 dark:bg-orange-950/20"

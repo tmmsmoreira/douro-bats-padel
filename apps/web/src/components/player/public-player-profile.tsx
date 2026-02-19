@@ -64,7 +64,7 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Check if user is admin or editor
-  const userRoles = (session?.user as any)?.roles || [];
+  const userRoles = session?.user?.roles || [];
   const isAdminOrEditor = userRoles.includes('ADMIN') || userRoles.includes('EDITOR');
 
   const {
@@ -87,7 +87,7 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
   // Delete user mutation
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      const token = (session as any)?.accessToken;
+      const token = session?.accessToken;
       const res = await fetch(`${API_URL}/players/${playerId}`, {
         method: 'DELETE',
         headers: {

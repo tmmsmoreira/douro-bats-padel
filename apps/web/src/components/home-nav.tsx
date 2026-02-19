@@ -83,7 +83,7 @@ export function HomeNav() {
                       <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                         <Avatar className="h-10 w-10">
                           <AvatarImage
-                            src={(session?.user as any)?.profilePhoto || undefined}
+                            src={session?.user?.profilePhoto || undefined}
                             alt={session?.user?.name || 'User'}
                           />
                           <AvatarFallback className="bg-primary text-primary-foreground">

@@ -46,6 +46,10 @@ interface Player {
   tier: string;
 }
 
+interface WaitlistedPlayer extends Player {
+  position: number;
+}
+
 interface Assignment {
   id: string;
   round: number;
@@ -414,7 +418,7 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
           <CardContent>
             {event.waitlistedPlayers && event.waitlistedPlayers.length > 0 ? (
               <div className="space-y-2">
-                {event.waitlistedPlayers.map((player: any) => (
+                {event.waitlistedPlayers.map((player: WaitlistedPlayer) => (
                   <div
                     key={player.id}
                     className="flex items-center justify-between py-2 border-b last:border-0"

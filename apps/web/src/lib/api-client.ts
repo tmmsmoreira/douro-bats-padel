@@ -31,7 +31,7 @@ class ApiClient {
     return res.json();
   }
 
-  async post<T>(path: string, data?: any): Promise<T> {
+  async post<T>(path: string, data?: unknown): Promise<T> {
     const headers = await this.getHeaders();
     const res = await fetch(`${this.baseUrl}${path}`, {
       method: 'POST',
@@ -46,7 +46,7 @@ class ApiClient {
     return res.json();
   }
 
-  async patch<T>(path: string, data?: any): Promise<T> {
+  async patch<T>(path: string, data?: unknown): Promise<T> {
     const headers = await this.getHeaders();
     const res = await fetch(`${this.baseUrl}${path}`, {
       method: 'PATCH',

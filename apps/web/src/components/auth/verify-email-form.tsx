@@ -2,7 +2,7 @@
 
 import type React from 'react';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,39 @@ export function VerifyEmailForm() {
   const [success, setSuccess] = useState(false);
   const [message, setMessage] = useState('');
 
+  const verifyEmail = useCallback(
+    async (token: string) => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/verify-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          setError(data.message || 'Verification failed');
+          setIsLoading(false);
+          return;
+        }
+
+        setSuccess(true);
+        setMessage(data.message);
+        setIsLoading(false);
+
+        // Redirect to login after 3 seconds
+        setTimeout(() => {
+          router.push('/login');
+        }, 3000);
+      } catch {
+        setError('An error occurred during verification');
+        setIsLoading(false);
+      }
+    },
+    [router]
+  );
+
   useEffect(() => {
     const token = searchParams.get('token');
 
@@ -26,37 +59,7 @@ export function VerifyEmailForm() {
     }
 
     verifyEmail(token);
-  }, [searchParams]);
-
-  const verifyEmail = async (token: string) => {
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/verify-email`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.message || 'Verification failed');
-        setIsLoading(false);
-        return;
-      }
-
-      setSuccess(true);
-      setMessage(data.message);
-      setIsLoading(false);
-
-      // Redirect to login after 3 seconds
-      setTimeout(() => {
-        router.push('/login');
-      }, 3000);
-    } catch {
-      setError('An error occurred during verification');
-      setIsLoading(false);
-    }
-  };
+  }, [searchParams, verifyEmail]);
 
   if (isLoading) {
     return (

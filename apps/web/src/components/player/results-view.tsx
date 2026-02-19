@@ -9,6 +9,21 @@ import { Footer } from '@/components/footer';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
+interface Player {
+  id: string;
+  name: string;
+  rating: number;
+}
+
+interface Match {
+  id: string;
+  round: number;
+  setsA: number;
+  setsB: number;
+  teamA: Player[];
+  teamB: Player[];
+}
+
 export function ResultsView({ eventId }: { eventId: string }) {
   const { data: session } = useSession();
 
@@ -51,13 +66,16 @@ export function ResultsView({ eventId }: { eventId: string }) {
   }
 
   // Group by round
-  const rounds = matches.reduce((acc: any, match: any) => {
-    if (!acc[match.round]) {
-      acc[match.round] = [];
-    }
-    acc[match.round].push(match);
-    return acc;
-  }, {});
+  const rounds = matches.reduce(
+    (acc: Record<number, Match[]>, match: Match) => {
+      if (!acc[match.round]) {
+        acc[match.round] = [];
+      }
+      acc[match.round].push(match);
+      return acc;
+    },
+    {} as Record<number, Match[]>
+  );
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -69,14 +87,14 @@ export function ResultsView({ eventId }: { eventId: string }) {
             <p className="text-muted-foreground">Final scores and outcomes</p>
           </div>
 
-          {Object.entries(rounds).map(([round, roundMatches]: [string, any]) => (
+          {Object.entries(rounds).map(([round, roundMatches]: [string, Match[]]) => (
             <Card key={round}>
               <CardHeader>
                 <CardTitle>Round {round}</CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
                 <div className="space-y-4">
-                  {roundMatches.map((match: any) => {
+                  {roundMatches.map((match: Match) => {
                     const teamAWon = match.setsA > match.setsB;
                     const teamBWon = match.setsB > match.setsA;
                     const tie = match.setsA === match.setsB;
@@ -92,7 +110,7 @@ export function ResultsView({ eventId }: { eventId: string }) {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
                           <div className={`space-y-1 ${teamAWon ? 'font-bold' : ''}`}>
                             <p className="text-sm font-medium">Team A</p>
-                            {match.teamA?.map((player: any) => (
+                            {match.teamA?.map((player) => (
                               <p key={player.id} className="text-sm">
                                 {player.name}
                               </p>
@@ -112,7 +130,7 @@ export function ResultsView({ eventId }: { eventId: string }) {
                           </div>
                           <div className={`space-y-1 ${teamBWon ? 'font-bold' : ''}`}>
                             <p className="text-sm font-medium">Team B</p>
-                            {match.teamB?.map((player: any) => (
+                            {match.teamB?.map((player) => (
                               <p key={player.id} className="text-sm">
                                 {player.name}
                               </p>

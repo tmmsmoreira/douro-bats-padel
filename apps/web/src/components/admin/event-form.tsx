@@ -38,9 +38,35 @@ interface Court {
   venueId: string;
 }
 
+interface EventFormData {
+  title?: string;
+  date: Date;
+  startsAt: Date;
+  endsAt: Date;
+  venueId: string;
+  courtIds: string[];
+  capacity: number;
+  rsvpOpensAt: Date;
+  rsvpClosesAt: Date;
+  tierRules?: {
+    masterCount?: number;
+    masterPercentage?: number;
+    mastersTimeSlot?: {
+      startsAt: string;
+      endsAt: string;
+      courtIds: string[];
+    };
+    explorersTimeSlot?: {
+      startsAt: string;
+      endsAt: string;
+      courtIds: string[];
+    };
+  };
+}
+
 interface EventFormProps {
   eventId?: string;
-  initialData?: any;
+  initialData?: EventFormData;
 }
 
 export function EventForm({ eventId, initialData }: EventFormProps = {}) {

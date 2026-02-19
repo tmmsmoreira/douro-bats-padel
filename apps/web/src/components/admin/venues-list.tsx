@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -111,14 +112,17 @@ export function VenuesList() {
           <CardHeader>
             <div className="flex items-start gap-4">
               {venue.logo && (
-                <img
-                  src={venue.logo}
-                  alt={t('logo', { venueName: venue.name })}
-                  className="h-16 w-16 object-contain rounded border"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
+                <div className="relative h-16 w-16 rounded border overflow-hidden flex-shrink-0">
+                  <Image
+                    src={venue.logo}
+                    alt={t('logo', { venueName: venue.name })}
+                    fill
+                    className="object-contain"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                </div>
               )}
               <div className="flex-1">
                 <CardTitle>{venue.name}</CardTitle>

@@ -24,6 +24,48 @@ import {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
+interface Player {
+  id: string;
+  name: string;
+  rating: number;
+  tier?: string;
+}
+
+interface WaitlistedPlayer extends Player {
+  position: number;
+}
+
+interface Assignment {
+  id: string;
+  round: number;
+  courtId: string;
+  tier: string;
+  court?: {
+    id: string;
+    label: string;
+  };
+  teamA: Player[];
+  teamB: Player[];
+}
+
+interface Draw {
+  id: string;
+  eventId: string;
+  assignments: Assignment[];
+  event?: {
+    tierRules?: {
+      mastersTimeSlot?: {
+        startsAt: string;
+        endsAt: string;
+      };
+      explorersTimeSlot?: {
+        startsAt: string;
+        endsAt: string;
+      };
+    };
+  };
+}
+
 export function EventDetails({ eventId }: { eventId: string }) {
   const { data: session } = useSession();
   const queryClient = useQueryClient();
@@ -254,7 +296,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
               <CardContent className="pt-0">
                 {event.waitlistedPlayers && event.waitlistedPlayers.length > 0 ? (
                   <div className="space-y-2">
-                    {event.waitlistedPlayers.map((player: any) => (
+                    {event.waitlistedPlayers.map((player: WaitlistedPlayer) => (
                       <div
                         key={player.id}
                         className="flex items-center justify-between py-2 border-b last:border-0"
@@ -287,7 +329,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
             </CardHeader>
             <CardContent className="pt-0">
               <div className="space-y-2">
-                {event.confirmedPlayers?.map((player: any) => (
+                {event.confirmedPlayers?.map((player: Player) => (
                   <div
                     key={player.id}
                     className="flex items-center justify-between py-2 border-b last:border-0"
@@ -309,7 +351,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
             </CardHeader>
             <CardContent className="pt-0">
               <div className="space-y-2">
-                {event.waitlistedPlayers?.map((player: any) => (
+                {event.waitlistedPlayers?.map((player: WaitlistedPlayer) => (
                   <div
                     key={player.id}
                     className="flex items-center justify-between py-2 border-b last:border-0"
@@ -357,21 +399,21 @@ export function EventDetails({ eventId }: { eventId: string }) {
 }
 
 // Draw Summary Component
-function DrawSummary({ draw }: { draw: any }) {
+function DrawSummary({ draw }: { draw: Draw }) {
   // Group assignments by tier and round
-  const masterAssignments = draw.assignments?.filter((a: any) => a.tier === 'MASTERS') || [];
-  const explorerAssignments = draw.assignments?.filter((a: any) => a.tier === 'EXPLORERS') || [];
+  const masterAssignments = draw.assignments?.filter((a) => a.tier === 'MASTERS') || [];
+  const explorerAssignments = draw.assignments?.filter((a) => a.tier === 'EXPLORERS') || [];
 
-  const mastersRounds: Record<number, any[]> = {};
-  masterAssignments.forEach((assignment: any) => {
+  const mastersRounds: Record<number, Assignment[]> = {};
+  masterAssignments.forEach((assignment) => {
     if (!mastersRounds[assignment.round]) {
       mastersRounds[assignment.round] = [];
     }
     mastersRounds[assignment.round].push(assignment);
   });
 
-  const explorersRounds: Record<number, any[]> = {};
-  explorerAssignments.forEach((assignment: any) => {
+  const explorersRounds: Record<number, Assignment[]> = {};
+  explorerAssignments.forEach((assignment) => {
     if (!explorersRounds[assignment.round]) {
       explorersRounds[assignment.round] = [];
     }
@@ -399,7 +441,7 @@ function DrawSummary({ draw }: { draw: any }) {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {assignments.map((assignment: any) => (
+                  {assignments.map((assignment) => (
                     <AssignmentSummaryCard key={assignment.id} assignment={assignment} />
                   ))}
                 </div>
@@ -428,7 +470,7 @@ function DrawSummary({ draw }: { draw: any }) {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {assignments.map((assignment: any) => (
+                  {assignments.map((assignment) => (
                     <AssignmentSummaryCard key={assignment.id} assignment={assignment} />
                   ))}
                 </div>
@@ -442,7 +484,7 @@ function DrawSummary({ draw }: { draw: any }) {
 }
 
 // Assignment Summary Card (simplified, read-only version)
-function AssignmentSummaryCard({ assignment }: { assignment: any }) {
+function AssignmentSummaryCard({ assignment }: { assignment: Assignment }) {
   return (
     <div className="border rounded-lg p-4">
       <div className="mb-3">
@@ -452,7 +494,7 @@ function AssignmentSummaryCard({ assignment }: { assignment: any }) {
         <div className="pr-4">
           <p className="text-sm font-medium mb-2">Team A</p>
           <div className="space-y-1">
-            {assignment.teamA?.map((player: any) => (
+            {assignment.teamA?.map((player) => (
               <div key={player.id} className="flex items-center justify-between text-sm">
                 <span>{player.name}</span>
                 <span className="text-xs text-muted-foreground">{player.rating}</span>
@@ -463,7 +505,7 @@ function AssignmentSummaryCard({ assignment }: { assignment: any }) {
         <div className="pl-4">
           <p className="text-sm font-medium mb-2">Team B</p>
           <div className="space-y-1">
-            {assignment.teamB?.map((player: any) => (
+            {assignment.teamB?.map((player) => (
               <div key={player.id} className="flex items-center justify-between text-sm">
                 <span>{player.name}</span>
                 <span className="text-xs text-muted-foreground">{player.rating}</span>

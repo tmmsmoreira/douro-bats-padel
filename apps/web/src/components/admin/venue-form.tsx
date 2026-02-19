@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -173,14 +174,17 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
             {formData.logo && (
               <div className="mt-2">
                 <p className="text-sm text-muted-foreground mb-2">{t('logoPreview')}</p>
-                <img
-                  src={formData.logo}
-                  alt={t('logoPreviewAlt')}
-                  className="h-16 w-16 object-contain border rounded"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
+                <div className="relative h-16 w-16 border rounded overflow-hidden">
+                  <Image
+                    src={formData.logo}
+                    alt={t('logoPreviewAlt')}
+                    fill
+                    className="object-contain"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                </div>
               </div>
             )}
           </div>

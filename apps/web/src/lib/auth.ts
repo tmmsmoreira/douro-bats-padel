@@ -2,6 +2,7 @@ import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
 import type { AuthTokens, AuthUser } from '@padel/types';
+import type { JWT } from 'next-auth/jwt';
 
 /**
  * Token refresh strategy:
@@ -15,7 +16,7 @@ import type { AuthTokens, AuthUser } from '@padel/types';
 /**
  * Refresh the access token using the refresh token
  */
-async function refreshAccessToken(token: any) {
+async function refreshAccessToken(token: JWT) {
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`, {
       method: 'POST',

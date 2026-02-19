@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { RegisterForm } from '@/components/auth/register-form';
 import { LanguageToggleButton } from '@/components/language-toggle-button';
 import { ThemeToggleButton } from '@/components/ui/theme-toggle-button';
@@ -38,7 +39,9 @@ export default function RegisterPage() {
 
       {/* Right side - Register Form */}
       <div className="flex-1 flex items-center justify-center bg-background p-8">
-        <RegisterForm />
+        <Suspense fallback={<div>Loading...</div>}>
+          <RegisterForm />
+        </Suspense>
       </div>
     </div>
   );

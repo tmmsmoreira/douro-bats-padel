@@ -7,8 +7,15 @@ import { SessionProvider } from 'next-auth/react';
 import { useState } from 'react';
 import { ThemeProvider } from './theme-provider';
 import { Toaster } from 'sonner';
+import type { Session } from 'next-auth';
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export function Providers({
+  children,
+  session,
+}: {
+  children: React.ReactNode;
+  session?: Session | null;
+}) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -23,7 +30,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-      <SessionProvider>
+      <SessionProvider session={session}>
         <QueryClientProvider client={queryClient}>
           {children}
           <Toaster richColors position="top-right" />

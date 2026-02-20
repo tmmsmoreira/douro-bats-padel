@@ -34,7 +34,11 @@
     "players": "Jogadores",
     "venues": "Clubes",
     "playerView": "Vista de Jogador",
-    "invitations": "Convites"
+    "invitations": "Convites",
+    "account": "Conta",
+    "settings": "Definições",
+    "language": "Idioma",
+    "theme": "Tema"
   },
   "auth": {
     "login": {
@@ -201,6 +205,7 @@
     "status": "Estado"
   },
   "admin": {
+    "loading": "A carregar...",
     "eventsManagement": "Gestão de Eventos",
     "eventsDescription": "Gerir noites de jogo, confirmações e sorteios",
     "createEvent": "Criar Evento",

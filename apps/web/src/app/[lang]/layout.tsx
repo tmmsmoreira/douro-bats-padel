@@ -7,6 +7,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { locales, type Locale } from '@/i18n/config';
+import { auth } from '@/lib/auth';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -56,6 +57,8 @@ export default async function LangLayout({
   // Enable static rendering
   setRequestLocale(lang);
 
+  // Fetch session server-side to prevent hydration flash
+  const session = await auth();
   const messages = await getMessages({ locale: lang });
 
   return (
@@ -72,7 +75,7 @@ export default async function LangLayout({
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body className={inter.className} suppressHydrationWarning>
-        <Providers>
+        <Providers session={session}>
           <NextIntlClientProvider locale={lang} messages={messages}>
             {children}
           </NextIntlClientProvider>

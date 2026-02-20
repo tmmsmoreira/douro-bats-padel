@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Switch } from '@/components/ui/switch';
-import { i18n, localeFlags, type Locale } from '@/i18n';
+import { i18n, localeFlags, localeNames, type Locale } from '@/i18n';
 
 export function LanguageToggle() {
   const pathname = usePathname();
@@ -15,6 +15,9 @@ export function LanguageToggle() {
   }, []);
 
   const currentLocale = (pathname.split('/')[1] as Locale) || i18n.defaultLocale;
+  const isPortuguese = currentLocale === 'pt';
+  const displayFlag = localeFlags[currentLocale];
+  const displayName = localeNames[currentLocale];
 
   const toggleLanguage = (checked: boolean) => {
     const newLocale: Locale = checked ? 'pt' : 'en';
@@ -30,29 +33,14 @@ export function LanguageToggle() {
     router.push(newPath);
   };
 
-  if (!mounted) {
-    return (
-      <div className="flex items-center justify-between px-2 py-1.5">
-        <div className="flex items-center gap-2">
-          <span className="text-xl">🇬🇧</span>
-          <span className="text-sm">English</span>
-        </div>
-        <Switch disabled checked={false} />
-      </div>
-    );
-  }
-
-  const isPortuguese = currentLocale === 'pt';
-  const displayFlag = localeFlags[currentLocale];
-  const displayName = currentLocale === 'en' ? 'English' : 'Português';
-
+  // Show the same content during SSR and after hydration to prevent flash
   return (
     <div className="flex items-center justify-between px-2 py-1.5">
       <div className="flex items-center gap-2">
         <span className="text-xl">{displayFlag}</span>
         <span className="text-sm">{displayName}</span>
       </div>
-      <Switch checked={isPortuguese} onCheckedChange={toggleLanguage} />
+      <Switch checked={isPortuguese} onCheckedChange={toggleLanguage} disabled={!mounted} />
     </div>
   );
 }

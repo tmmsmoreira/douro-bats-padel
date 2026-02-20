@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, usePathname } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -13,11 +13,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { signOut, useSession } from 'next-auth/react';
-import { User, LogOut, Menu, X } from 'lucide-react';
+import { User, LogOut } from 'lucide-react';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { ThemeToggleButton } from '@/components/ui/theme-toggle-button';
 import { LanguageToggleButton } from '@/components/language-toggle-button';
 import { LanguageMenuItems } from '@/components/language-menu-items';
+import { MenuToggle } from '@/components/ui/menu-toggle';
 import { useTranslations } from 'next-intl';
 
 export function HomeNav() {
@@ -25,6 +26,20 @@ export function HomeNav() {
   const { data: session } = useSession();
   const t = useTranslations('nav');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [mobileMenuOpen]);
 
   const isEditor =
     session?.user?.roles?.includes('EDITOR') || session?.user?.roles?.includes('ADMIN');
@@ -142,85 +157,137 @@ export function HomeNav() {
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="flex md:hidden items-center gap-2">
-            {!session && (
-              <>
-                <LanguageToggleButton />
-                <ThemeToggleButton />
-              </>
-            )}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-9 w-9 p-0"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
-          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="md:hidden h-9 w-9 p-0"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+          >
+            <MenuToggle isOpen={mobileMenuOpen} />
+          </Button>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Full-Screen Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t py-4 space-y-3">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className={cn(
-                  'block px-3 py-2 text-base font-medium rounded-md transition-colors',
-                  pathname === item.href
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
+          <div className="md:hidden fixed inset-0 top-16 bg-card z-50 overflow-y-auto">
+            <div className="container mx-auto px-4 py-6 space-y-2">
+              {/* User Profile Section (if logged in) */}
+              {session && (
+                <div className="flex items-center gap-4 pb-6 border-b">
+                  <Avatar className="h-16 w-16">
+                    <AvatarImage
+                      src={session?.user?.profilePhoto || undefined}
+                      alt={session?.user?.name || 'User'}
+                    />
+                    <AvatarFallback className="bg-primary text-primary-foreground text-xl">
+                      {session?.user?.name
+                        ? session.user.name
+                            .split(' ')
+                            .map((n) => n[0])
+                            .join('')
+                            .toUpperCase()
+                            .slice(0, 2)
+                        : session?.user?.email?.[0]?.toUpperCase() || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    {session?.user?.name && (
+                      <p className="font-semibold text-lg truncate">{session.user.name}</p>
+                    )}
+                    {session?.user?.email && (
+                      <p className="text-sm text-muted-foreground truncate">{session.user.email}</p>
+                    )}
+                  </div>
+                </div>
+              )}
 
-            {session ? (
-              <div className="space-y-3 pt-3 border-t">
-                {isEditor && (
-                  <Link href="/admin" onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="ghost" size="sm" className="w-full justify-start">
-                      {t('admin')}
+              {/* Navigation Section */}
+              <div className="space-y-1">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={cn(
+                      'flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-colors',
+                      pathname === item.href
+                        ? 'bg-primary text-primary-foreground'
+                        : 'text-foreground hover:bg-accent'
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+
+              {/* Account Section (if logged in) */}
+              {session && (
+                <div className="space-y-1 pt-2 border-t">
+                  <p className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    {t('account') || 'Account'}
+                  </p>
+                  <Link
+                    href="/profile"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-colors text-foreground hover:bg-accent"
+                  >
+                    <User className="h-5 w-5" />
+                    {t('profile')}
+                  </Link>
+                </div>
+              )}
+
+              {/* Settings Section */}
+              <div className="space-y-1 pt-2 border-t">
+                <p className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {t('settings') || 'Settings'}
+                </p>
+                <div className="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-accent">
+                  <span className="text-base font-medium">{t('language') || 'Language'}</span>
+                  <LanguageToggleButton />
+                </div>
+                <div className="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-accent">
+                  <span className="text-base font-medium">{t('theme') || 'Theme'}</span>
+                  <ThemeToggleButton />
+                </div>
+              </div>
+
+              {/* Sign In/Out Section */}
+              <div className="pt-2 border-t">
+                {session ? (
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      signOut();
+                    }}
+                    className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-colors text-destructive hover:bg-destructive/10 w-full"
+                  >
+                    <LogOut className="h-5 w-5" />
+                    {t('signOut')}
+                  </button>
+                ) : (
+                  <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                    <Button className="w-full" size="lg">
+                      {t('signIn')}
                     </Button>
                   </Link>
                 )}
-                <Link href="/profile" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="ghost" size="sm" className="w-full justify-start">
-                    <User className="mr-2 h-4 w-4" />
-                    {t('profile')}
-                  </Button>
-                </Link>
+              </div>
 
-                {/* Theme and Language toggles for logged-in users */}
-                <div className="flex items-center gap-2 px-3 py-2 border-t">
-                  <LanguageToggleButton />
-                  <ThemeToggleButton />
+              {/* Role Switching Section */}
+              {session && isEditor && (
+                <div className="pt-2 border-t">
+                  <Link
+                    href="/admin"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center uppercase justify-center w-full px-4 py-3 text-base font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90"
+                  >
+                    {t('admin')}
+                  </Link>
                 </div>
-
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start text-destructive hover:text-destructive"
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    signOut();
-                  }}
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  {t('signOut')}
-                </Button>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-2 pt-3 border-t">
-                <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
-                  <Button className="w-full">{t('signIn')}</Button>
-                </Link>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
       </div>

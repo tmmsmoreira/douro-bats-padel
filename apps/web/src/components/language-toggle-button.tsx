@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { i18n, type Locale } from '@/i18n';
+import { i18n, localeFlags, type Locale } from '@/i18n';
 
 export function LanguageToggleButton() {
   const pathname = usePathname();
@@ -15,6 +15,7 @@ export function LanguageToggleButton() {
   }, []);
 
   const currentLocale = (pathname.split('/')[1] as Locale) || i18n.defaultLocale;
+  const displayFlag = localeFlags[currentLocale];
 
   const toggleLanguage = () => {
     const newLocale: Locale = currentLocale === 'en' ? 'pt' : 'en';
@@ -30,21 +31,13 @@ export function LanguageToggleButton() {
     router.push(newPath);
   };
 
-  if (!mounted) {
-    return (
-      <Button variant="ghost" size="icon" disabled className="text-xl">
-        🇬🇧
-      </Button>
-    );
-  }
-
-  const displayFlag = currentLocale === 'en' ? '🇬🇧' : '🇵🇹';
-
+  // Show the same flag during SSR and after hydration to prevent flash
   return (
     <Button
       variant="ghost"
       size="icon"
       onClick={toggleLanguage}
+      disabled={!mounted}
       className="text-xl"
       aria-label={`Switch to ${currentLocale === 'en' ? 'Portuguese' : 'English'}`}
     >

@@ -1,10 +1,9 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useSession } from 'next-auth/react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DatePicker } from '@/components/ui/date-picker';
@@ -15,63 +14,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { formatDate, formatTime } from '@/lib/utils';
 import Link from 'next/link';
-import type { EventWithRSVP } from '@padel/types';
 import { useState, useMemo } from 'react';
 import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+import { useAdminEvents, useAuthFetch } from '@/hooks';
+import { EventCard, EventStats } from '@/components/shared';
 
 type EventState = 'ALL' | 'DRAFT' | 'OPEN' | 'FROZEN' | 'DRAWN' | 'PUBLISHED';
 
 const EVENTS_PER_PAGE = 10;
 
 export function EventsList() {
-  const { data: session } = useSession();
   const queryClient = useQueryClient();
+  const authFetch = useAuthFetch();
   const t = useTranslations('eventsList');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [statusFilter, setStatusFilter] = useState<EventState>('ALL');
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { data: events, isLoading } = useQuery({
-    queryKey: ['admin-events', session?.accessToken],
-    queryFn: async () => {
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-      };
-
-      if (session?.accessToken) {
-        headers.Authorization = `Bearer ${session.accessToken}`;
-      }
-
-      // Add includeUnpublished=true query parameter for admin view
-      const res = await fetch(`${API_URL}/events?includeUnpublished=true`, { headers });
-
-      if (!res.ok) {
-        throw new Error(`API Error: ${res.statusText}`);
-      }
-
-      return res.json() as Promise<EventWithRSVP[]>;
-    },
-  });
+  const { data: events, isLoading } = useAdminEvents();
 
   const publishDrawMutation = useMutation({
     mutationFn: async (eventId: string) => {
-      if (!session?.accessToken) throw new Error('Not authenticated');
-
-      const res = await fetch(`${API_URL}/draws/events/${eventId}/publish`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.accessToken}`,
-        },
-      });
-
-      if (!res.ok) throw new Error('Failed to publish draw');
-      return res.json();
+      return authFetch.post(`/draws/events/${eventId}/publish`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-events'] });
@@ -200,63 +166,50 @@ export function EventsList() {
               const hasEventPassed = eventEndTime < new Date();
 
               return (
-                <Card key={event.id}>
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle>{event.title || t('untitledEvent')}</CardTitle>
-                        <CardDescription>
-                          {formatDate(event.date)} • {formatTime(event.startsAt)} -{' '}
-                          {formatTime(event.endsAt)}
-                        </CardDescription>
-                      </div>
-                      <Badge variant={event.state === 'PUBLISHED' ? 'default' : 'secondary'}>
-                        {event.state}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="flex items-center justify-between">
-                      <div className="flex gap-4 text-sm">
-                        <span>
-                          <strong>{event.confirmedCount}</strong> / {event.capacity}{' '}
-                          {t('confirmed')}
-                        </span>
-                        {event.waitlistCount > 0 && (
-                          <span className="text-muted-foreground">
-                            {event.waitlistCount} {t('waitlisted')}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex gap-2">
-                        <Link href={`/admin/events/${event.id}`}>
-                          <Button variant="outline" size="sm">
-                            {t('manage')}
-                          </Button>
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  showStatus
+                  headerActions={
+                    <Badge variant={event.state === 'PUBLISHED' ? 'default' : 'secondary'}>
+                      {event.state}
+                    </Badge>
+                  }
+                >
+                  <div className="flex items-center justify-between">
+                    <EventStats
+                      event={event}
+                      confirmedLabel={t('confirmed')}
+                      waitlistedLabel={t('waitlisted')}
+                    />
+                    <div className="flex gap-2">
+                      <Link href={`/admin/events/${event.id}`}>
+                        <Button variant="outline" size="sm">
+                          {t('manage')}
+                        </Button>
+                      </Link>
+                      {event.state === 'FROZEN' && !hasEventPassed && (
+                        <Link href={`/admin/events/${event.id}/draw`}>
+                          <Button size="sm">{t('generateDraw')}</Button>
                         </Link>
-                        {event.state === 'FROZEN' && !hasEventPassed && (
-                          <Link href={`/admin/events/${event.id}/draw`}>
-                            <Button size="sm">{t('generateDraw')}</Button>
-                          </Link>
-                        )}
-                        {event.state === 'DRAWN' && !hasEventPassed && (
-                          <Button
-                            size="sm"
-                            onClick={() => publishDrawMutation.mutate(event.id)}
-                            disabled={publishDrawMutation.isPending}
-                          >
-                            {publishDrawMutation.isPending ? 'Publishing...' : t('publish')}
-                          </Button>
-                        )}
-                        {event.state === 'PUBLISHED' && hasEventPassed && (
-                          <Link href={`/admin/events/${event.id}/results`}>
-                            <Button size="sm">{t('enterResults')}</Button>
-                          </Link>
-                        )}
-                      </div>
+                      )}
+                      {event.state === 'DRAWN' && !hasEventPassed && (
+                        <Button
+                          size="sm"
+                          onClick={() => publishDrawMutation.mutate(event.id)}
+                          disabled={publishDrawMutation.isPending}
+                        >
+                          {publishDrawMutation.isPending ? 'Publishing...' : t('publish')}
+                        </Button>
+                      )}
+                      {event.state === 'PUBLISHED' && hasEventPassed && (
+                        <Link href={`/admin/events/${event.id}/results`}>
+                          <Button size="sm">{t('enterResults')}</Button>
+                        </Link>
+                      )}
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </EventCard>
               );
             })}
           </div>

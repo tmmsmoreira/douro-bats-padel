@@ -240,6 +240,9 @@ export function EventDetails({ eventId }: { eventId: string }) {
                 <span>{event.venue.name}</span>
               </div>
             )}
+            <Badge variant={event.state === 'PUBLISHED' ? 'default' : 'secondary'}>
+              {event.state}
+            </Badge>
           </div>
         </div>
         <div className="flex gap-2">
@@ -264,12 +267,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
               <Button variant="outline">{t('viewEditDraw')}</Button>
             </Link>
           )}
-          {event.state === 'DRAWN' && !hasEventPassed && (
-            <Link href={`/admin/events/${eventId}/draw/view`}>
-              <Button variant="outline">{t('viewEditDraw')}</Button>
-            </Link>
-          )}
-          {event.state === 'PUBLISHED' && !hasEventPassed && (
+          {(event.state === 'DRAWN' || event.state === 'PUBLISHED') && !hasEventPassed && (
             <Link href={`/admin/events/${eventId}/draw/view`}>
               <Button variant="outline">{t('viewEditDraw')}</Button>
             </Link>

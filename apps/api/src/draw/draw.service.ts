@@ -71,6 +71,14 @@ export class DrawService {
       throw new NotFoundException('Event not found');
     }
 
+    // Check if event has passed
+    const eventEndTime = new Date(event.endsAt);
+    const hasEventPassed = eventEndTime < new Date();
+
+    if (hasEventPassed) {
+      throw new BadRequestException('Cannot generate draw for a past event');
+    }
+
     if (event.state !== EventState.FROZEN && event.state !== EventState.OPEN) {
       throw new BadRequestException('Event must be frozen before generating draw');
     }
@@ -682,6 +690,14 @@ export class DrawService {
       throw new NotFoundException('Assignment not found');
     }
 
+    // Check if event has passed
+    const eventEndTime = new Date(assignment.draw.event.endsAt);
+    const hasEventPassed = eventEndTime < new Date();
+
+    if (hasEventPassed) {
+      throw new BadRequestException('Cannot update assignment for a past event');
+    }
+
     // Audit log
     console.log(`[AUDIT] Assignment ${assignmentId} updated by ${updatedBy}`);
     console.log(`Before: TeamA=${assignment.teamA}, TeamB=${assignment.teamB}`);
@@ -708,6 +724,14 @@ export class DrawService {
       throw new NotFoundException('Event not found');
     }
 
+    // Check if event has passed
+    const eventEndTime = new Date(event.endsAt);
+    const hasEventPassed = eventEndTime < new Date();
+
+    if (hasEventPassed) {
+      throw new BadRequestException('Cannot publish draw for a past event');
+    }
+
     if (event.draws.length === 0) {
       throw new BadRequestException('No draw generated for this event');
     }
@@ -730,6 +754,14 @@ export class DrawService {
 
     if (!event) {
       throw new NotFoundException('Event not found');
+    }
+
+    // Check if event has passed
+    const eventEndTime = new Date(event.endsAt);
+    const hasEventPassed = eventEndTime < new Date();
+
+    if (hasEventPassed) {
+      throw new BadRequestException('Cannot unpublish draw for a past event');
     }
 
     if (event.state !== EventState.PUBLISHED) {
@@ -762,6 +794,14 @@ export class DrawService {
 
     if (!event) {
       throw new NotFoundException('Event not found');
+    }
+
+    // Check if event has passed
+    const eventEndTime = new Date(event.endsAt);
+    const hasEventPassed = eventEndTime < new Date();
+
+    if (hasEventPassed) {
+      throw new BadRequestException('Cannot delete draw for a past event');
     }
 
     if (event.draws.length === 0) {

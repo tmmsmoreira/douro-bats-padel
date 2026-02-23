@@ -275,6 +275,14 @@ export class EventsService {
       throw new NotFoundException('Event not found');
     }
 
+    // Check if event has passed
+    const eventEndTime = new Date(event.endsAt);
+    const hasEventPassed = eventEndTime < new Date();
+
+    if (hasEventPassed) {
+      throw new BadRequestException('Cannot update a past event');
+    }
+
     // Validate tier rules if provided
     const capacity = dto.capacity ?? event.capacity;
     if (dto.tierRules !== undefined) {

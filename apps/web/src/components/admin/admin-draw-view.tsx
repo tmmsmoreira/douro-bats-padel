@@ -274,11 +274,15 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
   const mastersRounds = groupByRound(masterAssignments);
   const explorersRounds = groupByRound(explorerAssignments);
 
+  // Check if event has passed
+  const eventEndTime = new Date(draw.event.endsAt);
+  const hasEventPassed = eventEndTime < new Date();
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Manage Draw</h1>
+          <h1 className="text-3xl font-bold">{hasEventPassed ? 'View Draw' : 'Manage Draw'}</h1>
           <p className="text-muted-foreground">{draw.event.title}</p>
           <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
             <div className="flex items-center gap-1">
@@ -300,44 +304,46 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
             )}
           </div>
         </div>
-        <div className="flex gap-2">
-          {draw.event.state !== 'PUBLISHED' && (
-            <>
+        {!hasEventPassed && (
+          <div className="flex gap-2">
+            {draw.event.state !== 'PUBLISHED' && (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => router.push(`/admin/events/${eventId}/draw`)}
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  Generate New
+                </Button>
+                <Button
+                  onClick={() => publishDrawMutation.mutate()}
+                  disabled={publishDrawMutation.isPending}
+                >
+                  <Send className="h-4 w-4" />
+                  {publishDrawMutation.isPending ? 'Publishing...' : 'Publish'}
+                </Button>
+              </>
+            )}
+            {draw.event.state === 'PUBLISHED' && (
               <Button
                 variant="outline"
-                onClick={() => router.push(`/admin/events/${eventId}/draw`)}
+                onClick={() => unpublishDrawMutation.mutate()}
+                disabled={unpublishDrawMutation.isPending}
               >
-                <RefreshCw className="h-4 w-4" />
-                Generate New
+                <ArchiveRestore className="h-4 w-4" />
+                {unpublishDrawMutation.isPending ? 'Unpublishing...' : 'Unpublish'}
               </Button>
-              <Button
-                onClick={() => publishDrawMutation.mutate()}
-                disabled={publishDrawMutation.isPending}
-              >
-                <Send className="h-4 w-4" />
-                {publishDrawMutation.isPending ? 'Publishing...' : 'Publish'}
-              </Button>
-            </>
-          )}
-          {draw.event.state === 'PUBLISHED' && (
+            )}
             <Button
-              variant="outline"
-              onClick={() => unpublishDrawMutation.mutate()}
-              disabled={unpublishDrawMutation.isPending}
+              variant="destructive"
+              onClick={() => setShowDeleteDialog(true)}
+              disabled={deleteDrawMutation.isPending}
             >
-              <ArchiveRestore className="h-4 w-4" />
-              {unpublishDrawMutation.isPending ? 'Unpublishing...' : 'Unpublish'}
+              <Trash2 className="h-4 w-4" />
+              {deleteDrawMutation.isPending ? 'Deleting...' : 'Delete'}
             </Button>
-          )}
-          <Button
-            variant="destructive"
-            onClick={() => setShowDeleteDialog(true)}
-            disabled={deleteDrawMutation.isPending}
-          >
-            <Trash2 className="h-4 w-4" />
-            {deleteDrawMutation.isPending ? 'Deleting...' : 'Delete'}
-          </Button>
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Masters Assignments */}
@@ -364,6 +370,7 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
                       key={assignment.id}
                       assignment={assignment}
                       onEdit={() => setEditingAssignment(assignment)}
+                      canEdit={!hasEventPassed}
                     />
                   ))}
                 </div>
@@ -398,6 +405,7 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
                       key={assignment.id}
                       assignment={assignment}
                       onEdit={() => setEditingAssignment(assignment)}
+                      canEdit={!hasEventPassed}
                     />
                   ))}
                 </div>
@@ -481,14 +489,24 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
   );
 }
 
-function AssignmentCard({ assignment, onEdit }: { assignment: Assignment; onEdit: () => void }) {
+function AssignmentCard({
+  assignment,
+  onEdit,
+  canEdit = true,
+}: {
+  assignment: Assignment;
+  onEdit: () => void;
+  canEdit?: boolean;
+}) {
   return (
     <div className="border rounded-lg p-4">
       <div className="flex items-center justify-between mb-3">
         <Badge variant="outline">{assignment.court?.label || `Court ${assignment.courtId}`}</Badge>
-        <Button variant="ghost" size="sm" onClick={onEdit}>
-          <Pencil className="h-4 w-4" />
-        </Button>
+        {canEdit && (
+          <Button variant="ghost" size="sm" onClick={onEdit}>
+            <Pencil className="h-4 w-4" />
+          </Button>
+        )}
       </div>
       <div className="grid grid-cols-2 divide-x">
         <div className="pr-4">

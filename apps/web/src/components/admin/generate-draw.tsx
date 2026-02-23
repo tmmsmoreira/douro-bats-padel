@@ -165,6 +165,15 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
     return <div className="text-center py-8">Event not found</div>;
   }
 
+  // Check if event has passed - redirect to view page if it has
+  const eventEndTime = new Date(event.endsAt);
+  const hasEventPassed = eventEndTime < new Date();
+
+  if (hasEventPassed) {
+    router.push(`/${locale}/admin/events/${eventId}`);
+    return <div className="text-center py-8">Redirecting...</div>;
+  }
+
   const confirmedCount = event.confirmedCount || 0;
 
   // Since MASTERS and EXPLORERS play at different times, capacity is additive

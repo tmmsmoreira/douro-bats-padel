@@ -2,14 +2,18 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { EventForm } from '@/components/admin/event-form';
 import { use } from 'react';
+import { useLocale } from 'next-intl';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export default function EditEventPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: eventId } = use(params);
   const { data: session } = useSession();
+  const router = useRouter();
+  const locale = useLocale();
 
   const { data: event, isLoading } = useQuery({
     queryKey: ['event', eventId, session?.accessToken],
@@ -50,6 +54,22 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         <div>
           <h1 className="text-3xl font-bold">Edit Event</h1>
           <p className="text-muted-foreground text-destructive">Event not found</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Check if event has passed - redirect to event details if it has
+  const eventEndTime = new Date(event.endsAt);
+  const hasEventPassed = eventEndTime < new Date();
+
+  if (hasEventPassed) {
+    router.push(`/${locale}/admin/events/${eventId}`);
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold">Edit Event</h1>
+          <p className="text-muted-foreground">Cannot edit past events. Redirecting...</p>
         </div>
       </div>
     );

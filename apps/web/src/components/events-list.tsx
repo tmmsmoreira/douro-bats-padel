@@ -30,7 +30,12 @@ export function EventsList() {
         headers.Authorization = `Bearer ${session.accessToken}`;
       }
 
-      const res = await fetch(`${API_URL}/events`, { headers });
+      // Only fetch upcoming events (from today onwards)
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const from = today.toISOString();
+
+      const res = await fetch(`${API_URL}/events?from=${from}`, { headers });
 
       if (!res.ok) {
         throw new Error(`API Error: ${res.statusText}`);

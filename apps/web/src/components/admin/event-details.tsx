@@ -8,8 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { Calendar, Clock, MapPin, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { DeleteIcon, DeleteIconHandle } from 'lucide-animated';
+import { Calendar, MapPin, Clock } from 'lucide-react';
+import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 import {
   AlertDialog,
@@ -73,6 +74,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
   const t = useTranslations('eventDetails');
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const deleteIconRef = useRef<DeleteIconHandle>(null);
 
   const { data: event, isLoading } = useQuery({
     queryKey: ['event', eventId, session?.accessToken],
@@ -277,8 +279,14 @@ export function EventDetails({ eventId }: { eventId: string }) {
               <Button>{t('enterResults')}</Button>
             </Link>
           )}
-          <Button variant="destructive" onClick={handleDeleteEvent} disabled={isDeleting}>
-            <Trash2 className="h-4 w-4" />
+          <Button
+            variant="destructive"
+            onClick={handleDeleteEvent}
+            disabled={isDeleting}
+            onMouseEnter={() => deleteIconRef.current?.startAnimation()}
+            onMouseLeave={() => deleteIconRef.current?.stopAnimation()}
+          >
+            <DeleteIcon size={16} ref={deleteIconRef} />
             {isDeleting ? t('deleting') : t('deleteEvent')}
           </Button>
         </div>
@@ -405,6 +413,8 @@ export function EventDetails({ eventId }: { eventId: string }) {
 
 // Draw Summary Component
 function DrawSummary({ draw }: { draw: Draw }) {
+  const t = useTranslations('eventDetails');
+
   // Group assignments by tier and round
   const masterAssignments = draw.assignments?.filter((a) => a.tier === 'MASTERS') || [];
   const explorerAssignments = draw.assignments?.filter((a) => a.tier === 'EXPLORERS') || [];
@@ -442,9 +452,9 @@ function DrawSummary({ draw }: { draw: Draw }) {
           {Object.entries(mastersRounds).map(([round, assignments]) => (
             <Card key={`masters-${round}`}>
               <CardHeader>
-                <CardTitle>Round {round}</CardTitle>
+                <CardTitle>{t('round', { round: round })}</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-0">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {assignments.map((assignment) => (
                     <AssignmentSummaryCard key={assignment.id} assignment={assignment} />
@@ -471,9 +481,9 @@ function DrawSummary({ draw }: { draw: Draw }) {
           {Object.entries(explorersRounds).map(([round, assignments]) => (
             <Card key={`explorers-${round}`}>
               <CardHeader>
-                <CardTitle>Round {round}</CardTitle>
+                <CardTitle>{t('round', { round: round })}</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-0">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {assignments.map((assignment) => (
                     <AssignmentSummaryCard key={assignment.id} assignment={assignment} />
@@ -490,6 +500,8 @@ function DrawSummary({ draw }: { draw: Draw }) {
 
 // Assignment Summary Card (simplified, read-only version)
 function AssignmentSummaryCard({ assignment }: { assignment: Assignment }) {
+  const t = useTranslations('eventDetails');
+
   return (
     <div className="border rounded-lg p-4">
       <div className="mb-3">
@@ -497,7 +509,7 @@ function AssignmentSummaryCard({ assignment }: { assignment: Assignment }) {
       </div>
       <div className="grid grid-cols-2 divide-x">
         <div className="pr-4">
-          <p className="text-sm font-medium mb-2">Team A</p>
+          <p className="text-sm font-medium mb-2">{t('team', { team: 'A' })}</p>
           <div className="space-y-1">
             {assignment.teamA?.map((player) => (
               <div key={player.id} className="flex items-center justify-between text-sm">
@@ -508,7 +520,7 @@ function AssignmentSummaryCard({ assignment }: { assignment: Assignment }) {
           </div>
         </div>
         <div className="pl-4">
-          <p className="text-sm font-medium mb-2">Team B</p>
+          <p className="text-sm font-medium mb-2">{t('team', { team: 'A' })}</p>
           <div className="space-y-1">
             {assignment.teamB?.map((player) => (
               <div key={player.id} className="flex items-center justify-between text-sm">

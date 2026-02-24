@@ -9,7 +9,7 @@ import {
   InputGroupInput,
 } from '@/components/ui/input-group';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarDaysIcon } from 'lucide-animated';
 
 function formatDate(date: Date | undefined) {
   if (!date) {
@@ -91,7 +91,7 @@ export function DatePicker({
               aria-label="Select date"
               disabled={disabled}
             >
-              <CalendarIcon />
+              <CalendarDaysIcon size={16} />
               <span className="sr-only">Select date</span>
             </InputGroupButton>
           </PopoverTrigger>

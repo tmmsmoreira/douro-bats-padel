@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Globe } from 'lucide-react';
+import { Globe } from 'lucide-animated';
 import { i18n, localeNames, localeFlags, type Locale } from '@/i18n';
 
 export function LanguageSwitcher() {

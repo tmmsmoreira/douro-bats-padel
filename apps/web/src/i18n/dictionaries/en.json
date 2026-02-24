@@ -202,6 +202,11 @@
     "performanceStats": "Performance Stats",
     "basedOnLastWeeks": "Based on last 5 weeks",
     "currentRating": "Current Rating",
+    "userAltText": "User",
+    "weeksPlayed": "Weeks Played",
+    "bestRank": "Best Rank",
+    "recentWeeklyScores": "Recent Weekly Scores",
+    "week": "Week",
     "status": "Status"
   },
   "admin": {
@@ -367,7 +372,8 @@
     "playerSince": "Player since",
     "accountCreated": "Account created",
     "searchPlayers": "Search players by name or email...",
-    "noPlayersMatchSearch": "No players match your search."
+    "noPlayersMatchSearch": "No players match your search.",
+    "backToPlayers": "Back to Players"
   },
   "playerActions": {
     "actions": "Actions",
@@ -375,7 +381,8 @@
     "deleteUser": "Delete User",
     "deleting": "Deleting...",
     "deleteConfirmation": "Are you sure you want to delete this user? This action cannot be undone and will remove all associated data including RSVPs, matches, and rankings.",
-    "deleteError": "Failed to delete user"
+    "deleteError": "Failed to delete user",
+    "adminCannotBeDeleted": "⚠️ This user is an admin and cannot be deleted."
   },
   "eventDetails": {
     "loadingEvent": "Loading event...",
@@ -387,6 +394,7 @@
     "freezeRsvps": "Freeze RSVPs",
     "generateDraw": "Generate Draw",
     "viewEditDraw": "View & Edit Draw",
+    "enterResults": "Enter Results",
     "confirmedPlayers": "Confirmed Players",
     "spotsRemaining": "{count} spots remaining",
     "fullCapacity": "Event is at full capacity",
@@ -397,7 +405,10 @@
     "deleteEvent": "Delete Event",
     "deleting": "Deleting...",
     "deleteConfirmation": "Are you sure you want to delete this event? This action cannot be undone.",
-    "deleteError": "Failed to delete event"
+    "deleteSuccess": "Event deleted successfully",
+    "deleteError": "Failed to delete event",
+    "team": "Team {team}",
+    "round": "Round {round}"
   },
   "playerEventsList": {
     "loadingEvents": "Loading events...",

@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Moon, Sun } from 'lucide-react';
+import { MoonIcon, SunIcon } from 'lucide-animated';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 
@@ -16,7 +16,7 @@ export function ThemeToggleButton() {
   if (!mounted) {
     return (
       <Button variant="ghost" size="icon" disabled>
-        <Sun className="h-5 w-5" />
+        <SunIcon size={20} />
         <span className="sr-only">Toggle theme</span>
       </Button>
     );
@@ -30,7 +30,7 @@ export function ThemeToggleButton() {
 
   return (
     <Button variant="ghost" size="icon" onClick={toggleTheme}>
-      {isDark ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+      {isDark ? <MoonIcon size={20} /> : <SunIcon size={16} />}
       <span className="sr-only">Toggle theme</span>
     </Button>
   );

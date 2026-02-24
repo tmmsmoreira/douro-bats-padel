@@ -7,10 +7,22 @@ import { useRouter } from '@/i18n/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Mail, CheckCircle, XCircle, ArrowLeft, Trash2 } from 'lucide-react';
+import { Mail, CheckCircle, XCircle } from 'lucide-react';
+import { ArrowLeftIcon, ArrowLeftIconHandle, DeleteIcon, DeleteIconHandle } from 'lucide-animated';
 import { Button } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -62,6 +74,10 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
   const queryClient = useQueryClient();
   const { data: session } = useSession();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  const arrowLeftIconRef = useRef<ArrowLeftIconHandle>(null);
+  const deleteIconRef = useRef<DeleteIconHandle>(null);
 
   // Check if user is admin or editor
   const userRoles = session?.user?.roles || [];
@@ -103,20 +119,18 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
       return res.json();
     },
     onSuccess: () => {
+      toast.success(tActions('deleteSuccess'));
       queryClient.invalidateQueries({ queryKey: ['players'] });
       router.push('/admin/players');
     },
     onError: (error: Error) => {
-      alert(tActions('deleteError') + ': ' + error.message);
+      toast.error(tActions('deleteError') + ': ' + error.message);
       setIsDeleting(false);
     },
   });
 
   const handleDeleteUser = () => {
-    if (confirm(tActions('deleteConfirmation'))) {
-      setIsDeleting(true);
-      deleteMutation.mutate();
-    }
+    setShowDeleteDialog(true);
   };
 
   if (isLoading) {
@@ -126,10 +140,10 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
   if (error || !player) {
     return (
       <div className="space-y-6">
-        <Link href="/admin/players">
+        <Link href="/admin/players" onMouseEnter={() => arrowLeftIconRef.current?.startAnimation()}>
           <Button variant="ghost" size="sm">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Players
+            <ArrowLeftIcon ref={arrowLeftIconRef} size={16} />
+            {tList('backToPlayers')}
           </Button>
         </Link>
         <Card>
@@ -145,10 +159,10 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
     <div className="space-y-6">
       {/* Back Button */}
       <div>
-        <Link href="/admin/players">
+        <Link href="/admin/players" onMouseEnter={() => arrowLeftIconRef.current?.startAnimation()}>
           <Button variant="ghost" size="sm">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Players
+            <ArrowLeftIcon ref={arrowLeftIconRef} size={16} />
+            {tList('backToPlayers')}
           </Button>
         </Link>
       </div>
@@ -158,7 +172,10 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
         <CardHeader>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <Avatar className="h-24 w-24">
-              <AvatarImage src={player.profilePhoto || undefined} alt={player.name || 'User'} />
+              <AvatarImage
+                src={player.profilePhoto || undefined}
+                alt={player.name || t('userAltText')}
+              />
               <AvatarFallback className="text-3xl bg-primary text-primary-foreground">
                 {getUserInitials(player.name, player.email)}
               </AvatarFallback>
@@ -235,12 +252,12 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
             <CardContent>
               <div className="space-y-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">Weeks Played</p>
+                  <p className="text-sm text-muted-foreground">{t('weeksPlayed')}</p>
                   <p className="text-2xl font-bold">{player.player.weeklyScores.length}</p>
                 </div>
                 {player.player.rankingSnapshots.length > 0 && (
                   <div>
-                    <p className="text-sm text-muted-foreground">Best Rank</p>
+                    <p className="text-sm text-muted-foreground">{t('bestRank')}</p>
                     <p className="text-2xl font-bold">
                       #{Math.min(...player.player.rankingSnapshots.map((s) => s.rank))}
                     </p>
@@ -256,7 +273,7 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
       {player.player && player.player.weeklyScores.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Recent Weekly Scores</CardTitle>
+            <CardTitle>{t('recentWeeklyScores')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
@@ -266,7 +283,9 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
                   className="flex justify-between items-center py-2 border-b last:border-0"
                 >
                   <div>
-                    <p className="font-medium">Week {new Date(score.week).toLocaleDateString()}</p>
+                    <p className="font-medium">
+                      {t('week')} {new Date(score.week).toLocaleDateString()}
+                    </p>
                     <p className="text-xs text-muted-foreground">
                       {new Date(score.createdAt).toLocaleDateString()}
                     </p>
@@ -285,12 +304,12 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
           <CardHeader>
             <CardTitle className="text-destructive">{tActions('actions')}</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">{tActions('actionsDescription')}</p>
               {player.roles?.includes('ADMIN') && (
                 <div className="text-sm text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950/20 p-3 rounded-md border border-yellow-200 dark:border-yellow-800">
-                  ⚠️ This user is an admin and cannot be deleted.
+                  {tActions('adminCannotBeDeleted')}
                 </div>
               )}
               <Button
@@ -298,14 +317,42 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
                 onClick={handleDeleteUser}
                 disabled={isDeleting || player.roles?.includes('ADMIN')}
                 className="w-full sm:w-auto"
+                onMouseEnter={() => deleteIconRef.current?.startAnimation()}
+                onMouseLeave={() => deleteIconRef.current?.stopAnimation()}
               >
-                <Trash2 className="h-4 w-4 mr-2" />
+                <DeleteIcon ref={deleteIconRef} size={16} />
                 {isDeleting ? tActions('deleting') : tActions('deleteUser')}
               </Button>
             </div>
           </CardContent>
         </Card>
       )}
+
+      {/* Delete User Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{tActions('deleteConfirmation')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this user and all associated data. This action cannot be
+              undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                setIsDeleting(true);
+                deleteMutation.mutate();
+                setShowDeleteDialog(false);
+              }}
+            >
+              {tActions('deleteUser')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { PrismaClient, Role, EventState } from '@prisma/client';
+import { PrismaClient, Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
@@ -144,59 +144,10 @@ async function main() {
   );
   console.log('✅ Created courts:', courts.length);
 
-  // Create upcoming event (Friday night)
-  const nextFriday = new Date();
-  nextFriday.setDate(nextFriday.getDate() + ((5 - nextFriday.getDay() + 7) % 7 || 7));
-  nextFriday.setHours(20, 0, 0, 0);
-
-  const eventEnd = new Date(nextFriday);
-  eventEnd.setHours(21, 30, 0, 0);
-
-  const rsvpOpens = new Date();
-  rsvpOpens.setDate(rsvpOpens.getDate() + ((2 - rsvpOpens.getDay() + 7) % 7)); // Next Tuesday
-  rsvpOpens.setHours(21, 0, 0, 0);
-
-  const rsvpCloses = new Date(nextFriday);
-  rsvpCloses.setHours(14, 0, 0, 0);
-
-  const event = await prisma.event.create({
-    data: {
-      title: 'Sexta à Noite - Explorers & Masters',
-      date: nextFriday,
-      startsAt: nextFriday,
-      endsAt: eventEnd,
-      venueId: venue.id,
-      capacity: 24,
-      rsvpOpensAt: rsvpOpens,
-      rsvpClosesAt: rsvpCloses,
-      state: EventState.DRAFT,
-      tierRules: {
-        explorers: { min: 0, max: 299 },
-        masters: { min: 300, max: 999 },
-      },
-    },
-  });
-  console.log('✅ Created event:', event.title);
-
-  // Create some RSVPs
-  const allPlayers = await prisma.playerProfile.findMany({
-    take: 18,
-    include: { user: true },
-  });
-
-  for (let i = 0; i < allPlayers.length; i++) {
-    await prisma.rSVP.create({
-      data: {
-        eventId: event.id,
-        playerId: allPlayers[i].id,
-        status: i < 24 ? 'CONFIRMED' : 'WAITLISTED',
-        position: i < 24 ? 0 : i - 23,
-      },
-    });
-  }
-  console.log('✅ Created RSVPs:', allPlayers.length);
-
   console.log('🎉 Seeding completed!');
+  console.log('');
+  console.log('💡 To create test events with different states, run:');
+  console.log('   pnpm prisma:seed-test-events');
 }
 
 main()

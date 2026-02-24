@@ -8,7 +8,8 @@
     "lint": "ESLINT_USE_FLAT_CONFIG=false eslint \"{src,apps,libs,test}/**/*.ts\"",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:seed": "tsx prisma/seed.ts"
+    "prisma:seed": "tsx prisma/seed.ts",
+    "prisma:seed-test-events": "tsx prisma/seed-test-events.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.15",

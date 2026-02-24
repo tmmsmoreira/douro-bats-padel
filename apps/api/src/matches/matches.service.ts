@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { RankingService } from '../ranking/ranking.service';
 import type { Tier } from '@padel/types';
 
 interface SubmitMatchDto {
@@ -13,7 +14,10 @@ interface SubmitMatchDto {
 
 @Injectable()
 export class MatchesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private rankingService: RankingService
+  ) {}
 
   async submitMatch(dto: SubmitMatchDto, reportedBy: string) {
     const event = await this.prisma.event.findUnique({
@@ -96,8 +100,16 @@ export class MatchesService {
       },
     });
 
+    // Automatically compute rankings after publishing results
+    try {
+      await this.rankingService.computeRankingsForEvent(eventId);
+    } catch (error) {
+      // Log error but don't fail the publish operation
+      console.error('Failed to compute rankings:', error);
+    }
+
     return {
-      message: 'Matches published successfully',
+      message: 'Matches published successfully and rankings updated',
       count: event.matches.length,
     };
   }

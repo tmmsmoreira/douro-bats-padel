@@ -8,7 +8,8 @@ import {
   InputGroupInput,
 } from '@/components/ui/input-group';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Clock, Check } from 'lucide-react';
+import { ClockIcon } from 'lucide-animated';
+import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 function formatTime(date: Date | undefined) {
@@ -23,13 +24,15 @@ function formatTime(date: Date | undefined) {
   });
 }
 
-function parseTimeString(timeString: string): Date | undefined {
+function parseTimeString(timeString: string, baseDate?: Date): Date | undefined {
   if (!timeString) return undefined;
 
   const [hours, minutes] = timeString.split(':').map(Number);
   if (isNaN(hours) || isNaN(minutes)) return undefined;
 
-  const date = new Date();
+  // Use the provided base date or create a new one
+  // This ensures the time is set on the correct date
+  const date = baseDate ? new Date(baseDate) : new Date();
   date.setHours(hours, minutes, 0, 0);
   return date;
 }
@@ -50,12 +53,10 @@ export function TimePicker({
   id,
 }: TimePickerProps) {
   const [open, setOpen] = React.useState(false);
-  const [_time, setTime] = React.useState<Date | undefined>(value);
   const [inputValue, setInputValue] = React.useState(formatTime(value));
 
   // Sync with external value changes
   React.useEffect(() => {
-    setTime(value);
     setInputValue(formatTime(value));
   }, [value]);
 
@@ -80,11 +81,13 @@ export function TimePicker({
         placeholder={placeholder}
         disabled={disabled}
         onChange={(e) => {
-          setInputValue(e.target.value);
-          const parsedTime = parseTimeString(e.target.value);
-          if (parsedTime) {
-            setTime(parsedTime);
-            if (onChange) {
+          const newValue = e.target.value;
+          setInputValue(newValue);
+
+          // Only parse and trigger onChange if we have a complete time (HH:MM format)
+          if (newValue.match(/^\d{2}:\d{2}$/)) {
+            const parsedTime = parseTimeString(newValue, value);
+            if (parsedTime && onChange) {
               onChange(parsedTime);
             }
           }
@@ -105,7 +108,7 @@ export function TimePicker({
               aria-label="Select time"
               disabled={disabled}
             >
-              <Clock />
+              <ClockIcon size={16} />
               <span className="sr-only">Select time</span>
             </InputGroupButton>
           </PopoverTrigger>
@@ -123,21 +126,20 @@ export function TimePicker({
                     key={timeOption}
                     type="button"
                     className={cn(
-                      'relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+                      'relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground',
                       isSelected && 'bg-accent text-accent-foreground font-medium'
                     )}
                     onClick={() => {
                       setInputValue(timeOption);
-                      const parsedTime = parseTimeString(timeOption);
-                      setTime(parsedTime);
-                      if (onChange) {
+                      const parsedTime = parseTimeString(timeOption, value);
+                      if (parsedTime && onChange) {
                         onChange(parsedTime);
                       }
                       setOpen(false);
                     }}
                   >
                     <span className="flex-1">{timeOption}</span>
-                    {isSelected && <Check className="h-4 w-4" />}
+                    {isSelected && <Check size={16} />}
                   </button>
                 );
               })}

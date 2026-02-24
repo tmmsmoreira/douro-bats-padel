@@ -1,11 +1,11 @@
-const withPWA = require("next-pwa")
-const withNextIntl = require("next-intl/plugin")("./src/i18n/request.ts")
+const withPWA = require('next-pwa');
+const withNextIntl = require('next-intl/plugin')('./src/i18n/request.ts');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ["@padel/types"],
+  transpilePackages: ['@padel/types'],
   experimental: {
-    optimizePackageImports: ["lucide-react"],
+    optimizePackageImports: ['lucide-animated'],
   },
   typescript: {
     ignoreBuildErrors: true,
@@ -14,23 +14,23 @@ const nextConfig = {
     unoptimized: true,
     remotePatterns: [
       {
-        protocol: "https",
-        hostname: "images.unsplash.com",
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
       },
       {
-        protocol: "https",
-        hostname: "images.pexels.com",
+        protocol: 'https',
+        hostname: 'images.pexels.com',
       },
     ],
   },
   turbopack: {},
-}
+};
 
 module.exports = withNextIntl(
   withPWA({
-    dest: "public",
+    dest: 'public',
     register: true,
     skipWaiting: true,
-    disable: process.env.NODE_ENV === "development",
+    disable: process.env.NODE_ENV === 'development',
   })(nextConfig)
-)
+);

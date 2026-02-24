@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import type { CreateVenueDto, UpdateVenueDto } from '@padel/types';
-import { X } from 'lucide-react';
+import { X } from 'lucide-animated';
 import { useTranslations } from 'next-intl';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';

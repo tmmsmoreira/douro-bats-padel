@@ -1,6 +1,6 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Camera } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -18,6 +19,8 @@ export function PlayerProfile() {
   const t = useTranslations('profile');
   const [photoUrl, setPhotoUrl] = useState('');
   const [isEditingPhoto, setIsEditingPhoto] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
 
   const {
     data: profile,
@@ -51,6 +54,17 @@ export function PlayerProfile() {
     },
     enabled: !!session?.accessToken,
   });
+
+  // Handle unauthorized errors by signing out and redirecting to login
+  useEffect(() => {
+    if (error && error instanceof Error && error.message.includes('Unauthorized')) {
+      console.log('Unauthorized error detected, signing out...');
+      const locale = pathname.split('/')[1] || 'en';
+      signOut({ redirect: false }).then(() => {
+        router.push(`/${locale}/login`);
+      });
+    }
+  }, [error, pathname, router]);
 
   const updatePhotoMutation = useMutation({
     mutationFn: async (profilePhoto: string) => {

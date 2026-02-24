@@ -1,7 +1,8 @@
 'use client';
 
 import { Link } from '@/i18n/navigation';
-import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from 'lucide-react';
+import { FacebookIcon, InstagramIcon, TwitterIcon } from 'lucide-animated';
+import { MapPin, Mail, Phone } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 export function Footer() {
@@ -26,7 +27,7 @@ export function Footer() {
                 className="text-muted-foreground hover:text-primary transition-colors"
                 aria-label="Facebook"
               >
-                <Facebook className="h-5 w-5" />
+                <FacebookIcon size={20} />
               </a>
               <a
                 href="https://instagram.com"
@@ -35,7 +36,7 @@ export function Footer() {
                 className="text-muted-foreground hover:text-primary transition-colors"
                 aria-label="Instagram"
               >
-                <Instagram className="h-5 w-5" />
+                <InstagramIcon size={20} />
               </a>
               <a
                 href="https://twitter.com"
@@ -44,7 +45,7 @@ export function Footer() {
                 className="text-muted-foreground hover:text-primary transition-colors"
                 aria-label="Twitter"
               >
-                <Twitter className="h-5 w-5" />
+                <TwitterIcon size={20} />
               </a>
             </div>
           </div>

@@ -80,7 +80,7 @@ export function InvitationsList() {
 
     return (
       <Badge variant={variants[status]}>
-        {t(`invitation${status.charAt(0) + status.slice(1).toLowerCase()}` as any)}
+        {t(`invitation${status.charAt(0) + status.slice(1).toLowerCase()}`)}
       </Badge>
     );
   };

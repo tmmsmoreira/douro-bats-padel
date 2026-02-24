@@ -16,7 +16,6 @@ import {
 } from '@/components/ui/select';
 import Link from 'next/link';
 import { useState, useMemo } from 'react';
-import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAdminEvents, useAuthFetch } from '@/hooks';
 import { EventCard, EventStats } from '@/components/shared';
@@ -136,7 +135,7 @@ export function EventsList() {
         {/* Clear Filters */}
         <Button
           variant="ghost"
-          size="icon"
+          size="sm"
           onClick={() => {
             setSelectedDate(undefined);
             setStatusFilter('ALL');
@@ -144,7 +143,7 @@ export function EventsList() {
           disabled={!selectedDate && statusFilter === 'ALL'}
           title={t('clearFilters')}
         >
-          <Trash2 className="h-4 w-4" />
+          {t('clearFilters')}
         </Button>
       </div>
 
@@ -169,7 +168,6 @@ export function EventsList() {
                 <EventCard
                   key={event.id}
                   event={event}
-                  showStatus
                   headerActions={
                     <Badge variant={event.state === 'PUBLISHED' ? 'default' : 'secondary'}>
                       {event.state}

@@ -1,13 +1,15 @@
 'use client';
 
 import * as React from 'react';
-import { Moon, Sun } from 'lucide-react';
+import { MoonIcon, SunIcon } from 'lucide-animated';
 import { useTheme } from 'next-themes';
+import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Switch } from '@/components/ui/switch';
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
+  const iconRef = React.useRef<{ startAnimation: () => void; stopAnimation: () => void }>(null);
 
   React.useEffect(() => {
     setMounted(true);
@@ -15,31 +17,39 @@ export function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <div className="flex items-center justify-between px-2 py-1.5">
+      <DropdownMenuItem disabled className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Sun className="h-4 w-4" />
-          <span className="text-sm">Theme</span>
+          <SunIcon size={16} />
+          <span>Theme</span>
         </div>
         <Switch disabled checked={false} />
-      </div>
+      </DropdownMenuItem>
     );
   }
 
   const isDark = theme === 'dark';
 
-  const handleToggle = (checked: boolean) => {
-    const newTheme = checked ? 'dark' : 'light';
-    console.log('Switching theme to:', newTheme);
+  const handleToggle = () => {
+    const newTheme = isDark ? 'light' : 'dark';
     setTheme(newTheme);
   };
 
   return (
-    <div className="flex items-center justify-between px-2 py-1.5">
+    <DropdownMenuItem
+      onMouseEnter={() => iconRef.current?.startAnimation()}
+      onSelect={(e) => e.preventDefault()}
+      onClick={handleToggle}
+      className="flex items-center justify-between cursor-pointer"
+    >
       <div className="flex items-center gap-2">
-        {isDark ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-        <span className="text-sm">{isDark ? 'Dark mode' : 'Light mode'}</span>
+        {isDark ? <MoonIcon size={16} ref={iconRef} /> : <SunIcon size={16} ref={iconRef} />}
+        <span>{isDark ? 'Dark mode' : 'Light mode'}</span>
       </div>
-      <Switch checked={isDark} onCheckedChange={handleToggle} />
-    </div>
+      <Switch
+        checked={isDark}
+        onCheckedChange={handleToggle}
+        onClick={(e) => e.stopPropagation()}
+      />
+    </DropdownMenuItem>
   );
 }

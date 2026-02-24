@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, usePathname } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { signOut, useSession } from 'next-auth/react';
-import { User, LogOut } from 'lucide-react';
+import { UserIcon, LogoutIcon, LogoutIconHandle, UserIconHandle } from 'lucide-animated';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { ThemeToggleButton } from '@/components/ui/theme-toggle-button';
 import { LanguageToggleButton } from '@/components/language-toggle-button';
@@ -26,6 +26,9 @@ export function AdminNav() {
   const { data: session } = useSession();
   const t = useTranslations('nav');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const signOutIconRef = useRef<LogoutIconHandle>(null);
+  const userIconRef = useRef<UserIconHandle>(null);
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {
@@ -115,9 +118,12 @@ export function AdminNav() {
                     </div>
                   </div>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
+                  <DropdownMenuItem
+                    asChild
+                    onMouseEnter={() => userIconRef.current?.startAnimation()}
+                  >
                     <Link href="/profile" className="cursor-pointer flex gap-2">
-                      <User className="h-4 w-4" />
+                      <UserIcon size={16} ref={userIconRef} />
                       <span>{t('profile')}</span>
                     </Link>
                   </DropdownMenuItem>
@@ -126,8 +132,12 @@ export function AdminNav() {
                   <DropdownMenuSeparator />
                   <ThemeToggle />
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer flex gap-2">
-                    <LogOut className="h-4 w-4" />
+                  <DropdownMenuItem
+                    onClick={() => signOut()}
+                    className="cursor-pointer flex gap-2"
+                    onMouseEnter={() => signOutIconRef.current?.startAnimation()}
+                  >
+                    <LogoutIcon size={16} ref={signOutIconRef} />
                     <span>{t('signOut')}</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -156,7 +166,7 @@ export function AdminNav() {
                 <div className="flex items-center gap-4 pb-6 border-b">
                   <Avatar className="h-16 w-16">
                     <AvatarImage
-                      src={(session?.user as any)?.profilePhoto || undefined}
+                      src={session?.user?.profilePhoto || undefined}
                       alt={session?.user?.name || 'User'}
                     />
                     <AvatarFallback className="bg-primary text-primary-foreground text-xl">
@@ -210,7 +220,7 @@ export function AdminNav() {
                   onClick={() => setMobileMenuOpen(false)}
                   className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-colors text-foreground hover:bg-accent"
                 >
-                  <User className="h-5 w-5" />
+                  <UserIcon size={20} className="h-5 w-5" />
                   {t('profile')}
                 </Link>
               </div>
@@ -239,7 +249,7 @@ export function AdminNav() {
                   }}
                   className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-colors text-destructive hover:bg-destructive/10 w-full"
                 >
-                  <LogOut className="h-5 w-5" />
+                  <LogoutIcon size={20} />
                   {t('signOut')}
                 </button>
               </div>

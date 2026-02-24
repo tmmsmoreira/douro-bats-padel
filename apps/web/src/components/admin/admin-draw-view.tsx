@@ -17,7 +17,7 @@ import {
   Send,
   ArchiveRestore,
   Clock,
-} from 'lucide-react';
+} from 'lucide-animated';
 import {
   Dialog,
   DialogContent,

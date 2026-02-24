@@ -3,13 +3,15 @@
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
-import { Calendar, MapPin, ArrowLeft, Clock } from 'lucide-react';
+import { ArrowLeftIcon, ArrowLeftIconHandle, ClockIcon } from 'lucide-animated';
+import { Calendar, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { PlayerNav } from '@/components/player/player-nav';
 import { Footer } from '@/components/footer';
+import { useRef } from 'react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -78,6 +80,8 @@ export function EventDetails({ eventId }: { eventId: string }) {
     },
   });
 
+  const arrowLeftIconRef = useRef<ArrowLeftIconHandle>(null);
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
@@ -111,8 +115,12 @@ export function EventDetails({ eventId }: { eventId: string }) {
           <div className="space-y-6">
             {/* Back Button */}
             <Link href="/">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="h-4 w-4 mr-2" />
+              <Button
+                variant="ghost"
+                size="sm"
+                onMouseEnter={() => arrowLeftIconRef.current?.startAnimation()}
+              >
+                <ArrowLeftIcon ref={arrowLeftIconRef} size={16} />
                 {t('backToEvents')}
               </Button>
             </Link>
@@ -164,8 +172,12 @@ export function EventDetails({ eventId }: { eventId: string }) {
         <div className="space-y-6">
           {/* Back Button */}
           <Link href="/">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
+            <Button
+              variant="ghost"
+              size="sm"
+              onMouseEnter={() => arrowLeftIconRef.current?.startAnimation()}
+            >
+              <ArrowLeftIcon ref={arrowLeftIconRef} size={16} />
               {t('backToEvents')}
             </Button>
           </Link>
@@ -202,7 +214,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
                       variant="outline"
                       className="text-sm px-3 py-1 bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800"
                     >
-                      <Clock className="mr-2 h-3 w-3" />
+                      <ClockIcon className="mr-2 h-3 w-3" />
                       <span className="font-semibold">Masters:</span>
                       <span className="ml-1">
                         {event.tierRules.mastersTimeSlot.startsAt} -{' '}
@@ -215,7 +227,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
                       variant="outline"
                       className="text-sm px-3 py-1 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800"
                     >
-                      <Clock className="mr-2 h-3 w-3" />
+                      <ClockIcon className="mr-2 h-3 w-3" />
                       <span className="font-semibold">Explorers:</span>
                       <span className="ml-1">
                         {event.tierRules.explorersTimeSlot.startsAt} -{' '}

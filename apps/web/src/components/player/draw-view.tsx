@@ -268,19 +268,25 @@ export function DrawView({ eventId }: { eventId: string }) {
                 Nota: 25 minutos cada jogo, 2 minutos para troca
               </p>
 
-              <Card>
+              <Card className="overflow-hidden">
                 <CardContent className="p-0">
                   <div className="overflow-x-auto">
                     <table className="w-full border-collapse">
                       <thead>
                         <tr className="bg-muted">
-                          <th className="border p-2 text-left font-semibold"></th>
-                          <th className="border p-2 text-left font-semibold">Campo</th>
-                          <th className="border p-2 text-left font-semibold">Dupla A</th>
-                          <th className="border p-2 text-center font-semibold w-16">Sets A</th>
-                          <th className="border p-2 text-center font-semibold w-16">vs</th>
-                          <th className="border p-2 text-center font-semibold w-16">Sets B</th>
-                          <th className="border p-2 text-left font-semibold">Dupla B</th>
+                          <th className="border-r border-b p-2 text-left font-semibold"></th>
+                          <th className="border-r border-b p-2 text-left font-semibold">Campo</th>
+                          <th className="border-r border-b p-2 text-left font-semibold">Dupla A</th>
+                          <th className="border-r border-b p-2 text-center font-semibold w-16">
+                            Sets A
+                          </th>
+                          <th className="border-r border-b p-2 text-center font-semibold w-16">
+                            vs
+                          </th>
+                          <th className="border-r border-b p-2 text-center font-semibold w-16">
+                            Sets B
+                          </th>
+                          <th className="border-b p-2 text-left font-semibold">Dupla B</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -291,22 +297,26 @@ export function DrawView({ eventId }: { eventId: string }) {
                               <tr key={assignment.id} className="hover:bg-muted/50">
                                 {idx === 0 && (
                                   <td
-                                    className="border p-2 font-semibold bg-gray-100 dark:bg-gray-800"
+                                    className="border-r border-b p-2 font-semibold bg-gray-100 dark:bg-gray-800"
                                     rowSpan={assignments.length}
                                   >
                                     Ronda {round}
                                   </td>
                                 )}
-                                <td className="border p-2">
+                                <td className="border-r border-b p-2">
                                   {assignment.court?.label || `Campo ${assignment.courtId}`}
                                 </td>
-                                <td className={cn('border p-2', getTeamColor('MASTERS'))}>
+                                <td
+                                  className={cn('border-r border-b p-2', getTeamColor('MASTERS'))}
+                                >
                                   {getTeamName(assignment.teamA)}
                                 </td>
-                                <td className="border p-2 text-center">-</td>
-                                <td className="border p-2 text-center font-semibold">vs</td>
-                                <td className="border p-2 text-center">-</td>
-                                <td className={cn('border p-2', getTeamColor('MASTERS'))}>
+                                <td className="border-r border-b p-2 text-center">-</td>
+                                <td className="border-r border-b p-2 text-center font-semibold">
+                                  vs
+                                </td>
+                                <td className="border-r border-b p-2 text-center">-</td>
+                                <td className={cn('border-b p-2', getTeamColor('MASTERS'))}>
                                   {getTeamName(assignment.teamB)}
                                 </td>
                               </tr>
@@ -336,19 +346,25 @@ export function DrawView({ eventId }: { eventId: string }) {
                 Nota: 25 minutos cada jogo, 2 minutos para troca
               </p>
 
-              <Card>
+              <Card className="overflow-hidden">
                 <CardContent className="p-0">
                   <div className="overflow-x-auto">
                     <table className="w-full border-collapse">
                       <thead>
                         <tr className="bg-muted">
-                          <th className="border p-2 text-left font-semibold"></th>
-                          <th className="border p-2 text-left font-semibold">Campo</th>
-                          <th className="border p-2 text-left font-semibold">Dupla A</th>
-                          <th className="border p-2 text-center font-semibold w-16">Sets A</th>
-                          <th className="border p-2 text-center font-semibold w-16">vs</th>
-                          <th className="border p-2 text-center font-semibold w-16">Sets B</th>
-                          <th className="border p-2 text-left font-semibold">Dupla B</th>
+                          <th className="border-r border-b p-2 text-left font-semibold"></th>
+                          <th className="border-r border-b p-2 text-left font-semibold">Campo</th>
+                          <th className="border-r border-b p-2 text-left font-semibold">Dupla A</th>
+                          <th className="border-r border-b p-2 text-center font-semibold w-16">
+                            Sets A
+                          </th>
+                          <th className="border-r border-b p-2 text-center font-semibold w-16">
+                            vs
+                          </th>
+                          <th className="border-r border-b p-2 text-center font-semibold w-16">
+                            Sets B
+                          </th>
+                          <th className="border-b p-2 text-left font-semibold">Dupla B</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -359,22 +375,26 @@ export function DrawView({ eventId }: { eventId: string }) {
                               <tr key={assignment.id} className="hover:bg-muted/50">
                                 {idx === 0 && (
                                   <td
-                                    className="border p-2 font-semibold bg-gray-100 dark:bg-gray-800"
+                                    className="border-r border-b p-2 font-semibold bg-gray-100 dark:bg-gray-800"
                                     rowSpan={assignments.length}
                                   >
                                     Ronda {round}
                                   </td>
                                 )}
-                                <td className="border p-2">
+                                <td className="border-r border-b p-2">
                                   {assignment.court?.label || `Campo ${assignment.courtId}`}
                                 </td>
-                                <td className={cn('border p-2', getTeamColor('EXPLORERS'))}>
+                                <td
+                                  className={cn('border-r border-b p-2', getTeamColor('EXPLORERS'))}
+                                >
                                   {getTeamName(assignment.teamA)}
                                 </td>
-                                <td className="border p-2 text-center">-</td>
-                                <td className="border p-2 text-center font-semibold">vs</td>
-                                <td className="border p-2 text-center">-</td>
-                                <td className={cn('border p-2', getTeamColor('EXPLORERS'))}>
+                                <td className="border-r border-b p-2 text-center">-</td>
+                                <td className="border-r border-b p-2 text-center font-semibold">
+                                  vs
+                                </td>
+                                <td className="border-r border-b p-2 text-center">-</td>
+                                <td className={cn('border-b p-2', getTeamColor('EXPLORERS'))}>
                                   {getTeamName(assignment.teamB)}
                                 </td>
                               </tr>

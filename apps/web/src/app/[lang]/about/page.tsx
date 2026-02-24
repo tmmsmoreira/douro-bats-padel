@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trophy, Users, Calendar, TrendingUp } from 'lucide-react';
+import { Trophy, Users, Calendar, TrendingUp } from 'lucide-animated';
 import { Footer } from '@/components/footer';
 import { HomeNavClient } from '@/components/client-nav-wrapper';
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { LeaderboardEntry } from '@padel/types';
 import { ArrowUp, ArrowDown, Minus } from 'lucide-react';
@@ -8,6 +9,8 @@ import { ArrowUp, ArrowDown, Minus } from 'lucide-react';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 export function Leaderboard() {
+  const t = useTranslations('leaderboard');
+
   const { data: leaderboard, isLoading } = useQuery({
     queryKey: ['leaderboard'],
     queryFn: async () => {
@@ -18,14 +21,14 @@ export function Leaderboard() {
   });
 
   if (isLoading) {
-    return <div className="text-center py-8">Loading rankings...</div>;
+    return <div className="text-center py-8">{t('loadingRankings')}</div>;
   }
 
   return (
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>Leaderboard</CardTitle>
+          <CardTitle>{t('leaderboardTitle')}</CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
           <div className="space-y-2">
@@ -39,7 +42,7 @@ export function Leaderboard() {
                   <div>
                     <p className="font-medium">{entry.playerName}</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {entry.weeklyScores.length} weeks played
+                      {t('weeksPlayed', { count: entry.weeklyScores.length })}
                     </p>
                   </div>
                 </div>

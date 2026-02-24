@@ -12,16 +12,7 @@ import { DeleteIcon, DeleteIconHandle } from 'lucide-animated';
 import { Calendar, MapPin, Clock } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { toast } from 'sonner';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -221,7 +212,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">{event.title || t('untitledEvent')}</h1>
           <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
@@ -247,7 +238,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
             </Badge>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 self-end sm:self-auto">
           {!hasEventPassed && (
             <Link href={`/admin/events/${eventId}/edit`}>
               <Button variant="outline">{t('editEvent')}</Button>
@@ -323,7 +314,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">No players on waitlist</p>
+                  <p className="text-sm text-muted-foreground">{t('noPlayersOnWaitlist')}</p>
                 )}
               </CardContent>
             </Card>
@@ -383,30 +374,20 @@ export function EventDetails({ eventId }: { eventId: string }) {
       )}
 
       {/* Delete Event Confirmation Dialog */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t('deleteConfirmation')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete this event and all associated data. This action cannot be
-              undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => {
-                setIsDeleting(true);
-                deleteMutation.mutate();
-                setShowDeleteDialog(false);
-              }}
-            >
-              {t('deleteEvent')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmationDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title={t('deleteConfirmation')}
+        description={t('deleteConfirmationDescription')}
+        confirmText={t('deleteEvent')}
+        cancelText={t('cancel')}
+        variant="destructive"
+        onConfirm={() => {
+          setIsDeleting(true);
+          deleteMutation.mutate();
+          setShowDeleteDialog(false);
+        }}
+      />
     </div>
   );
 }
@@ -520,7 +501,7 @@ function AssignmentSummaryCard({ assignment }: { assignment: Assignment }) {
           </div>
         </div>
         <div className="pl-4">
-          <p className="text-sm font-medium mb-2">{t('team', { team: 'A' })}</p>
+          <p className="text-sm font-medium mb-2">{t('team', { team: 'B' })}</p>
           <div className="space-y-1">
             {assignment.teamB?.map((player) => (
               <div key={player.id} className="flex items-center justify-between text-sm">

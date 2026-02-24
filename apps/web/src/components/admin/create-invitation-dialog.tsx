@@ -104,10 +104,10 @@ export function CreateInvitationDialog() {
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Cancel
+              {t('cancel')}
             </Button>
             <Button type="submit" disabled={createMutation.isPending}>
-              {createMutation.isPending ? 'Sending...' : t('sendInvitation')}
+              {createMutation.isPending ? t('sending') : t('sendInvitation')}
             </Button>
           </DialogFooter>
         </form>

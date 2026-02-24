@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,18 +8,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { Save, Lock, Loader2 } from 'lucide-animated';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
+import { Lock, Loader2, Save } from 'lucide-react';
+import { LockIcon, LockIconHandle } from 'lucide-animated';
 import { useAuthFetch } from '@/hooks';
+import { useTranslations } from 'next-intl';
 
 interface Match {
   id: string;
@@ -70,12 +63,14 @@ interface ResultsEntryProps {
 }
 
 export function ResultsEntry({ eventId }: ResultsEntryProps) {
+  const t = useTranslations('resultsEntry');
   const queryClient = useQueryClient();
   const authFetch = useAuthFetch();
   const [showPublishDialog, setShowPublishDialog] = useState(false);
   const [matchResults, setMatchResults] = useState<
     Record<string, { setsA: number; setsB: number }>
   >({});
+  const lockIconRef = useRef<LockIconHandle>(null);
 
   // Fetch event data to check state and date
   const { data: event, isLoading: isLoadingEvent } = useQuery<Event>({
@@ -121,7 +116,7 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['matches', eventId] });
-      toast.success('Result saved');
+      toast.success(t('resultSaved'));
     },
     onError: (error: Error) => {
       toast.error(`Failed to save result: ${error.message}`);
@@ -136,7 +131,7 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['matches', eventId] });
       queryClient.invalidateQueries({ queryKey: ['admin-events'] });
-      toast.success('Results published! Rankings will be updated.');
+      toast.success(t('resultsPublished'));
       setShowPublishDialog(false);
     },
     onError: (error: Error) => {
@@ -162,7 +157,7 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
     const result = matchResults[key];
 
     if (!result || (result.setsA === 0 && result.setsB === 0)) {
-      toast.error('Please enter a valid score');
+      toast.error(t('enterValidScore'));
       return;
     }
 
@@ -180,6 +175,7 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
     return (
       <div className="flex items-center justify-center py-8">
         <Loader2 className="h-8 w-8 animate-spin" />
+        <span className="ml-2">{t('loading')}</span>
       </div>
     );
   }
@@ -193,8 +189,8 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
       return (
         <Card>
           <CardContent className="py-8 text-center text-muted-foreground">
-            <p className="text-lg font-medium mb-2">Event Not Published</p>
-            <p>Results can only be entered after the event draw has been published.</p>
+            <p className="text-lg font-medium mb-2">{t('eventNotPublished')}</p>
+            <p>{t('eventNotPublishedDescription')}</p>
           </CardContent>
         </Card>
       );
@@ -204,9 +200,11 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
       return (
         <Card>
           <CardContent className="py-8 text-center text-muted-foreground">
-            <p className="text-lg font-medium mb-2">Event Not Completed</p>
-            <p>Results can only be entered after the event has finished.</p>
-            <p className="text-sm mt-2">Event ends: {new Date(event.endsAt).toLocaleString()}</p>
+            <p className="text-lg font-medium mb-2">{t('eventNotCompleted')}</p>
+            <p>{t('eventNotCompletedDescription')}</p>
+            <p className="text-sm mt-2">
+              {t('eventEnds', { date: new Date(event.endsAt).toLocaleString() })}
+            </p>
           </CardContent>
         </Card>
       );
@@ -217,7 +215,7 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
     return (
       <Card>
         <CardContent className="py-8 text-center text-muted-foreground">
-          No draw found for this event. Please generate a draw first.
+          {t('noDrawFound')}
         </CardContent>
       </Card>
     );
@@ -257,16 +255,16 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Match Results Entry</CardTitle>
+              <CardTitle>{t('matchResultsEntry')}</CardTitle>
               <p className="text-sm text-muted-foreground mt-1">
-                {enteredMatches} of {totalMatches} matches entered
+                {t('matchesEntered', { entered: enteredMatches, total: totalMatches })}
               </p>
             </div>
             <div className="flex gap-2">
               {hasPublishedMatches && (
                 <Badge variant="default" className="gap-1">
                   <Lock className="h-3 w-3" />
-                  Published
+                  {t('published')}
                 </Badge>
               )}
               {!hasPublishedMatches && (
@@ -274,9 +272,11 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
                   onClick={() => setShowPublishDialog(true)}
                   disabled={!allMatchesEntered || publishMutation.isPending}
                   className="gap-2"
+                  onMouseEnter={() => lockIconRef.current?.startAnimation()}
+                  onMouseLeave={() => lockIconRef.current?.stopAnimation()}
                 >
-                  <Lock className="h-4 w-4" />
-                  Publish Results
+                  <LockIcon ref={lockIconRef} size={16} />
+                  {t('publishResults')}
                 </Button>
               )}
             </div>
@@ -287,13 +287,13 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
       {/* Masters Results */}
       {Object.keys(mastersRounds).length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold">Masters</h2>
+          <h2 className="text-2xl font-bold">{t('masters')}</h2>
           {Object.entries(mastersRounds)
             .sort(([a], [b]) => parseInt(a) - parseInt(b))
             .map(([round, assignments]) => (
               <Card key={`masters-${round}`}>
                 <CardHeader>
-                  <CardTitle className="text-lg">Round {round}</CardTitle>
+                  <CardTitle className="text-lg">{t('round', { round })}</CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0">
                   <div className="space-y-4">
@@ -321,13 +321,13 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
                               <Badge variant="secondary">{assignment.tier}</Badge>
                               {isSaved && !isPublished && (
                                 <Badge variant="outline" className="bg-blue-50 dark:bg-blue-950">
-                                  Saved
+                                  {t('saved')}
                                 </Badge>
                               )}
                               {isPublished && (
                                 <Badge variant="default" className="gap-1">
                                   <Lock className="h-3 w-3" />
-                                  Published
+                                  {t('published')}
                                 </Badge>
                               )}
                             </div>
@@ -336,7 +336,7 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
                             {/* Team A */}
                             <div className="space-y-1">
-                              <p className="text-sm font-medium">Team A</p>
+                              <p className="text-sm font-medium">{t('teamA')}</p>
                               {assignment.teamA?.map((player, idx) => (
                                 <p key={idx} className="text-sm text-muted-foreground">
                                   {player.name}
@@ -348,7 +348,7 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
                             <div className="flex items-center justify-center gap-4">
                               <div className="space-y-2">
                                 <Label htmlFor={`${key}-setsA`} className="sr-only">
-                                  Team A Sets
+                                  {t('teamASets')}
                                 </Label>
                                 <Input
                                   id={`${key}-setsA`}
@@ -371,7 +371,7 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
                               <span className="text-2xl font-bold">-</span>
                               <div className="space-y-2">
                                 <Label htmlFor={`${key}-setsB`} className="sr-only">
-                                  Team B Sets
+                                  {t('teamBSets')}
                                 </Label>
                                 <Input
                                   id={`${key}-setsB`}
@@ -395,7 +395,7 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
 
                             {/* Team B */}
                             <div className="space-y-1">
-                              <p className="text-sm font-medium">Team B</p>
+                              <p className="text-sm font-medium">{t('teamB')}</p>
                               {assignment.teamB?.map((player, idx) => (
                                 <p key={idx} className="text-sm text-muted-foreground">
                                   {player.name}
@@ -415,7 +415,7 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
                                 className="gap-2"
                               >
                                 <Save className="h-4 w-4" />
-                                {isSaved ? 'Update' : 'Save'}
+                                {isSaved ? t('update') : t('save')}
                               </Button>
                             </div>
                           )}
@@ -432,13 +432,13 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
       {/* Explorers Results */}
       {Object.keys(explorersRounds).length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold">Explorers</h2>
+          <h2 className="text-2xl font-bold">{t('explorers')}</h2>
           {Object.entries(explorersRounds)
             .sort(([a], [b]) => parseInt(a) - parseInt(b))
             .map(([round, assignments]) => (
               <Card key={`explorers-${round}`}>
                 <CardHeader>
-                  <CardTitle className="text-lg">Round {round}</CardTitle>
+                  <CardTitle className="text-lg">{t('round', { round })}</CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0">
                   <div className="space-y-4">
@@ -466,13 +466,13 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
                               <Badge variant="secondary">{assignment.tier}</Badge>
                               {isSaved && !isPublished && (
                                 <Badge variant="outline" className="bg-blue-50 dark:bg-blue-950">
-                                  Saved
+                                  {t('saved')}
                                 </Badge>
                               )}
                               {isPublished && (
                                 <Badge variant="default" className="gap-1">
                                   <Lock className="h-3 w-3" />
-                                  Published
+                                  {t('published')}
                                 </Badge>
                               )}
                             </div>
@@ -481,7 +481,7 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
                             {/* Team A */}
                             <div className="space-y-1">
-                              <p className="text-sm font-medium">Team A</p>
+                              <p className="text-sm font-medium">{t('teamA')}</p>
                               {assignment.teamA?.map((player, idx) => (
                                 <p key={idx} className="text-sm text-muted-foreground">
                                   {player.name}
@@ -493,7 +493,7 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
                             <div className="flex items-center justify-center gap-4">
                               <div className="space-y-2">
                                 <Label htmlFor={`${key}-setsA`} className="sr-only">
-                                  Team A Sets
+                                  {t('teamASets')}
                                 </Label>
                                 <Input
                                   id={`${key}-setsA`}
@@ -516,7 +516,7 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
                               <span className="text-2xl font-bold">-</span>
                               <div className="space-y-2">
                                 <Label htmlFor={`${key}-setsB`} className="sr-only">
-                                  Team B Sets
+                                  {t('teamBSets')}
                                 </Label>
                                 <Input
                                   id={`${key}-setsB`}
@@ -540,7 +540,7 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
 
                             {/* Team B */}
                             <div className="space-y-1">
-                              <p className="text-sm font-medium">Team B</p>
+                              <p className="text-sm font-medium">{t('teamB')}</p>
                               {assignment.teamB?.map((player, idx) => (
                                 <p key={idx} className="text-sm text-muted-foreground">
                                   {player.name}
@@ -560,7 +560,7 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
                                 className="gap-2"
                               >
                                 <Save className="h-4 w-4" />
-                                {isSaved ? 'Update' : 'Save'}
+                                {isSaved ? t('update') : t('save')}
                               </Button>
                             </div>
                           )}
@@ -575,31 +575,26 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
       )}
 
       {/* Publish confirmation dialog */}
-      <AlertDialog open={showPublishDialog} onOpenChange={setShowPublishDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Publish Results?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will publish all match results and update player rankings. This action cannot be
-              undone.
-              <br />
-              <br />
-              <strong>
-                Matches entered: {enteredMatches} of {totalMatches}
-              </strong>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => publishMutation.mutate()}
-              disabled={publishMutation.isPending}
-            >
-              {publishMutation.isPending ? 'Publishing...' : 'Publish Results'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmationDialog
+        open={showPublishDialog}
+        onOpenChange={setShowPublishDialog}
+        title={t('publishResultsTitle')}
+        description={
+          <>
+            {t('publishResultsDescription')}
+            <br />
+            <br />
+            <strong>
+              {t('matchesEnteredCount', { entered: enteredMatches, total: totalMatches })}
+            </strong>
+          </>
+        }
+        confirmText={t('publishResults')}
+        cancelText={t('cancel')}
+        variant="default"
+        isLoading={publishMutation.isPending}
+        onConfirm={() => publishMutation.mutate()}
+      />
     </div>
   );
 }

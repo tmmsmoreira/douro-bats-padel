@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { EventForm } from '@/components/admin/event-form';
 import { use } from 'react';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -14,6 +14,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
   const { data: session } = useSession();
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations('editEventPage');
 
   const { data: event, isLoading } = useQuery({
     queryKey: ['event', eventId, session?.accessToken],
@@ -41,8 +42,8 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Edit Event</h1>
-          <p className="text-muted-foreground">Loading event data...</p>
+          <h1 className="text-3xl font-bold">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('loading')}</p>
         </div>
       </div>
     );
@@ -52,8 +53,8 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Edit Event</h1>
-          <p className="text-muted-foreground text-destructive">Event not found</p>
+          <h1 className="text-3xl font-bold">{t('title')}</h1>
+          <p className="text-destructive">{t('eventNotFound')}</p>
         </div>
       </div>
     );
@@ -68,8 +69,8 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Edit Event</h1>
-          <p className="text-muted-foreground">Cannot edit past events. Redirecting...</p>
+          <h1 className="text-3xl font-bold">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('cannotEditPastEvents')}</p>
         </div>
       </div>
     );
@@ -78,8 +79,8 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Edit Event</h1>
-        <p className="text-muted-foreground">Update event information</p>
+        <h1 className="text-3xl font-bold">{t('title')}</h1>
+        <p className="text-muted-foreground">{t('description')}</p>
       </div>
       <EventForm eventId={eventId} initialData={event} />
     </div>

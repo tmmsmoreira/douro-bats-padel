@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import type { CreateVenueDto, UpdateVenueDto } from '@padel/types';
-import { X } from 'lucide-animated';
+import { XIcon } from 'lucide-animated';
 import { useTranslations } from 'next-intl';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
@@ -218,7 +218,7 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
                       onClick={() => handleRemoveCourt(court)}
                       className="ml-1 hover:text-destructive"
                     >
-                      <X className="h-3 w-3" />
+                      <XIcon size={16} />
                     </button>
                   </Badge>
                 ))}

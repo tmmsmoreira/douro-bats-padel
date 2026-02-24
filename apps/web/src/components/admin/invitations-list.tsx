@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,17 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Copy, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import type { Invitation, InvitationStatus } from '@padel/types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
@@ -28,6 +19,7 @@ export function InvitationsList() {
   const t = useTranslations('admin');
   const { data: session } = useSession();
   const queryClient = useQueryClient();
+  const [revokeInvitationId, setRevokeInvitationId] = useState<string | null>(null);
 
   const { data: invitations, isLoading } = useQuery<Invitation[]>({
     queryKey: ['invitations'],
@@ -132,28 +124,14 @@ export function InvitationsList() {
                       <Copy className="h-4 w-4 mr-2" />
                       {t('copyLink')}
                     </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="destructive" size="sm">
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          {t('revokeInvitation')}
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>{t('confirmRevokeInvitation')}</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => revokeMutation.mutate(invitation.id)}>
-                            Revoke
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => setRevokeInvitationId(invitation.id)}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      {t('revokeInvitation')}
+                    </Button>
                   </>
                 )}
               </div>
@@ -161,6 +139,23 @@ export function InvitationsList() {
           </CardContent>
         </Card>
       ))}
+
+      {/* Revoke Invitation Confirmation Dialog */}
+      <ConfirmationDialog
+        open={!!revokeInvitationId}
+        onOpenChange={(open) => !open && setRevokeInvitationId(null)}
+        title={t('confirmRevokeInvitation')}
+        description="This action cannot be undone."
+        confirmText="Revoke"
+        cancelText="Cancel"
+        variant="default"
+        onConfirm={() => {
+          if (revokeInvitationId) {
+            revokeMutation.mutate(revokeInvitationId);
+            setRevokeInvitationId(null);
+          }
+        }}
+      />
     </div>
   );
 }

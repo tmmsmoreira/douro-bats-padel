@@ -11,8 +11,8 @@ import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useLocale } from 'next-intl';
-import { AlertTriangle } from 'lucide-animated';
+import { useLocale, useTranslations } from 'next-intl';
+import { AlertTriangle } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -41,6 +41,7 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const locale = useLocale();
+  const t = useTranslations('generateDraw');
 
   const [constraints, setConstraints] = useState({
     avoidRecentSessions: 4,
@@ -121,7 +122,7 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
   const generateDrawMutation = useMutation({
     mutationFn: async () => {
       if (!session?.accessToken) {
-        throw new Error('Not authenticated');
+        throw new Error(t('notAuthenticated'));
       }
 
       const res = await fetch(`${API_URL}/draws/events/${eventId}`, {
@@ -141,7 +142,7 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
 
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.message || 'Failed to generate draw');
+        throw new Error(error.message || t('drawGenerationError'));
       }
 
       return res.json();
@@ -149,20 +150,20 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['draw', eventId] });
       queryClient.invalidateQueries({ queryKey: ['event', eventId] });
-      toast.success('Draw generated successfully!');
+      toast.success(t('drawGeneratedSuccess'));
       router.push(`/${locale}/admin/events/${eventId}/draw/view`);
     },
     onError: (error: Error) => {
-      toast.error(`Failed to generate draw: ${error.message}`);
+      toast.error(`${t('drawGenerationError')}: ${error.message}`);
     },
   });
 
   if (eventLoading) {
-    return <div className="text-center py-8">Loading event...</div>;
+    return <div className="text-center py-8">{t('loading')}</div>;
   }
 
   if (!event) {
-    return <div className="text-center py-8">Event not found</div>;
+    return <div className="text-center py-8">{t('eventNotFound')}</div>;
   }
 
   // Check if event has passed - redirect to view page if it has
@@ -171,7 +172,7 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
 
   if (hasEventPassed) {
     router.push(`/${locale}/admin/events/${eventId}`);
-    return <div className="text-center py-8">Redirecting...</div>;
+    return <div className="text-center py-8">{t('redirecting')}</div>;
   }
 
   const confirmedCount = event.confirmedCount || 0;
@@ -210,8 +211,8 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Generate Draw</h1>
-        <p className="text-muted-foreground">Configure and generate the tournament draw</p>
+        <h1 className="text-3xl font-bold">{t('title')}</h1>
+        <p className="text-muted-foreground">{t('description')}</p>
       </div>
 
       {existingDraw && (
@@ -231,7 +232,7 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
               }
             >
               {event.state === 'PUBLISHED' && <AlertTriangle className="h-5 w-5" />}
-              Draw Already Exists
+              {t('drawAlreadyExists')}
             </CardTitle>
             <CardDescription
               className={
@@ -241,19 +242,17 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
               }
             >
               {event.state === 'PUBLISHED' ? (
-                <>
-                  This draw is currently <strong>published</strong> and visible to players.
-                  <br />
-                  To generate a new draw, you must first <strong>unpublish or delete</strong> the
-                  existing draw from the draw view page.
-                </>
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: `${t('drawPublishedWarning')}<br />${t('drawPublishedInstructions')}`,
+                  }}
+                />
               ) : (
-                <>
-                  A draw has already been generated for this event.
-                  <br />
-                  To generate a new draw, you must first <strong>delete</strong> the existing draw
-                  from the draw view page.
-                </>
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: `${t('drawExistsWarning')}<br />${t('drawExistsInstructions')}`,
+                  }}
+                />
               )}
             </CardDescription>
           </CardHeader>
@@ -262,7 +261,7 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
               variant="outline"
               onClick={() => router.push(`/${locale}/admin/events/${eventId}/draw/view`)}
             >
-              View & Manage Draw
+              {t('viewManageDraw')}
             </Button>
           </CardContent>
         </Card>
@@ -273,25 +272,42 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
         <Card className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20">
           <CardHeader>
             <CardTitle className="text-yellow-800 dark:text-yellow-200">
-              ℹ️ Insufficient Players
+              ℹ️ {t('insufficientPlayers')}
             </CardTitle>
             <CardDescription className="text-yellow-700 dark:text-yellow-300">
-              You have {confirmedCount} confirmed players, but only {playersInDraw} can form
-              complete teams (multiple of 4).
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: t('insufficientPlayersDescription', {
+                    confirmedCount,
+                    playersInDraw,
+                  }),
+                }}
+              />
               <br />
               {waitlistedPlayers > 0 && (
                 <>
-                  <strong>
-                    {waitlistedPlayers} player{waitlistedPlayers !== 1 ? 's' : ''}
-                  </strong>{' '}
-                  will be waitlisted.
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: t('playersWaitlisted', {
+                        count: waitlistedPlayers,
+                      }),
+                    }}
+                  />
                   <br />
                 </>
               )}
-              You have capacity for {maxPlayers} players ({mastersCourts.length} MASTERS courts +{' '}
-              {explorersCourts.length} EXPLORERS courts) but only need {courtsNeeded} courts.
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: t('courtCapacityInfo', {
+                    maxPlayers,
+                    mastersCourts: mastersCourts.length,
+                    explorersCourts: explorersCourts.length,
+                    courtsNeeded,
+                  }),
+                }}
+              />
               <br />
-              <strong>Consider reducing the number of courts to avoid unnecessary costs.</strong>
+              <strong>{t('considerReducingCourts')}</strong>
             </CardDescription>
           </CardHeader>
         </Card>
@@ -303,17 +319,30 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
           <CardHeader>
             <CardTitle className="text-orange-800 dark:text-orange-200 flex items-center gap-2">
               <AlertTriangle className="h-5 w-5" />
-              Excess Players Detected
+              {t('excessPlayersDetected')}
             </CardTitle>
             <CardDescription className="text-orange-700 dark:text-orange-300">
-              You have {confirmedCount} confirmed players but only {mastersCourts.length} courts for
-              MASTERS and {explorersCourts.length} courts for EXPLORERS (max {maxPlayers} players
-              total).
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: t('excessPlayersDescription', {
+                    confirmedCount,
+                    mastersCourts: mastersCourts.length,
+                    explorersCourts: explorersCourts.length,
+                    maxPlayers,
+                  }),
+                }}
+              />
               <br />
-              <strong>{playersInDraw} players</strong> (top-rated) will be included in the draw, and{' '}
-              <strong>{waitlistedPlayers} players</strong> will be waitlisted.
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: t('playersInDrawInfo', {
+                    playersInDraw,
+                    waitlistedPlayers,
+                  }),
+                }}
+              />
               <br />
-              All courts will be used.
+              {t('allCourtsUsed')}
             </CardDescription>
           </CardHeader>
         </Card>
@@ -324,16 +353,28 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
         <Card className="border-blue-500 bg-blue-50 dark:bg-blue-950/20">
           <CardHeader>
             <CardTitle className="text-blue-800 dark:text-blue-200">
-              💡 Court Optimization
+              💡 {t('courtOptimization')}
             </CardTitle>
             <CardDescription className="text-blue-700 dark:text-blue-300">
-              With {playersInDraw} players, you only need {courtsNeeded} court
-              {courtsNeeded !== 1 ? 's' : ''}.
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: t('courtOptimizationDescription', {
+                    playersInDraw,
+                    courtsNeeded,
+                  }),
+                }}
+              />
               <br />
-              You have {mastersCourts.length} courts for MASTERS and {explorersCourts.length} courts
-              for EXPLORERS.
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: t('courtAllocationInfo', {
+                    mastersCourts: mastersCourts.length,
+                    explorersCourts: explorersCourts.length,
+                  }),
+                }}
+              />
               <br />
-              <strong>Consider reducing courts to avoid unnecessary costs.</strong>
+              <strong>{t('considerReducingCourts')}</strong>
             </CardDescription>
           </CardHeader>
         </Card>
@@ -342,24 +383,28 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
       {/* Tier Configuration Card */}
       <Card className="border-blue-500 bg-blue-50 dark:bg-blue-950/20">
         <CardHeader>
-          <CardTitle className="text-blue-800 dark:text-blue-200">Tier Configuration</CardTitle>
+          <CardTitle className="text-blue-800 dark:text-blue-200">
+            {t('tierConfiguration')}
+          </CardTitle>
           <CardDescription className="text-blue-700 dark:text-blue-300">
-            How players will be split into MASTERS and EXPLORERS tiers
+            {t('tierConfigurationDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Tier Split Method */}
           <div>
-            <span className="font-medium">Split Method:</span>{' '}
+            <span className="font-medium">{t('splitMethod')}:</span>{' '}
             {tierRules.masterCount !== undefined ? (
-              <Badge variant="outline">Fixed Count: {tierRules.masterCount} MASTERS</Badge>
+              <Badge variant="outline">
+                {t('fixedCount')}: {tierRules.masterCount} {t('masters')}
+              </Badge>
             ) : tierRules.masterPercentage !== undefined ? (
               <Badge variant="outline">
-                {tierRules.masterPercentage}% MASTERS / {100 - tierRules.masterPercentage}%
-                EXPLORERS
+                {tierRules.masterPercentage}% {t('masters')} / {100 - tierRules.masterPercentage}%{' '}
+                {t('explorers')}
               </Badge>
             ) : (
-              <Badge variant="outline">50% MASTERS / 50% EXPLORERS (Default)</Badge>
+              <Badge variant="outline">{t('defaultSplit')}</Badge>
             )}
           </div>
 
@@ -367,22 +412,22 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
           <div className="grid grid-cols-2 gap-4 p-3 bg-white dark:bg-gray-900 rounded-lg border">
             <div>
               <div className="text-sm font-medium text-yellow-700 dark:text-yellow-400">
-                MASTERS
+                {t('masters')}
               </div>
               <div className="text-2xl font-bold">
                 {Math.floor((playersInDraw * (tierRules.masterPercentage || 50)) / 100)}
               </div>
-              <div className="text-xs text-muted-foreground">players expected</div>
+              <div className="text-xs text-muted-foreground">{t('playersExpected')}</div>
             </div>
             <div>
               <div className="text-sm font-medium text-green-700 dark:text-green-400">
-                EXPLORERS
+                {t('explorers')}
               </div>
               <div className="text-2xl font-bold">
                 {playersInDraw -
                   Math.floor((playersInDraw * (tierRules.masterPercentage || 50)) / 100)}
               </div>
-              <div className="text-xs text-muted-foreground">players expected</div>
+              <div className="text-xs text-muted-foreground">{t('playersExpected')}</div>
             </div>
           </div>
 
@@ -391,28 +436,28 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
             {tierRules.mastersTimeSlot && (
               <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
                 <div className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-1">
-                  MASTERS Time Slot
+                  {t('masters')} Time Slot
                 </div>
                 <div className="text-sm">
                   {tierRules.mastersTimeSlot.startsAt} - {tierRules.mastersTimeSlot.endsAt}
                 </div>
                 <div className="text-xs text-muted-foreground mt-1">
-                  {mastersCourts.length} court{mastersCourts.length !== 1 ? 's' : ''} (capacity:{' '}
-                  {mastersCapacity} players)
+                  {mastersCourts.length} {t('courtPlural', { count: mastersCourts.length })} (
+                  {t('mastersCourts')}: {mastersCapacity} {t('playersExpected')})
                 </div>
               </div>
             )}
             {tierRules.explorersTimeSlot && (
               <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
                 <div className="text-sm font-medium text-green-800 dark:text-green-200 mb-1">
-                  EXPLORERS Time Slot
+                  {t('explorers')} Time Slot
                 </div>
                 <div className="text-sm">
                   {tierRules.explorersTimeSlot.startsAt} - {tierRules.explorersTimeSlot.endsAt}
                 </div>
                 <div className="text-xs text-muted-foreground mt-1">
-                  {explorersCourts.length} court{explorersCourts.length !== 1 ? 's' : ''} (capacity:{' '}
-                  {explorersCapacity} players)
+                  {explorersCourts.length} {t('courtPlural', { count: explorersCourts.length })} (
+                  {t('explorersCourts')}: {explorersCapacity} {t('playersExpected')})
                 </div>
               </div>
             )}
@@ -423,27 +468,28 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Event Information</CardTitle>
+            <CardTitle>{t('eventSummary')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             <div>
-              <span className="font-medium">Title:</span> {event.title || 'Untitled Event'}
+              <span className="font-medium">{t('title_field')}:</span>{' '}
+              {event.title || t('untitledEvent')}
             </div>
             <div>
-              <span className="font-medium">Confirmed Players:</span> {confirmedCount}
+              <span className="font-medium">{t('confirmedPlayers')}:</span> {confirmedCount}
             </div>
             <div>
-              <span className="font-medium">Players in Draw:</span>{' '}
+              <span className="font-medium">{t('playersInDraw')}:</span>{' '}
               <Badge variant={hasExcessPlayers ? 'destructive' : 'default'}>{playersInDraw}</Badge>
             </div>
             {waitlistedPlayers > 0 && (
               <div>
-                <span className="font-medium">Waitlisted Players:</span>{' '}
+                <span className="font-medium">{t('waitlistedPlayers')}:</span>{' '}
                 <Badge variant="secondary">{waitlistedPlayers}</Badge>
               </div>
             )}
             <div>
-              <span className="font-medium">Status:</span>{' '}
+              <span className="font-medium">{t('status')}:</span>{' '}
               <Badge variant={event.state === 'FROZEN' ? 'default' : 'secondary'}>
                 {event.state}
               </Badge>
@@ -451,19 +497,19 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
             {event.state !== 'FROZEN' && event.state !== 'DRAWN' && event.state !== 'PUBLISHED' && (
               <div className="text-sm text-destructive mt-2 flex items-center gap-1">
                 <AlertTriangle className="h-4 w-4" />
-                Event must be frozen to generate draw. Go to event details to freeze it.
+                {t('eventNotFrozen')}
               </div>
             )}
             {playersInDraw < 4 && confirmedCount >= 4 && (
               <div className="text-sm text-destructive mt-2 flex items-center gap-1">
                 <AlertTriangle className="h-4 w-4" />
-                Need at least 4 players to generate draw
+                {t('excessPlayersWarning')}
               </div>
             )}
             {confirmedCount < 4 && (
               <div className="text-sm text-destructive mt-2 flex items-center gap-1">
                 <AlertTriangle className="h-4 w-4" />
-                Need at least 4 confirmed players
+                {t('insufficientPlayersWarning')}
               </div>
             )}
           </CardContent>
@@ -471,10 +517,13 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Select Courts to Use</CardTitle>
+            <CardTitle>{t('courtSelection')}</CardTitle>
             <CardDescription>
-              Choose which courts to use for the draw. Selected: {selectedMastersCourts.length}{' '}
-              MASTERS + {selectedExplorersCourts.length} EXPLORERS (capacity: {maxPlayers} players)
+              {t('courtSelectionDescription', {
+                selectedMasters: selectedMastersCourts.length,
+                selectedExplorers: selectedExplorersCourts.length,
+                maxPlayers,
+              })}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -482,7 +531,7 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
               {mastersCourts.length > 0 && (
                 <div>
                   <div className="text-sm font-medium mb-2 text-yellow-800 dark:text-yellow-200">
-                    MASTERS Courts:
+                    {t('masters')} {t('courtPlural', { count: 2 })}:
                   </div>
                   <div className="space-y-2">
                     {availableCourts
@@ -519,7 +568,7 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
               {explorersCourts.length > 0 && (
                 <div>
                   <div className="text-sm font-medium mb-2 text-green-800 dark:text-green-200">
-                    EXPLORERS Courts:
+                    {t('explorers')} {t('courtPlural', { count: 2 })}:
                   </div>
                   <div className="space-y-2">
                     {availableCourts
@@ -562,15 +611,15 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Draw Constraints</CardTitle>
-            <CardDescription>Configure how the draw should be generated</CardDescription>
+            <CardTitle>{t('drawOptions')}</CardTitle>
+            <CardDescription>{t('drawOptionsDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label htmlFor="balance-strength">Balance Team Strength</Label>
+                <Label htmlFor="balance-strength">{t('balanceTeamStrength')}</Label>
                 <p className="text-sm text-muted-foreground">
-                  Create balanced teams based on player ratings
+                  {t('balanceTeamStrengthDescription')}
                 </p>
               </div>
               <Switch
@@ -584,10 +633,8 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
 
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label htmlFor="tier-mixing">Allow Tier Mixing</Label>
-                <p className="text-sm text-muted-foreground">
-                  Allow Masters and Explorers to play together if needed
-                </p>
+                <Label htmlFor="tier-mixing">{t('allowTierMixing')}</Label>
+                <p className="text-sm text-muted-foreground">{t('allowTierMixingDescription')}</p>
               </div>
               <Switch
                 id="tier-mixing"
@@ -604,11 +651,13 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
       {/* Players in Draw */}
       <Card>
         <CardHeader>
-          <CardTitle>Players in Draw ({playersInDraw})</CardTitle>
+          <CardTitle>
+            {t('confirmedPlayersList')} ({playersInDraw})
+          </CardTitle>
           <CardDescription>
             {hasExcessPlayers
-              ? `Top ${playersInDraw} players by rating will be included in the draw`
-              : 'All confirmed players will be included in the draw'}
+              ? t('topRatedPlayersIncluded', { count: playersInDraw })
+              : t('allPlayersIncluded')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -640,10 +689,10 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
       {waitlistedPlayers > 0 && (
         <Card className="border-orange-500">
           <CardHeader>
-            <CardTitle>Waitlisted Players ({waitlistedPlayers})</CardTitle>
-            <CardDescription>
-              These players will not be included in the draw due to court capacity limitations
-            </CardDescription>
+            <CardTitle>
+              {t('waitlistedPlayersList')} ({waitlistedPlayers})
+            </CardTitle>
+            <CardDescription>{t('waitlistedPlayersDescription')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
@@ -673,17 +722,17 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
 
       <div className="flex justify-end gap-4">
         <Button variant="outline" onClick={() => router.back()}>
-          Cancel
+          {t('cancel')}
         </Button>
         <Button
           onClick={() => generateDrawMutation.mutate()}
           disabled={generateDrawMutation.isPending || playersInDraw < 4 || event.state !== 'FROZEN'}
         >
           {generateDrawMutation.isPending
-            ? 'Generating...'
+            ? t('generating')
             : existingDraw
-              ? 'Generate New Draw'
-              : 'Generate Draw'}
+              ? t('generateNewDraw')
+              : t('generateDraw')}
         </Button>
       </div>
 
@@ -691,10 +740,10 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
         <Card className="border-destructive">
           <CardContent className="pt-6">
             <p className="text-destructive">
-              Error:{' '}
+              {t('drawGenerationError')}:{' '}
               {generateDrawMutation.error instanceof Error
                 ? generateDrawMutation.error.message
-                : 'Failed to generate draw'}
+                : t('drawGenerationError')}
             </p>
           </CardContent>
         </Card>

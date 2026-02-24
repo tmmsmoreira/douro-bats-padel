@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PlayerNav } from './player-nav';
@@ -70,6 +71,7 @@ interface Draw {
 
 export function DrawView({ eventId }: { eventId: string }) {
   const { data: session } = useSession();
+  const t = useTranslations('drawView');
 
   const {
     data: draw,
@@ -114,7 +116,7 @@ export function DrawView({ eventId }: { eventId: string }) {
       <div className="min-h-screen bg-background flex flex-col">
         <PlayerNav />
         <main className="container mx-auto px-4 py-8 flex-1 max-w-7xl">
-          <div className="text-center py-8">Loading draw...</div>
+          <div className="text-center py-8">{t('loadingDraw')}</div>
         </main>
         <Footer />
       </div>
@@ -127,13 +129,11 @@ export function DrawView({ eventId }: { eventId: string }) {
         <PlayerNav />
         <main className="container mx-auto px-4 py-8 flex-1 max-w-7xl">
           <div className="text-center py-8">
-            <p className="text-lg font-medium">Draw not available yet</p>
-            <p className="text-sm text-muted-foreground mt-2">
-              The draw will be published once the event organizers have finalized the teams.
-            </p>
+            <p className="text-lg font-medium">{t('drawNotAvailable')}</p>
+            <p className="text-sm text-muted-foreground mt-2">{t('drawNotAvailableDescription')}</p>
             {error && (
               <p className="text-xs text-red-500 mt-2">
-                Error: {error instanceof Error ? error.message : 'Failed to load draw'}
+                {t('error')}: {error instanceof Error ? error.message : 'Failed to load draw'}
               </p>
             )}
           </div>
@@ -204,7 +204,7 @@ export function DrawView({ eventId }: { eventId: string }) {
         <div className="space-y-8">
           {/* Header */}
           <div className="text-center">
-            <h1 className="text-3xl font-bold mb-2">{draw.event.title || 'Game Draw'}</h1>
+            <h1 className="text-3xl font-bold mb-2">{draw.event.title || t('gameDraw')}</h1>
             <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
@@ -229,7 +229,7 @@ export function DrawView({ eventId }: { eventId: string }) {
           {/* Duplas (Teams) */}
           <Card>
             <CardHeader className="bg-blue-50 dark:bg-blue-950/30">
-              <CardTitle>Duplas</CardTitle>
+              <CardTitle>{t('teams')}</CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -256,7 +256,7 @@ export function DrawView({ eventId }: { eventId: string }) {
           {Object.keys(masterRounds).length > 0 && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold">Padeleiras - Masters</h2>
+                <h2 className="text-2xl font-bold">{t('mastersTier')}</h2>
                 {mastersTimeSlot && (
                   <Badge variant="outline" className="text-base px-4 py-1">
                     <Clock className="mr-2 h-4 w-4" /> {mastersTimeSlot.startsAt} -{' '}
@@ -264,9 +264,7 @@ export function DrawView({ eventId }: { eventId: string }) {
                   </Badge>
                 )}
               </div>
-              <p className="text-sm text-muted-foreground">
-                Nota: 25 minutos cada jogo, 2 minutos para troca
-              </p>
+              <p className="text-sm text-muted-foreground">{t('note')}</p>
 
               <Card className="overflow-hidden">
                 <CardContent className="p-0">
@@ -275,18 +273,22 @@ export function DrawView({ eventId }: { eventId: string }) {
                       <thead>
                         <tr className="bg-muted">
                           <th className="border-r border-b p-2 text-left font-semibold"></th>
-                          <th className="border-r border-b p-2 text-left font-semibold">Campo</th>
-                          <th className="border-r border-b p-2 text-left font-semibold">Dupla A</th>
-                          <th className="border-r border-b p-2 text-center font-semibold w-16">
-                            Sets A
+                          <th className="border-r border-b p-2 text-left font-semibold">
+                            {t('court')}
+                          </th>
+                          <th className="border-r border-b p-2 text-left font-semibold">
+                            {t('teamA')}
                           </th>
                           <th className="border-r border-b p-2 text-center font-semibold w-16">
-                            vs
+                            {t('setsA')}
                           </th>
                           <th className="border-r border-b p-2 text-center font-semibold w-16">
-                            Sets B
+                            {t('vs')}
                           </th>
-                          <th className="border-b p-2 text-left font-semibold">Dupla B</th>
+                          <th className="border-r border-b p-2 text-center font-semibold w-16">
+                            {t('setsB')}
+                          </th>
+                          <th className="border-b p-2 text-left font-semibold">{t('teamB')}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -300,11 +302,12 @@ export function DrawView({ eventId }: { eventId: string }) {
                                     className="border-r border-b p-2 font-semibold bg-gray-100 dark:bg-gray-800"
                                     rowSpan={assignments.length}
                                   >
-                                    Ronda {round}
+                                    {t('round', { round })}
                                   </td>
                                 )}
                                 <td className="border-r border-b p-2">
-                                  {assignment.court?.label || `Campo ${assignment.courtId}`}
+                                  {assignment.court?.label ||
+                                    t('courtLabel', { courtId: assignment.courtId })}
                                 </td>
                                 <td
                                   className={cn('border-r border-b p-2', getTeamColor('MASTERS'))}
@@ -334,7 +337,7 @@ export function DrawView({ eventId }: { eventId: string }) {
           {Object.keys(explorerRounds).length > 0 && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold">Padeleiras - Explorers</h2>
+                <h2 className="text-2xl font-bold">{t('explorersTier')}</h2>
                 {explorersTimeSlot && (
                   <Badge variant="outline" className="text-base px-4 py-1">
                     <Clock className="mr-2 h-4 w-4" /> {explorersTimeSlot.startsAt} -{' '}
@@ -342,9 +345,7 @@ export function DrawView({ eventId }: { eventId: string }) {
                   </Badge>
                 )}
               </div>
-              <p className="text-sm text-muted-foreground">
-                Nota: 25 minutos cada jogo, 2 minutos para troca
-              </p>
+              <p className="text-sm text-muted-foreground">{t('note')}</p>
 
               <Card className="overflow-hidden">
                 <CardContent className="p-0">
@@ -353,18 +354,22 @@ export function DrawView({ eventId }: { eventId: string }) {
                       <thead>
                         <tr className="bg-muted">
                           <th className="border-r border-b p-2 text-left font-semibold"></th>
-                          <th className="border-r border-b p-2 text-left font-semibold">Campo</th>
-                          <th className="border-r border-b p-2 text-left font-semibold">Dupla A</th>
-                          <th className="border-r border-b p-2 text-center font-semibold w-16">
-                            Sets A
+                          <th className="border-r border-b p-2 text-left font-semibold">
+                            {t('court')}
+                          </th>
+                          <th className="border-r border-b p-2 text-left font-semibold">
+                            {t('teamA')}
                           </th>
                           <th className="border-r border-b p-2 text-center font-semibold w-16">
-                            vs
+                            {t('setsA')}
                           </th>
                           <th className="border-r border-b p-2 text-center font-semibold w-16">
-                            Sets B
+                            {t('vs')}
                           </th>
-                          <th className="border-b p-2 text-left font-semibold">Dupla B</th>
+                          <th className="border-r border-b p-2 text-center font-semibold w-16">
+                            {t('setsB')}
+                          </th>
+                          <th className="border-b p-2 text-left font-semibold">{t('teamB')}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -378,11 +383,12 @@ export function DrawView({ eventId }: { eventId: string }) {
                                     className="border-r border-b p-2 font-semibold bg-gray-100 dark:bg-gray-800"
                                     rowSpan={assignments.length}
                                   >
-                                    Ronda {round}
+                                    {t('round', { round })}
                                   </td>
                                 )}
                                 <td className="border-r border-b p-2">
-                                  {assignment.court?.label || `Campo ${assignment.courtId}`}
+                                  {assignment.court?.label ||
+                                    t('courtLabel', { courtId: assignment.courtId })}
                                 </td>
                                 <td
                                   className={cn('border-r border-b p-2', getTeamColor('EXPLORERS'))}
@@ -412,7 +418,7 @@ export function DrawView({ eventId }: { eventId: string }) {
           {event && event.waitlistedPlayers && event.waitlistedPlayers.length > 0 && (
             <Card>
               <CardHeader className="bg-amber-50 dark:bg-amber-950/30">
-                <CardTitle>Lista de Espera ({event.waitlistedPlayers.length})</CardTitle>
+                <CardTitle>{t('waitlist', { count: event.waitlistedPlayers.length })}</CardTitle>
               </CardHeader>
               <CardContent className="pt-6">
                 <div className="space-y-2">

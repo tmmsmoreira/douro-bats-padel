@@ -39,16 +39,32 @@ const AlertDialogContent = React.forwardRef<
 
   React.useImperativeHandle(ref, () => contentRef.current!);
 
-  const handleOverlayClick = () => {
+  const triggerPulse = React.useCallback(() => {
     setShouldPulse(true);
+  }, []);
+
+  const handleOverlayClick = () => {
+    triggerPulse();
   };
+
+  // Listen for Escape key press
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        triggerPulse();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [triggerPulse]);
 
   return (
     <AlertDialogPortal>
       <AlertDialogOverlay onClick={handleOverlayClick} />
       <div
         className={cn(
-          'fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%]',
+          'fixed left-[50%] top-[50%] z-50 w-[calc(100vw-2rem)] max-w-lg translate-x-[-50%] translate-y-[-50%]',
           shouldPulse && 'animate-pulse-scale'
         )}
         onAnimationEnd={() => setShouldPulse(false)}
@@ -56,7 +72,7 @@ const AlertDialogContent = React.forwardRef<
         <AlertDialogPrimitive.Content
           ref={contentRef}
           className={cn(
-            'grid w-full max-w-lg gap-4 border bg-background p-6 shadow-lg sm:rounded-lg',
+            'grid w-full gap-4 border bg-background p-6 shadow-lg sm:rounded-lg',
             'data-[state=open]:animate-in data-[state=closed]:animate-out',
             'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
             'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-100',

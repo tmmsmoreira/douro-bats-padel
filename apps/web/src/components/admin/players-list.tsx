@@ -8,7 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Mail, CheckCircle, XCircle, Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
+import { SearchIcon, SearchIconHandle } from 'lucide-animated';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -31,6 +32,7 @@ interface Player {
 export function PlayersList() {
   const t = useTranslations('playersList');
   const [searchQuery, setSearchQuery] = useState('');
+  const searchIconRef = useRef<SearchIconHandle>(null);
 
   const { data: players, isLoading } = useQuery<Player[]>({
     queryKey: ['players'],
@@ -72,12 +74,17 @@ export function PlayersList() {
     <div className="space-y-4">
       {/* Search Bar */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <SearchIcon
+          ref={searchIconRef}
+          size={16}
+          className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
+        />
         <Input
           type="text"
           placeholder={t('searchPlayers')}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          onMouseEnter={() => searchIconRef.current?.startAnimation()}
           className="pl-9"
         />
       </div>

@@ -3,9 +3,11 @@
 import { signOut } from 'next-auth/react';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 export default function ClearSessionPage() {
   const router = useRouter();
+  const t = useTranslations('clearSessionPage');
 
   useEffect(() => {
     // Clear the session and redirect to home
@@ -27,8 +29,8 @@ export default function ClearSessionPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="text-center">
-        <h1 className="text-2xl font-bold mb-4">Clearing Session...</h1>
-        <p className="text-muted-foreground">You will be redirected to the home page.</p>
+        <h1 className="text-2xl font-bold mb-4">{t('title')}</h1>
+        <p className="text-muted-foreground">{t('description')}</p>
       </div>
     </div>
   );

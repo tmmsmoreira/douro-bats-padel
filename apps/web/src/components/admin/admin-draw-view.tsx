@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -17,7 +18,7 @@ import {
   Send,
   ArchiveRestore,
   Clock,
-} from 'lucide-animated';
+} from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -98,6 +99,7 @@ interface Draw {
 }
 
 export function AdminDrawView({ eventId }: { eventId: string }) {
+  const t = useTranslations('adminDrawView');
   const { data: session } = useSession();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -114,7 +116,7 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
         headers.Authorization = `Bearer ${session.accessToken}`;
       }
       const res = await fetch(`${API_URL}/draws/events/${eventId}`, { headers });
-      if (!res.ok) throw new Error('Failed to fetch draw');
+      if (!res.ok) throw new Error(t('errorFetchingDraw'));
       return res.json();
     },
   });
@@ -145,7 +147,7 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
       teamA: string[];
       teamB: string[];
     }) => {
-      if (!session?.accessToken) throw new Error('Not authenticated');
+      if (!session?.accessToken) throw new Error(t('notAuthenticated'));
 
       const res = await fetch(`${API_URL}/draws/assignments/${assignmentId}`, {
         method: 'PATCH',
@@ -156,22 +158,22 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
         body: JSON.stringify({ teamA, teamB }),
       });
 
-      if (!res.ok) throw new Error('Failed to update assignment');
+      if (!res.ok) throw new Error(t('errorUpdatingAssignment', { message: '' }));
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['draw', eventId] });
       setEditingAssignment(null);
-      toast.success('Assignment updated successfully');
+      toast.success(t('assignmentUpdated'));
     },
     onError: (error: Error) => {
-      toast.error(`Failed to update assignment: ${error.message}`);
+      toast.error(t('errorUpdatingAssignment', { message: error.message }));
     },
   });
 
   const publishDrawMutation = useMutation({
     mutationFn: async () => {
-      if (!session?.accessToken) throw new Error('Not authenticated');
+      if (!session?.accessToken) throw new Error(t('notAuthenticated'));
 
       const res = await fetch(`${API_URL}/draws/events/${eventId}/publish`, {
         method: 'POST',
@@ -181,22 +183,22 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
         },
       });
 
-      if (!res.ok) throw new Error('Failed to publish draw');
+      if (!res.ok) throw new Error(t('errorPublishingDraw', { message: '' }));
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['draw', eventId] });
       queryClient.invalidateQueries({ queryKey: ['event', eventId] });
-      toast.success('Draw published successfully! Players have been notified.');
+      toast.success(t('drawPublished'));
     },
     onError: (error: Error) => {
-      toast.error(`Failed to publish draw: ${error.message}`);
+      toast.error(t('errorPublishingDraw', { message: error.message }));
     },
   });
 
   const unpublishDrawMutation = useMutation({
     mutationFn: async () => {
-      if (!session?.accessToken) throw new Error('Not authenticated');
+      if (!session?.accessToken) throw new Error(t('notAuthenticated'));
 
       const res = await fetch(`${API_URL}/draws/events/${eventId}/unpublish`, {
         method: 'POST',
@@ -206,22 +208,22 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
         },
       });
 
-      if (!res.ok) throw new Error('Failed to unpublish draw');
+      if (!res.ok) throw new Error(t('errorUnpublishingDraw', { message: '' }));
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['draw', eventId] });
       queryClient.invalidateQueries({ queryKey: ['event', eventId] });
-      toast.success('Draw unpublished successfully!');
+      toast.success(t('drawUnpublished'));
     },
     onError: (error: Error) => {
-      toast.error(`Failed to unpublish draw: ${error.message}`);
+      toast.error(t('errorUnpublishingDraw', { message: error.message }));
     },
   });
 
   const deleteDrawMutation = useMutation({
     mutationFn: async () => {
-      if (!session?.accessToken) throw new Error('Not authenticated');
+      if (!session?.accessToken) throw new Error(t('notAuthenticated'));
 
       const res = await fetch(`${API_URL}/draws/events/${eventId}`, {
         method: 'DELETE',
@@ -231,27 +233,27 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
         },
       });
 
-      if (!res.ok) throw new Error('Failed to delete draw');
+      if (!res.ok) throw new Error(t('errorDeletingDraw', { message: '' }));
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['draw', eventId] });
       queryClient.invalidateQueries({ queryKey: ['event', eventId] });
-      toast.success('Draw deleted successfully');
+      toast.success(t('drawDeleted'));
       // Redirect to the generate draw page
       router.push(`/admin/events/${eventId}/draw`);
     },
     onError: (error: Error) => {
-      toast.error(`Failed to delete draw: ${error.message}`);
+      toast.error(t('errorDeletingDraw', { message: error.message }));
     },
   });
 
   if (isLoading) {
-    return <div className="text-center py-8">Loading draw...</div>;
+    return <div className="text-center py-8">{t('loading')}</div>;
   }
 
   if (!draw) {
-    return <div className="text-center py-8">Draw not available yet</div>;
+    return <div className="text-center py-8">{t('notAvailable')}</div>;
   }
 
   // Group assignments by tier and round
@@ -280,9 +282,9 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">{hasEventPassed ? 'View Draw' : 'Manage Draw'}</h1>
+          <h1 className="text-3xl font-bold">{hasEventPassed ? t('viewDraw') : t('manageDraw')}</h1>
           <p className="text-muted-foreground">{draw.event.title}</p>
           <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
             <div className="flex items-center gap-1">
@@ -305,7 +307,7 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
           </div>
         </div>
         {!hasEventPassed && (
-          <div className="flex gap-2">
+          <div className="flex gap-2 self-end sm:self-auto">
             {draw.event.state !== 'PUBLISHED' && (
               <>
                 <Button
@@ -313,14 +315,14 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
                   onClick={() => router.push(`/admin/events/${eventId}/draw`)}
                 >
                   <RefreshCw className="h-4 w-4" />
-                  Generate New
+                  {t('generateNew')}
                 </Button>
                 <Button
                   onClick={() => publishDrawMutation.mutate()}
                   disabled={publishDrawMutation.isPending}
                 >
                   <Send className="h-4 w-4" />
-                  {publishDrawMutation.isPending ? 'Publishing...' : 'Publish'}
+                  {publishDrawMutation.isPending ? t('publishing') : t('publish')}
                 </Button>
               </>
             )}
@@ -331,7 +333,7 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
                 disabled={unpublishDrawMutation.isPending}
               >
                 <ArchiveRestore className="h-4 w-4" />
-                {unpublishDrawMutation.isPending ? 'Unpublishing...' : 'Unpublish'}
+                {unpublishDrawMutation.isPending ? t('unpublishing') : t('unpublish')}
               </Button>
             )}
             <Button
@@ -340,7 +342,7 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
               disabled={deleteDrawMutation.isPending}
             >
               <Trash2 className="h-4 w-4" />
-              {deleteDrawMutation.isPending ? 'Deleting...' : 'Delete'}
+              {deleteDrawMutation.isPending ? t('deleting') : t('delete')}
             </Button>
           </div>
         )}
@@ -350,7 +352,7 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
       {Object.keys(mastersRounds).length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <h2 className="text-2xl font-bold">Masters</h2>
+            <h2 className="text-2xl font-bold">{t('masters')}</h2>
             {draw.event.tierRules?.mastersTimeSlot && (
               <Badge variant="secondary" className="text-sm">
                 <Clock className="mr-2 h-4 w-4" /> {draw.event.tierRules.mastersTimeSlot.startsAt} -{' '}
@@ -361,7 +363,7 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
           {Object.entries(mastersRounds).map(([round, assignments]) => (
             <Card key={`masters-${round}`}>
               <CardHeader>
-                <CardTitle>Round {round}</CardTitle>
+                <CardTitle>{t('round', { number: round })}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -384,7 +386,7 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
       {Object.keys(explorersRounds).length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <h2 className="text-2xl font-bold">Explorers</h2>
+            <h2 className="text-2xl font-bold">{t('explorers')}</h2>
             {draw.event.tierRules?.explorersTimeSlot && (
               <Badge variant="secondary" className="text-sm">
                 <Clock className="mr-2 h-4 w-4" />
@@ -396,7 +398,7 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
           {Object.entries(explorersRounds).map(([round, assignments]) => (
             <Card key={`explorers-${round}`}>
               <CardHeader>
-                <CardTitle>Round {round}</CardTitle>
+                <CardTitle>{t('round', { number: round })}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -420,7 +422,9 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
         <Card>
           <CardHeader>
             <CardTitle>
-              Waitlist ({event.waitlistCount || event.waitlistedPlayers?.length || 0})
+              {t('waitlist', {
+                count: event.waitlistCount || event.waitlistedPlayers?.length || 0,
+              })}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -440,7 +444,7 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">No players on waitlist</p>
+              <p className="text-sm text-muted-foreground">{t('noPlayersOnWaitlist')}</p>
             )}
           </CardContent>
         </Card>
@@ -466,13 +470,11 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete this draw. This action cannot be undone.
-            </AlertDialogDescription>
+            <AlertDialogTitle>{t('deleteDrawTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>{t('deleteDrawDescription')}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => {
@@ -480,7 +482,7 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
                 setShowDeleteDialog(false);
               }}
             >
-              Delete Draw
+              {t('deleteDraw')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -498,10 +500,14 @@ function AssignmentCard({
   onEdit: () => void;
   canEdit?: boolean;
 }) {
+  const t = useTranslations('adminDrawView');
+
   return (
     <div className="border rounded-lg p-4">
       <div className="flex items-center justify-between mb-3">
-        <Badge variant="outline">{assignment.court?.label || `Court ${assignment.courtId}`}</Badge>
+        <Badge variant="outline">
+          {assignment.court?.label || t('court', { id: assignment.courtId })}
+        </Badge>
         {canEdit && (
           <Button variant="ghost" size="sm" onClick={onEdit}>
             <Pencil className="h-4 w-4" />
@@ -510,7 +516,7 @@ function AssignmentCard({
       </div>
       <div className="grid grid-cols-2 divide-x">
         <div className="pr-4">
-          <p className="text-sm font-medium mb-2">Team A</p>
+          <p className="text-sm font-medium mb-2">{t('teamA')}</p>
           <div className="space-y-1">
             {assignment.teamA.map((player) => (
               <div key={player.id} className="flex items-center justify-between text-sm">
@@ -521,7 +527,7 @@ function AssignmentCard({
           </div>
         </div>
         <div className="pl-4">
-          <p className="text-sm font-medium mb-2">Team B</p>
+          <p className="text-sm font-medium mb-2">{t('teamB')}</p>
           <div className="space-y-1">
             {assignment.teamB.map((player) => (
               <div key={player.id} className="flex items-center justify-between text-sm">
@@ -547,6 +553,7 @@ function EditAssignmentDialog({
   onSave: (teamA: string[], teamB: string[]) => void;
   isSaving: boolean;
 }) {
+  const t = useTranslations('adminDrawView');
   const [teamA, setTeamA] = useState<string[]>(assignment.teamA.map((p) => p.id));
   const [teamB, setTeamB] = useState<string[]>(assignment.teamB.map((p) => p.id));
 
@@ -564,7 +571,7 @@ function EditAssignmentDialog({
 
   const handleSave = () => {
     if (teamA.length !== 2 || teamB.length !== 2) {
-      toast.error('Each team must have exactly 2 players');
+      toast.error(t('teamValidationError'));
       return;
     }
     onSave(teamA, teamB);
@@ -574,15 +581,15 @@ function EditAssignmentDialog({
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Edit Assignment</DialogTitle>
-          <DialogDescription>
-            Click on a player to swap them between teams. Each team must have exactly 2 players.
-          </DialogDescription>
+          <DialogTitle>{t('editAssignment')}</DialogTitle>
+          <DialogDescription>{t('editAssignmentDescription')}</DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-2 gap-4 py-4">
           <div className="space-y-2">
-            <h3 className="font-medium">Team A ({teamA.length}/2)</h3>
+            <h3 className="font-medium">
+              {t('teamA')} ({teamA.length}/2)
+            </h3>
             <div className="space-y-2">
               {allPlayers
                 .filter((p) => teamA.includes(p.id))
@@ -607,7 +614,9 @@ function EditAssignmentDialog({
           </div>
 
           <div className="space-y-2">
-            <h3 className="font-medium">Team B ({teamB.length}/2)</h3>
+            <h3 className="font-medium">
+              {t('teamB')} ({teamB.length}/2)
+            </h3>
             <div className="space-y-2">
               {allPlayers
                 .filter((p) => teamB.includes(p.id))
@@ -634,13 +643,13 @@ function EditAssignmentDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={isSaving}>
-            Cancel
+            {t('cancel')}
           </Button>
           <Button
             onClick={handleSave}
             disabled={isSaving || teamA.length !== 2 || teamB.length !== 2}
           >
-            {isSaving ? 'Saving...' : 'Save Changes'}
+            {isSaving ? t('saving') : t('saveChanges')}
           </Button>
         </DialogFooter>
       </DialogContent>

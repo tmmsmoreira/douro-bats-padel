@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PlayerNav } from './player-nav';
@@ -26,6 +27,7 @@ interface Match {
 
 export function ResultsView({ eventId }: { eventId: string }) {
   const { data: session } = useSession();
+  const t = useTranslations('resultsView');
 
   const { data: matches, isLoading } = useQuery({
     queryKey: ['matches', eventId],
@@ -46,7 +48,7 @@ export function ResultsView({ eventId }: { eventId: string }) {
       <div className="min-h-screen bg-background flex flex-col">
         <PlayerNav />
         <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl">
-          <div className="text-center py-8">Loading results...</div>
+          <div className="text-center py-8">{t('loadingResults')}</div>
         </main>
         <Footer />
       </div>
@@ -58,7 +60,7 @@ export function ResultsView({ eventId }: { eventId: string }) {
       <div className="min-h-screen bg-background flex flex-col">
         <PlayerNav />
         <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl">
-          <div className="text-center py-8">Results not available yet</div>
+          <div className="text-center py-8">{t('noResults')}</div>
         </main>
         <Footer />
       </div>
@@ -83,14 +85,14 @@ export function ResultsView({ eventId }: { eventId: string }) {
       <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl">
         <div className="space-y-6">
           <div>
-            <h1 className="text-3xl font-bold">Match Results</h1>
-            <p className="text-muted-foreground">Final scores and outcomes</p>
+            <h1 className="text-3xl font-bold">{t('title')}</h1>
+            <p className="text-muted-foreground">{t('description')}</p>
           </div>
 
           {Object.entries(rounds).map(([round, roundMatches]: [string, Match[]]) => (
             <Card key={round}>
               <CardHeader>
-                <CardTitle>Round {round}</CardTitle>
+                <CardTitle>{t('round', { round })}</CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
                 <div className="space-y-4">
@@ -103,13 +105,13 @@ export function ResultsView({ eventId }: { eventId: string }) {
                       <div key={match.id} className="border rounded-lg p-4">
                         <div className="flex items-center justify-between mb-3">
                           <Badge variant="outline">
-                            {match.court?.label || `Court ${match.courtId}`}
+                            {match.court?.label || t('court', { court: match.courtId })}
                           </Badge>
                           <Badge variant="secondary">{match.tier}</Badge>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
                           <div className={`space-y-1 ${teamAWon ? 'font-bold' : ''}`}>
-                            <p className="text-sm font-medium">Team A</p>
+                            <p className="text-sm font-medium">{t('teamA')}</p>
                             {match.teamA?.map((player) => (
                               <p key={player.id} className="text-sm">
                                 {player.name}
@@ -126,10 +128,12 @@ export function ResultsView({ eventId }: { eventId: string }) {
                                 {match.setsB}
                               </span>
                             </div>
-                            {tie && <p className="text-xs text-muted-foreground mt-1">Tie</p>}
+                            {tie && (
+                              <p className="text-xs text-muted-foreground mt-1">{t('tie')}</p>
+                            )}
                           </div>
                           <div className={`space-y-1 ${teamBWon ? 'font-bold' : ''}`}>
-                            <p className="text-sm font-medium">Team B</p>
+                            <p className="text-sm font-medium">{t('teamB')}</p>
                             {match.teamB?.map((player) => (
                               <p key={player.id} className="text-sm">
                                 {player.name}

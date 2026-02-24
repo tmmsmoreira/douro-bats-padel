@@ -48,7 +48,7 @@ export default function EditVenuePage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold">{t('editVenue')}</h1>
-          <p className="text-muted-foreground text-destructive">Venue not found</p>
+          <p className="text-destructive">{t('venueNotFound')}</p>
         </div>
       </div>
     );

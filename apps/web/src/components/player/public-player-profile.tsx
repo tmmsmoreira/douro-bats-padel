@@ -334,12 +334,11 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
           <AlertDialogHeader>
             <AlertDialogTitle>{tActions('deleteConfirmation')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete this user and all associated data. This action cannot be
-              undone.
+              {tActions('deleteConfirmationDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{tActions('cancel')}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => {

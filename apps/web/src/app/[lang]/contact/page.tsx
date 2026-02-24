@@ -6,11 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Mail, Phone, MapPin, Clock } from 'lucide-animated';
+import { Mail, Phone, MapPin, Clock } from 'lucide-react';
 import { HomeNav } from '@/components/home-nav';
 import { Footer } from '@/components/footer';
+import { useTranslations } from 'next-intl';
 
 export default function ContactPage() {
+  const t = useTranslations('contactPage');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -42,10 +44,8 @@ export default function ContactPage() {
         <div className="space-y-6 sm:space-y-8">
           {/* Header */}
           <div className="text-center space-y-3 sm:space-y-4">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">Contact Us</h1>
-            <p className="text-base sm:text-lg md:text-xl text-muted-foreground">
-              Have questions? We&apos;d love to hear from you.
-            </p>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">{t('title')}</h1>
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground">{t('subtitle')}</p>
           </div>
 
           <div className="grid lg:grid-cols-3 gap-6 sm:gap-8">
@@ -53,10 +53,8 @@ export default function ContactPage() {
             <div className="lg:col-span-1 space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Get in Touch</CardTitle>
-                  <CardDescription>
-                    We&apos;re here to help and answer any questions you might have
-                  </CardDescription>
+                  <CardTitle>{t('getInTouch')}</CardTitle>
+                  <CardDescription>{t('getInTouchDescription')}</CardDescription>
                 </CardHeader>
                 <CardContent className="pt-0 space-y-4">
                   <div className="flex items-start gap-3">
@@ -64,8 +62,8 @@ export default function ContactPage() {
                       <MapPin className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-medium">Address</h3>
-                      <p className="text-sm text-muted-foreground">Porto, Portugal</p>
+                      <h3 className="font-medium">{t('address')}</h3>
+                      <p className="text-sm text-muted-foreground">{t('addressValue')}</p>
                     </div>
                   </div>
 
@@ -74,7 +72,7 @@ export default function ContactPage() {
                       <Mail className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-medium">Email</h3>
+                      <h3 className="font-medium">{t('email')}</h3>
                       <a
                         href="mailto:info@dourobatspadel.com"
                         className="text-sm text-muted-foreground hover:text-primary"
@@ -89,7 +87,7 @@ export default function ContactPage() {
                       <Phone className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-medium">Phone</h3>
+                      <h3 className="font-medium">{t('phone')}</h3>
                       <a
                         href="tel:+351123456789"
                         className="text-sm text-muted-foreground hover:text-primary"
@@ -104,9 +102,9 @@ export default function ContactPage() {
                       <Clock className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-medium">Business Hours</h3>
-                      <p className="text-sm text-muted-foreground">Mon - Fri: 9:00 AM - 6:00 PM</p>
-                      <p className="text-sm text-muted-foreground">Sat - Sun: 10:00 AM - 4:00 PM</p>
+                      <h3 className="font-medium">{t('businessHours')}</h3>
+                      <p className="text-sm text-muted-foreground">{t('businessHoursWeekdays')}</p>
+                      <p className="text-sm text-muted-foreground">{t('businessHoursWeekends')}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -117,29 +115,27 @@ export default function ContactPage() {
             <div className="lg:col-span-2">
               <Card>
                 <CardHeader>
-                  <CardTitle>Send us a Message</CardTitle>
-                  <CardDescription>
-                    Fill out the form below and we&apos;ll get back to you as soon as possible
-                  </CardDescription>
+                  <CardTitle>{t('sendMessage')}</CardTitle>
+                  <CardDescription>{t('sendMessageDescription')}</CardDescription>
                 </CardHeader>
                 <CardContent className="pt-0">
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="name">Name *</Label>
+                        <Label htmlFor="name">{t('name')} *</Label>
                         <Input
                           id="name"
                           value={formData.name}
                           onChange={(e) =>
                             setFormData((prev) => ({ ...prev, name: e.target.value }))
                           }
-                          placeholder="Your name"
+                          placeholder={t('namePlaceholder')}
                           required
                         />
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="email">Email *</Label>
+                        <Label htmlFor="email">{t('email')} *</Label>
                         <Input
                           id="email"
                           type="email"
@@ -147,46 +143,46 @@ export default function ContactPage() {
                           onChange={(e) =>
                             setFormData((prev) => ({ ...prev, email: e.target.value }))
                           }
-                          placeholder="your.email@example.com"
+                          placeholder={t('emailPlaceholder')}
                           required
                         />
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="subject">Subject *</Label>
+                      <Label htmlFor="subject">{t('subject')} *</Label>
                       <Input
                         id="subject"
                         value={formData.subject}
                         onChange={(e) =>
                           setFormData((prev) => ({ ...prev, subject: e.target.value }))
                         }
-                        placeholder="What is this about?"
+                        placeholder={t('subjectPlaceholder')}
                         required
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="message">Message *</Label>
+                      <Label htmlFor="message">{t('message')} *</Label>
                       <Textarea
                         id="message"
                         value={formData.message}
                         onChange={(e) =>
                           setFormData((prev) => ({ ...prev, message: e.target.value }))
                         }
-                        placeholder="Tell us more..."
+                        placeholder={t('messagePlaceholder')}
                         rows={6}
                         required
                       />
                     </div>
 
                     <Button type="submit" disabled={isSubmitting} className="w-full md:w-auto">
-                      {isSubmitting ? 'Sending...' : 'Send Message'}
+                      {isSubmitting ? t('sending') : t('sendMessageButton')}
                     </Button>
 
                     {submitted && (
                       <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg text-green-700 dark:text-green-400">
-                        Thank you for your message! We&apos;ll get back to you soon.
+                        {t('successMessage')}
                       </div>
                     )}
                   </form>

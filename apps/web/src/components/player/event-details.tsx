@@ -144,12 +144,10 @@ export function EventDetails({ eventId }: { eventId: string }) {
                     </p>
                   </div>
                   <div className="pt-4">
-                    <p className="text-lg mb-6">
-                      The draw for this event has been published! View the teams and match schedule.
-                    </p>
+                    <p className="text-lg mb-6">{t('drawPublishedMessage')}</p>
                     <Link href={`/events/${eventId}/draw`}>
                       <Button size="lg" className="w-full sm:w-auto">
-                        View Draw
+                        {t('viewDraw')}
                       </Button>
                     </Link>
                   </div>
@@ -176,6 +174,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
               variant="ghost"
               size="sm"
               onMouseEnter={() => arrowLeftIconRef.current?.startAnimation()}
+              onMouseLeave={() => arrowLeftIconRef.current?.stopAnimation()}
             >
               <ArrowLeftIcon ref={arrowLeftIconRef} size={16} />
               {t('backToEvents')}
@@ -215,7 +214,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
                       className="text-sm px-3 py-1 bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800"
                     >
                       <ClockIcon className="mr-2 h-3 w-3" />
-                      <span className="font-semibold">Masters:</span>
+                      <span className="font-semibold">{t('masters')}</span>
                       <span className="ml-1">
                         {event.tierRules.mastersTimeSlot.startsAt} -{' '}
                         {event.tierRules.mastersTimeSlot.endsAt}
@@ -228,7 +227,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
                       className="text-sm px-3 py-1 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800"
                     >
                       <ClockIcon className="mr-2 h-3 w-3" />
-                      <span className="font-semibold">Explorers:</span>
+                      <span className="font-semibold">{t('explorers')}</span>
                       <span className="ml-1">
                         {event.tierRules.explorersTimeSlot.startsAt} -{' '}
                         {event.tierRules.explorersTimeSlot.endsAt}

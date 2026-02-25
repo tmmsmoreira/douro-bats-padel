@@ -16,7 +16,7 @@ export function Footer() {
       <div className="container mx-auto px-4 py-8 sm:py-12 max-w-4xl">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           {/* About Section */}
-          <div className="space-y-4">
+          <div className="space-y-4 sm:col-span-2 lg:col-span-1">
             <h3 className="text-lg font-bold">Douro Bats Padel</h3>
             <p className="text-sm text-muted-foreground">{tFooter('description')}</p>
             <div className="flex gap-4">
@@ -50,86 +50,89 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Quick Links */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold">{tFooter('quickLinks')}</h3>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <Link
-                  href="/"
-                  className="text-muted-foreground hover:text-primary transition-colors"
-                >
-                  {tNav('home')}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/"
-                  className="text-muted-foreground hover:text-primary transition-colors"
-                >
-                  {tNav('events')}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/leaderboard"
-                  className="text-muted-foreground hover:text-primary transition-colors"
-                >
-                  {tNav('ranking')}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/about"
-                  className="text-muted-foreground hover:text-primary transition-colors"
-                >
-                  {tNav('about')}
-                </Link>
-              </li>
-            </ul>
-          </div>
+          {/* Quick Links and Legal - Side by side on mobile */}
+          <div className="grid grid-cols-2 gap-6 sm:col-span-2 lg:col-span-2 lg:grid-cols-2">
+            {/* Quick Links */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-bold">{tFooter('quickLinks')}</h3>
+              <ul className="space-y-2 text-sm">
+                <li>
+                  <Link
+                    href="/"
+                    className="text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    {tNav('home')}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/"
+                    className="text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    {tNav('events')}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/leaderboard"
+                    className="text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    {tNav('ranking')}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/about"
+                    className="text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    {tNav('about')}
+                  </Link>
+                </li>
+              </ul>
+            </div>
 
-          {/* Legal */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold">{tFooter('legal')}</h3>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <Link
-                  href="/terms"
-                  className="text-muted-foreground hover:text-primary transition-colors"
-                >
-                  {tFooter('termsAndConditions')}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/privacy"
-                  className="text-muted-foreground hover:text-primary transition-colors"
-                >
-                  {tFooter('privacyPolicy')}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/cookies"
-                  className="text-muted-foreground hover:text-primary transition-colors"
-                >
-                  {tFooter('cookiePolicy')}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/faq"
-                  className="text-muted-foreground hover:text-primary transition-colors"
-                >
-                  {tNav('faq')}
-                </Link>
-              </li>
-            </ul>
+            {/* Legal */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-bold">{tFooter('legal')}</h3>
+              <ul className="space-y-2 text-sm">
+                <li>
+                  <Link
+                    href="/terms"
+                    className="text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    {tFooter('termsAndConditions')}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/privacy"
+                    className="text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    {tFooter('privacyPolicy')}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/cookies"
+                    className="text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    {tFooter('cookiePolicy')}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/faq"
+                    className="text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    {tNav('faq')}
+                  </Link>
+                </li>
+              </ul>
+            </div>
           </div>
 
           {/* Contact */}
-          <div className="space-y-4">
+          <div className="space-y-4 sm:col-span-2 lg:col-span-1">
             <h3 className="text-lg font-bold">{tFooter('contact')}</h3>
             <ul className="space-y-3 text-sm">
               <li className="flex items-start gap-2">

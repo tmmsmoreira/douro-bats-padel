@@ -15,7 +15,7 @@ import {
 import { signOut, useSession } from 'next-auth/react';
 import { UserIcon, LogoutIcon, LogoutIconHandle, UserIconHandle } from 'lucide-animated';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { ThemeToggleButton } from '@/components/ui/theme-toggle-button';
+import { ThemeToggleButton } from '@/components/theme-toggle-button';
 import { LanguageToggleButton } from '@/components/language-toggle-button';
 import { LanguageMenuItems } from '@/components/language-menu-items';
 import { MenuToggle } from '@/components/ui/menu-toggle';

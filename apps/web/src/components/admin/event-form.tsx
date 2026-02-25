@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/select';
 import { DatePicker } from '@/components/ui/date-picker';
 import { TimePicker } from '@/components/ui/time-picker';
-import { DateTimePicker } from '@/components/ui/datetime-picker';
+import { DateTimePicker } from '@/components/datetime-picker';
 import type { CreateEventDto, TierRules } from '@padel/types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';

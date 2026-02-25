@@ -1,6 +1,6 @@
 import { ResendVerificationForm } from '@/components/auth/resend-verification-form';
 import { LanguageToggleButton } from '@/components/language-toggle-button';
-import { ThemeToggleButton } from '@/components/ui/theme-toggle-button';
+import { ThemeToggleButton } from '@/components/theme-toggle-button';
 
 export default function ResendVerificationPage() {
   return (

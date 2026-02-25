@@ -8,9 +8,11 @@ import {
   InputGroupInput,
 } from '@/components/ui/input-group';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ClockIcon } from 'lucide-animated';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useMediaQuery } from '@/hooks/use-media-query';
 
 function formatTime(date: Date | undefined) {
   if (!date) {
@@ -54,6 +56,7 @@ export function TimePicker({
 }: TimePickerProps) {
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState(formatTime(value));
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   // Sync with external value changes
   React.useEffect(() => {
@@ -72,6 +75,37 @@ export function TimePicker({
     }
     return options;
   }, []);
+
+  const handleTimeSelect = (timeOption: string) => {
+    setInputValue(timeOption);
+    const parsedTime = parseTimeString(timeOption, value);
+    if (parsedTime && onChange) {
+      onChange(parsedTime);
+    }
+    setOpen(false);
+  };
+
+  const timeListComponent = (
+    <div className="max-h-[300px] overflow-y-auto p-1">
+      {timeOptions.map((timeOption) => {
+        const isSelected = inputValue === timeOption;
+        return (
+          <button
+            key={timeOption}
+            type="button"
+            className={cn(
+              'relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground',
+              isSelected && 'bg-accent text-accent-foreground font-medium'
+            )}
+            onClick={() => handleTimeSelect(timeOption)}
+          >
+            <span className="flex-1 font-mono">{timeOption}</span>
+            {isSelected && <Check size={16} />}
+          </button>
+        );
+      })}
+    </div>
+  );
 
   return (
     <InputGroup>
@@ -100,52 +134,50 @@ export function TimePicker({
         }}
       />
       <InputGroupAddon align="inline-end">
-        <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>
+        {isMobile ? (
+          <>
             <InputGroupButton
               variant="ghost"
               size="icon-xs"
               aria-label="Select time"
               disabled={disabled}
+              onClick={() => setOpen(true)}
             >
               <ClockIcon size={16} />
               <span className="sr-only">Select time</span>
             </InputGroupButton>
-          </PopoverTrigger>
-          <PopoverContent
-            className="w-auto overflow-hidden p-0"
-            align="end"
-            alignOffset={-8}
-            sideOffset={10}
-          >
-            <div className="max-h-[300px] overflow-y-auto p-1">
-              {timeOptions.map((timeOption) => {
-                const isSelected = inputValue === timeOption;
-                return (
-                  <button
-                    key={timeOption}
-                    type="button"
-                    className={cn(
-                      'relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground',
-                      isSelected && 'bg-accent text-accent-foreground font-medium'
-                    )}
-                    onClick={() => {
-                      setInputValue(timeOption);
-                      const parsedTime = parseTimeString(timeOption, value);
-                      if (parsedTime && onChange) {
-                        onChange(parsedTime);
-                      }
-                      setOpen(false);
-                    }}
-                  >
-                    <span className="flex-1">{timeOption}</span>
-                    {isSelected && <Check size={16} />}
-                  </button>
-                );
-              })}
-            </div>
-          </PopoverContent>
-        </Popover>
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Select time</DialogTitle>
+                </DialogHeader>
+                {timeListComponent}
+              </DialogContent>
+            </Dialog>
+          </>
+        ) : (
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <InputGroupButton
+                variant="ghost"
+                size="icon-xs"
+                aria-label="Select time"
+                disabled={disabled}
+              >
+                <ClockIcon size={16} />
+                <span className="sr-only">Select time</span>
+              </InputGroupButton>
+            </PopoverTrigger>
+            <PopoverContent
+              className="w-auto overflow-hidden p-0"
+              align="end"
+              alignOffset={-8}
+              sideOffset={10}
+            >
+              {timeListComponent}
+            </PopoverContent>
+          </Popover>
+        )}
       </InputGroupAddon>
     </InputGroup>
   );

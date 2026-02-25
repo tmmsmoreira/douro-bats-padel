@@ -5,11 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
-import { Mail, CheckCircle, XCircle, Search } from 'lucide-react';
+import { Mail, CheckCircle, XCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { useState, useMemo, useRef } from 'react';
-import { SearchIcon, SearchIconHandle } from 'lucide-animated';
+import { SearchIcon, SearchIconHandle, XIcon, XIconHandle } from 'lucide-animated';
+import { Button } from '@/components/ui/button';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -33,6 +34,7 @@ export function PlayersList() {
   const t = useTranslations('playersList');
   const [searchQuery, setSearchQuery] = useState('');
   const searchIconRef = useRef<SearchIconHandle>(null);
+  const xIconRef = useRef<XIconHandle>(null);
 
   const { data: players, isLoading } = useQuery<Player[]>({
     queryKey: ['players'],
@@ -85,8 +87,22 @@ export function PlayersList() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           onMouseEnter={() => searchIconRef.current?.startAnimation()}
-          className="pl-9"
+          className="pl-9 pr-9"
         />
+        {searchQuery && (
+          <Button
+            type="button"
+            variant="link"
+            size="icon"
+            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+            onClick={() => setSearchQuery('')}
+            aria-label="Clear search"
+            onMouseEnter={() => xIconRef.current?.startAnimation()}
+            onMouseLeave={() => xIconRef.current?.stopAnimation()}
+          >
+            <XIcon ref={xIconRef} size={16} className="h-4 w-4" />
+          </Button>
+        )}
       </div>
 
       {/* Players List */}

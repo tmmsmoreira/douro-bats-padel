@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Copy, Trash2 } from 'lucide-react';
+import { Copy, Trash2, Mail } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
@@ -52,6 +52,29 @@ export function InvitationsList() {
     },
     onError: () => {
       toast.error(t('invitationError'));
+    },
+  });
+
+  const resendMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`${API_URL}/invitations/${id}/resend`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${session?.accessToken}`,
+        },
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || 'Failed to resend invitation');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['invitations'] });
+      toast.success(t('invitationResent'));
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || t('resendInvitationError'));
     },
   });
 
@@ -123,6 +146,15 @@ export function InvitationsList() {
                     >
                       <Copy className="h-4 w-4 mr-2" />
                       {t('copyLink')}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => resendMutation.mutate(invitation.id)}
+                      disabled={resendMutation.isPending}
+                    >
+                      <Mail className="h-4 w-4 mr-2" />
+                      {t('resendInvitation')}
                     </Button>
                     <Button
                       variant="destructive"

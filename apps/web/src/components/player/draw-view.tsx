@@ -115,7 +115,7 @@ export function DrawView({ eventId }: { eventId: string }) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <PlayerNav />
-        <main className="container mx-auto px-4 py-8 flex-1 max-w-7xl">
+        <main className="container mx-auto px-4 py-8 flex-1 max-w-7xl min-h-[500px]">
           <div className="text-center py-8">{t('loadingDraw')}</div>
         </main>
         <Footer />
@@ -127,7 +127,7 @@ export function DrawView({ eventId }: { eventId: string }) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <PlayerNav />
-        <main className="container mx-auto px-4 py-8 flex-1 max-w-7xl">
+        <main className="container mx-auto px-4 py-8 flex-1 max-w-7xl min-h-[500px]">
           <div className="text-center py-8">
             <p className="text-lg font-medium">{t('drawNotAvailable')}</p>
             <p className="text-sm text-muted-foreground mt-2">{t('drawNotAvailableDescription')}</p>
@@ -200,7 +200,7 @@ export function DrawView({ eventId }: { eventId: string }) {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <PlayerNav />
-      <main className="container mx-auto px-4 py-8 flex-1 max-w-7xl">
+      <main className="container mx-auto px-4 py-8 flex-1 max-w-7xl min-h-[500px]">
         <div className="space-y-8">
           {/* Header */}
           <div className="text-center">

@@ -47,7 +47,7 @@ export function ResultsView({ eventId }: { eventId: string }) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <PlayerNav />
-        <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl">
+        <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl min-h-[500px]">
           <div className="text-center py-8">{t('loadingResults')}</div>
         </main>
         <Footer />
@@ -59,7 +59,7 @@ export function ResultsView({ eventId }: { eventId: string }) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <PlayerNav />
-        <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl">
+        <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl min-h-[500px]">
           <div className="text-center py-8">{t('noResults')}</div>
         </main>
         <Footer />
@@ -82,7 +82,7 @@ export function ResultsView({ eventId }: { eventId: string }) {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <PlayerNav />
-      <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl">
+      <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl min-h-[500px]">
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold">{t('title')}</h1>

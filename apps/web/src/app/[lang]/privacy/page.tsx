@@ -7,7 +7,7 @@ export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <HomeNavClient />
-      <main className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 md:py-12 max-w-4xl flex-1">
+      <main className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 md:py-12 max-w-4xl flex-1 min-h-[500px]">
         <div className="space-y-6 sm:space-y-8">
           {/* Header */}
           <div className="text-center space-y-3 sm:space-y-4">

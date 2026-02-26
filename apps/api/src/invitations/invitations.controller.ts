@@ -49,4 +49,11 @@ export class InvitationsController {
   async revoke(@Param('id') id: string, @Req() req: any): Promise<Invitation> {
     return this.invitationsService.revoke(id, req.user.sub);
   }
+
+  @Post(':id/resend')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.EDITOR)
+  async resend(@Param('id') id: string, @Req() req: any): Promise<Invitation> {
+    return this.invitationsService.resend(id, req.user.sub);
+  }
 }

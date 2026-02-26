@@ -98,7 +98,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <PlayerNav />
-        <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl">
+        <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl min-h-[500px]">
           <div className="text-center py-8">{t('eventNotFound')}</div>
         </main>
         <Footer />
@@ -111,7 +111,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <PlayerNav />
-        <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl">
+        <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl min-h-[500px]">
           <div className="space-y-6">
             {/* Back Button */}
             <Link href="/">
@@ -166,7 +166,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <PlayerNav />
-      <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl">
+      <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl min-h-[500px]">
         <div className="space-y-6">
           {/* Back Button */}
           <Link href="/">

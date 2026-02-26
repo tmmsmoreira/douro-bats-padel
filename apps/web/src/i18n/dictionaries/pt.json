@@ -252,7 +252,10 @@
     "invitedBy": "Convidado Por",
     "expiresAt": "Expira Em",
     "usedAt": "Usado Em",
-    "noInvitations": "Nenhum convite encontrado"
+    "noInvitations": "Nenhum convite encontrado",
+    "resendInvitation": "Reenviar",
+    "invitationResent": "Convite reenviado com sucesso",
+    "resendInvitationError": "Falha ao reenviar convite"
   },
   "venuesList": {
     "loadingVenues": "A carregar clubes...",

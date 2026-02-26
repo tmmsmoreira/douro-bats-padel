@@ -227,4 +227,60 @@ export class InvitationsService {
 
     return invitation as Invitation;
   }
+
+  async resend(id: string, userId: string): Promise<Invitation> {
+    const invitation = await this.prisma.invitation.findUnique({
+      where: { id },
+      include: {
+        invitedByUser: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (!invitation) {
+      throw new NotFoundException('Invitation not found');
+    }
+
+    // Only the user who created the invitation or an admin can resend it
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (invitation.invitedBy !== userId && !user?.roles.includes('ADMIN')) {
+      throw new BadRequestException('You do not have permission to resend this invitation');
+    }
+
+    // Can only resend pending invitations
+    if (invitation.status !== 'PENDING') {
+      throw new BadRequestException(
+        `Cannot resend invitation with status ${invitation.status}. Only PENDING invitations can be resent.`
+      );
+    }
+
+    // Check if invitation has expired
+    if (invitation.expiresAt < new Date()) {
+      throw new BadRequestException(
+        'Cannot resend an expired invitation. Please create a new one.'
+      );
+    }
+
+    // Send invitation email
+    try {
+      await this.emailService.sendInvitationEmail(
+        invitation.email,
+        invitation.token,
+        invitation.invitedByUser?.name || 'Admin'
+      );
+    } catch (error) {
+      console.error('Failed to resend invitation email:', error);
+      throw new BadRequestException('Failed to send invitation email');
+    }
+
+    return invitation as Invitation;
+  }
 }

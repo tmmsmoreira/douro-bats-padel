@@ -252,7 +252,10 @@
     "invitedBy": "Invited By",
     "expiresAt": "Expires At",
     "usedAt": "Used At",
-    "noInvitations": "No invitations found"
+    "noInvitations": "No invitations found",
+    "resendInvitation": "Resend",
+    "invitationResent": "Invitation resent successfully",
+    "resendInvitationError": "Failed to resend invitation"
   },
   "venuesList": {
     "loadingVenues": "Loading venues...",

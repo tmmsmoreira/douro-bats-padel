@@ -6,7 +6,8 @@ import { useSession } from 'next-auth/react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Copy, Trash2, Mail } from 'lucide-react';
+import { Send } from 'lucide-react';
+import { CopyIcon, DeleteIcon } from 'lucide-animated';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
@@ -144,7 +145,7 @@ export function InvitationsList() {
                       size="sm"
                       onClick={() => copyInvitationLink(invitation.token)}
                     >
-                      <Copy className="h-4 w-4 mr-2" />
+                      <CopyIcon size={16} className="h-4 w-4" />
                       {t('copyLink')}
                     </Button>
                     <Button
@@ -153,7 +154,7 @@ export function InvitationsList() {
                       onClick={() => resendMutation.mutate(invitation.id)}
                       disabled={resendMutation.isPending}
                     >
-                      <Mail className="h-4 w-4 mr-2" />
+                      <Send className="h-4 w-4" />
                       {t('resendInvitation')}
                     </Button>
                     <Button
@@ -161,7 +162,7 @@ export function InvitationsList() {
                       size="sm"
                       onClick={() => setRevokeInvitationId(invitation.id)}
                     >
-                      <Trash2 className="h-4 w-4 mr-2" />
+                      <DeleteIcon size={16} className="h-4 w-4" />
                       {t('revokeInvitation')}
                     </Button>
                   </>

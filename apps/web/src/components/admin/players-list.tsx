@@ -1,15 +1,16 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { motion } from 'motion/react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
-import { Mail, CheckCircle, XCircle } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { Mail, CheckCircle } from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { useState, useMemo, useRef } from 'react';
-import { SearchIcon, SearchIconHandle, XIcon, XIconHandle } from 'lucide-animated';
+import { SearchIcon, SearchIconHandle, TrendingUpIcon, XIcon, XIconHandle } from 'lucide-animated';
 import { Button } from '@/components/ui/button';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
@@ -32,6 +33,7 @@ interface Player {
 
 export function PlayersList() {
   const t = useTranslations('playersList');
+  const locale = useLocale();
   const [searchQuery, setSearchQuery] = useState('');
   const searchIconRef = useRef<SearchIconHandle>(null);
   const xIconRef = useRef<XIconHandle>(null);
@@ -75,116 +77,176 @@ export function PlayersList() {
   return (
     <div className="space-y-4">
       {/* Search Bar */}
-      <div className="relative">
-        <SearchIcon
-          ref={searchIconRef}
-          size={16}
-          className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
-        />
-        <Input
-          type="text"
-          placeholder={t('searchPlayers')}
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onMouseEnter={() => searchIconRef.current?.startAnimation()}
-          className="pl-9 pr-9"
-        />
-        {searchQuery && (
-          <Button
-            type="button"
-            variant="link"
-            size="icon"
-            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
-            onClick={() => setSearchQuery('')}
-            aria-label="Clear search"
-            onMouseEnter={() => xIconRef.current?.startAnimation()}
-            onMouseLeave={() => xIconRef.current?.stopAnimation()}
-          >
-            <XIcon ref={xIconRef} size={16} className="h-4 w-4" />
-          </Button>
-        )}
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <div className="relative">
+          <SearchIcon
+            ref={searchIconRef}
+            size={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
+          />
+          <Input
+            type="text"
+            placeholder={t('searchPlayers')}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onMouseEnter={() => searchIconRef.current?.startAnimation()}
+            className="pl-9 pr-9"
+          />
+          {searchQuery && (
+            <Button
+              type="button"
+              variant="link"
+              size="icon"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+              onClick={() => setSearchQuery('')}
+              aria-label="Clear search"
+              onMouseEnter={() => xIconRef.current?.startAnimation()}
+              onMouseLeave={() => xIconRef.current?.stopAnimation()}
+            >
+              <XIcon ref={xIconRef} size={16} className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      </motion.div>
 
       {/* Players List */}
       {filteredPlayers.length === 0 ? (
-        <Card>
-          <CardContent className="py-8 text-center text-muted-foreground">
-            {t('noPlayersMatchSearch')}
-          </CardContent>
-        </Card>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card className="glass-card group transition-all duration-300 border-border/50">
+            <CardContent className="py-8 text-center text-muted-foreground">
+              {t('noPlayersMatchSearch')}
+            </CardContent>
+          </Card>
+        </motion.div>
       ) : (
-        <div className="grid gap-4">
+        <motion.div
+          initial="hidden"
+          animate="show"
+          variants={{
+            hidden: { opacity: 0 },
+            show: {
+              opacity: 1,
+              transition: {
+                staggerChildren: 0.1,
+              },
+            },
+          }}
+          className="space-y-4"
+        >
           {filteredPlayers.map((player) => (
-            <Link key={player.id} href={`/players/${player.id}`} className="block">
-              <Card className="transition-all hover:shadow-md hover:border-primary/50 cursor-pointer">
-                <CardHeader>
-                  <div className="flex items-start gap-4">
-                    <Avatar className="h-16 w-16 shrink-0">
-                      <AvatarImage
-                        src={player.profilePhoto || undefined}
-                        alt={player.name || player.email}
-                      />
-                      <AvatarFallback className="bg-primary text-primary-foreground text-lg">
-                        {player.name
-                          ? player.name
-                              .split(' ')
-                              .map((n) => n[0])
-                              .join('')
-                              .toUpperCase()
-                              .slice(0, 2)
-                          : player.email[0].toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <CardTitle className="flex items-center gap-2 flex-wrap">
-                        {player.name || t('noName')}
-                        {player.emailVerified ? (
-                          <CheckCircle className="h-4 w-4 text-green-600" />
-                        ) : (
-                          <XCircle className="h-4 w-4 text-muted-foreground" />
-                        )}
-                      </CardTitle>
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
-                        <Mail className="h-3 w-3 shrink-0" />
-                        <span className="truncate">{player.email}</span>
-                      </div>
-                    </div>
-                    {player.player && (
-                      <div className="flex flex-col items-end gap-1 shrink-0">
-                        <div className="text-2xl font-bold text-primary">
-                          {player.player.rating}
+            <motion.div
+              key={player.id}
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+              }}
+            >
+              <motion.div
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                className="cursor-pointer"
+              >
+                <Link href={`/players/${player.id}`} className="block">
+                  <Card className="glass-card group hover:shadow-xl transition-all duration-300 border-border/50">
+                    <CardContent className="p-6 space-y-4">
+                      {/* Top Section: Avatar, Name, Badge, and Rating */}
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start gap-3">
+                          {/* Avatar with verified badge */}
+                          <div className="relative shrink-0">
+                            <Avatar className="h-14 w-14">
+                              <AvatarImage
+                                src={player.profilePhoto || undefined}
+                                alt={player.name || player.email}
+                              />
+                              <AvatarFallback className="gradient-primary text-lg font-semibold">
+                                {player.name
+                                  ? player.name
+                                      .split(' ')
+                                      .map((n) => n[0])
+                                      .join('')
+                                      .toUpperCase()
+                                      .slice(0, 2)
+                                  : player.email[0].toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            {player.emailVerified && (
+                              <div className="absolute -bottom-1 -right-1 bg-background rounded-full p-0.5">
+                                <CheckCircle className="h-4 w-4 text-success" />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Name, Badge, and Email */}
+                          <div className="flex-1 min-w-0 space-y-1.5">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h3 className="group-hover:text-primary transition-colors font-heading font-semibold text-lg">
+                                {player.name || t('noName')}
+                              </h3>
+                              {player.player && (
+                                <Badge
+                                  variant={
+                                    player.player.status === 'ACTIVE' ? 'default' : 'secondary'
+                                  }
+                                  className="uppercase text-xs"
+                                >
+                                  {player.player.status}
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                              <Mail className="h-3.5 w-3.5 shrink-0" />
+                              <span className="truncate">{player.email}</span>
+                            </div>
+                          </div>
                         </div>
-                        <div className="text-xs text-muted-foreground">{t('rating')}</div>
+
+                        {/* Rating */}
+                        {player.player && (
+                          <div className="flex flex-col items-end gap-0.5 shrink-0">
+                            <div className="flex items-center gap-1.5 text-3xl font-bold text-primary font-heading">
+                              <TrendingUpIcon size={20} className="text-primary" />
+                              <span className="gradient-text">{player.player.rating}</span>
+                            </div>
+                            <div className="text-xs text-muted-foreground font-medium">
+                              {t('rating')}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                </CardHeader>
-                {player.player && (
-                  <CardContent className="pt-0">
-                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 text-sm">
-                      <div>
-                        <span className="text-muted-foreground">{t('status')}:</span>{' '}
-                        <Badge
-                          variant={player.player.status === 'ACTIVE' ? 'default' : 'secondary'}
-                        >
-                          {player.player.status}
-                        </Badge>
+
+                      {/* Bottom Section: Player Since and Account Created */}
+                      <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-muted-foreground pt-4 border-t border-border/50">
+                        <div>
+                          <span className="font-medium">{t('playerSince')}:</span>{' '}
+                          <span className="font-semibold text-foreground">
+                            {player.player
+                              ? new Date(player.player.createdAt).toLocaleDateString(locale)
+                              : new Date(player.createdAt).toLocaleDateString(locale)}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="font-medium">{t('accountCreated')}:</span>{' '}
+                          <span className="font-semibold text-foreground">
+                            {new Date(player.createdAt).toLocaleDateString(locale)}
+                          </span>
+                        </div>
                       </div>
-                      <div>
-                        <span className="text-muted-foreground">{t('playerSince')}:</span>{' '}
-                        {new Date(player.player.createdAt).toLocaleDateString()}
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">{t('accountCreated')}:</span>{' '}
-                        {new Date(player.createdAt).toLocaleDateString()}
-                      </div>
-                    </div>
-                  </CardContent>
-                )}
-              </Card>
-            </Link>
+                    </CardContent>
+                  </Card>
+                </Link>
+              </motion.div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
     </div>
   );

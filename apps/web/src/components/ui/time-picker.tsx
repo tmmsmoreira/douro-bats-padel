@@ -147,7 +147,7 @@ export function TimePicker({
               <span className="sr-only">Select time</span>
             </InputGroupButton>
             <Dialog open={open} onOpenChange={setOpen}>
-              <DialogContent className="sm:max-w-[425px]">
+              <DialogContent className="sm:max-w-[425px]" aria-describedby={undefined}>
                 <DialogHeader>
                   <DialogTitle>Select time</DialogTitle>
                 </DialogHeader>

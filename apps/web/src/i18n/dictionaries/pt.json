@@ -24,7 +24,7 @@
     "ranking": "Classificação",
     "leaderboard": "Classificação",
     "profile": "Perfil",
-    "admin": "Painel Admin",
+    "adminView": "Vista de Admin",
     "signIn": "Entrar",
     "signUp": "Registar",
     "signOut": "Sair",
@@ -178,7 +178,10 @@
     "playedGames": "{value} jogos jogados",
     "loadingRankings": "A carregar classificações...",
     "leaderboardTitle": "Classificação",
-    "weeksPlayed": "{count} semanas jogadas"
+    "weeksPlayed": "{count} semanas jogadas",
+    "topThree": "Top 3",
+    "fullLeaderboard": "Classificação Completa",
+    "rating": "Classificação"
   },
   "profile": {
     "title": "O Meu Perfil",

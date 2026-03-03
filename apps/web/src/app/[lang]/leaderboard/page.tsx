@@ -1,4 +1,4 @@
-import { Leaderboard } from '@/components/leaderboard';
+import { Leaderboard } from '@/components/player/leaderboard';
 import { Footer } from '@/components/footer';
 import { getTranslations } from 'next-intl/server';
 import { HomeNavClient } from '@/components/client-nav-wrapper';

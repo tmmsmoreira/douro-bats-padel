@@ -1,17 +1,13 @@
 import { PlayersList } from '@/components/admin/players-list';
+import { PageHeader } from '@/components/admin/page-header';
 import { getTranslations } from 'next-intl/server';
 
 export default async function PlayersPage() {
   const t = await getTranslations('admin');
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">{t('playersManagement')}</h1>
-          <p className="text-muted-foreground">{t('playersDescription')}</p>
-        </div>
-      </div>
+    <div className="space-y-8">
+      <PageHeader title={t('playersManagement')} description={t('playersDescription')} />
       <PlayersList />
     </div>
   );

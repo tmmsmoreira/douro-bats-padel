@@ -20,6 +20,7 @@ import { LanguageToggleButton } from '@/components/language-toggle-button';
 import { LanguageMenuItems } from '@/components/language-menu-items';
 import { MenuToggle } from '@/components/ui/menu-toggle';
 import { useTranslations } from 'next-intl';
+import { motion } from 'motion/react';
 
 export function PlayerNav() {
   const pathname = usePathname();
@@ -29,6 +30,11 @@ export function PlayerNav() {
 
   const userIconRef = useRef<{ startAnimation: () => void; stopAnimation: () => void }>(null);
   const signOutIconRef = useRef<{ startAnimation: () => void; stopAnimation: () => void }>(null);
+
+  // Track that user is in player view
+  useEffect(() => {
+    sessionStorage.setItem('lastView', 'player');
+  }, []);
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {
@@ -53,50 +59,131 @@ export function PlayerNav() {
   ];
 
   return (
-    <nav className="border-b bg-card sticky top-0 z-50">
-      <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="text-base sm:text-lg font-bold shrink-0">
-            Padel Manager
-          </Link>
+    <motion.header
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border/50"
+    >
+      <nav className="border-b bg-card sticky top-0 z-50">
+        <div className="container mx-auto px-4">
+          <div className="flex h-16 items-center justify-between">
+            {/* Logo */}
+            <Link href="/" className="font-heading gradient-text text-xl font-bold shrink-0">
+              Douro Bats Padel
+            </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-4 lg:gap-6">
-            <div className="flex gap-1">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    'px-3 py-2 text-sm font-medium rounded-md transition-colors',
-                    pathname === item.href
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                  )}
-                >
-                  {item.label}
-                </Link>
-              ))}
+            {/* Desktop Navigation */}
+            <div className="hidden flex-1 md:flex items-center justify-between">
+              <div className="flex flex-1 gap-2 justify-center px-6">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      'px-4 py-2 text-sm font-medium rounded-[999px]  transition-colors',
+                      pathname === item.href
+                        ? 'bg-primary text-primary-foreground'
+                        : 'text-muted-foreground hover:text-primary-foreground'
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+
+              <div className="flex items-center gap-4">
+                {isEditor && (
+                  <Link href="/admin">
+                    <Button variant="ghost" size="xs" className="uppercase">
+                      {t('adminView')}
+                    </Button>
+                  </Link>
+                )}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage
+                          src={session?.user?.profilePhoto || undefined}
+                          alt={session?.user?.name || 'User'}
+                        />
+                        <AvatarFallback className="gradient-primary">
+                          {session?.user?.name
+                            ? session.user.name
+                                .split(' ')
+                                .map((n) => n[0])
+                                .join('')
+                                .toUpperCase()
+                                .slice(0, 2)
+                            : session?.user?.email?.[0]?.toUpperCase() || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <div className="flex items-center justify-start gap-2 p-2">
+                      <div className="flex flex-col space-y-1 leading-none">
+                        {session?.user?.name && <p className="font-medium">{session.user.name}</p>}
+                        {session?.user?.email && (
+                          <p className="w-[200px] truncate text-sm text-muted-foreground">
+                            {session.user.email}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      asChild
+                      onMouseEnter={() => userIconRef.current?.startAnimation()}
+                    >
+                      <Link href="/profile" className="cursor-pointer flex gap-2">
+                        <UserIcon size={16} ref={userIconRef} />
+                        <span>{t('profile')}</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <LanguageMenuItems />
+                    <DropdownMenuSeparator />
+                    <ThemeToggle />
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => signOut()}
+                      className="cursor-pointer flex gap-2"
+                      onMouseEnter={() => signOutIconRef.current?.startAnimation()}
+                    >
+                      <LogoutIcon size={16} ref={signOutIconRef} />
+                      <span>{t('signOut')}</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              {isEditor && (
-                <Link href="/admin">
-                  <Button variant="ghost" size="sm">
-                    {t('admin')}
-                  </Button>
-                </Link>
-              )}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                    <Avatar className="h-10 w-10">
+            {/* Mobile Menu Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="md:hidden h-9 w-9 p-0"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+            >
+              <MenuToggle isOpen={mobileMenuOpen} />
+            </Button>
+          </div>
+
+          {/* Full-Screen Mobile Menu */}
+          {mobileMenuOpen && (
+            <div className="md:hidden fixed inset-0 top-16 bg-card z-50 overflow-y-auto">
+              <div className="container mx-auto px-4 py-6 space-y-2">
+                {/* User Profile Section */}
+                {session && (
+                  <div className="flex items-center gap-4 pb-6 border-b">
+                    <Avatar className="h-16 w-16">
                       <AvatarImage
                         src={session?.user?.profilePhoto || undefined}
                         alt={session?.user?.name || 'User'}
                       />
-                      <AvatarFallback className="bg-primary text-primary-foreground">
+                      <AvatarFallback className="gradient-primary text-xl">
                         {session?.user?.name
                           ? session.user.name
                               .split(' ')
@@ -107,172 +194,99 @@ export function PlayerNav() {
                           : session?.user?.email?.[0]?.toUpperCase() || 'U'}
                       </AvatarFallback>
                     </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <div className="flex items-center justify-start gap-2 p-2">
-                    <div className="flex flex-col space-y-1 leading-none">
-                      {session?.user?.name && <p className="font-medium">{session.user.name}</p>}
+                    <div className="flex-1 min-w-0">
+                      {session?.user?.name && (
+                        <p className="font-semibold text-lg truncate">{session.user.name}</p>
+                      )}
                       {session?.user?.email && (
-                        <p className="w-[200px] truncate text-sm text-muted-foreground">
+                        <p className="text-sm text-muted-foreground truncate">
                           {session.user.email}
                         </p>
                       )}
                     </div>
                   </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    asChild
-                    onMouseEnter={() => userIconRef.current?.startAnimation()}
-                  >
-                    <Link href="/profile" className="cursor-pointer flex gap-2">
-                      <UserIcon size={16} ref={userIconRef} />
-                      <span>{t('profile')}</span>
+                )}
+
+                {/* Navigation Section */}
+                <div className="space-y-1">
+                  {navItems.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={cn(
+                        'flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-colors',
+                        pathname === item.href
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-foreground hover:bg-secondary'
+                      )}
+                    >
+                      {item.label}
                     </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <LanguageMenuItems />
-                  <DropdownMenuSeparator />
-                  <ThemeToggle />
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => signOut()}
-                    className="cursor-pointer flex gap-2"
-                    onMouseEnter={() => signOutIconRef.current?.startAnimation()}
+                  ))}
+                </div>
+
+                {/* Account Section */}
+                <div className="space-y-1 pt-2 border-t">
+                  <p className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    {t('account') || 'Account'}
+                  </p>
+                  <Link
+                    href="/profile"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-colors text-foreground hover:bg-secondary"
                   >
-                    <LogoutIcon size={16} ref={signOutIconRef} />
-                    <span>{t('signOut')}</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
+                    <UserIcon size={20} className="h-5 w-5" />
+                    {t('profile')}
+                  </Link>
+                </div>
 
-          {/* Mobile Menu Button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="md:hidden h-9 w-9 p-0"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-          >
-            <MenuToggle isOpen={mobileMenuOpen} />
-          </Button>
-        </div>
-
-        {/* Full-Screen Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden fixed inset-0 top-16 bg-card z-50 overflow-y-auto">
-            <div className="container mx-auto px-4 py-6 space-y-2">
-              {/* User Profile Section */}
-              {session && (
-                <div className="flex items-center gap-4 pb-6 border-b">
-                  <Avatar className="h-16 w-16">
-                    <AvatarImage
-                      src={session?.user?.profilePhoto || undefined}
-                      alt={session?.user?.name || 'User'}
-                    />
-                    <AvatarFallback className="bg-primary text-primary-foreground text-xl">
-                      {session?.user?.name
-                        ? session.user.name
-                            .split(' ')
-                            .map((n) => n[0])
-                            .join('')
-                            .toUpperCase()
-                            .slice(0, 2)
-                        : session?.user?.email?.[0]?.toUpperCase() || 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    {session?.user?.name && (
-                      <p className="font-semibold text-lg truncate">{session.user.name}</p>
-                    )}
-                    {session?.user?.email && (
-                      <p className="text-sm text-muted-foreground truncate">{session.user.email}</p>
-                    )}
+                {/* Settings Section */}
+                <div className="space-y-1 pt-2 border-t">
+                  <p className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    {t('settings') || 'Settings'}
+                  </p>
+                  <div className="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-secondary">
+                    <span className="text-base font-medium">{t('language') || 'Language'}</span>
+                    <LanguageToggleButton />
+                  </div>
+                  <div className="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-secondary">
+                    <span className="text-base font-medium">{t('theme') || 'Theme'}</span>
+                    <ThemeToggleButton />
                   </div>
                 </div>
-              )}
 
-              {/* Navigation Section */}
-              <div className="space-y-1">
-                {navItems.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={cn(
-                      'flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-colors',
-                      pathname === item.href
-                        ? 'bg-primary text-primary-foreground'
-                        : 'text-foreground hover:bg-accent'
-                    )}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-              </div>
-
-              {/* Account Section */}
-              <div className="space-y-1 pt-2 border-t">
-                <p className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  {t('account') || 'Account'}
-                </p>
-                <Link
-                  href="/profile"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-colors text-foreground hover:bg-accent"
-                >
-                  <UserIcon size={20} className="h-5 w-5" />
-                  {t('profile')}
-                </Link>
-              </div>
-
-              {/* Settings Section */}
-              <div className="space-y-1 pt-2 border-t">
-                <p className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  {t('settings') || 'Settings'}
-                </p>
-                <div className="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-accent">
-                  <span className="text-base font-medium">{t('language') || 'Language'}</span>
-                  <LanguageToggleButton />
-                </div>
-                <div className="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-accent">
-                  <span className="text-base font-medium">{t('theme') || 'Theme'}</span>
-                  <ThemeToggleButton />
-                </div>
-              </div>
-
-              {/* Sign Out Section */}
-              <div className="pt-2 border-t">
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    signOut();
-                  }}
-                  className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-colors text-destructive hover:bg-destructive/10 w-full"
-                >
-                  <LogoutIcon size={20} />
-                  {t('signOut')}
-                </button>
-              </div>
-
-              {/* Role Switching Section */}
-              {isEditor && (
+                {/* Sign Out Section */}
                 <div className="pt-2 border-t">
-                  <Link
-                    href="/admin"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center uppercase justify-center w-full px-4 py-3 text-base font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90"
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      signOut();
+                    }}
+                    className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-colors text-destructive hover:bg-destructive/10 w-full"
                   >
-                    {t('admin')}
-                  </Link>
+                    <LogoutIcon size={20} />
+                    {t('signOut')}
+                  </button>
                 </div>
-              )}
+
+                {/* Role Switching Section */}
+                {isEditor && (
+                  <div className="pt-2 border-t">
+                    <Link
+                      href="/admin"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center uppercase justify-center w-full px-4 py-3 text-base font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90"
+                    >
+                      {t('adminView')}
+                    </Link>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        )}
-      </div>
-    </nav>
+          )}
+        </div>
+      </nav>
+    </motion.header>
   );
 }

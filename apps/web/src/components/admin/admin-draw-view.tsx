@@ -597,7 +597,7 @@ function EditAssignmentDialog({
                   <button
                     key={player.id}
                     onClick={() => swapPlayer(player.id)}
-                    className="w-full p-3 border rounded-lg hover:bg-accent transition-colors text-left"
+                    className="w-full p-3 border rounded-lg hover:bg-secondary transition-colors text-left"
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-medium">{player.name}</span>
@@ -624,7 +624,7 @@ function EditAssignmentDialog({
                   <button
                     key={player.id}
                     onClick={() => swapPlayer(player.id)}
-                    className="w-full p-3 border rounded-lg hover:bg-accent transition-colors text-left"
+                    className="w-full p-3 border rounded-lg hover:bg-secondary transition-colors text-left"
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-medium">{player.name}</span>

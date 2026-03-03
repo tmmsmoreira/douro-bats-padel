@@ -176,7 +176,7 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
                 src={player.profilePhoto || undefined}
                 alt={player.name || t('userAltText')}
               />
-              <AvatarFallback className="text-3xl bg-primary text-primary-foreground">
+              <AvatarFallback className="gradient-primary text-3xl">
                 {getUserInitials(player.name, player.email)}
               </AvatarFallback>
             </Avatar>

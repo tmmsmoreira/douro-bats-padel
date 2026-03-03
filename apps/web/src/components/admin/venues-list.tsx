@@ -5,10 +5,18 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { motion } from 'motion/react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { SquarePenIcon, DeleteIcon, DeleteIconHandle, SquarePenIconHandle } from 'lucide-animated';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import {
+  SquarePenIcon,
+  DeleteIcon,
+  DeleteIconHandle,
+  SquarePenIconHandle,
+  MapPinIcon,
+} from 'lucide-animated';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
@@ -99,70 +107,116 @@ export function VenuesList() {
   }
 
   return (
-    <div className="grid gap-4">
+    <motion.div
+      initial="hidden"
+      animate="show"
+      variants={{
+        hidden: { opacity: 0 },
+        show: {
+          opacity: 1,
+          transition: {
+            staggerChildren: 0.1,
+          },
+        },
+      }}
+      className="space-y-4"
+    >
       {venues.map((venue) => (
-        <Card key={venue.id}>
-          <CardHeader>
-            <div className="flex items-start gap-4">
-              {venue.logo && (
-                <div className="relative h-16 w-16 rounded border overflow-hidden flex-shrink-0">
-                  <Image
-                    src={venue.logo}
-                    alt={t('logo', { venueName: venue.name })}
-                    fill
-                    className="object-contain"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
+        <motion.div
+          key={venue.id}
+          variants={{
+            hidden: { opacity: 0, y: 20 },
+            show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+          }}
+        >
+          <Card className="glass-card group hover:shadow-xl transition-all duration-300 border-border/50">
+            <CardContent className="p-6 space-y-4">
+              {/* Top Section: Logo, Name, Address, and Actions */}
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-3 flex-1 min-w-0">
+                  {/* Square Avatar for Venue Logo */}
+                  <Avatar className="h-14 w-14 rounded-lg shrink-0">
+                    {venue.logo ? (
+                      <div className="relative h-full w-full">
+                        <Image
+                          src={venue.logo}
+                          alt={t('logo', { venueName: venue.name })}
+                          fill
+                          className="object-contain p-1"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <AvatarFallback className="gradient-primary text-lg font-semibold rounded-lg">
+                        {venue.name
+                          .split(' ')
+                          .map((n) => n[0])
+                          .join('')
+                          .toUpperCase()
+                          .slice(0, 2)}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+
+                  {/* Venue Info */}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-heading font-semibold text-lg truncate">{venue.name}</h3>
+                    {venue.address && (
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <MapPinIcon size={14} className="text-muted-foreground shrink-0" />
+                        <p className="text-sm text-muted-foreground truncate">{venue.address}</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              )}
-              <div className="flex-1">
-                <CardTitle>{venue.name}</CardTitle>
-                {venue.address && (
-                  <p className="text-sm text-muted-foreground mt-1">{venue.address}</p>
+
+                {/* Action Buttons */}
+                <div className="flex gap-2 shrink-0">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEdit(venue.id)}
+                    onMouseEnter={() => squarePenIconRef.current?.startAnimation()}
+                    onMouseLeave={() => squarePenIconRef.current?.stopAnimation()}
+                  >
+                    <SquarePenIcon ref={squarePenIconRef} size={16} />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDelete(venue.id, venue.name)}
+                    disabled={deleteMutation.isPending}
+                    onMouseEnter={() => deleteIconRef.current?.startAnimation()}
+                    onMouseLeave={() => deleteIconRef.current?.stopAnimation()}
+                  >
+                    <DeleteIcon ref={deleteIconRef} size={16} />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-border/50" />
+
+              {/* Bottom Section: Courts */}
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-2">{t('courts')}</p>
+                {venue.courts.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {venue.courts.map((court) => (
+                      <Badge key={court.id} variant="outline">
+                        {court.label}
+                      </Badge>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">{t('noCourtsAvailable')}</p>
                 )}
               </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleEdit(venue.id)}
-                  onMouseEnter={() => squarePenIconRef.current?.startAnimation()}
-                  onMouseLeave={() => squarePenIconRef.current?.stopAnimation()}
-                >
-                  <SquarePenIcon ref={squarePenIconRef} size={16} />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDelete(venue.id, venue.name)}
-                  disabled={deleteMutation.isPending}
-                  onMouseEnter={() => deleteIconRef.current?.startAnimation()}
-                  onMouseLeave={() => deleteIconRef.current?.stopAnimation()}
-                >
-                  <DeleteIcon ref={deleteIconRef} size={16} />
-                </Button>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div>
-              <p className="text-sm font-medium mb-2">{t('courts')}</p>
-              {venue.courts.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {venue.courts.map((court) => (
-                    <Badge key={court.id} variant="outline">
-                      {court.label}
-                    </Badge>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">{t('noCourtsAvailable')}</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
       ))}
 
       {/* Delete Venue Confirmation Dialog */}
@@ -181,6 +235,6 @@ export function VenuesList() {
           }
         }}
       />
-    </div>
+    </motion.div>
   );
 }

@@ -118,7 +118,7 @@ export function DatePicker({
               <span className="sr-only">Select date</span>
             </InputGroupButton>
             <Dialog open={open} onOpenChange={setOpen}>
-              <DialogContent className="sm:max-w-[425px]">
+              <DialogContent className="sm:max-w-[425px]" aria-describedby={undefined}>
                 <DialogHeader>
                   <DialogTitle>Select date</DialogTitle>
                 </DialogHeader>

@@ -143,7 +143,7 @@ export function VenuesList() {
                           alt={t('logo', { venueName: venue.name })}
                           fill
                           className="object-contain p-1"
-                          onError={(e) => {
+                          onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
                             e.currentTarget.style.display = 'none';
                           }}
                         />

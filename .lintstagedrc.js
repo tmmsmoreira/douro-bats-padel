@@ -1,8 +1,9 @@
 module.exports = {
-  // Run ESLint and Prettier on TypeScript and JavaScript files in web app
+  // Run TypeScript check, ESLint and Prettier on TypeScript and JavaScript files in web app
   'apps/web/**/*.{ts,tsx,js,jsx}': (filenames) => {
     const relativeFiles = filenames.map((f) => f.replace(/^apps\/web\//, ''));
     return [
+      `cd apps/web && pnpm exec tsc --noEmit`,
       `cd apps/web && ESLINT_USE_FLAT_CONFIG=false pnpm exec eslint --fix ${relativeFiles.join(' ')}`,
       `pnpm exec prettier --write ${filenames.join(' ')}`,
     ];

@@ -7,8 +7,9 @@ module.exports = {
       'error',
       { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
     ],
-    '@typescript-eslint/no-explicit-any': 'warn',
-    'react-hooks/rules-of-hooks': 'warn',
-    'react-hooks/exhaustive-deps': 'warn',
+    '@typescript-eslint/no-explicit-any': 'error',
+    '@typescript-eslint/no-implicit-any-catch': 'off', // Deprecated in favor of noImplicitAny in tsconfig
+    'react-hooks/rules-of-hooks': 'error',
+    'react-hooks/exhaustive-deps': 'error',
   },
 };

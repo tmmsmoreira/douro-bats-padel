@@ -180,7 +180,7 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
                     alt={t('logoPreviewAlt')}
                     fill
                     className="object-contain"
-                    onError={(e) => {
+                    onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
                       e.currentTarget.style.display = 'none';
                     }}
                   />

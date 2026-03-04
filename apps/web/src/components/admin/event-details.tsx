@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { Calendar, MapPin, Clock, MoreVertical, Edit, Trash2 } from 'lucide-react';
+import { Calendar, MapPin, Clock, MoreVertical, Edit } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -528,9 +528,11 @@ function EventDetailsHeaderActionButtons({
   const getPrimaryAction = () => {
     if (hasEventPassed && event.state === 'PUBLISHED') {
       return (
-        <Link href={`/admin/events/${event.id}/results`}>
+        <Link href={`/admin/events/${event.id}/results`} className="w-full">
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Button variant="secondary">{t('enterResults')}</Button>
+            <Button variant="secondary" className="w-full">
+              {t('enterResults')}
+            </Button>
           </motion.div>
         </Link>
       );
@@ -539,27 +541,39 @@ function EventDetailsHeaderActionButtons({
     if (!hasEventPassed) {
       switch (event.state) {
         case 'DRAFT':
-          return <Button onClick={() => publishMutation.mutate()}>{t('publishEvent')}</Button>;
+          return (
+            <Button onClick={() => publishMutation.mutate()} className="w-full">
+              {t('publishEvent')}
+            </Button>
+          );
         case 'OPEN':
-          return <Button onClick={() => freezeMutation.mutate()}>{t('freezeRsvps')}</Button>;
+          return (
+            <Button onClick={() => freezeMutation.mutate()} className="w-full">
+              {t('freezeRsvps')}
+            </Button>
+          );
         case 'FROZEN':
           if (!draw) {
             return (
-              <Link href={`/admin/events/${event.id}/draw`}>
-                <Button>{t('generateDraw')}</Button>
+              <Link href={`/admin/events/${event.id}/draw`} className="w-full">
+                <Button className="w-full">{t('generateDraw')}</Button>
               </Link>
             );
           }
           return (
-            <Link href={`/admin/events/${event.id}/draw/view`}>
-              <Button variant="outline">{t('viewEditDraw')}</Button>
+            <Link href={`/admin/events/${event.id}/draw/view`} className="w-full">
+              <Button variant="outline" className="w-full">
+                {t('viewEditDraw')}
+              </Button>
             </Link>
           );
         case 'DRAWN':
         case 'PUBLISHED':
           return (
-            <Link href={`/admin/events/${event.id}/draw/view`}>
-              <Button variant="outline">{t('viewEditDraw')}</Button>
+            <Link href={`/admin/events/${event.id}/draw/view`} className="w-full">
+              <Button variant="outline" className="w-full">
+                {t('viewEditDraw')}
+              </Button>
             </Link>
           );
       }
@@ -569,13 +583,13 @@ function EventDetailsHeaderActionButtons({
   };
 
   return (
-    <div className="flex gap-2 self-end sm:self-auto">
-      {getPrimaryAction()}
+    <div className="flex gap-2 w-full sm:w-auto">
+      <div className="flex-1 sm:flex-initial">{getPrimaryAction()}</div>
 
       {/* More Actions Dropdown */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="icon">
+          <Button variant="outline" size="icon" className="shrink-0">
             <MoreVertical className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>

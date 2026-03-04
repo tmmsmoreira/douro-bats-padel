@@ -26,7 +26,7 @@ export function ActionButton({
       <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
         <Button
           variant={variant}
-          className="gap-2 px-4 py-5 text-base font-medium"
+          className="w-full gap-2 px-4 py-5 text-base font-medium"
           onMouseEnter={() => iconRef.current?.startAnimation()}
           onMouseLeave={() => iconRef.current?.stopAnimation()}
         >

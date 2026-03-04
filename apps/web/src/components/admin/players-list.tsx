@@ -210,35 +210,28 @@ export function PlayersList() {
                         </div>
 
                         {/* Rating */}
-                        {player.player && (
-                          <div className="flex flex-col items-end gap-0.5 shrink-0">
-                            <div className="flex items-center gap-1.5 text-3xl font-bold text-primary font-heading">
-                              <TrendingUpIcon size={20} className="text-primary" />
-                              <span className="gradient-text">{player.player.rating}</span>
-                            </div>
-                            <div className="text-xs text-muted-foreground font-medium">
-                              {t('rating')}
-                            </div>
-                          </div>
-                        )}
+                        {player.player && <RatingSection player={player} />}
                       </div>
 
                       {/* Bottom Section: Player Since and Account Created */}
-                      <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-muted-foreground pt-4 border-t border-border/50">
-                        <div>
-                          <span className="font-medium">{t('playerSince')}:</span>{' '}
-                          <span className="font-semibold text-foreground">
-                            {player.player
-                              ? new Date(player.player.createdAt).toLocaleDateString(locale)
-                              : new Date(player.createdAt).toLocaleDateString(locale)}
-                          </span>
+                      <div className="flex items-center flex-wrap justify-between text-sm text-muted-foreground pt-4 border-t border-border/50">
+                        <div className=" gap-x-6 gap-y-1">
+                          <div>
+                            <span className="font-medium">{t('playerSince')}:</span>{' '}
+                            <span className="font-semibold text-foreground">
+                              {player.player
+                                ? new Date(player.player.createdAt).toLocaleDateString(locale)
+                                : new Date(player.createdAt).toLocaleDateString(locale)}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="font-medium">{t('accountCreated')}:</span>{' '}
+                            <span className="font-semibold text-foreground">
+                              {new Date(player.createdAt).toLocaleDateString(locale)}
+                            </span>
+                          </div>
                         </div>
-                        <div>
-                          <span className="font-medium">{t('accountCreated')}:</span>{' '}
-                          <span className="font-semibold text-foreground">
-                            {new Date(player.createdAt).toLocaleDateString(locale)}
-                          </span>
-                        </div>
+                        {player.player && <RatingSection player={player} isMobile />}
                       </div>
                     </CardContent>
                   </Card>
@@ -248,6 +241,26 @@ export function PlayersList() {
           ))}
         </motion.div>
       )}
+    </div>
+  );
+}
+
+function RatingSection({ player, isMobile = false }: { player: Player; isMobile?: boolean }) {
+  const t = useTranslations('playersList');
+
+  return (
+    <div
+      className={
+        isMobile
+          ? 'flex md:hidden flex-col items-end gap-0.5 shrink-0'
+          : 'hidden md:flex flex-col items-end gap-0.5 shrink-0'
+      }
+    >
+      <div className="flex items-center gap-1.5 text-3xl font-bold text-primary font-heading">
+        <TrendingUpIcon size={20} className="text-primary" />
+        <span className="gradient-text">{player.player?.rating}</span>
+      </div>
+      <div className="text-xs text-muted-foreground font-medium">{t('rating')}</div>
     </div>
   );
 }

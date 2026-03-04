@@ -11,6 +11,8 @@ model User {
   id                        String         @id @default(cuid())
   email                     String         @unique
   name                      String?
+  dateOfBirth               DateTime?
+  phoneNumber               String?        @unique
   passwordHash              String?
   profilePhoto              String?
   roles                     Role[]

@@ -1,6 +1,6 @@
 import { PublicPlayerProfile } from '@/components/player/public-player-profile';
 import { PlayerNav } from '@/components/player/player-nav';
-import { Footer } from '@/components/footer';
+import { Footer } from '@/components/shared/footer';
 
 export default async function PlayerProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

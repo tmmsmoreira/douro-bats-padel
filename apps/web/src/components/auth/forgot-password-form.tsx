@@ -5,9 +5,12 @@ import type React from 'react';
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
 
 export function ForgotPasswordForm() {
+  const t = useTranslations('auth.forgotPassword');
+  const locale = useLocale();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -29,7 +32,7 @@ export function ForgotPasswordForm() {
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.message || 'Failed to send reset email');
+        setError(data.message || t('failedToSend'));
         setIsLoading(false);
         return;
       }
@@ -42,42 +45,37 @@ export function ForgotPasswordForm() {
       }
       setIsLoading(false);
     } catch {
-      setError('An error occurred. Please try again.');
+      setError(t('errorOccurred'));
       setIsLoading(false);
     }
   };
 
   if (success) {
     return (
-      <Card className="w-full max-w-md">
+      <Card className="glass-card w-full max-w-md">
         <CardHeader>
-          <CardTitle>Check Your Email</CardTitle>
-          <CardDescription>Password reset instructions have been sent</CardDescription>
+          <CardTitle>{t('successTitle')}</CardTitle>
+          <CardDescription>{t('successDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="pt-0 space-y-4">
-          <p className="text-sm text-muted-foreground">
-            If an account exists with the email <strong>{email}</strong>, you will receive password
-            reset instructions.
-          </p>
+          <p className="text-sm text-muted-foreground">{t('successMessage', { email })}</p>
           {process.env.NODE_ENV === 'development' && resetToken && (
             <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-              <p className="text-sm font-medium text-yellow-800 mb-2">
-                Development Mode - Reset Token:
-              </p>
+              <p className="text-sm font-medium text-yellow-800 mb-2">{t('devModeToken')}</p>
               <code className="text-xs bg-white p-2 block rounded border break-all">
                 {resetToken}
               </code>
               <Link
-                href={`/reset-password?token=${resetToken}`}
+                href={`/${locale}/reset-password?token=${resetToken}`}
                 className="text-sm text-primary hover:underline mt-2 inline-block"
               >
-                Click here to reset your password
+                {t('clickToReset')}
               </Link>
             </div>
           )}
           <div className="text-center">
-            <Link href="/login" className="text-sm text-primary hover:underline">
-              Back to login
+            <Link href={`/${locale}/login`} className="text-sm text-primary hover:underline">
+              {t('backToLogin')}
             </Link>
           </div>
         </CardContent>
@@ -86,20 +84,21 @@ export function ForgotPasswordForm() {
   }
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="glass-card w-full max-w-md">
       <CardHeader>
-        <CardTitle>Forgot Password</CardTitle>
-        <CardDescription>Enter your email to reset your password</CardDescription>
+        <CardTitle>{t('title')}</CardTitle>
+        <CardDescription>{t('description')}</CardDescription>
       </CardHeader>
       <CardContent className="pt-0">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">
-              Email
+              {t('email')}
             </label>
             <input
               id="email"
               type="email"
+              placeholder={t('emailPlaceholder')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-3 py-2 border rounded-md"
@@ -107,14 +106,13 @@ export function ForgotPasswordForm() {
             />
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Sending...' : 'Send Reset Link'}
+          <Button type="submit" className="gradient-primary w-full" disabled={isLoading}>
+            {isLoading ? t('sending') : t('sendResetLink')}
           </Button>
           <div className="text-center text-sm text-muted-foreground">
             <p>
-              Remember your password?{' '}
-              <Link href="/login" className="text-primary hover:underline">
-                Sign in
+              <Link href={`/${locale}/login`} className="text-primary hover:underline">
+                {t('backToLogin')}
               </Link>
             </p>
           </div>

@@ -1,8 +1,8 @@
 'use client';
 
 import * as React from 'react';
-import { DatePicker } from '@/components/ui/date-picker';
-import { TimePicker } from '@/components/ui/time-picker';
+import { DatePicker } from '@/components/shared/date-picker';
+import { TimePicker } from '@/components/shared/time-picker';
 
 interface DateTimePickerProps {
   value?: Date;

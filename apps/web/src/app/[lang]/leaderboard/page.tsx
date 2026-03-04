@@ -1,14 +1,14 @@
 import { Leaderboard } from '@/components/player/leaderboard';
-import { Footer } from '@/components/footer';
+import { Footer } from '@/components/shared/footer';
 import { getTranslations } from 'next-intl/server';
-import { HomeNavClient } from '@/components/client-nav-wrapper';
+import { AdaptiveNav } from '@/components/shared/adaptive-nav';
 
 export default async function LeaderboardPage() {
   const t = await getTranslations('leaderboard');
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <HomeNavClient />
+      <AdaptiveNav />
       <main className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-1 max-w-4xl min-h-[500px]">
         <div className="space-y-4 sm:space-y-6">
           <div>

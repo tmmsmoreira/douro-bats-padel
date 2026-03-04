@@ -12,7 +12,7 @@ import { DeleteIcon, DeleteIconHandle } from 'lucide-animated';
 import { Calendar, MapPin, Clock } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
+import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 

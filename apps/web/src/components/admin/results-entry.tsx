@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
+import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
 import { Lock, Loader2, Save } from 'lucide-react';
 import { LockIcon, LockIconHandle } from 'lucide-animated';
 import { useAuthFetch } from '@/hooks';

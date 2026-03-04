@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
 
 interface ResetPasswordFormProps {
@@ -14,6 +15,8 @@ interface ResetPasswordFormProps {
 
 export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   const router = useRouter();
+  const t = useTranslations('auth.resetPassword');
+  const locale = useLocale();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -26,14 +29,14 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 
     // Validate passwords match
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('passwordsDoNotMatch'));
       setIsLoading(false);
       return;
     }
 
     // Validate password length
     if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError(t('passwordTooShort'));
       setIsLoading(false);
       return;
     }
@@ -50,34 +53,35 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.message || 'Failed to reset password');
+        setError(data.message || t('failedToReset'));
         setIsLoading(false);
         return;
       }
 
       // Password reset successful, redirect to login
-      router.push('/login?reset=true');
+      router.push(`/${locale}/login?reset=true`);
     } catch {
-      setError('An error occurred. Please try again.');
+      setError(t('errorOccurred'));
       setIsLoading(false);
     }
   };
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="glass-card w-full max-w-md">
       <CardHeader>
-        <CardTitle>Reset Password</CardTitle>
-        <CardDescription>Enter your new password</CardDescription>
+        <CardTitle>{t('title')}</CardTitle>
+        <CardDescription>{t('description')}</CardDescription>
       </CardHeader>
       <CardContent className="pt-0">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="password" className="text-sm font-medium">
-              New Password
+              {t('password')}
             </label>
             <input
               id="password"
               type="password"
+              placeholder={t('passwordPlaceholder')}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-3 py-2 border rounded-md"
@@ -87,11 +91,12 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           </div>
           <div className="space-y-2">
             <label htmlFor="confirmPassword" className="text-sm font-medium">
-              Confirm Password
+              {t('confirmPasswordLabel')}
             </label>
             <input
               id="confirmPassword"
               type="password"
+              placeholder={t('confirmPasswordPlaceholder')}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="w-full px-3 py-2 border rounded-md"
@@ -100,13 +105,13 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
             />
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Resetting...' : 'Reset Password'}
+          <Button type="submit" className="gradient-primary w-full" disabled={isLoading}>
+            {isLoading ? t('resetting') : t('resetPassword')}
           </Button>
           <div className="text-center text-sm text-muted-foreground">
             <p>
-              <Link href="/login" className="text-primary hover:underline">
-                Back to login
+              <Link href={`/${locale}/login`} className="text-primary hover:underline">
+                {t('backToLogin')}
               </Link>
             </p>
           </div>

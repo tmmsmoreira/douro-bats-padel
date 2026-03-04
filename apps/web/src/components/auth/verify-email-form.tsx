@@ -6,11 +6,14 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
 
 export function VerifyEmailForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const t = useTranslations('auth.verifyEmail');
+  const locale = useLocale();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -28,7 +31,7 @@ export function VerifyEmailForm() {
         const data = await res.json();
 
         if (!res.ok) {
-          setError(data.message || 'Verification failed');
+          setError(data.message || t('verificationFailed'));
           setIsLoading(false);
           return;
         }
@@ -39,34 +42,34 @@ export function VerifyEmailForm() {
 
         // Redirect to login after 3 seconds
         setTimeout(() => {
-          router.push('/login');
+          router.push(`/${locale}/login`);
         }, 3000);
       } catch {
-        setError('An error occurred during verification');
+        setError(t('verificationError'));
         setIsLoading(false);
       }
     },
-    [router]
+    [router, t, locale]
   );
 
   useEffect(() => {
     const token = searchParams.get('token');
 
     if (!token) {
-      setError('Invalid verification link');
+      setError(t('invalidLink'));
       setIsLoading(false);
       return;
     }
 
     verifyEmail(token);
-  }, [searchParams, verifyEmail]);
+  }, [searchParams, verifyEmail, t]);
 
   if (isLoading) {
     return (
-      <Card className="w-full max-w-md">
+      <Card className="glass-card w-full max-w-md">
         <CardHeader>
-          <CardTitle>Verifying Email</CardTitle>
-          <CardDescription>Please wait while we verify your email address...</CardDescription>
+          <CardTitle>{t('title')}</CardTitle>
+          <CardDescription>{t('description')}</CardDescription>
         </CardHeader>
         <CardContent className="pt-0">
           <div className="flex justify-center py-8">
@@ -79,10 +82,10 @@ export function VerifyEmailForm() {
 
   if (success) {
     return (
-      <Card className="w-full max-w-md">
+      <Card className="glass-card w-full max-w-md">
         <CardHeader>
-          <CardTitle>Email Verified!</CardTitle>
-          <CardDescription>Your email has been successfully verified</CardDescription>
+          <CardTitle>{t('successTitle')}</CardTitle>
+          <CardDescription>{t('successDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="pt-0 space-y-4">
           <div className="flex justify-center py-4">
@@ -101,11 +104,9 @@ export function VerifyEmailForm() {
             </svg>
           </div>
           <p className="text-center text-sm text-muted-foreground">{message}</p>
-          <p className="text-center text-sm text-muted-foreground">
-            Redirecting to login page in 3 seconds...
-          </p>
-          <Link href="/login" className="block">
-            <Button className="w-full">Go to Login</Button>
+          <p className="text-center text-sm text-muted-foreground">{t('redirecting')}</p>
+          <Link href={`/${locale}/login`} className="block">
+            <Button className="gradient-primary w-full">{t('goToLogin')}</Button>
           </Link>
         </CardContent>
       </Card>
@@ -113,10 +114,10 @@ export function VerifyEmailForm() {
   }
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="glass-card w-full max-w-md">
       <CardHeader>
-        <CardTitle>Verification Failed</CardTitle>
-        <CardDescription>We couldn&apos;t verify your email address</CardDescription>
+        <CardTitle>{t('errorTitle')}</CardTitle>
+        <CardDescription>{t('errorDescription')}</CardDescription>
       </CardHeader>
       <CardContent className="pt-0 space-y-4">
         <div className="flex justify-center py-4">
@@ -135,17 +136,15 @@ export function VerifyEmailForm() {
           </svg>
         </div>
         <p className="text-sm text-destructive text-center">{error}</p>
-        <p className="text-sm text-muted-foreground text-center">
-          The verification link may have expired or is invalid.
-        </p>
-        <Link href="/resend-verification" className="block">
+        <p className="text-sm text-muted-foreground text-center">{t('linkExpired')}</p>
+        <Link href={`/${locale}/resend-verification`} className="block">
           <Button variant="outline" className="w-full">
-            Resend Verification Email
+            {t('resendVerification')}
           </Button>
         </Link>
-        <Link href="/login" className="block">
+        <Link href={`/${locale}/login`} className="block">
           <Button variant="ghost" className="w-full">
-            Back to Login
+            {t('backToLogin')}
           </Button>
         </Link>
       </CardContent>

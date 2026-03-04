@@ -18,6 +18,8 @@ import { Label } from '@/components/ui/label';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import type { CreateInvitationDto } from '@padel/types';
+import { SendIcon } from 'lucide-react';
+import { motion } from 'motion/react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -61,14 +63,22 @@ export function CreateInvitationDialog() {
     e.preventDefault();
     createMutation.mutate({
       email,
-      expirationDays: parseInt(expirationDays, 10),
+      expiresInDays: parseInt(expirationDays, 10),
     });
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>{t('createInvitation')}</Button>
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <Button
+            variant="gradient"
+            className="w-full sm:w-auto gap-2 px-4 py-5 text-base font-medium"
+          >
+            <SendIcon className="h-5 w-5" />
+            {t('createInvitation')}
+          </Button>
+        </motion.div>
       </DialogTrigger>
       <DialogContent>
         <form onSubmit={handleSubmit}>

@@ -6,7 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { DatePicker } from '@/components/ui/date-picker';
+import { DatePicker } from '@/components/shared/date-picker';
 import {
   Select,
   SelectContent,
@@ -171,6 +171,7 @@ export function EventsList() {
       ) : (
         <>
           <motion.div
+            key={`${statusFilter}-${selectedDate?.toISOString() || 'all'}-${currentPage}`}
             initial="hidden"
             animate="show"
             variants={{

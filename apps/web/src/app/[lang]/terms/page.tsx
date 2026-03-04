@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Footer } from '@/components/footer';
-import { HomeNavClient } from '@/components/client-nav-wrapper';
+import { Footer } from '@/components/shared/footer';
+import { HomeNavClient } from '@/components/shared/client-nav-wrapper';
 
 export default function TermsPage() {
   return (

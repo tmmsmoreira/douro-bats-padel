@@ -1,9 +1,9 @@
 import { auth } from '@/lib/auth';
-import { EventsList } from '@/components/events-list';
-import { PastEventsList } from '@/components/past-events-list';
-import { Footer } from '@/components/footer';
+import { EventsList } from '@/components/shared/events-list';
+import { PastEventsList } from '@/components/shared/past-events-list';
+import { Footer } from '@/components/shared/footer';
 import { getTranslations } from 'next-intl/server';
-import { HomeNavClient } from '@/components/client-nav-wrapper';
+import { HomeNavClient } from '@/components/shared/client-nav-wrapper';
 
 export default async function HomePage() {
   const session = await auth();

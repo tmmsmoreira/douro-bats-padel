@@ -18,10 +18,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { DatePicker } from '@/components/ui/date-picker';
-import { TimePicker } from '@/components/ui/time-picker';
-import { DateTimePicker } from '@/components/datetime-picker';
+import { DatePicker } from '@/components/shared/date-picker';
+import { TimePicker } from '@/components/shared/time-picker';
+import { DateTimePicker } from '@/components/shared/datetime-picker';
 import type { CreateEventDto, TierRules } from '@padel/types';
+import { motion } from 'motion/react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -386,323 +387,333 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
   };
 
   return (
-    <Card>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="title">{t('eventTitle')}</Label>
-            <Input
-              id="title"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              placeholder={t('eventTitlePlaceholder')}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    >
+      <Card className="glass-card">
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="date">{t('eventDate')}</Label>
-              <DatePicker
-                id="date"
-                value={formData.date}
-                onChange={(date) => setFormData({ ...formData, date })}
-                placeholder={t('selectEventDate')}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="capacity">{t('capacity')}</Label>
+              <Label htmlFor="title">{t('eventTitle')}</Label>
               <Input
-                id="capacity"
-                type="number"
-                value={formData.capacity}
-                readOnly
-                className="bg-muted cursor-not-allowed"
-                required
+                id="title"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                placeholder={t('eventTitlePlaceholder')}
               />
-              <p className="text-xs text-muted-foreground">{t('autoCalculated')}</p>
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="venue">{t('venue')}</Label>
-            {venuesLoading ? (
-              <div className="text-sm text-muted-foreground">{t('loadingVenues')}</div>
-            ) : (
-              <Select
-                value={formData.venueId}
-                onValueChange={(value) =>
-                  setFormData({
-                    ...formData,
-                    venueId: value,
-                    mastersCourtIds: [],
-                    explorersCourtIds: [],
-                  })
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="date">{t('eventDate')}</Label>
+                <DatePicker
+                  id="date"
+                  value={formData.date}
+                  onChange={(date) => setFormData({ ...formData, date })}
+                  placeholder={t('selectEventDate')}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="capacity">{t('capacity')}</Label>
+                <Input
+                  id="capacity"
+                  type="number"
+                  value={formData.capacity}
+                  readOnly
+                  className="bg-muted cursor-not-allowed"
+                  required
+                />
+                <p className="text-xs text-muted-foreground">{t('autoCalculated')}</p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="venue">{t('venue')}</Label>
+              {venuesLoading ? (
+                <div className="text-sm text-muted-foreground">{t('loadingVenues')}</div>
+              ) : (
+                <Select
+                  value={formData.venueId}
+                  onValueChange={(value) =>
+                    setFormData({
+                      ...formData,
+                      venueId: value,
+                      mastersCourtIds: [],
+                      explorersCourtIds: [],
+                    })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('selectVenue')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {venues?.map((venue) => (
+                      <SelectItem key={venue.id} value={venue.id}>
+                        {venue.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="rsvpOpensAt">{t('rsvpOpensAt')}</Label>
+                <DateTimePicker
+                  id="rsvpOpensAt"
+                  value={formData.rsvpOpensAt}
+                  onChange={(datetime) => setFormData({ ...formData, rsvpOpensAt: datetime })}
+                  placeholder={t('rsvpOpensAtPlaceholder')}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="rsvpClosesAt">{t('rsvpClosesAt')}</Label>
+                <DateTimePicker
+                  id="rsvpClosesAt"
+                  value={formData.rsvpClosesAt}
+                  onChange={(datetime) => setFormData({ ...formData, rsvpClosesAt: datetime })}
+                  placeholder={t('rsvpClosesAtPlaceholder')}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-4 rounded-lg border p-4 bg-muted/50">
+              <div className="space-y-2">
+                <Label>{t('tierAssignmentRules')}</Label>
+                <p className="text-sm text-muted-foreground">{t('tierAssignmentDescription')}</p>
+              </div>
+
+              <RadioGroup
+                value={formData.tierRuleType}
+                onValueChange={(value: 'auto' | 'count' | 'percentage') =>
+                  setFormData({ ...formData, tierRuleType: value })
                 }
               >
-                <SelectTrigger>
-                  <SelectValue placeholder={t('selectVenue')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {venues?.map((venue) => (
-                    <SelectItem key={venue.id} value={venue.id}>
-                      {venue.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          </div>
-
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="rsvpOpensAt">{t('rsvpOpensAt')}</Label>
-              <DateTimePicker
-                id="rsvpOpensAt"
-                value={formData.rsvpOpensAt}
-                onChange={(datetime) => setFormData({ ...formData, rsvpOpensAt: datetime })}
-                placeholder={t('rsvpOpensAtPlaceholder')}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="rsvpClosesAt">{t('rsvpClosesAt')}</Label>
-              <DateTimePicker
-                id="rsvpClosesAt"
-                value={formData.rsvpClosesAt}
-                onChange={(datetime) => setFormData({ ...formData, rsvpClosesAt: datetime })}
-                placeholder={t('rsvpClosesAtPlaceholder')}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-4 rounded-lg border p-4 bg-muted/50">
-            <div className="space-y-2">
-              <Label>{t('tierAssignmentRules')}</Label>
-              <p className="text-sm text-muted-foreground">{t('tierAssignmentDescription')}</p>
-            </div>
-
-            <RadioGroup
-              value={formData.tierRuleType}
-              onValueChange={(value: 'auto' | 'count' | 'percentage') =>
-                setFormData({ ...formData, tierRuleType: value })
-              }
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="auto" id="tier-auto" />
-                <Label htmlFor="tier-auto" className="font-normal cursor-pointer">
-                  {t('tierAuto')}
-                </Label>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="count" id="tier-count" />
-                <Label htmlFor="tier-count" className="font-normal cursor-pointer">
-                  {t('tierCount')}
-                </Label>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="percentage" id="tier-percentage" />
-                <Label htmlFor="tier-percentage" className="font-normal cursor-pointer">
-                  {t('tierPercentage')}
-                </Label>
-              </div>
-            </RadioGroup>
-
-            {formData.tierRuleType === 'count' && (
-              <div className="space-y-2 ml-6">
-                <Label htmlFor="masterCount">{t('numberOfMastersPlayers')}</Label>
-                <Input
-                  id="masterCount"
-                  type="number"
-                  min="0"
-                  max={formData.capacity}
-                  value={formData.masterCount}
-                  onChange={(e) => setFormData({ ...formData, masterCount: e.target.value })}
-                  placeholder={t('numberOfMastersPlaceholder')}
-                />
-                <p className="text-xs text-muted-foreground">
-                  {t('topRatedPlayers', { count: formData.masterCount || 'X' })}
-                </p>
-              </div>
-            )}
-
-            {formData.tierRuleType === 'percentage' && (
-              <div className="space-y-2 ml-6">
-                <Label htmlFor="masterPercentage">{t('mastersPercentage')}</Label>
-                <Input
-                  id="masterPercentage"
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="1"
-                  value={formData.masterPercentage}
-                  onChange={(e) => setFormData({ ...formData, masterPercentage: e.target.value })}
-                  placeholder={t('mastersPercentagePlaceholder')}
-                />
-                <p className="text-xs text-muted-foreground">
-                  {t('topPercentagePlayers', { percentage: formData.masterPercentage || 'X' })}
-                </p>
-              </div>
-            )}
-
-            <div className="space-y-4 pt-4 border-t">
-              <div className="space-y-2">
-                <Label className="text-base">{t('timeSlotsAndCourts')}</Label>
-                <p className="text-sm text-muted-foreground">{t('timeSlotsDescription')}</p>
-              </div>
-
-              <div className="space-y-3 p-3 rounded-lg border bg-card">
-                <Label className="text-sm font-medium">{t('mastersTimeSlot')}</Label>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="mastersStartTime" className="text-xs text-muted-foreground">
-                      {t('startTime')}
-                    </Label>
-                    <TimePicker
-                      id="mastersStartTime"
-                      value={formData.mastersStartTime}
-                      onChange={(time) => setFormData({ ...formData, mastersStartTime: time })}
-                      placeholder={t('startTimePlaceholder')}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="mastersEndTime" className="text-xs text-muted-foreground">
-                      {t('endTime')}
-                    </Label>
-                    <TimePicker
-                      id="mastersEndTime"
-                      value={formData.mastersEndTime}
-                      onChange={(time) => setFormData({ ...formData, mastersEndTime: time })}
-                      placeholder={t('endTimePlaceholder')}
-                    />
-                  </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="auto" id="tier-auto" />
+                  <Label htmlFor="tier-auto" className="font-normal cursor-pointer">
+                    {t('tierAuto')}
+                  </Label>
                 </div>
 
-                {selectedVenue && selectedVenue.courts.length > 0 && (
-                  <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">{t('courtsAvailable')}</Label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {selectedVenue.courts.map((court) => (
-                        <div key={court.id} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`masters-court-${court.id}`}
-                            checked={formData.mastersCourtIds.includes(court.id)}
-                            onCheckedChange={(checked) => {
-                              setFormData((prev) => ({
-                                ...prev,
-                                mastersCourtIds: checked
-                                  ? [...prev.mastersCourtIds, court.id]
-                                  : prev.mastersCourtIds.filter((id) => id !== court.id),
-                              }));
-                            }}
-                          />
-                          <label
-                            htmlFor={`masters-court-${court.id}`}
-                            className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                          >
-                            {court.label}
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {t('courtsSelected', { count: formData.mastersCourtIds.length })}
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-3 p-3 rounded-lg border bg-card">
-                <Label className="text-sm font-medium">{t('explorersTimeSlot')}</Label>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="explorersStartTime" className="text-xs text-muted-foreground">
-                      {t('startTime')}
-                    </Label>
-                    <TimePicker
-                      id="explorersStartTime"
-                      value={formData.explorersStartTime}
-                      onChange={(time) => setFormData({ ...formData, explorersStartTime: time })}
-                      placeholder={t('explorersStartTimePlaceholder')}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="explorersEndTime" className="text-xs text-muted-foreground">
-                      {t('endTime')}
-                    </Label>
-                    <TimePicker
-                      id="explorersEndTime"
-                      value={formData.explorersEndTime}
-                      onChange={(time) => setFormData({ ...formData, explorersEndTime: time })}
-                      placeholder={t('explorersEndTimePlaceholder')}
-                    />
-                  </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="count" id="tier-count" />
+                  <Label htmlFor="tier-count" className="font-normal cursor-pointer">
+                    {t('tierCount')}
+                  </Label>
                 </div>
 
-                {selectedVenue && selectedVenue.courts.length > 0 && (
-                  <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">{t('courtsAvailable')}</Label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {selectedVenue.courts.map((court) => (
-                        <div key={court.id} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`explorers-court-${court.id}`}
-                            checked={formData.explorersCourtIds.includes(court.id)}
-                            onCheckedChange={(checked) => {
-                              setFormData((prev) => ({
-                                ...prev,
-                                explorersCourtIds: checked
-                                  ? [...prev.explorersCourtIds, court.id]
-                                  : prev.explorersCourtIds.filter((id) => id !== court.id),
-                              }));
-                            }}
-                          />
-                          <label
-                            htmlFor={`explorers-court-${court.id}`}
-                            className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                          >
-                            {court.label}
-                          </label>
-                        </div>
-                      ))}
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="percentage" id="tier-percentage" />
+                  <Label htmlFor="tier-percentage" className="font-normal cursor-pointer">
+                    {t('tierPercentage')}
+                  </Label>
+                </div>
+              </RadioGroup>
+
+              {formData.tierRuleType === 'count' && (
+                <div className="space-y-2 ml-6">
+                  <Label htmlFor="masterCount">{t('numberOfMastersPlayers')}</Label>
+                  <Input
+                    id="masterCount"
+                    type="number"
+                    min="0"
+                    max={formData.capacity}
+                    value={formData.masterCount}
+                    onChange={(e) => setFormData({ ...formData, masterCount: e.target.value })}
+                    placeholder={t('numberOfMastersPlaceholder')}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {t('topRatedPlayers', { count: formData.masterCount || 'X' })}
+                  </p>
+                </div>
+              )}
+
+              {formData.tierRuleType === 'percentage' && (
+                <div className="space-y-2 ml-6">
+                  <Label htmlFor="masterPercentage">{t('mastersPercentage')}</Label>
+                  <Input
+                    id="masterPercentage"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="1"
+                    value={formData.masterPercentage}
+                    onChange={(e) => setFormData({ ...formData, masterPercentage: e.target.value })}
+                    placeholder={t('mastersPercentagePlaceholder')}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {t('topPercentagePlayers', { percentage: formData.masterPercentage || 'X' })}
+                  </p>
+                </div>
+              )}
+
+              <div className="space-y-4 pt-4 border-t">
+                <div className="space-y-2">
+                  <Label className="text-base">{t('timeSlotsAndCourts')}</Label>
+                  <p className="text-sm text-muted-foreground">{t('timeSlotsDescription')}</p>
+                </div>
+
+                <div className="space-y-3 p-3 rounded-lg border bg-card">
+                  <Label className="text-sm font-medium">{t('mastersTimeSlot')}</Label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="mastersStartTime" className="text-xs text-muted-foreground">
+                        {t('startTime')}
+                      </Label>
+                      <TimePicker
+                        id="mastersStartTime"
+                        value={formData.mastersStartTime}
+                        onChange={(time) => setFormData({ ...formData, mastersStartTime: time })}
+                        placeholder={t('startTimePlaceholder')}
+                      />
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      {t('courtsSelected', { count: formData.explorersCourtIds.length })}
-                    </p>
+                    <div className="space-y-2">
+                      <Label htmlFor="mastersEndTime" className="text-xs text-muted-foreground">
+                        {t('endTime')}
+                      </Label>
+                      <TimePicker
+                        id="mastersEndTime"
+                        value={formData.mastersEndTime}
+                        onChange={(time) => setFormData({ ...formData, mastersEndTime: time })}
+                        placeholder={t('endTimePlaceholder')}
+                      />
+                    </div>
                   </div>
-                )}
+
+                  {selectedVenue && selectedVenue.courts.length > 0 && (
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">
+                        {t('courtsAvailable')}
+                      </Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {selectedVenue.courts.map((court) => (
+                          <div key={court.id} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`masters-court-${court.id}`}
+                              checked={formData.mastersCourtIds.includes(court.id)}
+                              onCheckedChange={(checked) => {
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  mastersCourtIds: checked
+                                    ? [...prev.mastersCourtIds, court.id]
+                                    : prev.mastersCourtIds.filter((id) => id !== court.id),
+                                }));
+                              }}
+                            />
+                            <label
+                              htmlFor={`masters-court-${court.id}`}
+                              className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                            >
+                              {court.label}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {t('courtsSelected', { count: formData.mastersCourtIds.length })}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-3 p-3 rounded-lg border bg-card">
+                  <Label className="text-sm font-medium">{t('explorersTimeSlot')}</Label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="explorersStartTime" className="text-xs text-muted-foreground">
+                        {t('startTime')}
+                      </Label>
+                      <TimePicker
+                        id="explorersStartTime"
+                        value={formData.explorersStartTime}
+                        onChange={(time) => setFormData({ ...formData, explorersStartTime: time })}
+                        placeholder={t('explorersStartTimePlaceholder')}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="explorersEndTime" className="text-xs text-muted-foreground">
+                        {t('endTime')}
+                      </Label>
+                      <TimePicker
+                        id="explorersEndTime"
+                        value={formData.explorersEndTime}
+                        onChange={(time) => setFormData({ ...formData, explorersEndTime: time })}
+                        placeholder={t('explorersEndTimePlaceholder')}
+                      />
+                    </div>
+                  </div>
+
+                  {selectedVenue && selectedVenue.courts.length > 0 && (
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">
+                        {t('courtsAvailable')}
+                      </Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {selectedVenue.courts.map((court) => (
+                          <div key={court.id} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`explorers-court-${court.id}`}
+                              checked={formData.explorersCourtIds.includes(court.id)}
+                              onCheckedChange={(checked) => {
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  explorersCourtIds: checked
+                                    ? [...prev.explorersCourtIds, court.id]
+                                    : prev.explorersCourtIds.filter((id) => id !== court.id),
+                                }));
+                              }}
+                            />
+                            <label
+                              htmlFor={`explorers-court-${court.id}`}
+                              className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                            >
+                              {court.label}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {t('courtsSelected', { count: formData.explorersCourtIds.length })}
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
 
-          {(createMutation.isError || updateMutation.isError) && (
-            <div className="text-sm text-destructive">
-              {t('error')}: {((createMutation.error || updateMutation.error) as Error)?.message}
+            {(createMutation.isError || updateMutation.isError) && (
+              <div className="text-sm text-destructive">
+                {t('error')}: {((createMutation.error || updateMutation.error) as Error)?.message}
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
+                {isEditMode
+                  ? updateMutation.isPending
+                    ? t('updating')
+                    : t('updateEvent')
+                  : createMutation.isPending
+                    ? t('creating')
+                    : t('createEvent')}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.push(isEditMode ? `/admin/events/${eventId}` : '/admin')}
+              >
+                {t('cancel')}
+              </Button>
             </div>
-          )}
-
-          <div className="flex gap-2">
-            <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
-              {isEditMode
-                ? updateMutation.isPending
-                  ? t('updating')
-                  : t('updateEvent')
-                : createMutation.isPending
-                  ? t('creating')
-                  : t('createEvent')}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => router.push(isEditMode ? `/admin/events/${eventId}` : '/admin')}
-            >
-              {t('cancel')}
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+          </form>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }

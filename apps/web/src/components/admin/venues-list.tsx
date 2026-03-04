@@ -19,7 +19,7 @@ import {
 } from 'lucide-animated';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
+import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 

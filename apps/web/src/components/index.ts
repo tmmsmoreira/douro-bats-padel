@@ -12,7 +12,7 @@ export {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from './ui/dropdown-menu';
-export { ThemeToggle } from './ui/theme-toggle';
+export { ThemeToggle } from './shared/theme-toggle';
 export { Switch } from './ui/switch';
 export { AdminNav } from './admin/admin-nav';
 export { EventsList as AdminEventsList } from './admin/events-list';

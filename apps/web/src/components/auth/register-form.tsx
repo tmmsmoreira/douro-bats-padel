@@ -8,11 +8,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 
 export function RegisterForm() {
   const searchParams = useSearchParams();
+  const t = useTranslations('auth.register');
+  const locale = useLocale();
   const invitationToken = searchParams.get('invitation');
 
   const [name, setName] = useState('');
@@ -51,11 +54,11 @@ export function RegisterForm() {
           setEmail(data.email); // Pre-fill email
         } else {
           setInvitationValid(false);
-          setError(data.message || 'Invalid invitation');
+          setError(data.message || t('invalidInvitation'));
         }
       } catch {
         setInvitationValid(false);
-        setError('Failed to validate invitation');
+        setError(t('failedToValidate'));
       } finally {
         setValidatingInvitation(false);
       }
@@ -71,21 +74,21 @@ export function RegisterForm() {
 
     // Validate passwords match
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('passwordsDoNotMatch'));
       setIsLoading(false);
       return;
     }
 
     // Validate password length
     if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError(t('passwordTooShort'));
       setIsLoading(false);
       return;
     }
 
     // Validate email matches invitation
     if (email !== invitationEmail) {
-      setError('Email must match the invitation email');
+      setError(t('emailMustMatch'));
       setIsLoading(false);
       return;
     }
@@ -105,7 +108,7 @@ export function RegisterForm() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.message || 'Registration failed');
+        setError(data.message || t('registrationFailed'));
         setIsLoading(false);
         return;
       }
@@ -118,7 +121,7 @@ export function RegisterForm() {
       }
       setIsLoading(false);
     } catch {
-      setError('An error occurred during registration');
+      setError(t('errorOccurred'));
       setIsLoading(false);
     }
   };
@@ -126,10 +129,10 @@ export function RegisterForm() {
   // Show loading state while validating invitation
   if (validatingInvitation) {
     return (
-      <Card className="w-full max-w-md">
+      <Card className="glass-card w-full max-w-md">
         <CardContent className="py-12 flex flex-col items-center justify-center space-y-4">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Validating invitation...</p>
+          <p className="text-sm text-muted-foreground">{t('validatingInvitation')}</p>
         </CardContent>
       </Card>
     );
@@ -138,11 +141,11 @@ export function RegisterForm() {
   // Show error if no invitation token or invalid
   if (!invitationToken || !invitationValid) {
     return (
-      <Card className="w-full max-w-md">
+      <Card className="glass-card w-full max-w-md">
         <CardHeader className="space-y-1 px-4 sm:px-6 pt-6">
-          <CardTitle className="text-xl sm:text-2xl">Invitation Required</CardTitle>
+          <CardTitle className="text-xl sm:text-2xl">{t('invitationRequired')}</CardTitle>
           <CardDescription className="text-sm">
-            You need a valid invitation to create an account
+            {t('invitationRequiredDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-0 space-y-4">
@@ -166,13 +169,10 @@ export function RegisterForm() {
               {error}
             </div>
           )}
-          <p className="text-sm text-muted-foreground text-center">
-            This application is invitation-only. Please contact an administrator to receive an
-            invitation link.
-          </p>
-          <Link href="/login" className="block">
+          <p className="text-sm text-muted-foreground text-center">{t('invitationOnlyMessage')}</p>
+          <Link href={`/${locale}/login`} className="block">
             <Button variant="outline" className="w-full">
-              Go to Login
+              {t('goToLogin')}
             </Button>
           </Link>
         </CardContent>
@@ -182,10 +182,10 @@ export function RegisterForm() {
 
   if (success) {
     return (
-      <Card className="w-full max-w-md">
+      <Card className="w-full glass-card max-w-md">
         <CardHeader className="space-y-1 px-4 sm:px-6 pt-6">
-          <CardTitle className="text-xl sm:text-2xl">Check Your Email</CardTitle>
-          <CardDescription className="text-sm">Registration successful!</CardDescription>
+          <CardTitle className="text-xl sm:text-2xl">{t('successTitle')}</CardTitle>
+          <CardDescription className="text-sm">{t('successDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="pt-0 space-y-4">
           <div className="flex justify-center py-4">
@@ -204,35 +204,35 @@ export function RegisterForm() {
             </svg>
           </div>
           <p className="text-sm text-muted-foreground text-center">
-            We&apos;ve sent a verification email to <strong>{email}</strong>. Please check your
-            inbox and click the verification link to activate your account.
+            {t('successMessage', { email })}
           </p>
           {process.env.NODE_ENV === 'development' && verificationToken && (
             <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-              <p className="text-sm font-medium text-yellow-800 mb-2">
-                Development Mode - Verification Token:
-              </p>
+              <p className="text-sm font-medium text-yellow-800 mb-2">{t('devModeToken')}</p>
               <code className="text-xs bg-white p-2 block rounded border break-all">
                 {verificationToken}
               </code>
               <Link
-                href={`/verify-email?token=${verificationToken}`}
+                href={`/${locale}/verify-email?token=${verificationToken}`}
                 className="text-sm text-yellow-800 hover:underline mt-2 inline-block"
               >
-                Click here to verify
+                {t('clickToVerify')}
               </Link>
             </div>
           )}
-          <Link href="/login" className="block">
+          <Link href={`/${locale}/login`} className="block">
             <Button variant="outline" className="w-full">
-              Go to Login
+              {t('goToLogin')}
             </Button>
           </Link>
           <div className="text-center text-sm text-muted-foreground">
             <p>
-              Didn&apos;t receive the email?{' '}
-              <Link href="/resend-verification" className="text-primary hover:underline">
-                Resend verification
+              {t('didntReceiveEmail')}{' '}
+              <Link
+                href={`/${locale}/resend-verification`}
+                className="text-primary hover:underline"
+              >
+                {t('resendVerification')}
               </Link>
             </p>
           </div>
@@ -242,19 +242,19 @@ export function RegisterForm() {
   }
 
   return (
-    <Card className="w-full max-w-md border-0 shadow-none sm:border sm:shadow-sm">
+    <Card className="glass-card w-full max-w-md border-0 shadow-none sm:border sm:shadow-sm">
       <CardHeader className="space-y-1 px-4 sm:px-6 pt-6">
-        <CardTitle className="text-2xl sm:text-3xl font-bold">Create Account</CardTitle>
-        <CardDescription className="text-sm">Join the Douro Bats Padel community</CardDescription>
+        <CardTitle className="text-2xl sm:text-3xl font-bold">{t('title')}</CardTitle>
+        <CardDescription className="text-sm">{t('description')}</CardDescription>
       </CardHeader>
       <CardContent className="pt-0 px-4 sm:px-6 pb-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name">{t('name')}</Label>
             <Input
               id="name"
               type="text"
-              placeholder="John Doe"
+              placeholder={t('namePlaceholder')}
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="h-11"
@@ -262,11 +262,11 @@ export function RegisterForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t('email')}</Label>
             <Input
               id="email"
               type="email"
-              placeholder="hello@example.com"
+              placeholder={t('emailPlaceholder')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="h-11 bg-muted"
@@ -274,16 +274,14 @@ export function RegisterForm() {
               readOnly
               disabled
             />
-            <p className="text-xs text-muted-foreground">
-              Email is pre-filled from your invitation
-            </p>
+            <p className="text-xs text-muted-foreground">{t('emailPreFilled')}</p>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t('password')}</Label>
             <Input
               id="password"
               type="password"
-              placeholder="••••••••"
+              placeholder={t('passwordPlaceholder')}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="h-11"
@@ -292,11 +290,11 @@ export function RegisterForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <Label htmlFor="confirmPassword">{t('confirmPassword')}</Label>
             <Input
               id="confirmPassword"
               type="password"
-              placeholder="••••••••"
+              placeholder={t('confirmPasswordPlaceholder')}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="h-11"
@@ -309,15 +307,19 @@ export function RegisterForm() {
               {error}
             </div>
           )}
-          <Button type="submit" className="w-full h-11 text-base" disabled={isLoading}>
-            {isLoading ? 'Creating account...' : 'Create Account'}
+          <Button
+            type="submit"
+            className="gradient-primary w-full h-11 text-base"
+            disabled={isLoading}
+          >
+            {isLoading ? t('creatingAccount') : t('createAccount')}
           </Button>
 
           <div className="text-center text-sm text-muted-foreground pt-4">
             <p>
-              Already have an account?{' '}
-              <Link href="/login" className="text-primary hover:underline font-medium">
-                Sign in
+              {t('alreadyHaveAccount')}{' '}
+              <Link href={`/${locale}/login`} className="text-primary hover:underline font-medium">
+                {t('signIn')}
               </Link>
             </p>
           </div>

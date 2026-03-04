@@ -14,7 +14,7 @@ export default function LoginPage() {
       </div>
 
       {/* Left side - Image */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="hidden lg:flex lg:w-1/2 relative bg-linear-to-br from-slate-900 via-purple-900 to-slate-900">
         <div className="absolute inset-0 bg-black/20" />
         <Image
           src="https://images.pexels.com/photos/31012869/pexels-photo-31012869.jpeg?auto=compress&cs=tinysrgb&w=2070"
@@ -23,9 +23,9 @@ export default function LoginPage() {
           className="object-cover opacity-80"
           priority
         />
-        <div className="relative z-10 flex flex-col justify-between p-12 text-white">
-          <div>
-            <h1 className="text-4xl font-bold mb-2">Douro Bats Padel</h1>
+        <div className="relative z-10 flex flex-col justify-between text-white p-12">
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+            <h1 className="text-4xl font-bold mb-2 font-heading gradient-text">Douro Bats Padel</h1>
             <p className="text-lg text-white/90">Manage your padel game nights with ease</p>
           </div>
           <div className="space-y-4">

@@ -5,9 +5,12 @@ import type React from 'react';
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
 
 export function ResendVerificationForm() {
+  const t = useTranslations('auth.resendVerification');
+  const locale = useLocale();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -30,7 +33,7 @@ export function ResendVerificationForm() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.message || 'Failed to send verification email');
+        setError(data.message || t('failedToSend'));
         setIsLoading(false);
         return;
       }
@@ -42,42 +45,37 @@ export function ResendVerificationForm() {
       }
       setIsLoading(false);
     } catch {
-      setError('An error occurred. Please try again.');
+      setError(t('errorOccurred'));
       setIsLoading(false);
     }
   };
 
   if (success) {
     return (
-      <Card className="w-full max-w-md">
+      <Card className="glass-card w-full max-w-md">
         <CardHeader>
-          <CardTitle>Check Your Email</CardTitle>
-          <CardDescription>Verification email has been sent</CardDescription>
+          <CardTitle>{t('successTitle')}</CardTitle>
+          <CardDescription>{t('successDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="pt-0 space-y-4">
-          <p className="text-sm text-muted-foreground">
-            If an account exists with the email <strong>{email}</strong> and is not yet verified,
-            you will receive a verification email.
-          </p>
+          <p className="text-sm text-muted-foreground">{t('successMessage', { email })}</p>
           {verificationToken && (
             <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-              <p className="text-sm font-medium text-yellow-800 mb-2">
-                Development Mode - Verification Token:
-              </p>
+              <p className="text-sm font-medium text-yellow-800 mb-2">{t('devModeToken')}</p>
               <code className="text-xs bg-white p-2 block rounded border break-all">
                 {verificationToken}
               </code>
               <Link
-                href={`/verify-email?token=${verificationToken}`}
+                href={`/${locale}/verify-email?token=${verificationToken}`}
                 className="text-sm text-yellow-800 hover:underline mt-2 inline-block"
               >
-                Click here to verify
+                {t('clickToVerify')}
               </Link>
             </div>
           )}
-          <Link href="/login" className="block">
+          <Link href={`/${locale}/login`} className="block">
             <Button variant="outline" className="w-full">
-              Back to Login
+              {t('backToLogin')}
             </Button>
           </Link>
         </CardContent>
@@ -86,20 +84,21 @@ export function ResendVerificationForm() {
   }
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="glass-card w-full max-w-md">
       <CardHeader>
-        <CardTitle>Resend Verification Email</CardTitle>
-        <CardDescription>Enter your email to receive a new verification link</CardDescription>
+        <CardTitle>{t('title')}</CardTitle>
+        <CardDescription>{t('description')}</CardDescription>
       </CardHeader>
       <CardContent className="pt-0">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">
-              Email
+              {t('email')}
             </label>
             <input
               id="email"
               type="email"
+              placeholder={t('emailPlaceholder')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-3 py-2 border rounded-md"
@@ -107,14 +106,14 @@ export function ResendVerificationForm() {
             />
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Sending...' : 'Resend Verification Email'}
+          <Button type="submit" className="gradient-primary w-full" disabled={isLoading}>
+            {isLoading ? t('sending') : t('resendButton')}
           </Button>
           <div className="text-center text-sm text-muted-foreground">
             <p>
-              Already verified?{' '}
-              <Link href="/login" className="text-primary hover:underline">
-                Sign in
+              {t('alreadyVerified')}{' '}
+              <Link href={`/${locale}/login`} className="text-primary hover:underline">
+                {t('signIn')}
               </Link>
             </p>
           </div>

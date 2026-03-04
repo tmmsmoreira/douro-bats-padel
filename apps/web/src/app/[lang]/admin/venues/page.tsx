@@ -1,5 +1,6 @@
 import { VenuesList } from '@/components/admin/venues-list';
-import { PageHeader } from '@/components/admin/page-header';
+import { PageHeader } from '@/components/shared/page-header';
+import { ActionButton } from '@/components/shared/action-button';
 import { getTranslations } from 'next-intl/server';
 
 export default async function VenuesPage() {
@@ -10,8 +11,7 @@ export default async function VenuesPage() {
       <PageHeader
         title={t('venuesManagement')}
         description={t('venuesDescription')}
-        buttonText={t('createVenue')}
-        buttonHref="/admin/venues/new"
+        action={<ActionButton href="/admin/venues/new" label={t('createVenue')} />}
       />
       <VenuesList />
     </div>

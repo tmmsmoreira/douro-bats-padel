@@ -1,6 +1,6 @@
 import { InvitationsList } from '@/components/admin/invitations-list';
 import { CreateInvitationDialog } from '@/components/admin/create-invitation-dialog';
-import { PageHeader } from '@/components/admin/page-header';
+import { PageHeader } from '@/components/shared/page-header';
 import { getTranslations } from 'next-intl/server';
 
 export default async function InvitationsPage() {

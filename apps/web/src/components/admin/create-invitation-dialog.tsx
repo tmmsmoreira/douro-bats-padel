@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
@@ -18,7 +18,7 @@ import { Label } from '@/components/ui/label';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import type { CreateInvitationDto } from '@padel/types';
-import { SendIcon } from 'lucide-react';
+import { SendIcon, SendIconHandle } from '@/components/icons/send-icon';
 import { motion } from 'motion/react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
@@ -30,6 +30,7 @@ export function CreateInvitationDialog() {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [expirationDays, setExpirationDays] = useState('7');
+  const iconRef = useRef<SendIconHandle>(null);
 
   const createMutation = useMutation({
     mutationFn: async (dto: CreateInvitationDto) => {
@@ -74,8 +75,10 @@ export function CreateInvitationDialog() {
           <Button
             variant="gradient"
             className="w-full sm:w-auto gap-2 px-4 py-5 text-base font-medium"
+            onMouseEnter={() => iconRef.current?.startAnimation()}
+            onMouseLeave={() => iconRef.current?.stopAnimation()}
           >
-            <SendIcon className="h-5 w-5" />
+            <SendIcon size={18} ref={iconRef} />
             {t('createInvitation')}
           </Button>
         </motion.div>

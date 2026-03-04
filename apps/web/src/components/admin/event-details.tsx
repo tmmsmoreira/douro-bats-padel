@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, UseMutationResult } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
@@ -8,11 +8,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { ArrowLeftIcon, ArrowLeftIconHandle, DeleteIcon, DeleteIconHandle } from 'lucide-animated';
-import { Calendar, MapPin, Clock } from 'lucide-react';
+import { Calendar, MapPin, Clock, MoreVertical, Edit, Trash2 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
+import { PageHeader } from '../shared/page-header';
+import { DeleteIcon, DeleteIconHandle } from 'lucide-animated';
+import { motion } from 'motion/react';
+import { EventStatus, StatusBadge } from '../shared';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -58,17 +68,32 @@ interface Draw {
   };
 }
 
+interface EventDetails {
+  id: string;
+  title: string | null;
+  date: string;
+  startsAt: string;
+  endsAt: string;
+  capacity: number;
+  state: 'DRAFT' | 'OPEN' | 'FROZEN' | 'DRAWN' | 'PUBLISHED';
+  venue?: {
+    id: string;
+    name: string;
+  };
+  confirmedCount: number;
+  waitlistCount: number;
+  confirmedPlayers?: Player[];
+  waitlistedPlayers?: WaitlistedPlayer[];
+}
+
 export function EventDetails({ eventId }: { eventId: string }) {
   const { data: session } = useSession();
   const queryClient = useQueryClient();
   const router = useRouter();
   const t = useTranslations('eventDetails');
-  const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const deleteIconRef = useRef<DeleteIconHandle>(null);
-  const arrowLeftIconRef = useRef<ArrowLeftIconHandle>(null);
 
-  const { data: event, isLoading } = useQuery({
+  const { data: event, isLoading } = useQuery<EventDetails>({
     queryKey: ['event', eventId, session?.accessToken],
     queryFn: async () => {
       const headers: HeadersInit = {
@@ -191,13 +216,8 @@ export function EventDetails({ eventId }: { eventId: string }) {
     },
     onError: (error: Error) => {
       toast.error(t('deleteError') + ': ' + error.message);
-      setIsDeleting(false);
     },
   });
-
-  const handleDeleteEvent = () => {
-    setShowDeleteDialog(true);
-  };
 
   if (isLoading) {
     return <div className="text-center py-8">{t('loadingEvent')}</div>;
@@ -207,198 +227,130 @@ export function EventDetails({ eventId }: { eventId: string }) {
     return <div className="text-center py-8">{t('eventNotFound')}</div>;
   }
 
-  // Check if event has passed
-  const eventEndTime = new Date(event.endsAt);
-  const hasEventPassed = eventEndTime < new Date();
-
   return (
-    <div className="space-y-6">
-      {/* Back Button */}
-      <div>
-        <Link href="/admin" onMouseEnter={() => arrowLeftIconRef.current?.startAnimation()}>
-          <Button variant="ghost" size="sm">
-            <ArrowLeftIcon ref={arrowLeftIconRef} size={16} />
-            {t('backToEvents')}
-          </Button>
-        </Link>
-      </div>
+    <div className="space-y-8">
+      <PageHeader
+        title={event.title || t('untitledEvent')}
+        description={<EventDetailsHeaderInfo event={event} />}
+        showBackButton
+        backButtonHref="/admin"
+        backButtonLabel={t('backToEvents')}
+        action={
+          <EventDetailsHeaderActionButtons
+            event={event}
+            freezeMutation={freezeMutation}
+            publishMutation={publishMutation}
+            draw={draw}
+            onDeleteClick={() => setShowDeleteDialog(true)}
+          />
+        }
+      />
+      <div className="space-y-4">
+        {/* Show draw if it exists, otherwise show confirmed players */}
+        {draw ? (
+          <div className="space-y-6">
+            <DrawSummary draw={draw} />
 
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">{event.title || t('untitledEvent')}</h1>
-          <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
-              <span>
-                {new Date(event.date).toLocaleDateString('en-US', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-              </span>
-            </div>
-            {event.venue && (
-              <div className="flex items-center gap-1">
-                <MapPin className="h-4 w-4" />
-                <span>{event.venue.name}</span>
-              </div>
+            {/* Always show waitlist if there are waitlisted players */}
+            {(event.waitlistCount > 0 || (event.waitlistedPlayers?.length ?? 0) > 0) && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    {t('waitlist')} ({event.waitlistCount || event.waitlistedPlayers?.length || 0})
+                  </CardTitle>
+                  <CardDescription>{t('playersWaitingForSpot')}</CardDescription>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  {event.waitlistedPlayers && event.waitlistedPlayers.length > 0 ? (
+                    <div className="space-y-2">
+                      {event.waitlistedPlayers.map((player: WaitlistedPlayer) => (
+                        <div
+                          key={player.id}
+                          className="flex items-center justify-between py-2 border-b last:border-0"
+                        >
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary">#{player.position}</Badge>
+                            <span>{player.name}</span>
+                          </div>
+                          <span className="text-sm text-muted-foreground">{player.rating}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">{t('noPlayersOnWaitlist')}</p>
+                  )}
+                </CardContent>
+              </Card>
             )}
-            <Badge variant={event.state === 'PUBLISHED' ? 'default' : 'secondary'}>
-              {event.state}
-            </Badge>
           </div>
-        </div>
-        <div className="flex gap-2 self-end sm:self-auto">
-          {!hasEventPassed && (
-            <Link href={`/admin/events/${eventId}/edit`}>
-              <Button variant="outline">{t('editEvent')}</Button>
-            </Link>
-          )}
-          {event.state === 'DRAFT' && !hasEventPassed && (
-            <Button onClick={() => publishMutation.mutate()}>{t('publishEvent')}</Button>
-          )}
-          {event.state === 'OPEN' && !hasEventPassed && (
-            <Button onClick={() => freezeMutation.mutate()}>{t('freezeRsvps')}</Button>
-          )}
-          {event.state === 'FROZEN' && !hasEventPassed && !draw && (
-            <Link href={`/admin/events/${eventId}/draw`}>
-              <Button>{t('generateDraw')}</Button>
-            </Link>
-          )}
-          {event.state === 'FROZEN' && !hasEventPassed && draw && (
-            <Link href={`/admin/events/${eventId}/draw/view`}>
-              <Button variant="outline">{t('viewEditDraw')}</Button>
-            </Link>
-          )}
-          {(event.state === 'DRAWN' || event.state === 'PUBLISHED') && !hasEventPassed && (
-            <Link href={`/admin/events/${eventId}/draw/view`}>
-              <Button variant="outline">{t('viewEditDraw')}</Button>
-            </Link>
-          )}
-          {event.state === 'PUBLISHED' && hasEventPassed && (
-            <Link href={`/admin/events/${eventId}/results`}>
-              <Button>{t('enterResults')}</Button>
-            </Link>
-          )}
-          <Button
-            variant="destructive"
-            onClick={handleDeleteEvent}
-            disabled={isDeleting}
-            onMouseEnter={() => deleteIconRef.current?.startAnimation()}
-            onMouseLeave={() => deleteIconRef.current?.stopAnimation()}
-          >
-            <DeleteIcon size={16} ref={deleteIconRef} />
-            {isDeleting ? t('deleting') : t('deleteEvent')}
-          </Button>
-        </div>
-      </div>
-
-      {/* Show draw if it exists, otherwise show confirmed players */}
-      {draw ? (
-        <div className="space-y-6">
-          <DrawSummary draw={draw} />
-
-          {/* Always show waitlist if there are waitlisted players */}
-          {(event.waitlistCount > 0 || event.waitlistedPlayers?.length > 0) && (
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2">
             <Card>
               <CardHeader>
                 <CardTitle>
-                  {t('waitlist')} ({event.waitlistCount || event.waitlistedPlayers?.length || 0})
+                  {t('confirmedPlayers')} ({event.confirmedCount})
+                </CardTitle>
+                <CardDescription>
+                  {t('spotsRemaining', { count: event.capacity - event.confirmedCount })}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="space-y-2">
+                  {event.confirmedPlayers?.map((player: Player) => (
+                    <div
+                      key={player.id}
+                      className="flex items-center justify-between py-2 border-b last:border-0"
+                    >
+                      <span>{player.name}</span>
+                      <span className="text-sm text-muted-foreground">{player.rating}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  {t('waitlist')} ({event.waitlistCount})
                 </CardTitle>
                 <CardDescription>{t('playersWaitingForSpot')}</CardDescription>
               </CardHeader>
               <CardContent className="pt-0">
-                {event.waitlistedPlayers && event.waitlistedPlayers.length > 0 ? (
-                  <div className="space-y-2">
-                    {event.waitlistedPlayers.map((player: WaitlistedPlayer) => (
-                      <div
-                        key={player.id}
-                        className="flex items-center justify-between py-2 border-b last:border-0"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Badge variant="secondary">#{player.position}</Badge>
-                          <span>{player.name}</span>
-                        </div>
-                        <span className="text-sm text-muted-foreground">{player.rating}</span>
+                <div className="space-y-2">
+                  {event.waitlistedPlayers?.map((player: WaitlistedPlayer) => (
+                    <div
+                      key={player.id}
+                      className="flex items-center justify-between py-2 border-b last:border-0"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary">#{player.position}</Badge>
+                        <span>{player.name}</span>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">{t('noPlayersOnWaitlist')}</p>
-                )}
+                      <span className="text-sm text-muted-foreground">{player.rating}</span>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
-          )}
-        </div>
-      ) : (
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                {t('confirmedPlayers')} ({event.confirmedCount})
-              </CardTitle>
-              <CardDescription>
-                {t('spotsRemaining', { count: event.capacity - event.confirmedCount })}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="space-y-2">
-                {event.confirmedPlayers?.map((player: Player) => (
-                  <div
-                    key={player.id}
-                    className="flex items-center justify-between py-2 border-b last:border-0"
-                  >
-                    <span>{player.name}</span>
-                    <span className="text-sm text-muted-foreground">{player.rating}</span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          </div>
+        )}
 
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                {t('waitlist')} ({event.waitlistCount})
-              </CardTitle>
-              <CardDescription>{t('playersWaitingForSpot')}</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="space-y-2">
-                {event.waitlistedPlayers?.map((player: WaitlistedPlayer) => (
-                  <div
-                    key={player.id}
-                    className="flex items-center justify-between py-2 border-b last:border-0"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary">#{player.position}</Badge>
-                      <span>{player.name}</span>
-                    </div>
-                    <span className="text-sm text-muted-foreground">{player.rating}</span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Delete Event Confirmation Dialog */}
-      <ConfirmationDialog
-        open={showDeleteDialog}
-        onOpenChange={setShowDeleteDialog}
-        title={t('deleteConfirmation')}
-        description={t('deleteConfirmationDescription')}
-        confirmText={t('deleteEvent')}
-        cancelText={t('cancel')}
-        variant="destructive"
-        onConfirm={() => {
-          setIsDeleting(true);
-          deleteMutation.mutate();
-          setShowDeleteDialog(false);
-        }}
-      />
+        {/* Delete Event Confirmation Dialog */}
+        <ConfirmationDialog
+          open={showDeleteDialog}
+          onOpenChange={setShowDeleteDialog}
+          title={t('deleteConfirmation')}
+          description={t('deleteConfirmationDescription')}
+          confirmText={t('deleteEvent')}
+          cancelText={t('cancel')}
+          variant="destructive"
+          onConfirm={() => {
+            deleteMutation.mutate();
+            setShowDeleteDialog(false);
+          }}
+        />
+      </div>
     </div>
   );
 }
@@ -523,6 +475,134 @@ function AssignmentSummaryCard({ assignment }: { assignment: Assignment }) {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function EventDetailsHeaderInfo({ event }: { event: EventDetails }) {
+  return (
+    <div>
+      <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
+        <div className="flex items-center gap-1">
+          <Calendar className="h-4 w-4" />
+          <span>
+            {new Date(event.date).toLocaleDateString('en-US', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </span>
+        </div>
+        {event.venue && (
+          <div className="flex items-center gap-1">
+            <MapPin className="h-4 w-4" />
+            <span>{event.venue.name}</span>
+          </div>
+        )}
+        <StatusBadge status={event.state as EventStatus} />
+      </div>
+    </div>
+  );
+}
+
+function EventDetailsHeaderActionButtons({
+  event,
+  freezeMutation,
+  publishMutation,
+  draw,
+  onDeleteClick,
+}: {
+  event: EventDetails;
+  freezeMutation: UseMutationResult<any, Error, void, unknown>;
+  publishMutation: UseMutationResult<any, Error, void, unknown>;
+  draw: Draw | null;
+  onDeleteClick: () => void;
+}) {
+  const t = useTranslations('eventDetails');
+  const eventEndTime = new Date(event.endsAt);
+  const hasEventPassed = eventEndTime < new Date();
+  const deleteIconRef = useRef<DeleteIconHandle>(null);
+
+  // Determine the primary action based on event state
+  const getPrimaryAction = () => {
+    if (hasEventPassed && event.state === 'PUBLISHED') {
+      return (
+        <Link href={`/admin/events/${event.id}/results`}>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button variant="secondary">{t('enterResults')}</Button>
+          </motion.div>
+        </Link>
+      );
+    }
+
+    if (!hasEventPassed) {
+      switch (event.state) {
+        case 'DRAFT':
+          return <Button onClick={() => publishMutation.mutate()}>{t('publishEvent')}</Button>;
+        case 'OPEN':
+          return <Button onClick={() => freezeMutation.mutate()}>{t('freezeRsvps')}</Button>;
+        case 'FROZEN':
+          if (!draw) {
+            return (
+              <Link href={`/admin/events/${event.id}/draw`}>
+                <Button>{t('generateDraw')}</Button>
+              </Link>
+            );
+          }
+          return (
+            <Link href={`/admin/events/${event.id}/draw/view`}>
+              <Button variant="outline">{t('viewEditDraw')}</Button>
+            </Link>
+          );
+        case 'DRAWN':
+        case 'PUBLISHED':
+          return (
+            <Link href={`/admin/events/${event.id}/draw/view`}>
+              <Button variant="outline">{t('viewEditDraw')}</Button>
+            </Link>
+          );
+      }
+    }
+
+    return null;
+  };
+
+  return (
+    <div className="flex gap-2 self-end sm:self-auto">
+      {getPrimaryAction()}
+
+      {/* More Actions Dropdown */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" size="icon">
+            <MoreVertical className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          {!hasEventPassed && (
+            <>
+              <DropdownMenuItem asChild>
+                <Link href={`/admin/events/${event.id}/edit`} className="cursor-pointer flex gap-2">
+                  <Edit className="h-4 w-4" />
+                  <span>{t('editEvent')}</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+            </>
+          )}
+          <DropdownMenuItem
+            variant="destructive"
+            onClick={onDeleteClick}
+            className="cursor-pointer flex gap-2"
+            onMouseEnter={() => deleteIconRef.current?.startAnimation()}
+            onMouseLeave={() => deleteIconRef.current?.stopAnimation()}
+          >
+            <DeleteIcon ref={deleteIconRef} size={16} className="h-4 w-4" />
+            <span>{t('deleteEvent')}</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }

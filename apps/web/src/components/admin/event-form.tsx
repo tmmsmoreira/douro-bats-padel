@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -380,6 +381,26 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
     };
 
     if (isEditMode) {
+      // Check if any field has changed
+      if (initialData) {
+        const hasChanges =
+          formData.title !== initialData.title ||
+          formData.date?.getTime() !== initialData.date?.getTime() ||
+          startsAt.getTime() !== initialData.startsAt?.getTime() ||
+          endsAt.getTime() !== initialData.endsAt?.getTime() ||
+          formData.venueId !== initialData.venueId ||
+          parseInt(formData.capacity) !== initialData.capacity ||
+          formData.rsvpOpensAt?.getTime() !== initialData.rsvpOpensAt?.getTime() ||
+          formData.rsvpClosesAt?.getTime() !== initialData.rsvpClosesAt?.getTime() ||
+          JSON.stringify(allCourtIds.sort()) !== JSON.stringify(initialData.courtIds?.sort()) ||
+          JSON.stringify(tierRules) !== JSON.stringify(initialData.tierRules);
+
+        if (!hasChanges) {
+          toast.info(t('noChangesToSave') || 'No changes to save');
+          router.push(`/admin/events/${eventId}`);
+          return;
+        }
+      }
       updateMutation.mutate(dto);
     } else {
       createMutation.mutate(dto);

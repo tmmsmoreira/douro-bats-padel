@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -129,6 +130,22 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
       logo: formData.logo.trim() || undefined,
       courts: formData.courts,
     };
+
+    // Check for changes in edit mode
+    if (venueId && initialData) {
+      const hasChanges =
+        formData.name.trim() !== initialData.name ||
+        formData.address.trim() !== (initialData.address || '') ||
+        formData.logo.trim() !== (initialData.logo || '') ||
+        JSON.stringify(formData.courts.sort()) !==
+          JSON.stringify(initialData.courts.map((c) => c.label).sort());
+
+      if (!hasChanges) {
+        toast.info(t('noChangesToSave') || 'No changes to save');
+        router.push('/admin/venues');
+        return;
+      }
+    }
 
     saveMutation.mutate(dto);
   };

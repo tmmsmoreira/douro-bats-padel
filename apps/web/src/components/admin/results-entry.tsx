@@ -161,6 +161,21 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
       return;
     }
 
+    // Check if the result has changed from the existing match
+    const existingMatch = matches?.find(
+      (m) => m.courtId === assignment.courtId && m.round === assignment.round
+    );
+
+    if (existingMatch) {
+      const hasChanges =
+        existingMatch.setsA !== result.setsA || existingMatch.setsB !== result.setsB;
+
+      if (!hasChanges) {
+        toast.info(t('noChangesToSave') || 'No changes to save');
+        return;
+      }
+    }
+
     saveMatchMutation.mutate({
       eventId,
       courtId: assignment.courtId,

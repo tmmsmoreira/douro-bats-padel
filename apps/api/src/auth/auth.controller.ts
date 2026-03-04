@@ -58,6 +58,16 @@ export class AuthController {
     return this.authService.updateProfilePhoto(req.user.sub, body.profilePhoto);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Patch('profile')
+  async updateProfile(
+    @Req() req: any,
+    @Body()
+    body: { name?: string; dateOfBirth?: string; phoneNumber?: string; profilePhoto?: string }
+  ) {
+    return this.authService.updateProfile(req.user.sub, body);
+  }
+
   @Post('verify-email')
   async verifyEmail(@Body() body: { token: string }) {
     return this.authService.verifyEmail(body.token);

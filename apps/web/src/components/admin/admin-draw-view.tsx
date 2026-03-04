@@ -574,6 +574,23 @@ function EditAssignmentDialog({
       toast.error(t('teamValidationError'));
       return;
     }
+
+    // Check if teams have changed
+    const originalTeamA = assignment.teamA.map((p) => p.id).sort();
+    const originalTeamB = assignment.teamB.map((p) => p.id).sort();
+    const newTeamA = [...teamA].sort();
+    const newTeamB = [...teamB].sort();
+
+    const hasChanges =
+      JSON.stringify(originalTeamA) !== JSON.stringify(newTeamA) ||
+      JSON.stringify(originalTeamB) !== JSON.stringify(newTeamB);
+
+    if (!hasChanges) {
+      toast.info(t('noChangesToSave') || 'No changes to save');
+      onClose();
+      return;
+    }
+
     onSave(teamA, teamB);
   };
 

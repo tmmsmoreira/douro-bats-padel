@@ -237,6 +237,8 @@ export class AuthService {
       id: user.id,
       email: user.email,
       name: user.name,
+      dateOfBirth: user.dateOfBirth,
+      phoneNumber: user.phoneNumber,
       profilePhoto: user.profilePhoto,
       roles: user.roles,
       player: user.player,
@@ -340,6 +342,57 @@ export class AuthService {
       id: user.id,
       email: user.email,
       name: user.name,
+      profilePhoto: user.profilePhoto,
+      roles: user.roles,
+      player: user.player,
+    };
+  }
+
+  async updateProfile(
+    userId: string,
+    data: {
+      name?: string;
+      dateOfBirth?: string;
+      phoneNumber?: string;
+      profilePhoto?: string;
+    }
+  ) {
+    // Check if phone number is already taken by another user
+    if (data.phoneNumber) {
+      const existingUser = await this.prisma.user.findFirst({
+        where: {
+          phoneNumber: data.phoneNumber,
+          NOT: { id: userId },
+        },
+      });
+
+      if (existingUser) {
+        throw new ConflictException('Phone number already in use');
+      }
+    }
+
+    const updateData: any = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.phoneNumber !== undefined) updateData.phoneNumber = data.phoneNumber;
+    if (data.profilePhoto !== undefined) updateData.profilePhoto = data.profilePhoto;
+    if (data.dateOfBirth !== undefined) {
+      updateData.dateOfBirth = data.dateOfBirth ? new Date(data.dateOfBirth) : null;
+    }
+
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+      include: {
+        player: true,
+      },
+    });
+
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      dateOfBirth: user.dateOfBirth,
+      phoneNumber: user.phoneNumber,
       profilePhoto: user.profilePhoto,
       roles: user.roles,
       player: user.player,

@@ -2,7 +2,7 @@ import type React from 'react';
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import { Footer } from '@/components/public/footer';
-import { AdminNavClient } from '@/components/shared/client-nav-wrapper';
+import { AdminNavWithContext } from '@/components/shared/admin-nav-with-context';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -19,7 +19,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <AdminNavClient />
+      <AdminNavWithContext />
       <main className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-1 max-w-4xl min-h-[500px]">
         {children}
       </main>

@@ -542,6 +542,7 @@
   },
   "resultsEntry": {
     "loading": "A carregar...",
+    "backToEvent": "Voltar ao Evento",
     "eventNotPublished": "Evento Não Publicado",
     "eventNotPublishedDescription": "Os resultados só podem ser inseridos após o sorteio do evento ter sido publicado.",
     "eventNotCompleted": "Evento Não Concluído",
@@ -681,6 +682,7 @@
   "adminDrawView": {
     "loading": "A carregar sorteio...",
     "notAvailable": "Sorteio ainda não disponível",
+    "backToEvent": "Voltar ao Evento",
     "manageDraw": "Gerir Sorteio",
     "viewDraw": "Ver Sorteio",
     "generateNew": "Gerar Novo",

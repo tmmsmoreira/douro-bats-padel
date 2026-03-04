@@ -18,7 +18,6 @@ import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { LanguageMenuItems } from '@/components/shared/language-menu-items';
 import { MenuToggle } from '@/components/shared/menu-toggle';
 import { useTranslations } from 'next-intl';
-import { motion } from 'motion/react';
 import { MobileMenu } from '@/components/shared/mobile-menu';
 
 export function PlayerNav() {
@@ -29,11 +28,6 @@ export function PlayerNav() {
 
   const userIconRef = useRef<{ startAnimation: () => void; stopAnimation: () => void }>(null);
   const signOutIconRef = useRef<{ startAnimation: () => void; stopAnimation: () => void }>(null);
-
-  // Track that user is in player view
-  useEffect(() => {
-    sessionStorage.setItem('lastView', 'player');
-  }, []);
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {
@@ -59,11 +53,7 @@ export function PlayerNav() {
 
   return (
     <>
-      <motion.header
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border/50"
-      >
+      <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border/50">
         <nav className="border-b bg-card sticky top-0 z-50">
           <div className="container mx-auto px-4">
             <div className="flex h-16 items-center justify-between">
@@ -93,7 +83,13 @@ export function PlayerNav() {
 
                 <div className="flex items-center gap-4">
                   {isEditor && (
-                    <Link href="/admin">
+                    <Link
+                      href="/admin"
+                      onClick={() => {
+                        sessionStorage.setItem('lastView', 'admin');
+                        window.dispatchEvent(new Event('viewChanged'));
+                      }}
+                    >
                       <Button variant="ghost" size="xs" className="uppercase">
                         {t('adminView')}
                       </Button>
@@ -174,7 +170,7 @@ export function PlayerNav() {
             </div>
           </div>
         </nav>
-      </motion.header>
+      </header>
 
       {/* Full-Screen Mobile Menu */}
       <MobileMenu

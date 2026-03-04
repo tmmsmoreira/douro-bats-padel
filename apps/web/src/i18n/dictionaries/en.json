@@ -569,6 +569,7 @@
   },
   "resultsEntry": {
     "loading": "Loading...",
+    "backToEvent": "Back to Event",
     "eventNotPublished": "Event Not Published",
     "eventNotPublishedDescription": "Results can only be entered after the event draw has been published.",
     "eventNotCompleted": "Event Not Completed",
@@ -708,6 +709,7 @@
   "adminDrawView": {
     "loading": "Loading draw...",
     "notAvailable": "Draw not available yet",
+    "backToEvent": "Back to Event",
     "manageDraw": "Manage Draw",
     "viewDraw": "View Draw",
     "generateNew": "Generate New",

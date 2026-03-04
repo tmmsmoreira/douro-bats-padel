@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { DeleteIcon, DeleteIconHandle } from 'lucide-animated';
+import { ArrowLeftIcon, ArrowLeftIconHandle, DeleteIcon, DeleteIconHandle } from 'lucide-animated';
 import { Calendar, MapPin, Clock } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { toast } from 'sonner';
@@ -66,6 +66,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const deleteIconRef = useRef<DeleteIconHandle>(null);
+  const arrowLeftIconRef = useRef<ArrowLeftIconHandle>(null);
 
   const { data: event, isLoading } = useQuery({
     queryKey: ['event', eventId, session?.accessToken],
@@ -212,6 +213,16 @@ export function EventDetails({ eventId }: { eventId: string }) {
 
   return (
     <div className="space-y-6">
+      {/* Back Button */}
+      <div>
+        <Link href="/admin" onMouseEnter={() => arrowLeftIconRef.current?.startAnimation()}>
+          <Button variant="ghost" size="sm">
+            <ArrowLeftIcon ref={arrowLeftIconRef} size={16} />
+            {t('backToEvents')}
+          </Button>
+        </Link>
+      </div>
+
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">{event.title || t('untitledEvent')}</h1>

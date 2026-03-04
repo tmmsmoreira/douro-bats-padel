@@ -18,7 +18,6 @@ import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { LanguageMenuItems } from '@/components/shared/language-menu-items';
 import { MenuToggle } from '@/components/shared/menu-toggle';
 import { useTranslations } from 'next-intl';
-import { motion } from 'motion/react';
 import { MobileMenu } from '@/components/shared/mobile-menu';
 
 export function AdminNav() {
@@ -29,11 +28,6 @@ export function AdminNav() {
 
   const signOutIconRef = useRef<LogoutIconHandle>(null);
   const userIconRef = useRef<UserIconHandle>(null);
-
-  // Track that user is in admin view
-  useEffect(() => {
-    sessionStorage.setItem('lastView', 'admin');
-  }, []);
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {
@@ -59,11 +53,7 @@ export function AdminNav() {
 
   return (
     <>
-      <motion.header
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border/50"
-      >
+      <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border/50">
         <nav className="border-b bg-card sticky top-0 z-50">
           <div className="container mx-auto px-4">
             <div className="flex h-16 items-center justify-between">
@@ -95,7 +85,13 @@ export function AdminNav() {
                 </div>
 
                 <div className="flex items-center gap-4">
-                  <Link href="/">
+                  <Link
+                    href="/"
+                    onClick={() => {
+                      sessionStorage.setItem('lastView', 'player');
+                      window.dispatchEvent(new Event('viewChanged'));
+                    }}
+                  >
                     <Button variant="ghost" size="xs" className="uppercase">
                       {t('playerView')}
                     </Button>
@@ -175,7 +171,7 @@ export function AdminNav() {
             </div>
           </div>
         </nav>
-      </motion.header>
+      </header>
 
       {/* Full-Screen Mobile Menu */}
       <MobileMenu

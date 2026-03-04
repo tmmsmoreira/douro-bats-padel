@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -19,6 +19,8 @@ import {
   ArchiveRestore,
   Clock,
 } from 'lucide-react';
+import { ArrowLeftIcon, ArrowLeftIconHandle } from 'lucide-animated';
+import Link from 'next/link';
 import {
   Dialog,
   DialogContent,
@@ -105,6 +107,7 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
   const queryClient = useQueryClient();
   const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const arrowLeftIconRef = useRef<ArrowLeftIconHandle>(null);
 
   const { data: draw, isLoading } = useQuery<Draw>({
     queryKey: ['draw', eventId],
@@ -282,6 +285,19 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
 
   return (
     <div className="space-y-6">
+      {/* Back Button */}
+      <div>
+        <Link
+          href={`/admin/events/${eventId}`}
+          onMouseEnter={() => arrowLeftIconRef.current?.startAnimation()}
+        >
+          <Button variant="ghost" size="sm">
+            <ArrowLeftIcon ref={arrowLeftIconRef} size={16} />
+            {t('backToEvent')}
+          </Button>
+        </Link>
+      </div>
+
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">{hasEventPassed ? t('viewDraw') : t('manageDraw')}</h1>

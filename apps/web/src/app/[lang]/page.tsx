@@ -3,7 +3,7 @@ import { EventsList } from '@/components/shared/events-list';
 import { PastEventsList } from '@/components/shared/past-events-list';
 import { Footer } from '@/components/public/footer';
 import { getTranslations } from 'next-intl/server';
-import { HomeNavClient } from '@/components/shared/client-nav-wrapper';
+import { HomeAdaptiveNav } from '@/components/shared/home-adaptive-nav';
 
 export default async function HomePage() {
   const session = await auth();
@@ -11,7 +11,7 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <HomeNavClient />
+      <HomeAdaptiveNav />
       <main className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-1 max-w-4xl min-h-[500px]">
         <div className="space-y-8 sm:space-y-12">
           <div className="space-y-4 sm:space-y-6">

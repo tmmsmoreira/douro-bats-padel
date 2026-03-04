@@ -10,9 +10,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
 import { Lock, Loader2, Save } from 'lucide-react';
-import { LockIcon, LockIconHandle } from 'lucide-animated';
+import { ArrowLeftIcon, ArrowLeftIconHandle, LockIcon, LockIconHandle } from 'lucide-animated';
 import { useAuthFetch } from '@/hooks';
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
 
 interface Match {
   id: string;
@@ -71,6 +72,7 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
     Record<string, { setsA: number; setsB: number }>
   >({});
   const lockIconRef = useRef<LockIconHandle>(null);
+  const arrowLeftIconRef = useRef<ArrowLeftIconHandle>(null);
 
   // Fetch event data to check state and date
   const { data: event, isLoading: isLoadingEvent } = useQuery<Event>({
@@ -265,6 +267,19 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
 
   return (
     <div className="space-y-6">
+      {/* Back Button */}
+      <div>
+        <Link
+          href={`/admin/events/${eventId}`}
+          onMouseEnter={() => arrowLeftIconRef.current?.startAnimation()}
+        >
+          <Button variant="ghost" size="sm">
+            <ArrowLeftIcon ref={arrowLeftIconRef} size={16} />
+            {t('backToEvent')}
+          </Button>
+        </Link>
+      </div>
+
       {/* Header with stats */}
       <Card>
         <CardHeader>

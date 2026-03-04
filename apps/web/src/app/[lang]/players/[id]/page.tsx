@@ -1,5 +1,5 @@
 import { PublicPlayerProfile } from '@/components/player/public-player-profile';
-import { PlayerNav } from '@/components/player/player-nav';
+import { AdaptiveNav } from '@/components/shared/adaptive-nav';
 import { Footer } from '@/components/public/footer';
 
 export default async function PlayerProfilePage({ params }: { params: Promise<{ id: string }> }) {
@@ -7,7 +7,7 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <PlayerNav />
+      <AdaptiveNav />
       <main className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-1 max-w-4xl min-h-[500px]">
         <PublicPlayerProfile playerId={id} />
       </main>

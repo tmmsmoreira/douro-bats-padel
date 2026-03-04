@@ -65,7 +65,7 @@ export function RegisterForm() {
     };
 
     validateInvitation();
-  }, [invitationToken]);
+  }, [invitationToken, t]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

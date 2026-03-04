@@ -4,8 +4,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import { HomeNav } from '@/components/shared/home-nav';
-import { Footer } from '@/components/shared/footer';
+import { HomeNav } from '@/components/public/home-nav';
+import { Footer } from '@/components/public/footer';
 
 interface FAQItem {
   question: string;

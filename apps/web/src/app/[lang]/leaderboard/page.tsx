@@ -1,5 +1,5 @@
 import { Leaderboard } from '@/components/player/leaderboard';
-import { Footer } from '@/components/shared/footer';
+import { Footer } from '@/components/public/footer';
 import { getTranslations } from 'next-intl/server';
 import { AdaptiveNav } from '@/components/shared/adaptive-nav';
 

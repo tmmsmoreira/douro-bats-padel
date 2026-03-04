@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PlayerNav } from './player-nav';
-import { Footer } from '@/components/footer';
+import { Footer } from '@/components/public/footer';
 import { cn } from '@/lib/utils';
 import { MapPin, Calendar, Clock } from 'lucide-react';
 

@@ -2,8 +2,8 @@
 
 import { Suspense } from 'react';
 import { VerifyEmailForm } from '@/components/auth/verify-email-form';
-import { LanguageToggleButton } from '@/components/language-toggle-button';
-import { ThemeToggleButton } from '@/components/theme-toggle-button';
+import { LanguageToggleButton } from '@/components/shared/language-toggle-button';
+import { ThemeToggleButton } from '@/components/shared/theme-toggle-button';
 
 export default function VerifyEmailPage() {
   return (

@@ -1,6 +1,6 @@
 import { ForgotPasswordForm } from '@/components/auth/forgot-password-form';
-import { LanguageToggleButton } from '@/components/language-toggle-button';
-import { ThemeToggleButton } from '@/components/theme-toggle-button';
+import { LanguageToggleButton } from '@/components/shared/language-toggle-button';
+import { ThemeToggleButton } from '@/components/shared/theme-toggle-button';
 
 export default function ForgotPasswordPage() {
   return (

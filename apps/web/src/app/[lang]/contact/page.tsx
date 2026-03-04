@@ -7,8 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Mail, Phone, MapPin, Clock } from 'lucide-react';
-import { HomeNav } from '@/components/shared/home-nav';
-import { Footer } from '@/components/shared/footer';
+import { HomeNav } from '@/components/public/home-nav';
+import { Footer } from '@/components/public/footer';
 import { useTranslations } from 'next-intl';
 
 export default function ContactPage() {

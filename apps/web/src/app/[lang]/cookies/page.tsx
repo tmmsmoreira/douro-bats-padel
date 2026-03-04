@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { HomeNav } from '@/components/shared/home-nav';
-import { Footer } from '@/components/shared/footer';
+import { HomeNav } from '@/components/public/home-nav';
+import { Footer } from '@/components/public/footer';
 
 export default function CookiesPage() {
   return (

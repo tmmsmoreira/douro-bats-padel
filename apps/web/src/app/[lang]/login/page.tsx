@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { LoginForm } from '@/components/auth/login-form';
-import { LanguageToggleButton } from '@/components/language-toggle-button';
-import { ThemeToggleButton } from '@/components/theme-toggle-button';
+import { LanguageToggleButton } from '@/components/shared/language-toggle-button';
+import { ThemeToggleButton } from '@/components/shared/theme-toggle-button';
 import Image from 'next/image';
 
 export default function LoginPage() {

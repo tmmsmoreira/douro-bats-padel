@@ -2,7 +2,6 @@
 
 import { motion } from 'motion/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { formatDate, formatTime } from '@/lib/utils';
 import { Clock, MapPin } from 'lucide-react';
 import type { EventWithRSVP } from '@padel/types';
@@ -20,7 +19,6 @@ export function EventCard({
   event,
   children,
   showVenue = true,
-  showStatus = false,
   headerActions,
   animate = false,
 }: EventCardProps) {

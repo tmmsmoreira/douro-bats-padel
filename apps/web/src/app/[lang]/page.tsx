@@ -1,7 +1,7 @@
 import { auth } from '@/lib/auth';
 import { EventsList } from '@/components/shared/events-list';
 import { PastEventsList } from '@/components/shared/past-events-list';
-import { Footer } from '@/components/shared/footer';
+import { Footer } from '@/components/public/footer';
 import { getTranslations } from 'next-intl/server';
 import { HomeNavClient } from '@/components/shared/client-nav-wrapper';
 

@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PlayerNav } from './player-nav';
-import { Footer } from '@/components/footer';
+import { Footer } from '@/components/public/footer';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -16,6 +16,11 @@ interface Player {
   rating: number;
 }
 
+interface Court {
+  id: string;
+  label: string;
+}
+
 interface Match {
   id: string;
   round: number;
@@ -23,6 +28,9 @@ interface Match {
   setsB: number;
   teamA: Player[];
   teamB: Player[];
+  court?: Court;
+  courtId?: string;
+  tier?: string;
 }
 
 export function ResultsView({ eventId }: { eventId: string }) {
@@ -89,7 +97,7 @@ export function ResultsView({ eventId }: { eventId: string }) {
             <p className="text-muted-foreground">{t('description')}</p>
           </div>
 
-          {Object.entries(rounds).map(([round, roundMatches]: [string, Match[]]) => (
+          {(Object.entries(rounds) as [string, Match[]][]).map(([round, roundMatches]) => (
             <Card key={round}>
               <CardHeader>
                 <CardTitle>{t('round', { round })}</CardTitle>
@@ -105,9 +113,9 @@ export function ResultsView({ eventId }: { eventId: string }) {
                       <div key={match.id} className="border rounded-lg p-4">
                         <div className="flex items-center justify-between mb-3">
                           <Badge variant="outline">
-                            {match.court?.label || t('court', { court: match.courtId })}
+                            {match.court?.label || t('court', { court: match.courtId || '' })}
                           </Badge>
-                          <Badge variant="secondary">{match.tier}</Badge>
+                          {match.tier && <Badge variant="secondary">{match.tier}</Badge>}
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
                           <div className={`space-y-1 ${teamAWon ? 'font-bold' : ''}`}>

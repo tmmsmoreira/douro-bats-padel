@@ -3,8 +3,8 @@
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { ResetPasswordForm } from '@/components/auth/reset-password-form';
-import { LanguageToggleButton } from '@/components/language-toggle-button';
-import { ThemeToggleButton } from '@/components/theme-toggle-button';
+import { LanguageToggleButton } from '@/components/shared/language-toggle-button';
+import { ThemeToggleButton } from '@/components/shared/theme-toggle-button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 

@@ -1,10 +1,11 @@
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import type { EventWithRSVP } from '@padel/types';
+import type { Session } from 'next-auth';
 
 interface RSVPButtonsProps {
   event: EventWithRSVP;
-  session: any;
+  session: Session | null;
   onRSVP: (eventId: string, status: 'IN' | 'OUT') => void;
   isPending: boolean;
   registerText?: string;

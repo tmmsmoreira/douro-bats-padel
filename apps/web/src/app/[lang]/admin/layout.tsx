@@ -1,7 +1,7 @@
 import type React from 'react';
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
-import { Footer } from '@/components/shared/footer';
+import { Footer } from '@/components/public/footer';
 import { AdminNavClient } from '@/components/shared/client-nav-wrapper';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {

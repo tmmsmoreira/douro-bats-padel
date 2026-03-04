@@ -8,7 +8,7 @@ const nextConfig = {
     optimizePackageImports: ['lucide-animated'],
   },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   images: {
     unoptimized: true,

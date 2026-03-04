@@ -262,8 +262,8 @@ importers:
         version: 5.0.8(@types/react@19.2.2)(react@19.2.0)
     devDependencies:
       baseline-browser-mapping:
-        specifier: ^2.9.19
-        version: 2.9.19
+        specifier: ^2.10.0
+        version: 2.10.0
 
   packages/config:
     devDependencies:
@@ -7819,11 +7819,12 @@ packages:
     engines: { node: ^4.5.0 || >= 5.9 }
     dev: false
 
-  /baseline-browser-mapping@2.9.19:
+  /baseline-browser-mapping@2.10.0:
     resolution:
       {
-        integrity: sha512-ipDqC8FrAl/76p2SSWKSI+H9tFwm7vYqXQrItCuiVPt26Km0jS+NzSsBWAaBusvSbQcfJG+JitdMm+wZAgTYqg==,
+        integrity: sha512-lIyg0szRfYbiy67j9KN8IyeD7q7hcmqnJ1ddWmNt19ItGpNN64mnllmxUNFIOdOm6by97jlL6wfpTTJrmnjWAA==,
       }
+    engines: { node: '>=6.0.0' }
     hasBin: true
 
   /basic-ftp@5.0.5:
@@ -7952,7 +7953,7 @@ packages:
     engines: { node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7 }
     hasBin: true
     dependencies:
-      baseline-browser-mapping: 2.9.19
+      baseline-browser-mapping: 2.10.0
       caniuse-lite: 1.0.30001751
       electron-to-chromium: 1.5.241
       node-releases: 2.0.26
@@ -7967,7 +7968,7 @@ packages:
     engines: { node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7 }
     hasBin: true
     dependencies:
-      baseline-browser-mapping: 2.9.19
+      baseline-browser-mapping: 2.10.0
       caniuse-lite: 1.0.30001769
       electron-to-chromium: 1.5.286
       node-releases: 2.0.27

@@ -1,5 +1,5 @@
 import { PlayerProfile } from '@/components/player/player-profile';
-import { Footer } from '@/components/shared/footer';
+import { Footer } from '@/components/public/footer';
 import { AdaptiveNav } from '@/components/shared/adaptive-nav';
 
 export default function ProfilePage() {

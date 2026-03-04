@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Trophy, Users, Calendar, TrendingUp } from 'lucide-react';
-import { Footer } from '@/components/shared/footer';
+import { Footer } from '@/components/public/footer';
 import { HomeNavClient } from '@/components/shared/client-nav-wrapper';
 import { getTranslations } from 'next-intl/server';
 

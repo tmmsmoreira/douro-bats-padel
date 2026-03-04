@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Link, usePathname } from '@/i18n/navigation';
+import { Link } from '@/i18n/navigation';
+import { useActivePathname } from '@/hooks/use-active-pathname';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -21,7 +22,7 @@ import { useTranslations } from 'next-intl';
 import { MobileMenu } from '@/components/shared/mobile-menu';
 
 export function PlayerNav() {
-  const pathname = usePathname();
+  const pathname = useActivePathname();
   const { data: session } = useSession();
   const t = useTranslations('nav');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -87,7 +88,8 @@ export function PlayerNav() {
                       href="/admin"
                       onClick={() => {
                         sessionStorage.setItem('lastView', 'admin');
-                        window.dispatchEvent(new Event('viewChanged'));
+                        // Don't dispatch viewChanged immediately - let the URL change first
+                        // The AdaptiveNav will detect the URL change and switch automatically
                       }}
                     >
                       <Button variant="ghost" size="xs" className="uppercase">

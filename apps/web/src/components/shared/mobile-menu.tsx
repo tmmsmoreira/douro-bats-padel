@@ -1,7 +1,8 @@
 'use client';
 
 import { motion, AnimatePresence } from 'motion/react';
-import { Link, usePathname } from '@/i18n/navigation';
+import { Link } from '@/i18n/navigation';
+import { useActivePathname } from '@/hooks/use-active-pathname';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -41,7 +42,7 @@ export function MobileMenu({
   showAccountSection = true,
   showSignInButton = false,
 }: MobileMenuProps) {
-  const pathname = usePathname();
+  const pathname = useActivePathname();
 
   return (
     <AnimatePresence>

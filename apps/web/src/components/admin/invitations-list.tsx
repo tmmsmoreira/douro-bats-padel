@@ -21,6 +21,7 @@ export function InvitationsList() {
   const { data: session } = useSession();
   const queryClient = useQueryClient();
   const [revokeInvitationId, setRevokeInvitationId] = useState<string | null>(null);
+  const [deleteInvitationId, setDeleteInvitationId] = useState<string | null>(null);
 
   const { data: invitations, isLoading } = useQuery<Invitation[]>({
     queryKey: ['invitations'],
@@ -49,10 +50,10 @@ export function InvitationsList() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invitations'] });
-      toast.success(t('invitationRevoked'));
+      toast.success(t('revokedInvitation'));
     },
     onError: () => {
-      toast.error(t('invitationError'));
+      toast.error(t('revokedInvitationError'));
     },
   });
 
@@ -76,6 +77,25 @@ export function InvitationsList() {
     },
     onError: (error: Error) => {
       toast.error(error.message || t('resendInvitationError'));
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`${API_URL}/invitations/${id}/permanent`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${session?.accessToken}`,
+        },
+      });
+      if (!res.ok) throw new Error('Failed to delete invitation');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['invitations'] });
+      toast.success(t('invitationDeleted'));
+    },
+    onError: () => {
+      toast.error(t('deleteInvitationError'));
     },
   });
 
@@ -107,7 +127,7 @@ export function InvitationsList() {
 
   if (!invitations || invitations.length === 0) {
     return (
-      <Card>
+      <Card className="glass-card">
         <CardContent className="py-8 text-center text-muted-foreground">
           {t('noInvitations')}
         </CardContent>
@@ -118,7 +138,7 @@ export function InvitationsList() {
   return (
     <div className="space-y-4">
       {invitations.map((invitation) => (
-        <Card key={invitation.id}>
+        <Card className="glass-card" key={invitation.id}>
           <CardContent className="p-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex-1 space-y-2">
@@ -167,6 +187,16 @@ export function InvitationsList() {
                     </Button>
                   </>
                 )}
+                {invitation.status === 'REVOKED' && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setDeleteInvitationId(invitation.id)}
+                  >
+                    <DeleteIcon size={16} className="h-4 w-4" />
+                    {t('deleteInvitation')}
+                  </Button>
+                )}
               </div>
             </div>
           </CardContent>
@@ -179,13 +209,32 @@ export function InvitationsList() {
         onOpenChange={(open) => !open && setRevokeInvitationId(null)}
         title={t('confirmRevokeInvitation')}
         description="This action cannot be undone."
-        confirmText="Revoke"
-        cancelText="Cancel"
+        confirmText={t('revokeInvitation')}
+        confirmingText={t('revokingInvitation')}
+        cancelText={t('cancel')}
         variant="default"
         onConfirm={() => {
           if (revokeInvitationId) {
             revokeMutation.mutate(revokeInvitationId);
             setRevokeInvitationId(null);
+          }
+        }}
+      />
+
+      {/* Delete Invitation Confirmation Dialog */}
+      <ConfirmationDialog
+        open={!!deleteInvitationId}
+        onOpenChange={(open) => !open && setDeleteInvitationId(null)}
+        title={t('confirmDeleteInvitation')}
+        description="This will permanently delete this invitation from the database. This action cannot be undone."
+        confirmText={t('deleteInvitation')}
+        confirmingText={t('deletingInvitation')}
+        cancelText={t('cancel')}
+        variant="destructive"
+        onConfirm={() => {
+          if (deleteInvitationId) {
+            deleteMutation.mutate(deleteInvitationId);
+            setDeleteInvitationId(null);
           }
         }}
       />

@@ -8,6 +8,7 @@ import type { LeaderboardEntry } from '@padel/types';
 import { ArrowUp, ArrowDown, Minus, Trophy } from 'lucide-react';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
+import { Spinner } from '../ui/spinner';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -24,7 +25,12 @@ export function Leaderboard() {
   });
 
   if (isLoading) {
-    return <div className="text-center py-8">{t('loadingRankings')}</div>;
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Spinner data-icon="inline-start" className="mr-2" />
+        {t('loadingRankings')}
+      </div>
+    );
   }
 
   const topThree = leaderboard?.slice(0, 3) || [];

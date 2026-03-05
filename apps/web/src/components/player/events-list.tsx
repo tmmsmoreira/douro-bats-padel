@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useUpcomingEvents, useRSVP } from '@/hooks';
 import { EventCard, EventStats } from '@/components/shared';
+import { Spinner } from '../ui/spinner';
 
 export function EventsList() {
   const t = useTranslations('playerEventsList');
@@ -15,7 +16,12 @@ export function EventsList() {
   const rsvpMutation = useRSVP([['player-events']]);
 
   if (isLoading) {
-    return <div className="text-center py-8">{t('loadingEvents')}</div>;
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Spinner data-icon="inline-start" className="mr-2" />
+        {t('loadingEvents')}
+      </div>
+    );
   }
 
   if (!events || events.length === 0) {

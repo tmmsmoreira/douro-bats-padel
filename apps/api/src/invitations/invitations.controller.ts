@@ -56,4 +56,11 @@ export class InvitationsController {
   async resend(@Param('id') id: string, @Req() req: any): Promise<Invitation> {
     return this.invitationsService.resend(id, req.user.sub);
   }
+
+  @Delete(':id/permanent')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.EDITOR)
+  async deletePermanently(@Param('id') id: string, @Req() req: any): Promise<void> {
+    return this.invitationsService.deletePermanently(id, req.user.sub);
+  }
 }

@@ -283,4 +283,34 @@ export class InvitationsService {
 
     return invitation as Invitation;
   }
+
+  async deletePermanently(id: string, userId: string): Promise<void> {
+    const invitation = await this.prisma.invitation.findUnique({
+      where: { id },
+    });
+
+    if (!invitation) {
+      throw new NotFoundException('Invitation not found');
+    }
+
+    // Only the user who created the invitation or an admin can delete it
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (invitation.invitedBy !== userId && !user?.roles.includes('ADMIN')) {
+      throw new BadRequestException('You do not have permission to delete this invitation');
+    }
+
+    // Only allow deletion of REVOKED or EXPIRED invitations
+    if (invitation.status !== 'REVOKED' && invitation.status !== 'EXPIRED') {
+      throw new BadRequestException(
+        `Cannot delete invitation with status ${invitation.status}. Only REVOKED or EXPIRED invitations can be deleted.`
+      );
+    }
+
+    await this.prisma.invitation.delete({
+      where: { id },
+    });
+  }
 }

@@ -14,6 +14,7 @@ import { ArrowLeftIcon, ArrowLeftIconHandle, LockIcon, LockIconHandle } from 'lu
 import { useAuthFetch } from '@/hooks';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
+import { PageHeader } from '../shared/page-header';
 
 interface Match {
   id: string;
@@ -266,343 +267,340 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
   const hasPublishedMatches = matches?.some((m) => m.publishedAt !== null);
 
   return (
-    <div className="space-y-6">
-      {/* Back Button */}
-      <div>
-        <Link
-          href={`/admin/events/${eventId}`}
-          onMouseEnter={() => arrowLeftIconRef.current?.startAnimation()}
-        >
-          <Button variant="ghost" size="sm">
-            <ArrowLeftIcon ref={arrowLeftIconRef} size={16} />
-            {t('backToEvent')}
-          </Button>
-        </Link>
-      </div>
+    <div className="space-y-8">
+      <PageHeader
+        title={t('title')}
+        description={t('description')}
+        showBackButton
+        backButtonHref={`/admin/events/${eventId}`}
+        backButtonLabel={t('backToEvent')}
+      />
 
-      {/* Header with stats */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>{t('matchResultsEntry')}</CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">
-                {t('matchesEntered', { entered: enteredMatches, total: totalMatches })}
-              </p>
+      <div className="space-y-8">
+        {/* Header with stats */}
+        <Card className="glass-card">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>{t('matchResultsEntry')}</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {t('matchesEntered', { entered: enteredMatches, total: totalMatches })}
+                </p>
+              </div>
+              <div className="flex gap-2">
+                {hasPublishedMatches && (
+                  <Badge variant="default" className="gap-1">
+                    <Lock className="h-3 w-3" />
+                    {t('published')}
+                  </Badge>
+                )}
+                {!hasPublishedMatches && (
+                  <Button
+                    onClick={() => setShowPublishDialog(true)}
+                    disabled={!allMatchesEntered || publishMutation.isPending}
+                    className="gap-2"
+                    onMouseEnter={() => lockIconRef.current?.startAnimation()}
+                    onMouseLeave={() => lockIconRef.current?.stopAnimation()}
+                  >
+                    <LockIcon ref={lockIconRef} size={16} />
+                    {t('publishResults')}
+                  </Button>
+                )}
+              </div>
             </div>
-            <div className="flex gap-2">
-              {hasPublishedMatches && (
-                <Badge variant="default" className="gap-1">
-                  <Lock className="h-3 w-3" />
-                  {t('published')}
-                </Badge>
-              )}
-              {!hasPublishedMatches && (
-                <Button
-                  onClick={() => setShowPublishDialog(true)}
-                  disabled={!allMatchesEntered || publishMutation.isPending}
-                  className="gap-2"
-                  onMouseEnter={() => lockIconRef.current?.startAnimation()}
-                  onMouseLeave={() => lockIconRef.current?.stopAnimation()}
-                >
-                  <LockIcon ref={lockIconRef} size={16} />
-                  {t('publishResults')}
-                </Button>
-              )}
-            </div>
+          </CardHeader>
+        </Card>
+
+        {/* Masters Results */}
+        {Object.keys(mastersRounds).length > 0 && (
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold">{t('masters')}</h2>
+            {Object.entries(mastersRounds)
+              .sort(([a], [b]) => parseInt(a) - parseInt(b))
+              .map(([round, assignments]) => (
+                <Card className="glass-card" key={`masters-${round}`}>
+                  <CardHeader>
+                    <CardTitle className="text-lg">{t('round', { round })}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="space-y-4">
+                      {assignments.map((assignment) => {
+                        const key = `${assignment.courtId}-${assignment.round}`;
+                        const result = matchResults[key] || { setsA: 0, setsB: 0 };
+                        const existingMatch = matches?.find(
+                          (m) => m.courtId === assignment.courtId && m.round === assignment.round
+                        );
+                        const isPublished = existingMatch
+                          ? existingMatch.publishedAt !== null
+                          : false;
+                        const isSaved = !!existingMatch;
+
+                        return (
+                          <div
+                            key={assignment.id}
+                            className={`border rounded-lg p-4 ${isPublished ? 'bg-muted/50' : ''}`}
+                          >
+                            <div className="flex items-center justify-between mb-4">
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline">
+                                  {assignment.court?.label || `Court ${assignment.courtId}`}
+                                </Badge>
+                                <Badge variant="secondary">{assignment.tier}</Badge>
+                                {isSaved && !isPublished && (
+                                  <Badge variant="outline" className="bg-blue-50 dark:bg-blue-950">
+                                    {t('saved')}
+                                  </Badge>
+                                )}
+                                {isPublished && (
+                                  <Badge variant="default" className="gap-1">
+                                    <Lock className="h-3 w-3" />
+                                    {t('published')}
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                              {/* Team A */}
+                              <div className="space-y-1">
+                                <p className="text-sm font-medium">{t('teamA')}</p>
+                                {assignment.teamA?.map((player, idx) => (
+                                  <p key={idx} className="text-sm text-muted-foreground">
+                                    {player.name}
+                                  </p>
+                                ))}
+                              </div>
+
+                              {/* Score Input */}
+                              <div className="flex items-center justify-center gap-4">
+                                <div className="space-y-2">
+                                  <Label htmlFor={`${key}-setsA`} className="sr-only">
+                                    {t('teamASets')}
+                                  </Label>
+                                  <Input
+                                    id={`${key}-setsA`}
+                                    type="number"
+                                    min="0"
+                                    max="6"
+                                    value={result.setsA}
+                                    onChange={(e) =>
+                                      handleScoreChange(
+                                        assignment.courtId,
+                                        assignment.round,
+                                        'A',
+                                        e.target.value
+                                      )
+                                    }
+                                    disabled={isPublished}
+                                    className="w-20 text-center text-lg font-bold"
+                                  />
+                                </div>
+                                <span className="text-2xl font-bold">-</span>
+                                <div className="space-y-2">
+                                  <Label htmlFor={`${key}-setsB`} className="sr-only">
+                                    {t('teamBSets')}
+                                  </Label>
+                                  <Input
+                                    id={`${key}-setsB`}
+                                    type="number"
+                                    min="0"
+                                    max="6"
+                                    value={result.setsB}
+                                    onChange={(e) =>
+                                      handleScoreChange(
+                                        assignment.courtId,
+                                        assignment.round,
+                                        'B',
+                                        e.target.value
+                                      )
+                                    }
+                                    disabled={isPublished}
+                                    className="w-20 text-center text-lg font-bold"
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Team B */}
+                              <div className="space-y-1">
+                                <p className="text-sm font-medium">{t('teamB')}</p>
+                                {assignment.teamB?.map((player, idx) => (
+                                  <p key={idx} className="text-sm text-muted-foreground">
+                                    {player.name}
+                                  </p>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Save button */}
+                            {!isPublished && (
+                              <div className="mt-4 flex justify-end">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleSaveMatch(assignment)}
+                                  disabled={saveMatchMutation.isPending}
+                                  className="gap-2"
+                                >
+                                  <Save className="h-4 w-4" />
+                                  {isSaved ? t('update') : t('save')}
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
           </div>
-        </CardHeader>
-      </Card>
+        )}
 
-      {/* Masters Results */}
-      {Object.keys(mastersRounds).length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-2xl font-bold">{t('masters')}</h2>
-          {Object.entries(mastersRounds)
-            .sort(([a], [b]) => parseInt(a) - parseInt(b))
-            .map(([round, assignments]) => (
-              <Card key={`masters-${round}`}>
-                <CardHeader>
-                  <CardTitle className="text-lg">{t('round', { round })}</CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="space-y-4">
-                    {assignments.map((assignment) => {
-                      const key = `${assignment.courtId}-${assignment.round}`;
-                      const result = matchResults[key] || { setsA: 0, setsB: 0 };
-                      const existingMatch = matches?.find(
-                        (m) => m.courtId === assignment.courtId && m.round === assignment.round
-                      );
-                      const isPublished = existingMatch
-                        ? existingMatch.publishedAt !== null
-                        : false;
-                      const isSaved = !!existingMatch;
+        {/* Explorers Results */}
+        {Object.keys(explorersRounds).length > 0 && (
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold">{t('explorers')}</h2>
+            {Object.entries(explorersRounds)
+              .sort(([a], [b]) => parseInt(a) - parseInt(b))
+              .map(([round, assignments]) => (
+                <Card className="glass-card" key={`explorers-${round}`}>
+                  <CardHeader>
+                    <CardTitle className="text-lg">{t('round', { round })}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="space-y-4">
+                      {assignments.map((assignment) => {
+                        const key = `${assignment.courtId}-${assignment.round}`;
+                        const result = matchResults[key] || { setsA: 0, setsB: 0 };
+                        const existingMatch = matches?.find(
+                          (m) => m.courtId === assignment.courtId && m.round === assignment.round
+                        );
+                        const isPublished = existingMatch
+                          ? existingMatch.publishedAt !== null
+                          : false;
+                        const isSaved = !!existingMatch;
 
-                      return (
-                        <div
-                          key={assignment.id}
-                          className={`border rounded-lg p-4 ${isPublished ? 'bg-muted/50' : ''}`}
-                        >
-                          <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center gap-2">
-                              <Badge variant="outline">
-                                {assignment.court?.label || `Court ${assignment.courtId}`}
-                              </Badge>
-                              <Badge variant="secondary">{assignment.tier}</Badge>
-                              {isSaved && !isPublished && (
-                                <Badge variant="outline" className="bg-blue-50 dark:bg-blue-950">
-                                  {t('saved')}
+                        return (
+                          <div
+                            key={assignment.id}
+                            className={`border rounded-lg p-4 ${isPublished ? 'bg-muted/50' : ''}`}
+                          >
+                            <div className="flex items-center justify-between mb-4">
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline">
+                                  {assignment.court?.label || `Court ${assignment.courtId}`}
                                 </Badge>
-                              )}
-                              {isPublished && (
-                                <Badge variant="default" className="gap-1">
-                                  <Lock className="h-3 w-3" />
-                                  {t('published')}
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                            {/* Team A */}
-                            <div className="space-y-1">
-                              <p className="text-sm font-medium">{t('teamA')}</p>
-                              {assignment.teamA?.map((player, idx) => (
-                                <p key={idx} className="text-sm text-muted-foreground">
-                                  {player.name}
-                                </p>
-                              ))}
-                            </div>
-
-                            {/* Score Input */}
-                            <div className="flex items-center justify-center gap-4">
-                              <div className="space-y-2">
-                                <Label htmlFor={`${key}-setsA`} className="sr-only">
-                                  {t('teamASets')}
-                                </Label>
-                                <Input
-                                  id={`${key}-setsA`}
-                                  type="number"
-                                  min="0"
-                                  max="6"
-                                  value={result.setsA}
-                                  onChange={(e) =>
-                                    handleScoreChange(
-                                      assignment.courtId,
-                                      assignment.round,
-                                      'A',
-                                      e.target.value
-                                    )
-                                  }
-                                  disabled={isPublished}
-                                  className="w-20 text-center text-lg font-bold"
-                                />
-                              </div>
-                              <span className="text-2xl font-bold">-</span>
-                              <div className="space-y-2">
-                                <Label htmlFor={`${key}-setsB`} className="sr-only">
-                                  {t('teamBSets')}
-                                </Label>
-                                <Input
-                                  id={`${key}-setsB`}
-                                  type="number"
-                                  min="0"
-                                  max="6"
-                                  value={result.setsB}
-                                  onChange={(e) =>
-                                    handleScoreChange(
-                                      assignment.courtId,
-                                      assignment.round,
-                                      'B',
-                                      e.target.value
-                                    )
-                                  }
-                                  disabled={isPublished}
-                                  className="w-20 text-center text-lg font-bold"
-                                />
+                                <Badge variant="secondary">{assignment.tier}</Badge>
+                                {isSaved && !isPublished && (
+                                  <Badge variant="outline" className="bg-blue-50 dark:bg-blue-950">
+                                    {t('saved')}
+                                  </Badge>
+                                )}
+                                {isPublished && (
+                                  <Badge variant="default" className="gap-1">
+                                    <Lock className="h-3 w-3" />
+                                    {t('published')}
+                                  </Badge>
+                                )}
                               </div>
                             </div>
 
-                            {/* Team B */}
-                            <div className="space-y-1">
-                              <p className="text-sm font-medium">{t('teamB')}</p>
-                              {assignment.teamB?.map((player, idx) => (
-                                <p key={idx} className="text-sm text-muted-foreground">
-                                  {player.name}
-                                </p>
-                              ))}
-                            </div>
-                          </div>
-
-                          {/* Save button */}
-                          {!isPublished && (
-                            <div className="mt-4 flex justify-end">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleSaveMatch(assignment)}
-                                disabled={saveMatchMutation.isPending}
-                                className="gap-2"
-                              >
-                                <Save className="h-4 w-4" />
-                                {isSaved ? t('update') : t('save')}
-                              </Button>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-        </div>
-      )}
-
-      {/* Explorers Results */}
-      {Object.keys(explorersRounds).length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-2xl font-bold">{t('explorers')}</h2>
-          {Object.entries(explorersRounds)
-            .sort(([a], [b]) => parseInt(a) - parseInt(b))
-            .map(([round, assignments]) => (
-              <Card key={`explorers-${round}`}>
-                <CardHeader>
-                  <CardTitle className="text-lg">{t('round', { round })}</CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="space-y-4">
-                    {assignments.map((assignment) => {
-                      const key = `${assignment.courtId}-${assignment.round}`;
-                      const result = matchResults[key] || { setsA: 0, setsB: 0 };
-                      const existingMatch = matches?.find(
-                        (m) => m.courtId === assignment.courtId && m.round === assignment.round
-                      );
-                      const isPublished = existingMatch
-                        ? existingMatch.publishedAt !== null
-                        : false;
-                      const isSaved = !!existingMatch;
-
-                      return (
-                        <div
-                          key={assignment.id}
-                          className={`border rounded-lg p-4 ${isPublished ? 'bg-muted/50' : ''}`}
-                        >
-                          <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center gap-2">
-                              <Badge variant="outline">
-                                {assignment.court?.label || `Court ${assignment.courtId}`}
-                              </Badge>
-                              <Badge variant="secondary">{assignment.tier}</Badge>
-                              {isSaved && !isPublished && (
-                                <Badge variant="outline" className="bg-blue-50 dark:bg-blue-950">
-                                  {t('saved')}
-                                </Badge>
-                              )}
-                              {isPublished && (
-                                <Badge variant="default" className="gap-1">
-                                  <Lock className="h-3 w-3" />
-                                  {t('published')}
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                            {/* Team A */}
-                            <div className="space-y-1">
-                              <p className="text-sm font-medium">{t('teamA')}</p>
-                              {assignment.teamA?.map((player, idx) => (
-                                <p key={idx} className="text-sm text-muted-foreground">
-                                  {player.name}
-                                </p>
-                              ))}
-                            </div>
-
-                            {/* Score Input */}
-                            <div className="flex items-center justify-center gap-4">
-                              <div className="space-y-2">
-                                <Label htmlFor={`${key}-setsA`} className="sr-only">
-                                  {t('teamASets')}
-                                </Label>
-                                <Input
-                                  id={`${key}-setsA`}
-                                  type="number"
-                                  min="0"
-                                  max="6"
-                                  value={result.setsA}
-                                  onChange={(e) =>
-                                    handleScoreChange(
-                                      assignment.courtId,
-                                      assignment.round,
-                                      'A',
-                                      e.target.value
-                                    )
-                                  }
-                                  disabled={isPublished}
-                                  className="w-20 text-center text-lg font-bold"
-                                />
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                              {/* Team A */}
+                              <div className="space-y-1">
+                                <p className="text-sm font-medium">{t('teamA')}</p>
+                                {assignment.teamA?.map((player, idx) => (
+                                  <p key={idx} className="text-sm text-muted-foreground">
+                                    {player.name}
+                                  </p>
+                                ))}
                               </div>
-                              <span className="text-2xl font-bold">-</span>
-                              <div className="space-y-2">
-                                <Label htmlFor={`${key}-setsB`} className="sr-only">
-                                  {t('teamBSets')}
-                                </Label>
-                                <Input
-                                  id={`${key}-setsB`}
-                                  type="number"
-                                  min="0"
-                                  max="6"
-                                  value={result.setsB}
-                                  onChange={(e) =>
-                                    handleScoreChange(
-                                      assignment.courtId,
-                                      assignment.round,
-                                      'B',
-                                      e.target.value
-                                    )
-                                  }
-                                  disabled={isPublished}
-                                  className="w-20 text-center text-lg font-bold"
-                                />
+
+                              {/* Score Input */}
+                              <div className="flex items-center justify-center gap-4">
+                                <div className="space-y-2">
+                                  <Label htmlFor={`${key}-setsA`} className="sr-only">
+                                    {t('teamASets')}
+                                  </Label>
+                                  <Input
+                                    id={`${key}-setsA`}
+                                    type="number"
+                                    min="0"
+                                    max="6"
+                                    value={result.setsA}
+                                    onChange={(e) =>
+                                      handleScoreChange(
+                                        assignment.courtId,
+                                        assignment.round,
+                                        'A',
+                                        e.target.value
+                                      )
+                                    }
+                                    disabled={isPublished}
+                                    className="w-20 text-center text-lg font-bold"
+                                  />
+                                </div>
+                                <span className="text-2xl font-bold">-</span>
+                                <div className="space-y-2">
+                                  <Label htmlFor={`${key}-setsB`} className="sr-only">
+                                    {t('teamBSets')}
+                                  </Label>
+                                  <Input
+                                    id={`${key}-setsB`}
+                                    type="number"
+                                    min="0"
+                                    max="6"
+                                    value={result.setsB}
+                                    onChange={(e) =>
+                                      handleScoreChange(
+                                        assignment.courtId,
+                                        assignment.round,
+                                        'B',
+                                        e.target.value
+                                      )
+                                    }
+                                    disabled={isPublished}
+                                    className="w-20 text-center text-lg font-bold"
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Team B */}
+                              <div className="space-y-1">
+                                <p className="text-sm font-medium">{t('teamB')}</p>
+                                {assignment.teamB?.map((player, idx) => (
+                                  <p key={idx} className="text-sm text-muted-foreground">
+                                    {player.name}
+                                  </p>
+                                ))}
                               </div>
                             </div>
 
-                            {/* Team B */}
-                            <div className="space-y-1">
-                              <p className="text-sm font-medium">{t('teamB')}</p>
-                              {assignment.teamB?.map((player, idx) => (
-                                <p key={idx} className="text-sm text-muted-foreground">
-                                  {player.name}
-                                </p>
-                              ))}
-                            </div>
+                            {/* Save button */}
+                            {!isPublished && (
+                              <div className="mt-4 flex justify-end">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleSaveMatch(assignment)}
+                                  disabled={saveMatchMutation.isPending}
+                                  className="gap-2"
+                                >
+                                  <Save className="h-4 w-4" />
+                                  {isSaved ? t('update') : t('save')}
+                                </Button>
+                              </div>
+                            )}
                           </div>
-
-                          {/* Save button */}
-                          {!isPublished && (
-                            <div className="mt-4 flex justify-end">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleSaveMatch(assignment)}
-                                disabled={saveMatchMutation.isPending}
-                                className="gap-2"
-                              >
-                                <Save className="h-4 w-4" />
-                                {isSaved ? t('update') : t('save')}
-                              </Button>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-        </div>
-      )}
+                        );
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+          </div>
+        )}
+      </div>
 
       {/* Publish confirmation dialog */}
       <ConfirmationDialog

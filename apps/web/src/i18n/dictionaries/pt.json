@@ -274,11 +274,14 @@
     "copyLink": "Copiar Link",
     "linkCopied": "Link copiado para a área de transferência",
     "revokeInvitation": "Revogar",
-    "invitationRevoked": "Convite revogado com sucesso",
+    "revokingInvitation": "A revogar",
+    "revokedInvitation": "Convite revogado com sucesso",
+    "revokedInvitationError": "Falha ao revogar o convite",
     "confirmRevokeInvitation": "Tem a certeza que deseja revogar este convite?",
     "invitationStatus": "Estado",
     "invitationPending": "Pendente",
     "invitationAccepted": "Aceite",
+    "invitationRevoked": "Revogado",
     "invitationExpired": "Expirado",
     "invitedBy": "Convidado Por",
     "expiresAt": "Expira Em",
@@ -286,7 +289,12 @@
     "noInvitations": "Nenhum convite encontrado",
     "resendInvitation": "Reenviar",
     "invitationResent": "Convite reenviado com sucesso",
-    "resendInvitationError": "Falha ao reenviar convite"
+    "resendInvitationError": "Falha ao reenviar convite",
+    "deleteInvitation": "Eliminar",
+    "deletingInvitation": "A eliminar",
+    "invitationDeleted": "Convite eliminado com sucesso",
+    "deleteInvitationError": "Falha ao eliminar convite",
+    "confirmDeleteInvitation": "Tem a certeza que deseja eliminar permanentemente este convite?"
   },
   "venuesList": {
     "loadingVenues": "A carregar clubes...",
@@ -541,6 +549,8 @@
     "successMessage": "Obrigado pela sua mensagem! Entraremos em contacto consigo em breve."
   },
   "resultsEntry": {
+    "title": "Inserir Resultados dos Jogos",
+    "description": "Insira os resultados de cada jogo. Os resultados podem ser guardados como rascunhos e publicados mais tarde.",
     "loading": "A carregar...",
     "backToEvent": "Voltar ao Evento",
     "eventNotPublished": "Evento Não Publicado",
@@ -571,10 +581,6 @@
     "resultSaved": "Resultado guardado",
     "resultsPublished": "Resultados publicados! As classificações serão atualizadas.",
     "enterValidScore": "Por favor, insira um resultado válido"
-  },
-  "resultsPage": {
-    "title": "Inserir Resultados dos Jogos",
-    "description": "Insira os resultados de cada jogo. Os resultados podem ser guardados como rascunhos e publicados mais tarde."
   },
   "newEventPage": {
     "title": "Criar Evento",

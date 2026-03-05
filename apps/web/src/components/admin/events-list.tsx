@@ -20,6 +20,7 @@ import { toast } from 'sonner';
 import { useAdminEvents, useAuthFetch } from '@/hooks';
 import { EventCard, EventStats } from '@/components/shared';
 import { StatusBadge, type EventStatus } from '@/components/shared/status-badge';
+import { Spinner } from '../ui/spinner';
 
 type EventState = 'ALL' | EventStatus;
 
@@ -86,7 +87,12 @@ export function EventsList() {
   }, [selectedDate, statusFilter]);
 
   if (isLoading) {
-    return <div className="text-center py-8">{t('loadingEvents')}</div>;
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Spinner data-icon="inline-start" className="mr-2" />
+        {t('loadingEvents')}
+      </div>
+    );
   }
 
   if (!events || events.length === 0) {

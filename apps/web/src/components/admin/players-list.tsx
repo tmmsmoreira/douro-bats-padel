@@ -12,6 +12,7 @@ import { Link } from '@/i18n/navigation';
 import { useState, useMemo, useRef } from 'react';
 import { SearchIcon, SearchIconHandle, TrendingUpIcon, XIcon, XIconHandle } from 'lucide-animated';
 import { Button } from '@/components/ui/button';
+import { Spinner } from '../ui/spinner';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -61,7 +62,12 @@ export function PlayersList() {
   }, [players, searchQuery]);
 
   if (isLoading) {
-    return <div className="text-center py-8">{t('loadingPlayers')}</div>;
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Spinner data-icon="inline-start" className="mr-2" />
+        {t('loadingPlayers')}
+      </div>
+    );
   }
 
   if (!players || players.length === 0) {

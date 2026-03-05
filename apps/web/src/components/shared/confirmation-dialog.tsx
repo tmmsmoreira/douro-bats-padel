@@ -11,6 +11,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Spinner } from '../ui/spinner';
 
 export interface ConfirmationDialogProps {
   open: boolean;
@@ -18,6 +19,7 @@ export interface ConfirmationDialogProps {
   title: string;
   description: string | React.ReactNode;
   confirmText?: string;
+  confirmingText?: string;
   cancelText?: string;
   onConfirm: () => void;
   variant?: 'default' | 'destructive';
@@ -31,6 +33,7 @@ export function ConfirmationDialog({
   description,
   confirmText = 'Confirm',
   cancelText = 'Cancel',
+  confirmingText = 'Processing...',
   onConfirm,
   variant = 'default',
   isLoading = false,
@@ -53,7 +56,14 @@ export function ConfirmationDialog({
                 : undefined
             }
           >
-            {isLoading ? 'Processing...' : confirmText}
+            {isLoading ? (
+              <>
+                {confirmingText}
+                <Spinner data-icon="inline-start" />
+              </>
+            ) : (
+              confirmText
+            )}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -301,11 +301,14 @@
     "copyLink": "Copy Link",
     "linkCopied": "Link copied to clipboard",
     "revokeInvitation": "Revoke",
-    "invitationRevoked": "Invitation revoked successfully",
+    "revokingInvitation": "Revoking",
+    "revokedInvitation": "Invitation revoked successfully",
+    "revokedInvitationError": "Failed to revoke invitation",
     "confirmRevokeInvitation": "Are you sure you want to revoke this invitation?",
     "invitationStatus": "Status",
     "invitationPending": "Pending",
     "invitationAccepted": "Accepted",
+    "invitationRevoked": "Revoked",
     "invitationExpired": "Expired",
     "invitedBy": "Invited By",
     "expiresAt": "Expires At",
@@ -313,7 +316,12 @@
     "noInvitations": "No invitations found",
     "resendInvitation": "Resend",
     "invitationResent": "Invitation resent successfully",
-    "resendInvitationError": "Failed to resend invitation"
+    "resendInvitationError": "Failed to resend invitation",
+    "deleteInvitation": "Delete",
+    "deletingInvitation": "Deleting",
+    "invitationDeleted": "Invitation deleted successfully",
+    "deleteInvitationError": "Failed to delete invitation",
+    "confirmDeleteInvitation": "Are you sure you want to permanently delete this invitation?"
   },
   "venuesList": {
     "loadingVenues": "Loading venues...",
@@ -568,6 +576,8 @@
     "successMessage": "Thank you for your message! We'll get back to you soon."
   },
   "resultsEntry": {
+    "title": "Enter Match Results",
+    "description": "Enter scores for each match. Results can be saved as drafts and published later.",
     "loading": "Loading...",
     "backToEvent": "Back to Event",
     "eventNotPublished": "Event Not Published",
@@ -598,10 +608,6 @@
     "resultSaved": "Result saved",
     "resultsPublished": "Results published! Rankings will be updated.",
     "enterValidScore": "Please enter a valid score"
-  },
-  "resultsPage": {
-    "title": "Enter Match Results",
-    "description": "Enter scores for each match. Results can be saved as drafts and published later."
   },
   "newEventPage": {
     "title": "Create Event",

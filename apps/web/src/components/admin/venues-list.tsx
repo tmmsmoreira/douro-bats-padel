@@ -20,6 +20,7 @@ import {
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
+import { Spinner } from '../ui/spinner';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -93,7 +94,12 @@ export function VenuesList() {
   };
 
   if (isLoading) {
-    return <div className="text-center py-8">{t('loadingVenues')}</div>;
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Spinner data-icon="inline-start" className="mr-2" />
+        {t('loadingVenues')}
+      </div>
+    );
   }
 
   if (!venues || venues.length === 0) {

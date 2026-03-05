@@ -23,6 +23,7 @@ import { PageHeader } from '../shared/page-header';
 import { DeleteIcon, DeleteIconHandle } from 'lucide-animated';
 import { motion } from 'motion/react';
 import { EventStatus, StatusBadge } from '../shared';
+import { Spinner } from '../ui/spinner';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -220,7 +221,12 @@ export function EventDetails({ eventId }: { eventId: string }) {
   });
 
   if (isLoading) {
-    return <div className="text-center py-8">{t('loadingEvent')}</div>;
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Spinner data-icon="inline-start" className="mr-2" />
+        {t('loadingEvent')}
+      </div>
+    );
   }
 
   if (!event) {
@@ -245,6 +251,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
           />
         }
       />
+
       <div className="space-y-4">
         {/* Show draw if it exists, otherwise show confirmed players */}
         {draw ? (

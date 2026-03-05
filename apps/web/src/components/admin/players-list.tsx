@@ -155,11 +155,7 @@ export function PlayersList() {
                 show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
               }}
             >
-              <motion.div
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
-                className="cursor-pointer"
-              >
+              <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
                 <Link href={`/players/${player.id}`} className="block">
                   <Card className="glass-card group hover:shadow-xl transition-all duration-300 border-border/50">
                     <CardContent className="p-6 space-y-4">

@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import * as AlertDialogPrimitive from '@radix-ui/react-alert-dialog';
+import { motion, useAnimation } from 'motion/react';
 
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
@@ -34,14 +35,17 @@ const AlertDialogContent = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Content>
 >(({ className, ...props }, ref) => {
-  const [shouldPulse, setShouldPulse] = React.useState(false);
   const contentRef = React.useRef<HTMLDivElement>(null);
+  const controls = useAnimation();
 
   React.useImperativeHandle(ref, () => contentRef.current!);
 
   const triggerPulse = React.useCallback(() => {
-    setShouldPulse(true);
-  }, []);
+    controls.start({
+      scale: [1, 1.05, 1],
+      transition: { duration: 0.3, ease: 'easeInOut' },
+    });
+  }, [controls]);
 
   const handleOverlayClick = () => {
     triggerPulse();
@@ -62,17 +66,14 @@ const AlertDialogContent = React.forwardRef<
   return (
     <AlertDialogPortal>
       <AlertDialogOverlay onClick={handleOverlayClick} />
-      <div
-        className={cn(
-          'fixed left-[50%] top-[50%] z-50 w-[calc(100vw-2rem)] max-w-lg translate-x-[-50%] translate-y-[-50%]',
-          shouldPulse && 'animate-pulse-scale'
-        )}
-        onAnimationEnd={() => setShouldPulse(false)}
+      <motion.div
+        animate={controls}
+        className="fixed left-[50%] top-[50%] z-50 w-[calc(100vw-2rem)] max-w-lg translate-x-[-50%] translate-y-[-50%]"
       >
         <AlertDialogPrimitive.Content
           ref={contentRef}
           className={cn(
-            'grid w-full gap-4 border bg-background p-6 shadow-lg sm:rounded-lg',
+            'grid w-full gap-4 border bg-background p-6 shadow-lg rounded-lg',
             'data-[state=open]:animate-in data-[state=closed]:animate-out',
             'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
             'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-100',
@@ -83,7 +84,7 @@ const AlertDialogContent = React.forwardRef<
           )}
           {...props}
         />
-      </div>
+      </motion.div>
     </AlertDialogPortal>
   );
 });

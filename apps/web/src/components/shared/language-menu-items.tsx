@@ -21,7 +21,7 @@ export function LanguageMenuItems() {
   return (
     <DropdownMenuRadioGroup value={currentLocale} onValueChange={switchLocale}>
       {locales.map((locale) => (
-        <DropdownMenuRadioItem key={locale} value={locale} className="cursor-pointer">
+        <DropdownMenuRadioItem key={locale} value={locale}>
           <div className="flex items-center gap-2">
             <span className="text-lg">{localeFlags[locale]}</span>
             <span>{localeNames[locale]}</span>

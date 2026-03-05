@@ -23,6 +23,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { ConfirmationDialog } from '../shared/confirmation-dialog';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -168,7 +169,7 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
       </div>
 
       {/* Player Header */}
-      <Card>
+      <Card className="glass-card">
         <CardHeader>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <Avatar className="h-24 w-24">
@@ -207,7 +208,7 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
       {/* Player Information */}
       {player.player && (
         <div className="grid gap-6 md:grid-cols-2">
-          <Card>
+          <Card className="glass-card">
             <CardHeader>
               <CardTitle>{t('playerInformation')}</CardTitle>
             </CardHeader>
@@ -245,7 +246,7 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
           </Card>
 
           {/* Performance Stats */}
-          <Card>
+          <Card className="glass-card">
             <CardHeader>
               <CardTitle>{t('performanceStats')}</CardTitle>
             </CardHeader>
@@ -300,7 +301,7 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
 
       {/* Admin Actions */}
       {isAdminOrEditor && (
-        <Card className="border-destructive/50">
+        <Card className="glass-card border-destructive/50">
           <CardHeader>
             <CardTitle className="text-destructive">{tActions('actions')}</CardTitle>
           </CardHeader>
@@ -329,29 +330,20 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
       )}
 
       {/* Delete User Confirmation Dialog */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{tActions('deleteConfirmation')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {tActions('deleteConfirmationDescription')}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{tActions('cancel')}</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => {
-                setIsDeleting(true);
-                deleteMutation.mutate();
-                setShowDeleteDialog(false);
-              }}
-            >
-              {tActions('deleteUser')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmationDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title={tActions('deleteConfirmation')}
+        description={tActions('deleteConfirmationDescription')}
+        confirmText={tActions('deleteUser')}
+        cancelText={tActions('cancel')}
+        variant="destructive"
+        onConfirm={() => {
+          setIsDeleting(true);
+          deleteMutation.mutate();
+          setShowDeleteDialog(false);
+        }}
+      />
     </div>
   );
 }

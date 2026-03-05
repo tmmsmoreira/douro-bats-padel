@@ -12,6 +12,8 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Spinner } from '../ui/spinner';
+import { DeleteIcon, DeleteIconHandle } from 'lucide-animated';
+import { motion } from 'motion/react';
 
 export interface ConfirmationDialogProps {
   open: boolean;
@@ -38,6 +40,8 @@ export function ConfirmationDialog({
   variant = 'default',
   isLoading = false,
 }: ConfirmationDialogProps) {
+  const deleteIconRef = React.useRef<DeleteIconHandle>(null);
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
@@ -46,25 +50,36 @@ export function ConfirmationDialog({
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>{cancelText}</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={onConfirm}
-            disabled={isLoading}
-            className={
-              variant === 'destructive'
-                ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
-                : undefined
-            }
-          >
-            {isLoading ? (
-              <>
-                {confirmingText}
-                <Spinner data-icon="inline-start" />
-              </>
-            ) : (
-              confirmText
-            )}
-          </AlertDialogAction>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <AlertDialogCancel disabled={isLoading}>{cancelText}</AlertDialogCancel>
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <AlertDialogAction
+              onClick={onConfirm}
+              disabled={isLoading}
+              className={
+                variant === 'destructive'
+                  ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                  : undefined
+              }
+              onMouseEnter={() => deleteIconRef.current?.startAnimation()}
+              onMouseLeave={() => deleteIconRef.current?.stopAnimation()}
+            >
+              {isLoading ? (
+                <>
+                  {confirmingText}
+                  <Spinner data-icon="inline-start" />
+                </>
+              ) : (
+                <>
+                  {variant === 'destructive' && (
+                    <DeleteIcon ref={deleteIconRef} size={16} className="h-4 w-4" />
+                  )}
+                  {confirmText}
+                </>
+              )}
+            </AlertDialogAction>
+          </motion.div>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

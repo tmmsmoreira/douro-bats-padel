@@ -292,7 +292,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2">
-            <Card>
+            <Card className="glass-card">
               <CardHeader>
                 <CardTitle>
                   {t('confirmedPlayers')} ({event.confirmedCount})
@@ -316,7 +316,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="glass-card">
               <CardHeader>
                 <CardTitle>
                   {t('waitlist')} ({event.waitlistCount})
@@ -604,7 +604,7 @@ function EventDetailsHeaderActionButtons({
           {!hasEventPassed && (
             <>
               <DropdownMenuItem asChild>
-                <Link href={`/admin/events/${event.id}/edit`} className="cursor-pointer flex gap-2">
+                <Link href={`/admin/events/${event.id}/edit`} className="flex gap-2">
                   <Edit className="h-4 w-4" />
                   <span>{t('editEvent')}</span>
                 </Link>
@@ -615,7 +615,7 @@ function EventDetailsHeaderActionButtons({
           <DropdownMenuItem
             variant="destructive"
             onClick={onDeleteClick}
-            className="cursor-pointer flex gap-2"
+            className="flex gap-2"
             onMouseEnter={() => deleteIconRef.current?.startAnimation()}
             onMouseLeave={() => deleteIconRef.current?.stopAnimation()}
           >

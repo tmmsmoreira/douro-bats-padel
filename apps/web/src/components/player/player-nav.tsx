@@ -136,7 +136,7 @@ export function PlayerNav() {
                         asChild
                         onMouseEnter={() => userIconRef.current?.startAnimation()}
                       >
-                        <Link href="/profile" className="cursor-pointer flex gap-2">
+                        <Link href="/profile" className="flex gap-2">
                           <UserIcon size={16} ref={userIconRef} />
                           <span>{t('profile')}</span>
                         </Link>
@@ -148,7 +148,7 @@ export function PlayerNav() {
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={() => signOut()}
-                        className="cursor-pointer flex gap-2"
+                        className="flex gap-2"
                         onMouseEnter={() => signOutIconRef.current?.startAnimation()}
                       >
                         <LogoutIcon size={16} ref={signOutIconRef} />

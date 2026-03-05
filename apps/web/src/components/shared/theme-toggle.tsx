@@ -39,7 +39,7 @@ export function ThemeToggle() {
       onMouseEnter={() => iconRef.current?.startAnimation()}
       onSelect={(e) => e.preventDefault()}
       onClick={handleToggle}
-      className="flex items-center justify-between cursor-pointer"
+      className="flex items-center justify-between"
     >
       <div className="flex items-center gap-2">
         {isDark ? <MoonIcon size={16} ref={iconRef} /> : <SunIcon size={16} ref={iconRef} />}

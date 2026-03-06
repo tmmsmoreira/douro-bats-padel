@@ -6,7 +6,7 @@ import { routing } from './i18n/routing';
 // Create the next-intl middleware
 const handleI18nRouting = createMiddleware(routing);
 
-export default async function proxy(req: NextRequest) {
+export default async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
 
   // Skip middleware for API routes and static files
@@ -54,7 +54,6 @@ export default async function proxy(req: NextRequest) {
     pathnameWithoutLocale === '/leaderboard' ||
     pathnameWithoutLocale === '/events' ||
     pathnameWithoutLocale.startsWith('/events/') ||
-    pathnameWithoutLocale.startsWith('/players/') ||
     pathnameWithoutLocale === '/about' ||
     pathnameWithoutLocale === '/contact' ||
     pathnameWithoutLocale === '/faq' ||

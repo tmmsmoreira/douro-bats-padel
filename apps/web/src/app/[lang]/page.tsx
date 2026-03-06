@@ -24,12 +24,7 @@ export default async function HomePage() {
           </div>
 
           <div className="space-y-4 sm:space-y-6">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-bold">{t('pastEventsTitle')}</h2>
-              <p className="text-sm sm:text-base text-muted-foreground mt-1">
-                {t('pastEventsDescription')}
-              </p>
-            </div>
+            <PageHeader title={t('pastEventsTitle')} description={t('pastEventsDescription')} />
             <PastEventsList />
           </div>
         </div>

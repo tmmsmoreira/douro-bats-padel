@@ -1,36 +1,24 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from '@/i18n/navigation';
 import { useActivePathname } from '@/hooks/use-active-pathname';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { signOut, useSession } from 'next-auth/react';
-import { UserIcon, LogoutIcon } from 'lucide-animated';
-import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { ThemeToggleButton } from '@/components/shared/theme-toggle-button';
 import { LanguageToggleButton } from '@/components/shared/language-toggle-button';
-import { LanguageMenuItems } from '@/components/shared/language-menu-items';
 import { MenuToggle } from '@/components/shared/menu-toggle';
 import { useTranslations } from 'next-intl';
 import { MobileMenu } from '@/components/shared/mobile-menu';
 
+/**
+ * Navigation component for unauthenticated users only.
+ * Shows public pages and a Sign In button.
+ */
 export function HomeNav() {
   const pathname = useActivePathname();
-  const { data: session } = useSession();
   const t = useTranslations('nav');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const userIconRef = useRef<{ startAnimation: () => void; stopAnimation: () => void }>(null);
-  const signOutIconRef = useRef<{ startAnimation: () => void; stopAnimation: () => void }>(null);
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {
@@ -45,9 +33,6 @@ export function HomeNav() {
       document.body.style.overflow = 'unset';
     };
   }, [mobileMenuOpen]);
-
-  const isEditor =
-    session?.user?.roles?.includes('EDITOR') || session?.user?.roles?.includes('ADMIN');
 
   const navItems = [
     { href: `/`, label: t('events') },
@@ -76,7 +61,7 @@ export function HomeNav() {
                         'px-4 py-2 text-sm font-medium rounded-[999px] transition-colors',
                         pathname === item.href
                           ? 'bg-primary text-primary-foreground'
-                          : 'text-muted-foreground hover:text-primary-foreground'
+                          : 'text-muted-foreground hover:text-muted-foreground/60'
                       )}
                     >
                       {item.label}
@@ -85,88 +70,11 @@ export function HomeNav() {
                 </div>
 
                 <div className="flex items-center gap-4">
-                  {!session && (
-                    <>
-                      <LanguageToggleButton />
-                      <ThemeToggleButton />
-                    </>
-                  )}
-                  {session ? (
-                    <>
-                      {isEditor && (
-                        <Link href="/admin">
-                          <Button variant="ghost" size="xs" className="uppercase">
-                            {t('adminView')}
-                          </Button>
-                        </Link>
-                      )}
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                            <Avatar className="h-10 w-10">
-                              <AvatarImage
-                                src={session?.user?.profilePhoto || undefined}
-                                alt={session?.user?.name || 'User'}
-                              />
-                              <AvatarFallback className="gradient-primary">
-                                {session?.user?.name
-                                  ? session.user.name
-                                      .split(' ')
-                                      .map((n) => n[0])
-                                      .join('')
-                                      .toUpperCase()
-                                      .slice(0, 2)
-                                  : session?.user?.email?.[0]?.toUpperCase() || 'U'}
-                              </AvatarFallback>
-                            </Avatar>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-56" align="end" forceMount>
-                          <div className="flex items-center justify-start gap-2 p-2">
-                            <div className="flex flex-col space-y-1 leading-none">
-                              {session?.user?.name && (
-                                <p className="font-medium">{session.user.name}</p>
-                              )}
-                              {session?.user?.email && (
-                                <p className="w-[200px] truncate text-sm text-muted-foreground">
-                                  {session.user.email}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            asChild
-                            onMouseEnter={() => userIconRef.current?.startAnimation()}
-                          >
-                            <Link href="/profile" className="flex gap-2">
-                              <UserIcon size={16} ref={userIconRef} />
-                              <span>{t('profile')}</span>
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <LanguageMenuItems />
-                          <DropdownMenuSeparator />
-                          <ThemeToggle />
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => signOut()}
-                            className="flex gap-2"
-                            onMouseEnter={() => signOutIconRef.current?.startAnimation()}
-                          >
-                            <LogoutIcon size={16} ref={signOutIconRef} />
-                            <span>{t('signOut')}</span>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <Link href="/login">
-                        <Button size="sm">{t('signIn')}</Button>
-                      </Link>
-                    </div>
-                  )}
+                  <LanguageToggleButton />
+                  <ThemeToggleButton />
+                  <Link href="/login">
+                    <Button size="sm">{t('signIn')}</Button>
+                  </Link>
                 </div>
               </div>
 
@@ -189,14 +97,14 @@ export function HomeNav() {
       <MobileMenu
         isOpen={mobileMenuOpen}
         onClose={() => setMobileMenuOpen(false)}
-        session={session}
+        session={null}
         navItems={navItems}
         t={t}
-        showRoleSwitch={session ? isEditor : false}
+        showRoleSwitch={false}
         roleSwitchHref="/admin"
         roleSwitchLabel={t('adminView')}
-        showAccountSection={!!session}
-        showSignInButton={!session}
+        showAccountSection={false}
+        showSignInButton={true}
       />
     </>
   );

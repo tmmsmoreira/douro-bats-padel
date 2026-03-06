@@ -77,7 +77,7 @@ export function AdminNav() {
                         'px-4 py-2 text-sm font-medium rounded-[999px]  transition-colors',
                         pathname === item.href
                           ? 'bg-primary text-primary-foreground'
-                          : 'text-muted-foreground hover:text-primary-foreground'
+                          : 'text-muted-foreground hover:text-muted-foreground/60'
                       )}
                     >
                       {item.label}

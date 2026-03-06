@@ -21,7 +21,7 @@ import { toast } from 'sonner';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
 import { PageHeader } from '../shared/page-header';
 import { DeleteIcon, DeleteIconHandle } from 'lucide-animated';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { EventStatus, StatusBadge } from '../shared';
 import { Spinner } from '../ui/spinner';
 import { LoadingState } from '../shared/loading-state';
@@ -255,53 +255,123 @@ export function EventDetails({ eventId }: { eventId: string }) {
     },
   });
 
-  if (showLoading) {
-    return <LoadingState message={t('loadingEvent')} />;
-  }
-
-  if (!event) {
-    return <div className="text-center py-8">{t('eventNotFound')}</div>;
-  }
-
   return (
-    <div className="space-y-8">
-      <PageHeader
-        title={event.title || t('untitledEvent')}
-        description={<EventDetailsHeaderInfo event={event} />}
-        showBackButton
-        backButtonHref="/admin"
-        backButtonLabel={t('backToEvents')}
-        action={
-          <EventDetailsHeaderActionButtons
-            event={event}
-            freezeMutation={freezeMutation}
-            unfreezeMutation={unfreezeMutation}
-            publishMutation={publishMutation}
-            draw={draw}
-            onDeleteClick={() => setShowDeleteDialog(true)}
+    <AnimatePresence mode="wait">
+      {showLoading ? (
+        <LoadingState message={t('loadingEvent')} />
+      ) : !event ? (
+        <motion.div
+          key="not-found"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="text-center py-8"
+        >
+          {t('eventNotFound')}
+        </motion.div>
+      ) : (
+        <motion.div
+          key="content"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="space-y-8"
+        >
+          <PageHeader
+            title={event.title || t('untitledEvent')}
+            description={<EventDetailsHeaderInfo event={event} />}
+            showBackButton
+            backButtonHref="/admin"
+            backButtonLabel={t('backToEvents')}
+            action={
+              <EventDetailsHeaderActionButtons
+                event={event}
+                freezeMutation={freezeMutation}
+                unfreezeMutation={unfreezeMutation}
+                publishMutation={publishMutation}
+                draw={draw}
+                onDeleteClick={() => setShowDeleteDialog(true)}
+              />
+            }
           />
-        }
-      />
 
-      <div className="space-y-4">
-        {/* Show draw if it exists, otherwise show confirmed players */}
-        {draw ? (
-          <div className="space-y-6">
-            <DrawSummary draw={draw} />
+          <div className="space-y-4">
+            {/* Show draw if it exists, otherwise show confirmed players */}
+            {draw ? (
+              <div className="space-y-6">
+                <DrawSummary draw={draw} />
 
-            {/* Always show waitlist if there are waitlisted players */}
-            {(event.waitlistCount > 0 || (event.waitlistedPlayers?.length ?? 0) > 0) && (
-              <Card className="glass-card">
-                <CardHeader>
-                  <CardTitle>
-                    {t('waitlist')} ({event.waitlistCount || event.waitlistedPlayers?.length || 0})
-                  </CardTitle>
-                  <CardDescription>{t('playersWaitingForSpot')}</CardDescription>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  {event.waitlistedPlayers && event.waitlistedPlayers.length > 0 ? (
+                {/* Always show waitlist if there are waitlisted players */}
+                {(event.waitlistCount > 0 || (event.waitlistedPlayers?.length ?? 0) > 0) && (
+                  <Card className="glass-card">
+                    <CardHeader>
+                      <CardTitle>
+                        {t('waitlist')} (
+                        {event.waitlistCount || event.waitlistedPlayers?.length || 0})
+                      </CardTitle>
+                      <CardDescription>{t('playersWaitingForSpot')}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      {event.waitlistedPlayers && event.waitlistedPlayers.length > 0 ? (
+                        <div className="space-y-2">
+                          {event.waitlistedPlayers.map((player: WaitlistedPlayer) => (
+                            <div
+                              key={player.id}
+                              className="flex items-center justify-between py-2 border-b last:border-0"
+                            >
+                              <div className="flex items-center gap-2">
+                                <Badge variant="secondary">#{player.position}</Badge>
+                                <span>{player.name}</span>
+                              </div>
+                              <span className="text-sm text-muted-foreground">{player.rating}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">{t('noPlayersOnWaitlist')}</p>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            ) : (
+              <div className="grid gap-6 md:grid-cols-2">
+                <Card className="glass-card">
+                  <CardHeader>
+                    <CardTitle>
+                      {t('confirmedPlayers')} ({event.confirmedCount})
+                    </CardTitle>
+                    <CardDescription>
+                      {t('spotsRemaining', { count: event.capacity - event.confirmedCount })}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-0">
                     <div className="space-y-2">
-                      {event.waitlistedPlayers.map((player: WaitlistedPlayer) => (
+                      {event.confirmedPlayers?.map((player: Player) => (
+                        <div
+                          key={player.id}
+                          className="flex items-center justify-between py-2 border-b last:border-0"
+                        >
+                          <span>{player.name}</span>
+                          <span className="text-sm text-muted-foreground">{player.rating}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="glass-card">
+                  <CardHeader>
+                    <CardTitle>
+                      {t('waitlist')} ({event.waitlistCount})
+                    </CardTitle>
+                    <CardDescription>{t('playersWaitingForSpot')}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="space-y-2">
+                      {event.waitlistedPlayers?.map((player: WaitlistedPlayer) => (
                         <div
                           key={player.id}
                           className="flex items-center justify-between py-2 border-b last:border-0"
@@ -314,83 +384,30 @@ export function EventDetails({ eventId }: { eventId: string }) {
                         </div>
                       ))}
                     </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">{t('noPlayersOnWaitlist')}</p>
-                  )}
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </div>
             )}
-          </div>
-        ) : (
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle>
-                  {t('confirmedPlayers')} ({event.confirmedCount})
-                </CardTitle>
-                <CardDescription>
-                  {t('spotsRemaining', { count: event.capacity - event.confirmedCount })}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="space-y-2">
-                  {event.confirmedPlayers?.map((player: Player) => (
-                    <div
-                      key={player.id}
-                      className="flex items-center justify-between py-2 border-b last:border-0"
-                    >
-                      <span>{player.name}</span>
-                      <span className="text-sm text-muted-foreground">{player.rating}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
 
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle>
-                  {t('waitlist')} ({event.waitlistCount})
-                </CardTitle>
-                <CardDescription>{t('playersWaitingForSpot')}</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="space-y-2">
-                  {event.waitlistedPlayers?.map((player: WaitlistedPlayer) => (
-                    <div
-                      key={player.id}
-                      className="flex items-center justify-between py-2 border-b last:border-0"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Badge variant="secondary">#{player.position}</Badge>
-                        <span>{player.name}</span>
-                      </div>
-                      <span className="text-sm text-muted-foreground">{player.rating}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            {/* Delete Event Confirmation Dialog */}
+            <ConfirmationDialog
+              open={showDeleteDialog}
+              onOpenChange={setShowDeleteDialog}
+              title={t('deleteConfirmation')}
+              description={t('deleteConfirmationDescription')}
+              confirmText={t('deleteEvent')}
+              confirmingText={t('deleting')}
+              cancelText={t('cancel')}
+              variant="destructive"
+              isLoading={deleteMutation.isPending}
+              onConfirm={() => {
+                deleteMutation.mutate();
+              }}
+            />
           </div>
-        )}
-
-        {/* Delete Event Confirmation Dialog */}
-        <ConfirmationDialog
-          open={showDeleteDialog}
-          onOpenChange={setShowDeleteDialog}
-          title={t('deleteConfirmation')}
-          description={t('deleteConfirmationDescription')}
-          confirmText={t('deleteEvent')}
-          confirmingText={t('deleting')}
-          cancelText={t('cancel')}
-          variant="destructive"
-          isLoading={deleteMutation.isPending}
-          onConfirm={() => {
-            deleteMutation.mutate();
-          }}
-        />
-      </div>
-    </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 

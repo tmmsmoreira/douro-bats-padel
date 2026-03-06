@@ -11,15 +11,17 @@ import { Toaster } from 'sonner';
 import type { Session } from 'next-auth';
 
 /**
- * Component to handle session errors and redirect to login
+ * Component to handle session errors (like token refresh failures)
+ * Note: Route protection is handled by middleware (proxy.ts), not here
  */
 function SessionErrorHandler({ children }: { children: React.ReactNode }) {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    // If there's a session error (e.g., RefreshAccessTokenError), sign out and redirect to login
+    // Only handle session errors (e.g., RefreshAccessTokenError)
+    // Do NOT handle general authentication - that's the middleware's job
     if (session?.error === 'RefreshAccessTokenError') {
       console.log('Session error detected, signing out and redirecting to login...');
       // Extract locale from pathname
@@ -29,29 +31,6 @@ function SessionErrorHandler({ children }: { children: React.ReactNode }) {
       });
     }
   }, [session, router, pathname]);
-
-  // Also check if session is unauthenticated and we're not on a public page
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      const locale = pathname.split('/')[1] || 'en';
-      const pathnameWithoutLocale = pathname.replace(`/${locale}`, '') || '/';
-
-      // Don't redirect if already on auth pages
-      const isAuthPage =
-        pathnameWithoutLocale.startsWith('/login') ||
-        pathnameWithoutLocale.startsWith('/signup') ||
-        pathnameWithoutLocale.startsWith('/register') ||
-        pathnameWithoutLocale.startsWith('/forgot-password') ||
-        pathnameWithoutLocale.startsWith('/reset-password') ||
-        pathnameWithoutLocale.startsWith('/verify-email') ||
-        pathnameWithoutLocale.startsWith('/resend-verification');
-
-      if (!isAuthPage) {
-        console.log('Session unauthenticated, redirecting to login...');
-        router.push(`/${locale}/login`);
-      }
-    }
-  }, [status, pathname, router]);
 
   return <>{children}</>;
 }

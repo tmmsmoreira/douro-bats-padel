@@ -1,7 +1,7 @@
 import { Leaderboard } from '@/components/player/leaderboard';
 import { Footer } from '@/components/public/footer';
 import { getTranslations } from 'next-intl/server';
-import { AdaptiveNav } from '@/components/shared/adaptive-nav';
+import { HomeAdaptiveNav } from '@/components/shared/home-adaptive-nav';
 import { PageHeader } from '@/components/shared/page-header';
 
 export default async function LeaderboardPage() {
@@ -9,7 +9,7 @@ export default async function LeaderboardPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <AdaptiveNav />
+      <HomeAdaptiveNav />
       <main className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-1 max-w-4xl min-h-[500px]">
         <div className="space-y-4 sm:space-y-6">
           <PageHeader title={t('title')} description={t('description')} />

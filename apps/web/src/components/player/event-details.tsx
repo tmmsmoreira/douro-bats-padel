@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { PlayerNav } from '@/components/player/player-nav';
+import { HomeAdaptiveNav } from '@/components/shared/home-adaptive-nav';
 import { Footer } from '@/components/public/footer';
 import { useRef } from 'react';
 
@@ -85,7 +85,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
-        <PlayerNav />
+        <HomeAdaptiveNav />
         <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl">
           <div className="text-center py-8">{t('loadingEvent')}</div>
         </main>
@@ -97,7 +97,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
   if (error || !event) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
-        <PlayerNav />
+        <HomeAdaptiveNav />
         <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl min-h-[500px]">
           <div className="text-center py-8">{t('eventNotFound')}</div>
         </main>
@@ -110,7 +110,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
   if (event.state === 'PUBLISHED') {
     return (
       <div className="min-h-screen bg-background flex flex-col">
-        <PlayerNav />
+        <HomeAdaptiveNav />
         <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl min-h-[500px]">
           <div className="space-y-6">
             {/* Back Button */}
@@ -165,7 +165,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <PlayerNav />
+      <HomeAdaptiveNav />
       <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl min-h-[500px]">
         <div className="space-y-6">
           {/* Back Button */}

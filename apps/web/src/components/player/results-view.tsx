@@ -219,7 +219,7 @@ export function ResultsView({ eventId }: { eventId: string }) {
           </div>
 
           {(Object.entries(rounds) as [string, Match[]][]).map(([round, roundMatches]) => (
-            <Card key={round}>
+            <Card className="glass-card" key={round}>
               <CardHeader>
                 <CardTitle>{t('round', { round })}</CardTitle>
               </CardHeader>

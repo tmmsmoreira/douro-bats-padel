@@ -93,7 +93,7 @@ export function AdminNav() {
                       window.dispatchEvent(new Event('viewChanged'));
                     }}
                   >
-                    <Button variant="ghost" size="xs" className="uppercase">
+                    <Button variant="ghost" size="xs" className="uppercase dark:hover:bg-muted">
                       {t('playerView')}
                     </Button>
                   </Link>

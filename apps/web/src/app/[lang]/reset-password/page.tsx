@@ -14,7 +14,7 @@ function ResetPasswordContent() {
 
   if (!token) {
     return (
-      <Card className="w-full max-w-md">
+      <Card className="glass-card w-full max-w-md">
         <CardHeader>
           <CardTitle>Invalid Reset Link</CardTitle>
           <CardDescription>This password reset link is invalid or has expired</CardDescription>

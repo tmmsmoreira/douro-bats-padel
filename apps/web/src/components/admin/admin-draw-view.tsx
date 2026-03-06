@@ -377,7 +377,7 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
             )}
           </div>
           {Object.entries(mastersRounds).map(([round, assignments]) => (
-            <Card key={`masters-${round}`}>
+            <Card className="glass-card" key={`masters-${round}`}>
               <CardHeader>
                 <CardTitle>{t('round', { number: round })}</CardTitle>
               </CardHeader>
@@ -412,7 +412,7 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
             )}
           </div>
           {Object.entries(explorersRounds).map(([round, assignments]) => (
-            <Card key={`explorers-${round}`}>
+            <Card className="glass-card" key={`explorers-${round}`}>
               <CardHeader>
                 <CardTitle>{t('round', { number: round })}</CardTitle>
               </CardHeader>

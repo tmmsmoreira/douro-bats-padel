@@ -269,7 +269,7 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
 
       {/* Insufficient Players Warning (not enough to fill all courts) */}
       {hasInsufficientPlayers && (
-        <Card className="border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20">
+        <Card className="glass-card border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20">
           <CardHeader>
             <CardTitle className="text-yellow-800 dark:text-yellow-200">
               ℹ️ {t('insufficientPlayers')}
@@ -315,7 +315,7 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
 
       {/* Excess Players Warning (more players than court capacity) */}
       {hasExcessPlayers && (
-        <Card className="border-orange-500 bg-orange-50 dark:bg-orange-950/20">
+        <Card className="glass-card border-orange-500 bg-orange-50 dark:bg-orange-950/20">
           <CardHeader>
             <CardTitle className="text-orange-800 dark:text-orange-200 flex items-center gap-2">
               <AlertTriangle className="h-5 w-5" />
@@ -350,7 +350,7 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
 
       {/* Unused Courts Warning (have players but not using all courts) */}
       {!hasExcessPlayers && unusedCourts > 0 && playersInDraw > 0 && (
-        <Card className="border-blue-500 bg-blue-50 dark:bg-blue-950/20">
+        <Card className="glass-card border-blue-500 bg-blue-50 dark:bg-blue-950/20">
           <CardHeader>
             <CardTitle className="text-blue-800 dark:text-blue-200">
               💡 {t('courtOptimization')}
@@ -381,7 +381,7 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
       )}
 
       {/* Tier Configuration Card */}
-      <Card className="border-blue-500 bg-blue-50 dark:bg-blue-950/20">
+      <Card className="glass-card border-blue-500 bg-blue-50 dark:bg-blue-950/20">
         <CardHeader>
           <CardTitle className="text-blue-800 dark:text-blue-200">
             {t('tierConfiguration')}
@@ -687,7 +687,7 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
 
       {/* Waitlisted Players */}
       {waitlistedPlayers > 0 && (
-        <Card className="border-orange-500">
+        <Card className="glass-card border-orange-500">
           <CardHeader>
             <CardTitle>
               {t('waitlistedPlayersList')} ({waitlistedPlayers})
@@ -737,7 +737,7 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
       </div>
 
       {generateDrawMutation.isError && (
-        <Card className="border-destructive">
+        <Card className="glass-card border-destructive">
           <CardContent className="pt-6">
             <p className="text-destructive">
               {t('drawGenerationError')}:{' '}

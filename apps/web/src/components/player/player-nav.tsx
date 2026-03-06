@@ -92,7 +92,7 @@ export function PlayerNav() {
                         // The AdaptiveNav will detect the URL change and switch automatically
                       }}
                     >
-                      <Button variant="ghost" size="xs" className="uppercase">
+                      <Button variant="ghost" size="xs" className="uppercase dark:hover:bg-muted">
                         {t('adminView')}
                       </Button>
                     </Link>

@@ -43,7 +43,7 @@ export function RSVPButtons({
     new Date() <= new Date(event.rsvpClosesAt);
 
   return (
-    <div className="flex gap-2 overflow-x-auto w-full sm:w-auto">
+    <div className="flex gap-2 w-full sm:w-auto">
       {session ? (
         <>
           {canRegister && !isConfirmed && !isWaitlisted && (

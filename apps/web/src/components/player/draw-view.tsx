@@ -347,7 +347,7 @@ export function DrawView({ eventId }: { eventId: string }) {
               </div>
               <p className="text-sm text-muted-foreground">{t('note')}</p>
 
-              <Card className="overflow-hidden">
+              <Card className="glass-card overflow-hidden">
                 <CardContent className="p-0">
                   <div className="overflow-x-auto">
                     <table className="w-full border-collapse">

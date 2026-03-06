@@ -30,7 +30,7 @@ export function EventsList() {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.3 }}
       >
-        <Card>
+        <Card className="glass-card">
           <CardContent className="py-8 text-center text-muted-foreground">
             {t('noEventsAvailable')}
           </CardContent>

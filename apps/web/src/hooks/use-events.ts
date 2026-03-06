@@ -123,6 +123,27 @@ export function useFreezeEvent(eventId: string) {
 }
 
 /**
+ * Hook to unfreeze event RSVPs
+ */
+export function useUnfreezeEvent(eventId: string) {
+  const queryClient = useQueryClient();
+  const authFetch = useAuthFetch();
+
+  return useMutation({
+    mutationFn: async () => {
+      return authFetch.post(`/events/${eventId}/unfreeze`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['event', eventId] });
+      toast.success('Event reopened successfully');
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to reopen event');
+    },
+  });
+}
+
+/**
  * Hook to publish event
  */
 export function usePublishEvent(eventId: string) {

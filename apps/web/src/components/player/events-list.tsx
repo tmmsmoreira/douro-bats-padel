@@ -2,11 +2,10 @@
 
 import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useUpcomingEvents, useRSVP } from '@/hooks';
-import { EventCard, EventStats } from '@/components/shared';
+import { EventCard, EventStats, StatusBadge } from '@/components/shared';
 import { Spinner } from '../ui/spinner';
 
 export function EventsList() {
@@ -54,55 +53,58 @@ export function EventsList() {
             showVenue
             headerActions={
               <>
-                {isConfirmed && <Badge variant="default">{t('confirmed')}</Badge>}
+                {isConfirmed && <StatusBadge status="CONFIRMED" label={t('confirmed')} />}
                 {isWaitlisted && (
-                  <Badge variant="secondary">
-                    {t('waitlist')} #{event.userRSVP?.position}
-                  </Badge>
+                  <StatusBadge
+                    status="WAITLISTED"
+                    label={`${t('waitlist')} #${event.userRSVP?.position}`}
+                  />
                 )}
               </>
             }
           >
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <EventStats
                 event={event}
                 confirmedLabel={t('confirmedCount')}
                 waitlistedLabel={t('waitlisted')}
               />
-              <div className="flex gap-2">
+              <div className="flex gap-2 w-full sm:w-auto">
                 {canRegister && !isConfirmed && !isWaitlisted && (
                   <Button
-                    size="sm"
+                    size="default"
                     onClick={() => handleRSVP(event.id, 'IN')}
                     disabled={rsvpMutation.isPending}
+                    className="flex-1 sm:flex-none rounded-lg"
                   >
                     {t('register')}
                   </Button>
                 )}
                 {(isConfirmed || isWaitlisted) && (
                   <Button
-                    size="sm"
+                    size="default"
                     variant="outline"
                     onClick={() => handleRSVP(event.id, 'OUT')}
                     disabled={rsvpMutation.isPending}
+                    className="flex-1 sm:flex-none rounded-lg"
                   >
                     {t('cancel')}
                   </Button>
                 )}
-                <Link href={`/events/${event.id}`}>
-                  <Button size="sm" variant="outline">
+                <Link href={`/events/${event.id}`} className="flex-1 sm:flex-none">
+                  <Button size="default" variant="outline" className="w-full rounded-lg">
                     {t('viewDetails')}
                   </Button>
                 </Link>
                 {event.state === 'PUBLISHED' && (
                   <>
-                    <Link href={`/events/${event.id}/draw`}>
-                      <Button size="sm" variant="outline">
+                    <Link href={`/events/${event.id}/draw`} className="flex-1 sm:flex-none">
+                      <Button size="default" variant="outline" className="w-full rounded-lg">
                         {t('viewDraw')}
                       </Button>
                     </Link>
-                    <Link href={`/events/${event.id}/results`}>
-                      <Button size="sm" variant="outline">
+                    <Link href={`/events/${event.id}/results`} className="flex-1 sm:flex-none">
+                      <Button size="default" variant="outline" className="w-full rounded-lg">
                         {t('viewResults')}
                       </Button>
                     </Link>

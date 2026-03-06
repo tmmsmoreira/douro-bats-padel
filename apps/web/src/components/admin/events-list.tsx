@@ -215,28 +215,35 @@ export function EventsList() {
                         confirmedLabel={t('confirmed')}
                         waitlistedLabel={t('waitlisted')}
                       />
-                      <div className="flex flex-wrap gap-3">
-                        <Link href={`/admin/events/${event.id}`}>
+                      <div className="flex gap-3 w-full sm:w-auto">
+                        <Link href={`/admin/events/${event.id}`} className="flex-1 sm:flex-none">
                           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                            <Button variant="outline" size="default" className="rounded-lg">
+                            <Button variant="outline" size="default" className="rounded-lg w-full">
                               {t('manage')}
                             </Button>
                           </motion.div>
                         </Link>
                         {event.state === 'FROZEN' && !hasEventPassed && (
-                          <Link href={`/admin/events/${event.id}/draw`}>
+                          <Link
+                            href={`/admin/events/${event.id}/draw`}
+                            className="flex-1 sm:flex-none"
+                          >
                             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                              <Button size="default" className="rounded-lg">
+                              <Button size="default" className="rounded-lg w-full">
                                 {t('generateDraw')}
                               </Button>
                             </motion.div>
                           </Link>
                         )}
                         {event.state === 'DRAWN' && !hasEventPassed && (
-                          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                          <motion.div
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="flex-1 sm:flex-none"
+                          >
                             <Button
                               size="default"
-                              className="rounded-lg"
+                              className="rounded-lg w-full"
                               onClick={() => publishDrawMutation.mutate(event.id)}
                               disabled={publishDrawMutation.isPending}
                             >
@@ -245,11 +252,14 @@ export function EventsList() {
                           </motion.div>
                         )}
                         {event.state === 'PUBLISHED' && hasEventPassed && (
-                          <Link href={`/admin/events/${event.id}/results`}>
+                          <Link
+                            href={`/admin/events/${event.id}/results`}
+                            className="flex-1 sm:flex-none"
+                          >
                             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                               <Button
                                 size="default"
-                                className="bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg shadow-md"
+                                className="bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg shadow-md w-full"
                               >
                                 {t('enterResults')}
                               </Button>

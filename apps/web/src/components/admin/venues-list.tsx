@@ -181,8 +181,8 @@ export function VenuesList() {
                 {/* Action Buttons */}
                 <div className="flex gap-2 shrink-0">
                   <Button
-                    variant="outline"
-                    size="sm"
+                    variant="ghost"
+                    size="icon"
                     onClick={() => handleEdit(venue.id)}
                     onMouseEnter={() => squarePenIconRef.current?.startAnimation()}
                     onMouseLeave={() => squarePenIconRef.current?.stopAnimation()}
@@ -190,14 +190,14 @@ export function VenuesList() {
                     <SquarePenIcon ref={squarePenIconRef} size={16} />
                   </Button>
                   <Button
-                    variant="outline"
-                    size="sm"
+                    variant="ghost"
+                    size="icon"
                     onClick={() => handleDelete(venue.id, venue.name)}
                     disabled={deleteMutation.isPending}
                     onMouseEnter={() => deleteIconRef.current?.startAnimation()}
                     onMouseLeave={() => deleteIconRef.current?.stopAnimation()}
                   >
-                    <DeleteIcon ref={deleteIconRef} size={16} />
+                    <DeleteIcon ref={deleteIconRef} size={16} className="text-destructive" />
                   </Button>
                 </div>
               </div>

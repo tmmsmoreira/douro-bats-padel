@@ -170,7 +170,7 @@ export function MobileMenu({
                     window.dispatchEvent(new Event('viewChanged'));
                     onClose();
                   }}
-                  className="flex items-center uppercase justify-center w-full px-4 py-3 text-base font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90"
+                  className="flex items-center uppercase justify-center w-full px-4 py-3 text-base font-medium transition-colors bg-secondary text-secondary-foreground hover:bg-secondary/90"
                 >
                   {roleSwitchLabel}
                 </Link>

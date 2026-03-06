@@ -5,8 +5,14 @@ import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { PlayerNav } from './player-nav';
 import { Footer } from '@/components/public/footer';
+import { ArrowLeftIcon, ArrowLeftIconHandle } from 'lucide-animated';
+import { Calendar, Clock, MapPin } from 'lucide-react';
+import Link from 'next/link';
+import { useRef } from 'react';
+import { formatDate, formatTime } from '@/lib/utils';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -33,11 +39,38 @@ interface Match {
   tier?: string;
 }
 
+interface Event {
+  id: string;
+  title: string | null;
+  date: string;
+  startsAt: string;
+  endsAt: string;
+  venue?: {
+    id: string;
+    name: string;
+  };
+}
+
 export function ResultsView({ eventId }: { eventId: string }) {
   const { data: session } = useSession();
   const t = useTranslations('resultsView');
+  const arrowLeftIconRef = useRef<ArrowLeftIconHandle>(null);
 
-  const { data: matches, isLoading } = useQuery({
+  const { data: event, isLoading: isLoadingEvent } = useQuery<Event>({
+    queryKey: ['event', eventId],
+    queryFn: async () => {
+      const headers: HeadersInit = { 'Content-Type': 'application/json' };
+      if (session?.accessToken) {
+        headers.Authorization = `Bearer ${session.accessToken}`;
+      }
+      const res = await fetch(`${API_URL}/events/${eventId}`, { headers });
+      if (!res.ok) throw new Error('Failed to fetch event');
+      return res.json();
+    },
+    enabled: !!session,
+  });
+
+  const { data: matches, isLoading: isLoadingMatches } = useQuery({
     queryKey: ['matches', eventId],
     queryFn: async () => {
       const headers: HeadersInit = { 'Content-Type': 'application/json' };
@@ -51,6 +84,8 @@ export function ResultsView({ eventId }: { eventId: string }) {
     enabled: !!session,
   });
 
+  const isLoading = isLoadingEvent || isLoadingMatches;
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
@@ -63,12 +98,67 @@ export function ResultsView({ eventId }: { eventId: string }) {
     );
   }
 
+  if (!event) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <PlayerNav />
+        <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl min-h-[500px]">
+          <div className="text-center py-8">{t('eventNotFound')}</div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   if (!matches || matches.length === 0) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <PlayerNav />
         <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl min-h-[500px]">
-          <div className="text-center py-8">{t('noResults')}</div>
+          <div className="space-y-6">
+            {/* Back Button */}
+            <Link href="/">
+              <Button
+                variant="ghost"
+                size="sm"
+                onMouseEnter={() => arrowLeftIconRef.current?.startAnimation()}
+                onMouseLeave={() => arrowLeftIconRef.current?.stopAnimation()}
+              >
+                <ArrowLeftIcon ref={arrowLeftIconRef} size={16} />
+                {t('backToEvents')}
+              </Button>
+            </Link>
+
+            {/* Event Information */}
+            <div>
+              <h1 className="text-3xl font-bold mb-2">{event.title || t('untitledEvent')}</h1>
+              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="h-4 w-4" />
+                  <span>{formatDate(event.date)}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Clock className="h-4 w-4" />
+                  <span>
+                    {formatTime(event.startsAt)} - {formatTime(event.endsAt)}
+                  </span>
+                </div>
+                {event.venue && (
+                  <div className="flex items-center gap-1.5">
+                    <MapPin className="h-4 w-4" />
+                    <span>{event.venue.name}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* No Results Message */}
+            <Card>
+              <CardContent className="py-8 text-center text-muted-foreground">
+                {t('noResults')}
+              </CardContent>
+            </Card>
+          </div>
         </main>
         <Footer />
       </div>
@@ -92,9 +182,40 @@ export function ResultsView({ eventId }: { eventId: string }) {
       <PlayerNav />
       <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl min-h-[500px]">
         <div className="space-y-6">
+          {/* Back Button */}
+          <Link href="/">
+            <Button
+              variant="ghost"
+              size="sm"
+              onMouseEnter={() => arrowLeftIconRef.current?.startAnimation()}
+              onMouseLeave={() => arrowLeftIconRef.current?.stopAnimation()}
+            >
+              <ArrowLeftIcon ref={arrowLeftIconRef} size={16} />
+              {t('backToEvents')}
+            </Button>
+          </Link>
+
+          {/* Event Information */}
           <div>
-            <h1 className="text-3xl font-bold">{t('title')}</h1>
-            <p className="text-muted-foreground">{t('description')}</p>
+            <h1 className="text-3xl font-bold mb-2">{event.title || t('untitledEvent')}</h1>
+            <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1.5">
+                <Calendar className="h-4 w-4" />
+                <span>{formatDate(event.date)}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Clock className="h-4 w-4" />
+                <span>
+                  {formatTime(event.startsAt)} - {formatTime(event.endsAt)}
+                </span>
+              </div>
+              {event.venue && (
+                <div className="flex items-center gap-1.5">
+                  <MapPin className="h-4 w-4" />
+                  <span>{event.venue.name}</span>
+                </div>
+              )}
+            </div>
           </div>
 
           {(Object.entries(rounds) as [string, Match[]][]).map(([round, roundMatches]) => (

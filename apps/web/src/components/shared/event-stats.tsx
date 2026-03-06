@@ -20,10 +20,10 @@ export function EventStats({
   const percentage = (event.confirmedCount / event.capacity) * 100;
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-3 w-full sm:w-auto">
       <Users className="w-4 h-4 text-muted-foreground shrink-0" />
-      <div className="flex items-center gap-3 text-sm">
-        <span>
+      <div className="flex items-center gap-3 text-sm flex-1 sm:flex-none">
+        <span className="whitespace-nowrap">
           <span className="font-bold text-foreground text-base">{event.confirmedCount}</span>
           <span className="text-muted-foreground">
             {' '}
@@ -31,7 +31,7 @@ export function EventStats({
           </span>
         </span>
         {showProgressBar && (
-          <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
+          <div className="flex-1 sm:w-32 h-2 bg-muted rounded-full overflow-hidden">
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${percentage}%` }}
@@ -42,7 +42,7 @@ export function EventStats({
         )}
       </div>
       {event.waitlistCount > 0 && (
-        <span className="text-sm text-muted-foreground">
+        <span className="text-sm text-muted-foreground whitespace-nowrap">
           {event.waitlistCount} {waitlistedLabel}
         </span>
       )}

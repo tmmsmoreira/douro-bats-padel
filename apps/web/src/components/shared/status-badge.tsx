@@ -2,14 +2,17 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 export type EventStatus = 'DRAFT' | 'OPEN' | 'FROZEN' | 'DRAWN' | 'PUBLISHED';
+export type PlayerStatus = 'CONFIRMED' | 'WAITLISTED' | 'PARTICIPATED';
+export type Status = EventStatus | PlayerStatus;
 
 interface StatusBadgeProps {
-  status: EventStatus;
+  status: Status;
   className?: string;
+  label?: string;
 }
 
 const statusConfig: Record<
-  EventStatus,
+  Status,
   {
     variant: 'default' | 'secondary' | 'outline' | 'destructive';
     className: string;
@@ -17,6 +20,7 @@ const statusConfig: Record<
     label: string;
   }
 > = {
+  // Event statuses
   DRAFT: {
     variant: 'outline',
     className: 'border-warning/30 text-warning bg-warning/10',
@@ -47,9 +51,29 @@ const statusConfig: Record<
     dotColor: 'bg-primary',
     label: 'PUBLISHED',
   },
+  // Player participation statuses
+  CONFIRMED: {
+    variant: 'default',
+    className: 'bg-primary/10 text-primary border-primary/30',
+    dotColor: 'bg-primary',
+    label: 'CONFIRMED',
+  },
+  WAITLISTED: {
+    variant: 'secondary',
+    className: 'bg-muted text-muted-foreground border-border',
+    dotColor: 'bg-muted-foreground',
+    label: 'WAITLISTED',
+  },
+  PARTICIPATED: {
+    variant: 'outline',
+    className:
+      'bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800',
+    dotColor: 'bg-green-600',
+    label: 'PARTICIPATED',
+  },
 };
 
-export function StatusBadge({ status, className }: StatusBadgeProps) {
+export function StatusBadge({ status, className, label }: StatusBadgeProps) {
   const config = statusConfig[status];
 
   return (
@@ -62,7 +86,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
       )}
     >
       <span className={cn('w-1.5 h-1.5 rounded-full', config.dotColor)} />
-      {config.label}
+      {label || config.label}
     </Badge>
   );
 }

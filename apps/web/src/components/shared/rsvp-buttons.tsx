@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import type { EventWithRSVP } from '@padel/types';
 import type { Session } from 'next-auth';
+import { motion } from 'motion/react';
 
 interface RSVPButtonsProps {
   event: EventWithRSVP;
@@ -42,12 +43,11 @@ export function RSVPButtons({
     new Date() <= new Date(event.rsvpClosesAt);
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex gap-2 overflow-x-auto w-full sm:w-auto">
       {session ? (
         <>
           {canRegister && !isConfirmed && !isWaitlisted && (
             <Button
-              size="sm"
               onClick={() => onRSVP(event.id, 'IN')}
               disabled={isPending}
               className="flex-1 sm:flex-none"
@@ -57,7 +57,6 @@ export function RSVPButtons({
           )}
           {(isConfirmed || isWaitlisted) && (
             <Button
-              size="sm"
               variant="outline"
               onClick={() => onRSVP(event.id, 'OUT')}
               disabled={isPending}
@@ -69,23 +68,27 @@ export function RSVPButtons({
         </>
       ) : (
         <Link href="/login" className="flex-1 sm:flex-none">
-          <Button size="sm" className="w-full">
-            {signInToRegisterText}
-          </Button>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button className="w-full rounded-lg">{signInToRegisterText}</Button>
+          </motion.div>
         </Link>
       )}
       {showViewDetails && (
         <Link href={`/events/${event.id}`} className="flex-1 sm:flex-none">
-          <Button size="sm" variant="outline" className="w-full">
-            {viewDetailsText}
-          </Button>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button variant="outline" className="w-full rounded-lg">
+              {viewDetailsText}
+            </Button>
+          </motion.div>
         </Link>
       )}
       {showViewDraw && event.state === 'PUBLISHED' && (
         <Link href={`/events/${event.id}/draw`} className="flex-1 sm:flex-none">
-          <Button size="sm" variant="outline" className="w-full">
-            {viewDrawText}
-          </Button>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button variant="outline" className="w-full rounded-lg">
+              {viewDrawText}
+            </Button>
+          </motion.div>
         </Link>
       )}
     </div>

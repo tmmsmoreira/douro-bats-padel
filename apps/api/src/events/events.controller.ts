@@ -105,6 +105,13 @@ export class EventsController {
     return this.eventsService.freeze(id);
   }
 
+  @Post(':id/unfreeze')
+  @UseGuards(RolesGuard)
+  @Roles(Role.EDITOR, Role.ADMIN)
+  async unfreeze(@Param('id') id: string) {
+    return this.eventsService.unfreeze(id);
+  }
+
   @Post(':id/rsvp')
   async rsvp(@Param('id') id: string, @Body() dto: RSVPDto, @Request() req: any) {
     return this.rsvpService.handleRSVP(id, req.user.sub, dto);

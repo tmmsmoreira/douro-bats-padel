@@ -24,6 +24,8 @@ import { DeleteIcon, DeleteIconHandle } from 'lucide-animated';
 import { motion } from 'motion/react';
 import { EventStatus, StatusBadge } from '../shared';
 import { Spinner } from '../ui/spinner';
+import { LoadingState } from '../shared/loading-state';
+import { useMinimumLoading } from '@/hooks/use-minimum-loading';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -116,6 +118,9 @@ export function EventDetails({ eventId }: { eventId: string }) {
     },
   });
 
+  // Use minimum loading to prevent jarring flashes
+  const showLoading = useMinimumLoading(isLoading, !!event);
+
   // Fetch draw if event has one
   const { data: draw } = useQuery({
     queryKey: ['draw', eventId, session?.accessToken],
@@ -161,6 +166,36 @@ export function EventDetails({ eventId }: { eventId: string }) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['event', eventId] });
+    },
+  });
+
+  const unfreezeMutation = useMutation({
+    mutationFn: async () => {
+      if (!session?.accessToken) {
+        throw new Error('Not authenticated');
+      }
+
+      const res = await fetch(`${API_URL}/events/${eventId}/unfreeze`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.accessToken}`,
+        },
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ message: res.statusText }));
+        throw new Error(errorData.message || `API Error: ${res.statusText}`);
+      }
+
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['event', eventId] });
+      toast.success(t('unfreezeSuccess') || 'Event reopened successfully');
+    },
+    onError: (error: Error) => {
+      toast.error(t('unfreezeError') + ': ' + error.message);
     },
   });
 
@@ -220,13 +255,8 @@ export function EventDetails({ eventId }: { eventId: string }) {
     },
   });
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <Spinner data-icon="inline-start" className="mr-2" />
-        {t('loadingEvent')}
-      </div>
-    );
+  if (showLoading) {
+    return <LoadingState message={t('loadingEvent')} />;
   }
 
   if (!event) {
@@ -245,6 +275,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
           <EventDetailsHeaderActionButtons
             event={event}
             freezeMutation={freezeMutation}
+            unfreezeMutation={unfreezeMutation}
             publishMutation={publishMutation}
             draw={draw}
             onDeleteClick={() => setShowDeleteDialog(true)}
@@ -260,7 +291,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
 
             {/* Always show waitlist if there are waitlisted players */}
             {(event.waitlistCount > 0 || (event.waitlistedPlayers?.length ?? 0) > 0) && (
-              <Card>
+              <Card className="glass-card">
                 <CardHeader>
                   <CardTitle>
                     {t('waitlist')} ({event.waitlistCount || event.waitlistedPlayers?.length || 0})
@@ -350,11 +381,12 @@ export function EventDetails({ eventId }: { eventId: string }) {
           title={t('deleteConfirmation')}
           description={t('deleteConfirmationDescription')}
           confirmText={t('deleteEvent')}
+          confirmingText={t('deleting')}
           cancelText={t('cancel')}
           variant="destructive"
+          isLoading={deleteMutation.isPending}
           onConfirm={() => {
             deleteMutation.mutate();
-            setShowDeleteDialog(false);
           }}
         />
       </div>
@@ -401,7 +433,7 @@ function DrawSummary({ draw }: { draw: Draw }) {
             )}
           </div>
           {Object.entries(mastersRounds).map(([round, assignments]) => (
-            <Card key={`masters-${round}`}>
+            <Card className="glass-card" key={`masters-${round}`}>
               <CardHeader>
                 <CardTitle>{t('round', { round: round })}</CardTitle>
               </CardHeader>
@@ -430,7 +462,7 @@ function DrawSummary({ draw }: { draw: Draw }) {
             )}
           </div>
           {Object.entries(explorersRounds).map(([round, assignments]) => (
-            <Card key={`explorers-${round}`}>
+            <Card className="glass-card" key={`explorers-${round}`}>
               <CardHeader>
                 <CardTitle>{t('round', { round: round })}</CardTitle>
               </CardHeader>
@@ -516,12 +548,14 @@ function EventDetailsHeaderInfo({ event }: { event: EventDetails }) {
 function EventDetailsHeaderActionButtons({
   event,
   freezeMutation,
+  unfreezeMutation,
   publishMutation,
   draw,
   onDeleteClick,
 }: {
   event: EventDetails;
   freezeMutation: UseMutationResult<any, Error, void, unknown>;
+  unfreezeMutation: UseMutationResult<any, Error, void, unknown>;
   publishMutation: UseMutationResult<any, Error, void, unknown>;
   draw: Draw | null;
   onDeleteClick: () => void;
@@ -549,14 +583,26 @@ function EventDetailsHeaderActionButtons({
       switch (event.state) {
         case 'DRAFT':
           return (
-            <Button onClick={() => publishMutation.mutate()} className="w-full">
-              {t('publishEvent')}
+            <Button
+              onClick={() => publishMutation.mutate()}
+              disabled={publishMutation.isPending}
+              className="w-full gap-2"
+            >
+              {publishMutation.isPending && (
+                <Spinner data-icon="inline-start" className="h-4 w-4" />
+              )}
+              {publishMutation.isPending ? t('publishing') : t('publishEvent')}
             </Button>
           );
         case 'OPEN':
           return (
-            <Button onClick={() => freezeMutation.mutate()} className="w-full">
-              {t('freezeRsvps')}
+            <Button
+              onClick={() => freezeMutation.mutate()}
+              disabled={freezeMutation.isPending}
+              className="w-full gap-2"
+            >
+              {freezeMutation.isPending && <Spinner data-icon="inline-start" className="h-4 w-4" />}
+              {freezeMutation.isPending ? t('freezing') : t('freezeRsvps')}
             </Button>
           );
         case 'FROZEN':
@@ -609,6 +655,18 @@ function EventDetailsHeaderActionButtons({
                   <span>{t('editEvent')}</span>
                 </Link>
               </DropdownMenuItem>
+              {event.state === 'FROZEN' && !draw && (
+                <DropdownMenuItem
+                  onClick={() => unfreezeMutation.mutate()}
+                  disabled={unfreezeMutation.isPending}
+                  className="gap-2"
+                >
+                  {unfreezeMutation.isPending && (
+                    <Spinner data-icon="inline-start" className="h-4 w-4" />
+                  )}
+                  <span>{unfreezeMutation.isPending ? t('unfreezing') : t('unfreezeEvent')}</span>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
             </>
           )}

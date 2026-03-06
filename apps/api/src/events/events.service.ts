@@ -359,6 +359,35 @@ export class EventsService {
     });
   }
 
+  async unfreeze(id: string) {
+    const event = await this.prisma.event.findUnique({
+      where: { id },
+      include: {
+        draws: true,
+      },
+    });
+
+    if (!event) {
+      throw new NotFoundException('Event not found');
+    }
+
+    if (event.state !== EventState.FROZEN) {
+      throw new BadRequestException('Event is not in frozen state');
+    }
+
+    // Check if event has a draw - cannot unfreeze if draw exists
+    if (event.draws.length > 0) {
+      throw new BadRequestException(
+        'Cannot unfreeze event with existing draw. Delete the draw first.'
+      );
+    }
+
+    return this.prisma.event.update({
+      where: { id },
+      data: { state: EventState.OPEN },
+    });
+  }
+
   async remove(id: string) {
     const event = await this.prisma.event.findUnique({ where: { id } });
 

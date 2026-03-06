@@ -4,6 +4,7 @@ import { PastEventsList } from '@/components/shared/past-events-list';
 import { Footer } from '@/components/public/footer';
 import { getTranslations } from 'next-intl/server';
 import { HomeAdaptiveNav } from '@/components/shared/home-adaptive-nav';
+import { PageHeader } from '@/components/shared/page-header';
 
 export default async function HomePage() {
   const session = await auth();
@@ -15,12 +16,10 @@ export default async function HomePage() {
       <main className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-1 max-w-4xl">
         <div className="space-y-8 sm:space-y-12">
           <div className="space-y-4 sm:space-y-6">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold">{t('title')}</h1>
-              <p className="text-sm sm:text-base text-muted-foreground mt-1">
-                {session ? t('description') : t('descriptionGuest')}
-              </p>
-            </div>
+            <PageHeader
+              title={t('title')}
+              description={session ? t('description') : t('descriptionGuest')}
+            />
             <EventsList />
           </div>
 

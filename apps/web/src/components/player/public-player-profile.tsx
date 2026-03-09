@@ -13,17 +13,10 @@ import { Button } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { useRef, useState } from 'react';
 import { toast } from 'sonner';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 import { ConfirmationDialog } from '../shared/confirmation-dialog';
+import { motion, AnimatePresence } from 'motion/react';
+import { LoadingState } from '@/components/shared/loading-state';
+import { useMinimumLoading } from '@/hooks/use-minimum-loading';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -134,30 +127,98 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
     setShowDeleteDialog(true);
   };
 
-  if (isLoading) {
-    return <div className="text-center py-8">{t('loadingProfile')}</div>;
-  }
-
-  if (error || !player) {
-    return (
-      <div className="space-y-6">
-        <Link href="/admin/players" onMouseEnter={() => arrowLeftIconRef.current?.startAnimation()}>
-          <Button variant="ghost" size="sm">
-            <ArrowLeftIcon ref={arrowLeftIconRef} size={16} />
-            {tList('backToPlayers')}
-          </Button>
-        </Link>
-        <Card>
-          <CardContent className="py-8 text-center text-muted-foreground">
-            {t('profileNotFound')}
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  // Use minimum loading to prevent jarring flashes
+  const showLoading = useMinimumLoading(isLoading, !!player);
 
   return (
-    <div className="space-y-6">
+    <AnimatePresence mode="wait">
+      {showLoading ? (
+        <LoadingState message={t('loadingProfile')} />
+      ) : error || !player ? (
+        <motion.div
+          key="not-found"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <div className="space-y-6">
+            <Link
+              href="/admin/players"
+              onMouseEnter={() => arrowLeftIconRef.current?.startAnimation()}
+            >
+              <Button variant="ghost" size="sm">
+                <ArrowLeftIcon ref={arrowLeftIconRef} size={16} />
+                {tList('backToPlayers')}
+              </Button>
+            </Link>
+            <Card>
+              <CardContent className="py-8 text-center text-muted-foreground">
+                {t('profileNotFound')}
+              </CardContent>
+            </Card>
+          </div>
+        </motion.div>
+      ) : (
+        <PublicPlayerProfileContent
+          player={player}
+          isAdminOrEditor={isAdminOrEditor}
+          handleDeleteUser={handleDeleteUser}
+          arrowLeftIconRef={arrowLeftIconRef}
+          deleteIconRef={deleteIconRef}
+          isDeleting={isDeleting}
+          showDeleteDialog={showDeleteDialog}
+          setShowDeleteDialog={setShowDeleteDialog}
+          setIsDeleting={setIsDeleting}
+          deleteMutation={deleteMutation}
+          t={t}
+          tList={tList}
+          tActions={tActions}
+        />
+      )}
+    </AnimatePresence>
+  );
+}
+
+// Separate component for public player profile content
+function PublicPlayerProfileContent({
+  player,
+  isAdminOrEditor,
+  handleDeleteUser,
+  arrowLeftIconRef,
+  deleteIconRef,
+  isDeleting,
+  showDeleteDialog,
+  setShowDeleteDialog,
+  setIsDeleting,
+  deleteMutation,
+  t,
+  tList,
+  tActions,
+}: {
+  player: PlayerData;
+  isAdminOrEditor: boolean;
+  handleDeleteUser: () => void;
+  arrowLeftIconRef: React.RefObject<ArrowLeftIconHandle | null>;
+  deleteIconRef: React.RefObject<DeleteIconHandle | null>;
+  isDeleting: boolean;
+  showDeleteDialog: boolean;
+  setShowDeleteDialog: (value: boolean) => void;
+  setIsDeleting: (value: boolean) => void;
+  deleteMutation: any;
+  t: any;
+  tList: any;
+  tActions: any;
+}) {
+  return (
+    <motion.div
+      key="content"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-6"
+    >
       {/* Back Button */}
       <div>
         <Link href="/admin/players" onMouseEnter={() => arrowLeftIconRef.current?.startAnimation()}>
@@ -344,6 +405,6 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
           setShowDeleteDialog(false);
         }}
       />
-    </div>
+    </motion.div>
   );
 }

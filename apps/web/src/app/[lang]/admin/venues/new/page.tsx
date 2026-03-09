@@ -1,4 +1,5 @@
 import { VenueForm } from '@/components/admin/venue-form';
+import { PageHeader } from '@/components/shared/page-header';
 import { getTranslations } from 'next-intl/server';
 
 export default async function NewVenuePage() {
@@ -6,10 +7,7 @@ export default async function NewVenuePage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">{t('createVenue')}</h1>
-        <p className="text-muted-foreground">{t('createVenueDescription')}</p>
-      </div>
+      <PageHeader title={t('createVenue')} description={t('createVenueDescription')} />
       <VenueForm />
     </div>
   );

@@ -51,9 +51,6 @@ export default async function middleware(req: NextRequest) {
   // Public pages that don't require authentication
   const isPublicPage =
     pathnameWithoutLocale === '/' ||
-    pathnameWithoutLocale === '/leaderboard' ||
-    pathnameWithoutLocale === '/events' ||
-    pathnameWithoutLocale.startsWith('/events/') ||
     pathnameWithoutLocale === '/about' ||
     pathnameWithoutLocale === '/contact' ||
     pathnameWithoutLocale === '/faq' ||

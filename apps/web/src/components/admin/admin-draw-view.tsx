@@ -39,6 +39,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { motion, AnimatePresence } from 'motion/react';
+import { LoadingState } from '@/components/shared/loading-state';
+import { useMinimumLoading } from '@/hooks/use-minimum-loading';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -251,17 +254,66 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
     },
   });
 
-  if (isLoading) {
-    return <div className="text-center py-8">{t('loading')}</div>;
-  }
+  // Use minimum loading to prevent jarring flashes
+  const showLoading = useMinimumLoading(isLoading, !!draw);
 
-  if (!draw) {
-    return <div className="text-center py-8">{t('notAvailable')}</div>;
-  }
+  return (
+    <AnimatePresence mode="wait">
+      {showLoading ? (
+        <LoadingState message={t('loading')} />
+      ) : !draw ? (
+        <motion.div
+          key="not-found"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="text-center py-8"
+        >
+          {t('notAvailable')}
+        </motion.div>
+      ) : (
+        <AdminDrawContent
+          draw={draw}
+          event={event}
+          eventId={eventId}
+          editingAssignment={editingAssignment}
+          setEditingAssignment={setEditingAssignment}
+          showDeleteDialog={showDeleteDialog}
+          setShowDeleteDialog={setShowDeleteDialog}
+          publishDrawMutation={publishDrawMutation}
+          unpublishDrawMutation={unpublishDrawMutation}
+          deleteDrawMutation={deleteDrawMutation}
+          updateAssignmentMutation={updateAssignmentMutation}
+          arrowLeftIconRef={arrowLeftIconRef}
+          router={router}
+          t={t}
+        />
+      )}
+    </AnimatePresence>
+  );
+}
 
+// Separate component for admin draw content
+function AdminDrawContent({
+  draw,
+  event,
+  eventId,
+  editingAssignment,
+  setEditingAssignment,
+  showDeleteDialog,
+  setShowDeleteDialog,
+  publishDrawMutation,
+  unpublishDrawMutation,
+  deleteDrawMutation,
+  updateAssignmentMutation,
+  arrowLeftIconRef,
+  router,
+  t,
+}: any) {
   // Group assignments by tier and round
-  const masterAssignments = draw.assignments.filter((a) => a.tier === 'MASTERS');
-  const explorerAssignments = draw.assignments.filter((a) => a.tier === 'EXPLORERS');
+  const masterAssignments = draw.assignments.filter((a: Assignment) => a.tier === 'MASTERS');
+  const explorerAssignments = draw.assignments.filter((a: Assignment) => a.tier === 'EXPLORERS');
 
   const groupByRound = (assignments: Assignment[]) => {
     return assignments.reduce(
@@ -284,7 +336,14 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
   const hasEventPassed = eventEndTime < new Date();
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      key="content"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-6"
+    >
       {/* Back Button */}
       <div>
         <Link
@@ -503,7 +562,7 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </motion.div>
   );
 }
 

@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { Link } from '@/i18n/navigation';
-import { useActivePathname } from '@/hooks/use-active-pathname';
-import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ThemeToggleButton } from '@/components/shared/theme-toggle-button';
 import { LanguageToggleButton } from '@/components/shared/language-toggle-button';
@@ -16,7 +14,6 @@ import { MobileMenu } from '@/components/shared/mobile-menu';
  * Shows public pages and a Sign In button.
  */
 export function HomeNav() {
-  const pathname = useActivePathname();
   const t = useTranslations('nav');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -34,11 +31,6 @@ export function HomeNav() {
     };
   }, [mobileMenuOpen]);
 
-  const navItems = [
-    { href: `/`, label: t('events') },
-    { href: `/leaderboard`, label: t('ranking') },
-  ];
-
   return (
     <>
       <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border/50">
@@ -50,32 +42,13 @@ export function HomeNav() {
                 Douro Bats Padel
               </Link>
 
-              {/* Desktop Navigation */}
-              <div className="hidden flex-1 md:flex items-center justify-between">
-                <div className="flex flex-1 gap-2 justify-center px-6">
-                  {navItems.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className={cn(
-                        'px-4 py-2 text-sm font-medium rounded-[999px] transition-colors',
-                        pathname === item.href
-                          ? 'bg-primary text-primary-foreground'
-                          : 'text-muted-foreground hover:text-muted-foreground/60'
-                      )}
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <LanguageToggleButton />
-                  <ThemeToggleButton />
-                  <Link href="/login">
-                    <Button size="sm">{t('signIn')}</Button>
-                  </Link>
-                </div>
+              {/* Desktop Actions */}
+              <div className="hidden md:flex items-center gap-4">
+                <LanguageToggleButton />
+                <ThemeToggleButton />
+                <Link href="/login">
+                  <Button size="sm">{t('signIn')}</Button>
+                </Link>
               </div>
 
               {/* Mobile Menu Button */}
@@ -98,7 +71,7 @@ export function HomeNav() {
         isOpen={mobileMenuOpen}
         onClose={() => setMobileMenuOpen(false)}
         session={null}
-        navItems={navItems}
+        navItems={[]}
         t={t}
         showRoleSwitch={false}
         roleSwitchHref="/admin"

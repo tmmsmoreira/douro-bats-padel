@@ -6,7 +6,14 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { toast } from 'sonner';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -89,7 +96,15 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
       if (venueId) {
         queryClient.invalidateQueries({ queryKey: ['venue', venueId] });
       }
+      toast.success(venueId ? t('venueUpdatedSuccess') : t('venueCreatedSuccess'));
       router.push('/admin/venues');
+    },
+    onError: (error: Error) => {
+      toast.error(
+        venueId
+          ? `${t('venueUpdateError')}: ${error.message}`
+          : `${t('venueCreateError')}: ${error.message}`
+      );
     },
   });
 
@@ -115,12 +130,12 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      alert(t('pleaseEnterVenueName'));
+      toast.error(t('pleaseEnterVenueName'));
       return;
     }
 
     if (formData.courts.length === 0) {
-      alert(t('pleaseAddAtLeastOneCourt'));
+      toast.error(t('pleaseAddAtLeastOneCourt'));
       return;
     }
 
@@ -152,12 +167,12 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
 
   return (
     <form onSubmit={handleSubmit}>
-      <Card>
+      <Card className="glass-card">
         <CardHeader>
           <CardTitle>{t('venueDetails')}</CardTitle>
           <CardDescription>{t('venueDetailsDescription')}</CardDescription>
         </CardHeader>
-        <CardContent className="pt-0 space-y-6">
+        <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="name">{t('venueName')} *</Label>
             <Input
@@ -242,7 +257,8 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
               </div>
             )}
           </div>
-
+        </CardContent>
+        <CardFooter>
           <div className="flex gap-2 justify-end">
             <Button type="button" variant="outline" onClick={() => router.push('/admin/venues')}>
               {t('cancel')}
@@ -257,18 +273,7 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
                   : t('createVenue')}
             </Button>
           </div>
-
-          {saveMutation.isError && (
-            <div className="text-sm text-destructive">
-              {t('errorPrefix')}{' '}
-              {saveMutation.error instanceof Error
-                ? saveMutation.error.message
-                : venueId
-                  ? t('failedToUpdate')
-                  : t('failedToCreate')}
-            </div>
-          )}
-        </CardContent>
+        </CardFooter>
       </Card>
     </form>
   );

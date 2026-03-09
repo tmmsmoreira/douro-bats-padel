@@ -13,6 +13,9 @@ import { Edit2, X, Check } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { toast } from 'sonner';
+import { motion, AnimatePresence } from 'motion/react';
+import { LoadingState } from '@/components/shared/loading-state';
+import { useMinimumLoading } from '@/hooks/use-minimum-loading';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -254,26 +257,91 @@ export function PlayerProfile() {
     return email?.[0]?.toUpperCase() || 'U';
   };
 
-  if (status === 'loading' || isLoading) {
-    return <div className="text-center py-8">{t('loadingProfile')}</div>;
-  }
-
-  if (error) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-destructive">
-          {t('errorLoadingProfile')}: {(error as Error).message}
-        </p>
-      </div>
-    );
-  }
-
-  if (!profile) {
-    return <div className="text-center py-8">{t('profileNotFound')}</div>;
-  }
+  // Use minimum loading to prevent jarring flashes
+  const showLoading = useMinimumLoading(status === 'loading' || isLoading, !!profile);
 
   return (
-    <div className="space-y-6">
+    <AnimatePresence mode="wait">
+      {showLoading ? (
+        <LoadingState message={t('loadingProfile')} />
+      ) : error ? (
+        <motion.div
+          key="error"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="text-center py-8"
+        >
+          <p className="text-destructive">
+            {t('errorLoadingProfile')}: {(error as Error).message}
+          </p>
+        </motion.div>
+      ) : !profile ? (
+        <motion.div
+          key="not-found"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="text-center py-8"
+        >
+          {t('profileNotFound')}
+        </motion.div>
+      ) : (
+        <ProfileContent
+          profile={profile}
+          isEditingProfile={isEditingProfile}
+          editedName={editedName}
+          setEditedName={setEditedName}
+          editedDateOfBirth={editedDateOfBirth}
+          setEditedDateOfBirth={setEditedDateOfBirth}
+          editedPhoneNumber={editedPhoneNumber}
+          setEditedPhoneNumber={setEditedPhoneNumber}
+          editedProfilePhoto={editedProfilePhoto}
+          setEditedProfilePhoto={setEditedProfilePhoto}
+          validationErrors={validationErrors}
+          handleEditProfile={handleEditProfile}
+          handleSaveProfile={handleSaveProfile}
+          handleCancelProfileEdit={handleCancelProfileEdit}
+          updateProfileMutation={updateProfileMutation}
+          getUserInitials={getUserInitials}
+          t={t}
+        />
+      )}
+    </AnimatePresence>
+  );
+}
+
+// Separate component for profile content
+function ProfileContent({
+  profile,
+  isEditingProfile,
+  editedName,
+  setEditedName,
+  editedDateOfBirth,
+  setEditedDateOfBirth,
+  editedPhoneNumber,
+  setEditedPhoneNumber,
+  editedProfilePhoto,
+  setEditedProfilePhoto,
+  validationErrors,
+  handleEditProfile,
+  handleSaveProfile,
+  handleCancelProfileEdit,
+  updateProfileMutation,
+  getUserInitials,
+  t,
+}: any) {
+  return (
+    <motion.div
+      key="content"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-6"
+    >
       <div>
         <h1 className="text-3xl font-bold">{t('title')}</h1>
         <p className="text-muted-foreground">{t('description')}</p>
@@ -443,6 +511,6 @@ export function PlayerProfile() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -4,6 +4,11 @@ import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { VenueForm } from '@/components/admin/venue-form';
 import { useTranslations } from 'next-intl';
+import { PageHeader } from '@/components/shared/page-header';
+import { motion, AnimatePresence } from 'motion/react';
+import { LoadingState } from '@/components/shared/loading-state';
+import { useMinimumLoading } from '@/hooks/use-minimum-loading';
+import { Card, CardContent } from '@/components/ui/card';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -19,7 +24,6 @@ export default function EditVenuePage() {
   const params = useParams();
   const venueId = params.id as string;
   const t = useTranslations('admin');
-  const tCommon = useTranslations('common');
 
   const { data: venue, isLoading } = useQuery<Venue>({
     queryKey: ['venue', venueId],
@@ -32,35 +36,43 @@ export default function EditVenuePage() {
     },
   });
 
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">{t('editVenue')}</h1>
-          <p className="text-muted-foreground">{tCommon('loading')}</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!venue) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">{t('editVenue')}</h1>
-          <p className="text-destructive">{t('venueNotFound')}</p>
-        </div>
-      </div>
-    );
-  }
+  // Use minimum loading to prevent jarring flashes
+  const showLoading = useMinimumLoading(isLoading, !!venue);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">{t('editVenue')}</h1>
-        <p className="text-muted-foreground">{t('updateVenueDescription')}</p>
-      </div>
-      <VenueForm venueId={venueId} initialData={venue} />
-    </div>
+    <AnimatePresence mode="wait">
+      {showLoading ? (
+        <LoadingState message={t('loadingVenue')} />
+      ) : !venue ? (
+        <motion.div
+          key="not-found"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <div className="space-y-6">
+            <PageHeader title={t('editVenue')} />
+            <Card className="glass-card">
+              <CardContent className="py-8 text-center text-destructive">
+                {t('venueNotFound')}
+              </CardContent>
+            </Card>
+          </div>
+        </motion.div>
+      ) : (
+        <motion.div
+          key="content"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="space-y-6"
+        >
+          <PageHeader title={t('editVenue')} description={t('updateVenueDescription')} />
+          <VenueForm venueId={venueId} initialData={venue} />
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

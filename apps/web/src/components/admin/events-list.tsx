@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
@@ -20,7 +20,8 @@ import { toast } from 'sonner';
 import { useAdminEvents, useAuthFetch } from '@/hooks';
 import { EventCard, EventStats } from '@/components/shared';
 import { StatusBadge, type EventStatus } from '@/components/shared/status-badge';
-import { Spinner } from '../ui/spinner';
+import { LoadingState } from '@/components/shared/loading-state';
+import { useMinimumLoading } from '@/hooks/use-minimum-loading';
 
 type EventState = 'ALL' | EventStatus;
 
@@ -86,27 +87,74 @@ export function EventsList() {
     setCurrentPage(1);
   }, [selectedDate, statusFilter]);
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <Spinner data-icon="inline-start" className="mr-2" />
-        {t('loadingEvents')}
-      </div>
-    );
-  }
-
-  if (!events || events.length === 0) {
-    return (
-      <Card>
-        <CardContent className="py-8 text-center text-muted-foreground">
-          {t('noEventsFound')}
-        </CardContent>
-      </Card>
-    );
-  }
+  // Use minimum loading to prevent jarring flashes
+  const showLoading = useMinimumLoading(isLoading, !!events);
 
   return (
-    <div className="space-y-4">
+    <AnimatePresence mode="wait">
+      {showLoading ? (
+        <LoadingState message={t('loadingEvents')} />
+      ) : !events || events.length === 0 ? (
+        <motion.div
+          key="no-events"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card>
+            <CardContent className="py-8 text-center text-muted-foreground">
+              {t('noEventsFound')}
+            </CardContent>
+          </Card>
+        </motion.div>
+      ) : (
+        <EventsListContent
+          paginatedEvents={paginatedEvents}
+          filteredEvents={filteredEvents}
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          totalPages={totalPages}
+          publishDrawMutation={publishDrawMutation}
+          t={t}
+        />
+      )}
+    </AnimatePresence>
+  );
+}
+
+// Separate component for events list content
+function EventsListContent({
+  paginatedEvents,
+  filteredEvents,
+  selectedDate,
+  setSelectedDate,
+  statusFilter,
+  setStatusFilter,
+  currentPage,
+  setCurrentPage,
+  totalPages,
+  publishDrawMutation,
+  t,
+}: any) {
+  // Calculate pagination indices
+  const EVENTS_PER_PAGE = 10;
+  const startIndex = (currentPage - 1) * EVENTS_PER_PAGE;
+  const endIndex = startIndex + EVENTS_PER_PAGE;
+
+  return (
+    <motion.div
+      key="content"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-4"
+    >
       {/* Filters */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
@@ -191,7 +239,7 @@ export function EventsList() {
             }}
             className="space-y-6"
           >
-            {paginatedEvents.map((event) => {
+            {paginatedEvents.map((event: any) => {
               // Check if event has passed
               const eventEndTime = new Date(event.endsAt);
               const hasEventPassed = eventEndTime < new Date();
@@ -288,7 +336,7 @@ export function EventsList() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                  onClick={() => setCurrentPage((prev: number) => Math.max(1, prev - 1))}
                   disabled={currentPage === 1}
                 >
                   {t('previous')}
@@ -329,7 +377,7 @@ export function EventsList() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                  onClick={() => setCurrentPage((prev: number) => Math.min(totalPages, prev + 1))}
                   disabled={currentPage === totalPages}
                 >
                   {t('next')}
@@ -339,6 +387,6 @@ export function EventsList() {
           )}
         </>
       )}
-    </div>
+    </motion.div>
   );
 }

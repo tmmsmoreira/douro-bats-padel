@@ -6,33 +6,54 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import type { LeaderboardEntry } from '@padel/types';
 import { ArrowUp, ArrowDown, Minus, Trophy } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { useMinimumLoading } from '@/hooks';
 import { LoadingState } from '@/components/shared';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+import { useAuthFetch } from '@/hooks/use-api';
 
 export function Leaderboard() {
   const t = useTranslations('leaderboard');
+  const authFetch = useAuthFetch();
 
   const { data: leaderboard, isLoading } = useQuery({
     queryKey: ['leaderboard'],
     queryFn: async () => {
-      const res = await fetch(`${API_URL}/rankings/leaderboard`);
-      if (!res.ok) throw new Error('Failed to fetch leaderboard');
-      return res.json() as Promise<LeaderboardEntry[]>;
+      return authFetch.get<LeaderboardEntry[]>('/rankings/leaderboard');
     },
   });
 
   const showLoading = useMinimumLoading(isLoading, !!leaderboard);
 
-  if (showLoading) {
-    return <LoadingState message={t('loadingRankings')} />;
-  }
+  return (
+    <AnimatePresence mode="wait">
+      {showLoading ? (
+        <LoadingState message={t('loadingRankings')} />
+      ) : !leaderboard || leaderboard.length === 0 ? (
+        <motion.div
+          key="no-data"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card>
+            <CardContent className="py-8 text-center text-muted-foreground">
+              {t('noRankingsAvailable')}
+            </CardContent>
+          </Card>
+        </motion.div>
+      ) : (
+        <LeaderboardContent leaderboard={leaderboard} t={t} />
+      )}
+    </AnimatePresence>
+  );
+}
 
-  const topThree = leaderboard?.slice(0, 3) || [];
-  const fullLeaderboard = leaderboard || [];
+// Separate component for leaderboard content
+function LeaderboardContent({ leaderboard, t }: { leaderboard: LeaderboardEntry[]; t: any }) {
+  const topThree = leaderboard.slice(0, 3);
+  const fullLeaderboard = leaderboard;
 
   // Podium colors for top 3
   const podiumColors = {
@@ -73,7 +94,14 @@ export function Leaderboard() {
   };
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      key="content"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-6"
+    >
       {/* Top 3 Podium */}
       {topThree.length > 0 && (
         <motion.div
@@ -81,7 +109,7 @@ export function Leaderboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             {/* Reorder: 2nd, 1st, 3rd */}
             {[topThree[1], topThree[0], topThree[2]].map((entry, displayIndex) => {
               if (!entry) return null;
@@ -245,6 +273,6 @@ export function Leaderboard() {
           </Card>
         </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 }

@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,8 @@ import {
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
-import { Spinner } from '../ui/spinner';
+import { LoadingState } from '@/components/shared/loading-state';
+import { useMinimumLoading } from '@/hooks/use-minimum-loading';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -93,38 +94,73 @@ export function VenuesList() {
     setDeleteVenue({ id: venueId, name: venueName });
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <Spinner data-icon="inline-start" className="mr-2" />
-        {t('loadingVenues')}
-      </div>
-    );
-  }
-
-  if (!venues || venues.length === 0) {
-    return (
-      <Card>
-        <CardContent className="py-8 text-center text-muted-foreground">
-          {t('noVenuesAvailable')}
-        </CardContent>
-      </Card>
-    );
-  }
+  // Use minimum loading to prevent jarring flashes
+  const showLoading = useMinimumLoading(isLoading, !!venues);
 
   return (
+    <AnimatePresence mode="wait">
+      {showLoading ? (
+        <LoadingState message={t('loadingVenues')} />
+      ) : !venues || venues.length === 0 ? (
+        <motion.div
+          key="empty"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card className="glass-card">
+            <CardContent className="py-8 text-center text-muted-foreground">
+              {t('noVenuesAvailable')}
+            </CardContent>
+          </Card>
+        </motion.div>
+      ) : (
+        <VenuesListContent
+          venues={venues}
+          handleEdit={handleEdit}
+          handleDelete={handleDelete}
+          deleteMutation={deleteMutation}
+          deleteVenue={deleteVenue}
+          setDeleteVenue={setDeleteVenue}
+          deleteIconRef={deleteIconRef}
+          squarePenIconRef={squarePenIconRef}
+          t={t}
+        />
+      )}
+    </AnimatePresence>
+  );
+}
+
+// Separate component for venues list content
+function VenuesListContent({
+  venues,
+  handleEdit,
+  handleDelete,
+  deleteMutation,
+  deleteVenue,
+  setDeleteVenue,
+  deleteIconRef,
+  squarePenIconRef,
+  t,
+}: {
+  venues: Venue[];
+  handleEdit: (venueId: string) => void;
+  handleDelete: (venueId: string, venueName: string) => void;
+  deleteMutation: any;
+  deleteVenue: { id: string; name: string } | null;
+  setDeleteVenue: (value: { id: string; name: string } | null) => void;
+  deleteIconRef: React.RefObject<DeleteIconHandle | null>;
+  squarePenIconRef: React.RefObject<SquarePenIconHandle | null>;
+  t: any;
+}) {
+  return (
     <motion.div
-      initial="hidden"
-      animate="show"
-      variants={{
-        hidden: { opacity: 0 },
-        show: {
-          opacity: 1,
-          transition: {
-            staggerChildren: 0.1,
-          },
-        },
-      }}
+      key="content"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
       className="space-y-4"
     >
       {venues.map((venue) => (

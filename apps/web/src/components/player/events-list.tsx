@@ -6,7 +6,9 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useUpcomingEvents, useRSVP } from '@/hooks';
 import { EventCard, EventStats, StatusBadge } from '@/components/shared';
-import { Spinner } from '../ui/spinner';
+import { motion, AnimatePresence } from 'motion/react';
+import { LoadingState } from '@/components/shared/loading-state';
+import { useMinimumLoading } from '@/hooks/use-minimum-loading';
 
 export function EventsList() {
   const t = useTranslations('playerEventsList');
@@ -14,31 +16,54 @@ export function EventsList() {
   const { data: events, isLoading } = useUpcomingEvents(['player-events']);
   const rsvpMutation = useRSVP([['player-events']]);
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <Spinner data-icon="inline-start" className="mr-2" />
-        {t('loadingEvents')}
-      </div>
-    );
-  }
-
-  if (!events || events.length === 0) {
-    return (
-      <Card>
-        <CardContent className="py-8 text-center text-muted-foreground">
-          {t('noUpcomingEvents')}
-        </CardContent>
-      </Card>
-    );
-  }
+  // Use minimum loading to prevent jarring flashes
+  const showLoading = useMinimumLoading(isLoading, !!events);
 
   const handleRSVP = (eventId: string, status: 'IN' | 'OUT') => {
     rsvpMutation.mutate({ eventId, status });
   };
 
   return (
-    <div className="grid gap-4">
+    <AnimatePresence mode="wait">
+      {showLoading ? (
+        <LoadingState message={t('loadingEvents')} />
+      ) : !events || events.length === 0 ? (
+        <motion.div
+          key="no-events"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card>
+            <CardContent className="py-8 text-center text-muted-foreground">
+              {t('noUpcomingEvents')}
+            </CardContent>
+          </Card>
+        </motion.div>
+      ) : (
+        <EventsListContent
+          events={events}
+          handleRSVP={handleRSVP}
+          rsvpMutation={rsvpMutation}
+          t={t}
+        />
+      )}
+    </AnimatePresence>
+  );
+}
+
+// Separate component for events list content
+function EventsListContent({ events, handleRSVP, rsvpMutation, t }: any) {
+  return (
+    <motion.div
+      key="content"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+      className="grid gap-4"
+    >
       {events.map((event) => {
         const userStatus = event.userRSVP?.status;
         const isConfirmed = userStatus === 'CONFIRMED';
@@ -115,6 +140,6 @@ export function EventsList() {
           </EventCard>
         );
       })}
-    </div>
+    </motion.div>
   );
 }

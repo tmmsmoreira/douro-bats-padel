@@ -7,7 +7,11 @@
     "FRONTEND_URL",
     "NEXTAUTH_URL",
     "NEXTAUTH_SECRET",
-    "RAILWAY_DEPLOYMENT_DRAINING_SECONDS"
+    "RAILWAY_DEPLOYMENT_DRAINING_SECONDS",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "EMAIL_FROM",
+    "RESEND_API_KEY"
   ],
   "tasks": {
     "@padel/types#build": {
@@ -17,7 +21,16 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"],
-      "env": ["NODE_ENV", "FRONTEND_URL", "NEXTAUTH_URL", "NEXTAUTH_SECRET"]
+      "env": [
+        "NODE_ENV",
+        "FRONTEND_URL",
+        "NEXTAUTH_URL",
+        "NEXTAUTH_SECRET",
+        "GOOGLE_CLIENT_ID",
+        "GOOGLE_CLIENT_SECRET",
+        "EMAIL_FROM",
+        "RESEND_API_KEY"
+      ]
     },
     "dev": {
       "dependsOn": ["^build"],

@@ -64,7 +64,7 @@ function EventsListContent({ events, handleRSVP, rsvpMutation, t }: any) {
       transition={{ duration: 0.3 }}
       className="grid gap-4"
     >
-      {events.map((event) => {
+      {events.map((event: any) => {
         const userStatus = event.userRSVP?.status;
         const isConfirmed = userStatus === 'CONFIRMED';
         const isWaitlisted = userStatus === 'WAITLISTED';

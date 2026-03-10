@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatDate, formatTime } from '@/lib/utils';
 import { Clock, MapPin, Calendar } from 'lucide-react';
 import type { EventWithRSVP } from '@padel/types';
+import { useLocale } from 'next-intl';
 
 interface EventCardProps {
   event: EventWithRSVP;
@@ -22,6 +23,8 @@ export function EventCard({
   headerActions,
   animate = false,
 }: EventCardProps) {
+  const locale = useLocale();
+
   const cardContent = (
     <Card className="glass-card group hover:shadow-xl transition-all duration-300 border-border/50">
       <CardHeader className="pb-4">
@@ -36,12 +39,12 @@ export function EventCard({
           <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-x-4 gap-y-2 text-sm text-muted-foreground flex-1 min-w-0">
             <span className="flex items-center gap-2">
               <Calendar className="w-4 h-4 shrink-0" />
-              <span>{formatDate(event.date)}</span>
+              <span>{formatDate(event.date, locale)}</span>
             </span>
             <span className="flex items-center gap-2">
               <Clock className="w-4 h-4 shrink-0" />
               <span>
-                {formatTime(event.startsAt)} - {formatTime(event.endsAt)}
+                {formatTime(event.startsAt, locale)} - {formatTime(event.endsAt, locale)}
               </span>
             </span>
             {showVenue && event.venue && (

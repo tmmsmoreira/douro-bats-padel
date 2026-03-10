@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { EventForm } from '@/components/admin/event-form';
 import { use } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import { PageHeader } from '@/components/shared/page-header';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -78,10 +79,13 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">{t('title')}</h1>
-        <p className="text-muted-foreground">{t('description')}</p>
-      </div>
+      <PageHeader
+        title={t('title')}
+        description={t('description')}
+        showBackButton
+        backButtonHref={`/admin/events/${eventId}`}
+        backButtonLabel={t('backToEvent')}
+      />
       <EventForm eventId={eventId} initialData={event} />
     </div>
   );

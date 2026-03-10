@@ -18,6 +18,16 @@
     "confirm": "Confirm",
     "close": "Close"
   },
+  "status": {
+    "draft": "Draft",
+    "open": "Open",
+    "frozen": "Frozen",
+    "drawn": "Drawn",
+    "published": "Published",
+    "confirmed": "Confirmed",
+    "waitlisted": "Waitlisted",
+    "participated": "Participated"
+  },
   "nav": {
     "home": "Home",
     "events": "Events",

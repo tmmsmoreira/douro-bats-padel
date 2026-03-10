@@ -18,6 +18,16 @@
     "confirm": "Confirmar",
     "close": "Fechar"
   },
+  "status": {
+    "draft": "Rascunho",
+    "open": "Aberto",
+    "frozen": "Congelado",
+    "drawn": "Sorteado",
+    "published": "Publicado",
+    "confirmed": "Confirmado",
+    "waitlisted": "Em Lista de Espera",
+    "participated": "Participou"
+  },
   "nav": {
     "home": "Início",
     "events": "Eventos",

@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PlayerNav } from './player-nav';
@@ -75,6 +75,7 @@ interface Draw {
 export function DrawView({ eventId }: { eventId: string }) {
   const { data: session } = useSession();
   const t = useTranslations('drawView');
+  const locale = useLocale();
 
   const {
     data: draw,
@@ -144,7 +145,7 @@ export function DrawView({ eventId }: { eventId: string }) {
               )}
             </motion.div>
           ) : (
-            <DrawContent draw={draw} event={event} t={t} />
+            <DrawContent draw={draw} event={event} t={t} locale={locale} />
           )}
         </AnimatePresence>
       </main>
@@ -154,7 +155,17 @@ export function DrawView({ eventId }: { eventId: string }) {
 }
 
 // Separate component for draw content
-function DrawContent({ draw, event, t }: { draw: Draw; event: any; t: any }) {
+function DrawContent({
+  draw,
+  event,
+  t,
+  locale,
+}: {
+  draw: Draw;
+  event: any;
+  t: any;
+  locale: string;
+}) {
   // Extract all unique teams (duplas)
   const teamsMap = new Map<string, Player[]>();
   draw.assignments.forEach((assignment) => {
@@ -225,7 +236,7 @@ function DrawContent({ draw, event, t }: { draw: Draw; event: any; t: any }) {
           <div className="flex items-center gap-1">
             <Calendar className="h-4 w-4" />
             <span>
-              {new Date(draw.event.date).toLocaleDateString('en-US', {
+              {new Date(draw.event.date).toLocaleDateString(locale, {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',

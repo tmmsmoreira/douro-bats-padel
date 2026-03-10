@@ -22,7 +22,6 @@ export { RegisterForm } from './auth/register-form';
 export { ForgotPasswordForm } from './auth/forgot-password-form';
 export { ResetPasswordForm } from './auth/reset-password-form';
 export { PlayerNav } from './player/player-nav';
-export { EventsList as PlayerEventsList } from './player/events-list';
 export { DrawView } from './player/draw-view';
 export { Leaderboard } from './player/leaderboard';
 export { PlayerProfile } from './player/player-profile';

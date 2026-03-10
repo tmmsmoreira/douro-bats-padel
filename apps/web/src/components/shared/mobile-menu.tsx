@@ -136,6 +136,62 @@ export function MobileMenu({
               </div>
             </div>
 
+            {/* LEGAL Section */}
+            <div className="space-y-1 pt-2 border-t">
+              <p className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Legal
+              </p>
+              <Link
+                href="/terms"
+                onClick={onClose}
+                className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-colors text-foreground hover:bg-secondary"
+              >
+                Termos e Condições
+              </Link>
+              <Link
+                href="/privacy"
+                onClick={onClose}
+                className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-colors text-foreground hover:bg-secondary"
+              >
+                Política de Privacidade
+              </Link>
+              <Link
+                href="/cookies"
+                onClick={onClose}
+                className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-colors text-foreground hover:bg-secondary"
+              >
+                Política de Cookies
+              </Link>
+            </div>
+
+            {/* INFORMAÇÃO Section */}
+            <div className="space-y-1 pt-2 border-t">
+              <p className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Informação
+              </p>
+              <Link
+                href="/about"
+                onClick={onClose}
+                className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-colors text-foreground hover:bg-secondary"
+              >
+                {t('about') || 'Sobre Nós'}
+              </Link>
+              <Link
+                href="/contact"
+                onClick={onClose}
+                className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-colors text-foreground hover:bg-secondary"
+              >
+                {t('contact') || 'Contacto'}
+              </Link>
+              <Link
+                href="/faq"
+                onClick={onClose}
+                className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-colors text-foreground hover:bg-secondary"
+              >
+                {t('faq') || 'FAQ'}
+              </Link>
+            </div>
+
             {/* Sign In/Out Section */}
             <div className="pt-2 border-t">
               {session ? (

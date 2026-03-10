@@ -1,4 +1,4 @@
-import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from './status-badge';
 import type { EventWithRSVP } from '@padel/types';
 
 interface RSVPBadgesProps {
@@ -22,15 +22,12 @@ export function RSVPBadges({
 
   return (
     <div className="flex flex-col items-end gap-2">
-      {isConfirmed && (
-        <Badge variant="default" className="uppercase">
-          {confirmedText}
-        </Badge>
-      )}
+      {isConfirmed && <StatusBadge status="CONFIRMED" label={confirmedText} />}
       {isWaitlisted && (
-        <Badge variant="secondary" className="uppercase">
-          {waitlistText} #{event.userRSVP?.position || 0}
-        </Badge>
+        <StatusBadge
+          status="WAITLISTED"
+          label={`${waitlistText} #${event.userRSVP?.position || 0}`}
+        />
       )}
     </div>
   );

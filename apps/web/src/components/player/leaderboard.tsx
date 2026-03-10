@@ -6,10 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import type { LeaderboardEntry } from '@padel/types';
 import { ArrowUp, ArrowDown, Minus, Trophy } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
-import { useMinimumLoading } from '@/hooks';
-import { LoadingState } from '@/components/shared';
+import { DataStateWrapper } from '@/components/shared';
 import { useAuthFetch } from '@/hooks/use-api';
 
 export function Leaderboard() {
@@ -23,30 +22,15 @@ export function Leaderboard() {
     },
   });
 
-  const showLoading = useMinimumLoading(isLoading, !!leaderboard);
-
   return (
-    <AnimatePresence mode="wait">
-      {showLoading ? (
-        <LoadingState message={t('loadingRankings')} />
-      ) : !leaderboard || leaderboard.length === 0 ? (
-        <motion.div
-          key="no-data"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <Card>
-            <CardContent className="py-8 text-center text-muted-foreground">
-              {t('noRankingsAvailable')}
-            </CardContent>
-          </Card>
-        </motion.div>
-      ) : (
-        <LeaderboardContent leaderboard={leaderboard} t={t} />
-      )}
-    </AnimatePresence>
+    <DataStateWrapper
+      isLoading={isLoading}
+      data={leaderboard}
+      loadingMessage={t('loadingRankings')}
+      emptyMessage={t('noRankingsAvailable')}
+    >
+      {(leaderboard) => <LeaderboardContent leaderboard={leaderboard} t={t} />}
+    </DataStateWrapper>
   );
 }
 

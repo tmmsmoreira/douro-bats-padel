@@ -12,13 +12,14 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { CalendarDaysIcon } from 'lucide-animated';
 import { useMediaQuery } from '@/hooks/use-media-query';
+import { useLocale } from 'next-intl';
 
-function formatDate(date: Date | undefined) {
+function formatDate(date: Date | undefined, locale?: string) {
   if (!date) {
     return '';
   }
 
-  return date.toLocaleDateString('en-US', {
+  return date.toLocaleDateString(locale || 'en-US', {
     day: '2-digit',
     month: 'long',
     year: 'numeric',
@@ -47,22 +48,23 @@ export function DatePicker({
   disabled,
   id,
 }: DatePickerProps) {
+  const locale = useLocale();
   const [open, setOpen] = React.useState(false);
   const [date, setDate] = React.useState<Date | undefined>(value);
   const [month, setMonth] = React.useState<Date | undefined>(value);
-  const [inputValue, setInputValue] = React.useState(formatDate(value));
+  const [inputValue, setInputValue] = React.useState(formatDate(value, locale));
   const isMobile = useMediaQuery('(max-width: 768px)');
 
   // Sync with external value changes
   React.useEffect(() => {
     setDate(value);
     setMonth(value);
-    setInputValue(formatDate(value));
-  }, [value]);
+    setInputValue(formatDate(value, locale));
+  }, [value, locale]);
 
   const handleSelect = (selectedDate: Date | undefined) => {
     setDate(selectedDate);
-    setInputValue(formatDate(selectedDate));
+    setInputValue(formatDate(selectedDate, locale));
     if (onChange) {
       onChange(selectedDate);
     }

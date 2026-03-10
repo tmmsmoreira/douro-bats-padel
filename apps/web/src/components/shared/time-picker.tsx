@@ -13,13 +13,14 @@ import { ClockIcon } from 'lucide-animated';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useMediaQuery } from '@/hooks/use-media-query';
+import { useLocale } from 'next-intl';
 
-function formatTime(date: Date | undefined) {
+function formatTime(date: Date | undefined, locale?: string) {
   if (!date) {
     return '';
   }
 
-  return date.toLocaleTimeString('en-US', {
+  return date.toLocaleTimeString(locale || 'en-US', {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
@@ -54,14 +55,15 @@ export function TimePicker({
   disabled,
   id,
 }: TimePickerProps) {
+  const locale = useLocale();
   const [open, setOpen] = React.useState(false);
-  const [inputValue, setInputValue] = React.useState(formatTime(value));
+  const [inputValue, setInputValue] = React.useState(formatTime(value, locale));
   const isMobile = useMediaQuery('(max-width: 768px)');
 
   // Sync with external value changes
   React.useEffect(() => {
-    setInputValue(formatTime(value));
-  }, [value]);
+    setInputValue(formatTime(value, locale));
+  }, [value, locale]);
 
   // Generate time options (every 15 minutes)
   const timeOptions = React.useMemo(() => {

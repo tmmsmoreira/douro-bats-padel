@@ -2,9 +2,9 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { ArrowLeftIcon, ArrowLeftIconHandle, ClockIcon } from 'lucide-animated';
-import { Calendar, MapPin } from 'lucide-react';
+import { Calendar, MapPin, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { HomeAdaptiveNav } from '@/components/shared/home-adaptive-nav';
 import { Footer } from '@/components/public/footer';
 import { useRef } from 'react';
+import { formatTime } from '@/lib/utils';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -60,6 +61,7 @@ interface EventDetails {
 export function EventDetails({ eventId }: { eventId: string }) {
   const { data: session } = useSession();
   const t = useTranslations('eventDetails');
+  const locale = useLocale();
 
   const {
     data: event,
@@ -135,7 +137,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
                   <div>
                     <h2 className="text-2xl font-bold mb-2">{event.title || t('untitledEvent')}</h2>
                     <p className="text-muted-foreground">
-                      {new Date(event.date).toLocaleDateString('en-US', {
+                      {new Date(event.date).toLocaleDateString(locale, {
                         weekday: 'long',
                         year: 'numeric',
                         month: 'long',
@@ -184,16 +186,22 @@ export function EventDetails({ eventId }: { eventId: string }) {
           {/* Event Header */}
           <div className="text-center space-y-4 mt-4">
             <h1 className="text-3xl font-bold mb-2">{event.title || t('untitledEvent')}</h1>
-            <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
+            <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground flex-wrap">
               <div className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
                 <span>
-                  {new Date(event.date).toLocaleDateString('en-US', {
+                  {new Date(event.date).toLocaleDateString(locale, {
                     weekday: 'long',
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
                   })}
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Clock className="h-4 w-4" />
+                <span>
+                  {formatTime(event.startsAt, locale)} - {formatTime(event.endsAt, locale)}
                 </span>
               </div>
               {event.venue && (

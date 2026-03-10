@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -414,8 +414,8 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
       transition={{ duration: 0.4 }}
     >
       <Card className="glass-card">
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit}>
+          <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="title">{t('eventTitle')}</Label>
               <Input
@@ -713,27 +713,26 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
                 {t('error')}: {((createMutation.error || updateMutation.error) as Error)?.message}
               </div>
             )}
-
-            <div className="flex gap-2">
-              <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
-                {isEditMode
-                  ? updateMutation.isPending
-                    ? t('updating')
-                    : t('updateEvent')
-                  : createMutation.isPending
-                    ? t('creating')
-                    : t('createEvent')}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => router.push(isEditMode ? `/admin/events/${eventId}` : '/admin')}
-              >
-                {t('cancel')}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
+          </CardContent>
+          <CardFooter className="flex justify-end gap-2">
+            <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
+              {isEditMode
+                ? updateMutation.isPending
+                  ? t('updating')
+                  : t('updateEvent')
+                : createMutation.isPending
+                  ? t('creating')
+                  : t('createEvent')}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.push(isEditMode ? `/admin/events/${eventId}` : '/admin')}
+            >
+              {t('cancel')}
+            </Button>
+          </CardFooter>
+        </form>
       </Card>
     </motion.div>
   );

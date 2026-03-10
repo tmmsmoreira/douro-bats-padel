@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Send } from 'lucide-react';
 import { CopyIcon, DeleteIcon } from 'lucide-animated';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { toast } from 'sonner';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
 import type { Invitation, InvitationStatus } from '@padel/types';
@@ -18,6 +18,7 @@ const WEB_URL = process.env.NEXT_PUBLIC_WEB_URL || 'http://localhost:3000';
 
 export function InvitationsList() {
   const t = useTranslations('admin');
+  const locale = useLocale();
   const { data: session } = useSession();
   const queryClient = useQueryClient();
   const [revokeInvitationId, setRevokeInvitationId] = useState<string | null>(null);
@@ -148,11 +149,11 @@ export function InvitationsList() {
                 </div>
                 <div className="text-sm text-muted-foreground space-y-1">
                   <p>
-                    {t('expiresAt')}: {new Date(invitation.expiresAt).toLocaleDateString()}
+                    {t('expiresAt')}: {new Date(invitation.expiresAt).toLocaleDateString(locale)}
                   </p>
                   {invitation.usedAt && (
                     <p>
-                      {t('usedAt')}: {new Date(invitation.usedAt).toLocaleDateString()}
+                      {t('usedAt')}: {new Date(invitation.usedAt).toLocaleDateString(locale)}
                     </p>
                   )}
                 </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
@@ -18,10 +18,8 @@ import Link from 'next/link';
 import { useState, useMemo } from 'react';
 import { toast } from 'sonner';
 import { useAdminEvents, useAuthFetch } from '@/hooks';
-import { EventCard, EventStats } from '@/components/shared';
+import { EventCard, EventStats, DataStateWrapper } from '@/components/shared';
 import { StatusBadge, type EventStatus } from '@/components/shared/status-badge';
-import { LoadingState } from '@/components/shared/loading-state';
-import { useMinimumLoading } from '@/hooks/use-minimum-loading';
 
 type EventState = 'ALL' | EventStatus;
 
@@ -87,28 +85,14 @@ export function EventsList() {
     setCurrentPage(1);
   }, [selectedDate, statusFilter]);
 
-  // Use minimum loading to prevent jarring flashes
-  const showLoading = useMinimumLoading(isLoading, !!events);
-
   return (
-    <AnimatePresence mode="wait">
-      {showLoading ? (
-        <LoadingState message={t('loadingEvents')} />
-      ) : !events || events.length === 0 ? (
-        <motion.div
-          key="no-events"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <Card>
-            <CardContent className="py-8 text-center text-muted-foreground">
-              {t('noEventsFound')}
-            </CardContent>
-          </Card>
-        </motion.div>
-      ) : (
+    <DataStateWrapper
+      isLoading={isLoading}
+      data={events}
+      loadingMessage={t('loadingEvents')}
+      emptyMessage={t('noEventsFound')}
+    >
+      {() => (
         <EventsListContent
           paginatedEvents={paginatedEvents}
           filteredEvents={filteredEvents}
@@ -123,7 +107,7 @@ export function EventsList() {
           t={t}
         />
       )}
-    </AnimatePresence>
+    </DataStateWrapper>
   );
 }
 

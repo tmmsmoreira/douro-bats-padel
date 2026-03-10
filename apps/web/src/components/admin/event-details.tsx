@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient, UseMutationResult } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,6 +26,7 @@ import { EventStatus, StatusBadge } from '../shared';
 import { Spinner } from '../ui/spinner';
 import { LoadingState } from '../shared/loading-state';
 import { useMinimumLoading } from '@/hooks/use-minimum-loading';
+import { formatTime } from '@/lib/utils';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -94,6 +95,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const t = useTranslations('eventDetails');
+  const locale = useLocale();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const { data: event, isLoading } = useQuery<EventDetails>({
@@ -281,7 +283,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
         >
           <PageHeader
             title={event.title || t('untitledEvent')}
-            description={<EventDetailsHeaderInfo event={event} />}
+            description={<EventDetailsHeaderInfo event={event} locale={locale} />}
             showBackButton
             backButtonHref="/admin"
             backButtonLabel={t('backToEvents')}
@@ -535,19 +537,25 @@ function AssignmentSummaryCard({ assignment }: { assignment: Assignment }) {
   );
 }
 
-function EventDetailsHeaderInfo({ event }: { event: EventDetails }) {
+function EventDetailsHeaderInfo({ event, locale }: { event: EventDetails; locale: string }) {
   return (
     <div>
-      <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
+      <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground flex-wrap">
         <div className="flex items-center gap-1">
           <Calendar className="h-4 w-4" />
           <span>
-            {new Date(event.date).toLocaleDateString('en-US', {
+            {new Date(event.date).toLocaleDateString(locale, {
               weekday: 'long',
               year: 'numeric',
               month: 'long',
               day: 'numeric',
             })}
+          </span>
+        </div>
+        <div className="flex items-center gap-1">
+          <Clock className="h-4 w-4" />
+          <span>
+            {formatTime(event.startsAt, locale)} - {formatTime(event.endsAt, locale)}
           </span>
         </div>
         {event.venue && (

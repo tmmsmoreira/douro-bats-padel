@@ -9,12 +9,13 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
-import { Lock, Loader2, Save } from 'lucide-react';
-import { ArrowLeftIcon, ArrowLeftIconHandle, LockIcon, LockIconHandle } from 'lucide-animated';
-import { useAuthFetch } from '@/hooks';
+import { Lock, Save } from 'lucide-react';
+import { LockIcon, LockIconHandle } from 'lucide-animated';
+import { useAuthFetch, useMinimumLoading } from '@/hooks';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
 import { PageHeader } from '../shared/page-header';
+import { motion, AnimatePresence } from 'motion/react';
+import { LoadingState } from '@/components/shared/loading-state';
 
 interface Match {
   id: string;
@@ -73,7 +74,6 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
     Record<string, { setsA: number; setsB: number }>
   >({});
   const lockIconRef = useRef<LockIconHandle>(null);
-  const arrowLeftIconRef = useRef<ArrowLeftIconHandle>(null);
 
   // Fetch event data to check state and date
   const { data: event, isLoading: isLoadingEvent } = useQuery<Event>({
@@ -189,56 +189,122 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
     });
   };
 
-  if (isLoading || isLoadingEvent) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <Loader2 className="h-8 w-8 animate-spin" />
-        <span className="ml-2">{t('loading')}</span>
-      </div>
-    );
-  }
+  // Use minimum loading to prevent jarring flashes
+  const showLoading = useMinimumLoading(isLoading || isLoadingEvent, !!(event && matches));
 
-  // Check if event is published and has passed
-  if (event) {
-    const eventEndTime = new Date(event.endsAt);
-    const hasEventPassed = eventEndTime < new Date();
+  return (
+    <AnimatePresence mode="wait">
+      {showLoading ? (
+        <LoadingState message={t('loading')} />
+      ) : !event ? (
+        <motion.div
+          key="no-event"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card>
+            <CardContent className="py-8 text-center text-muted-foreground">
+              {t('eventNotFound')}
+            </CardContent>
+          </Card>
+        </motion.div>
+      ) : event.state !== 'PUBLISHED' ? (
+        <motion.div
+          key="not-published"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card>
+            <CardContent className="py-8 text-center text-muted-foreground">
+              <p className="text-lg font-medium mb-2">{t('eventNotPublished')}</p>
+              <p>{t('eventNotPublishedDescription')}</p>
+            </CardContent>
+          </Card>
+        </motion.div>
+      ) : new Date(event.endsAt) > new Date() ? (
+        <motion.div
+          key="not-completed"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card>
+            <CardContent className="py-8 text-center text-muted-foreground">
+              <p className="text-lg font-medium mb-2">{t('eventNotCompleted')}</p>
+              <p>{t('eventNotCompletedDescription')}</p>
+              <p className="text-sm mt-2">
+                {t('eventEnds', { date: new Date(event.endsAt).toLocaleString() })}
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
+      ) : !draw || !draw.assignments || draw.assignments.length === 0 ? (
+        <motion.div
+          key="no-draw"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card>
+            <CardContent className="py-8 text-center text-muted-foreground">
+              {t('noDrawFound')}
+            </CardContent>
+          </Card>
+        </motion.div>
+      ) : (
+        <ResultsEntryContent
+          draw={draw}
+          matches={matches}
+          matchResults={matchResults}
+          handleScoreChange={handleScoreChange}
+          handleSaveMatch={handleSaveMatch}
+          saveMatchMutation={saveMatchMutation}
+          publishMutation={publishMutation}
+          showPublishDialog={showPublishDialog}
+          setShowPublishDialog={setShowPublishDialog}
+          lockIconRef={lockIconRef}
+          t={t}
+          eventId={eventId}
+        />
+      )}
+    </AnimatePresence>
+  );
+}
 
-    if (event.state !== 'PUBLISHED') {
-      return (
-        <Card>
-          <CardContent className="py-8 text-center text-muted-foreground">
-            <p className="text-lg font-medium mb-2">{t('eventNotPublished')}</p>
-            <p>{t('eventNotPublishedDescription')}</p>
-          </CardContent>
-        </Card>
-      );
-    }
-
-    if (!hasEventPassed) {
-      return (
-        <Card>
-          <CardContent className="py-8 text-center text-muted-foreground">
-            <p className="text-lg font-medium mb-2">{t('eventNotCompleted')}</p>
-            <p>{t('eventNotCompletedDescription')}</p>
-            <p className="text-sm mt-2">
-              {t('eventEnds', { date: new Date(event.endsAt).toLocaleString() })}
-            </p>
-          </CardContent>
-        </Card>
-      );
-    }
-  }
-
-  if (!draw || !draw.assignments || draw.assignments.length === 0) {
-    return (
-      <Card>
-        <CardContent className="py-8 text-center text-muted-foreground">
-          {t('noDrawFound')}
-        </CardContent>
-      </Card>
-    );
-  }
-
+// Separate component for results entry content
+function ResultsEntryContent({
+  draw,
+  matches,
+  matchResults,
+  handleScoreChange,
+  handleSaveMatch,
+  saveMatchMutation,
+  publishMutation,
+  showPublishDialog,
+  setShowPublishDialog,
+  lockIconRef,
+  t,
+  eventId,
+}: {
+  draw: Draw;
+  matches: Match[] | undefined;
+  matchResults: Record<string, { setsA: number; setsB: number }>;
+  handleScoreChange: (courtId: string, round: number, team: 'A' | 'B', value: string) => void;
+  handleSaveMatch: (assignment: Assignment) => void;
+  saveMatchMutation: any;
+  publishMutation: any;
+  showPublishDialog: boolean;
+  setShowPublishDialog: (show: boolean) => void;
+  lockIconRef: React.RefObject<LockIconHandle | null>;
+  t: any;
+  eventId: string;
+}) {
   // Group assignments by tier and round (same as draw page)
   const masterAssignments = draw.assignments.filter((a) => a.tier === 'MASTERS');
   const explorerAssignments = draw.assignments.filter((a) => a.tier === 'EXPLORERS');

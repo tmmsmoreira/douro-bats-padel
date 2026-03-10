@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useSession } from 'next-auth/react';
 import { useRouter } from '@/i18n/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -64,6 +64,7 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
   const t = useTranslations('profile');
   const tList = useTranslations('playersList');
   const tActions = useTranslations('playerActions');
+  const locale = useLocale();
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: session } = useSession();
@@ -174,6 +175,7 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
           t={t}
           tList={tList}
           tActions={tActions}
+          locale={locale}
         />
       )}
     </AnimatePresence>
@@ -195,6 +197,7 @@ function PublicPlayerProfileContent({
   t,
   tList,
   tActions,
+  locale,
 }: {
   player: PlayerData;
   isAdminOrEditor: boolean;
@@ -209,6 +212,7 @@ function PublicPlayerProfileContent({
   t: any;
   tList: any;
   tActions: any;
+  locale: string;
 }) {
   return (
     <motion.div
@@ -294,12 +298,14 @@ function PublicPlayerProfileContent({
                   <div>
                     <p className="text-sm text-muted-foreground">{tList('playerSince')}</p>
                     <p className="font-medium">
-                      {new Date(player.player.createdAt).toLocaleDateString()}
+                      {new Date(player.player.createdAt).toLocaleDateString(locale)}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">{tList('accountCreated')}</p>
-                    <p className="font-medium">{new Date(player.createdAt).toLocaleDateString()}</p>
+                    <p className="font-medium">
+                      {new Date(player.createdAt).toLocaleDateString(locale)}
+                    </p>
                   </div>
                 </div>
               </div>

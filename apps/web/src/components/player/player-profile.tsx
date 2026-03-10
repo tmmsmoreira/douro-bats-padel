@@ -2,7 +2,7 @@
 
 import { useSession, signOut } from 'next-auth/react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -23,6 +23,7 @@ export function PlayerProfile() {
   const { data: session, status } = useSession();
   const queryClient = useQueryClient();
   const t = useTranslations('profile');
+  const locale = useLocale();
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editedName, setEditedName] = useState('');
   const [editedDateOfBirth, setEditedDateOfBirth] = useState<Date | undefined>(undefined);
@@ -307,6 +308,7 @@ export function PlayerProfile() {
           updateProfileMutation={updateProfileMutation}
           getUserInitials={getUserInitials}
           t={t}
+          locale={locale}
         />
       )}
     </AnimatePresence>
@@ -332,6 +334,7 @@ function ProfileContent({
   updateProfileMutation,
   getUserInitials,
   t,
+  locale,
 }: any) {
   return (
     <motion.div
@@ -458,7 +461,7 @@ function ProfileContent({
               ) : (
                 <p className="text-lg font-medium">
                   {profile.dateOfBirth
-                    ? new Date(profile.dateOfBirth).toLocaleDateString()
+                    ? new Date(profile.dateOfBirth).toLocaleDateString(locale)
                     : t('notSet')}
                 </p>
               )}

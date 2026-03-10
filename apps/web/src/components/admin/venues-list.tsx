@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -20,8 +20,7 @@ import {
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
-import { LoadingState } from '@/components/shared/loading-state';
-import { useMinimumLoading } from '@/hooks/use-minimum-loading';
+import { DataStateWrapper } from '@/components/shared/data-state-wrapper';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -94,28 +93,14 @@ export function VenuesList() {
     setDeleteVenue({ id: venueId, name: venueName });
   };
 
-  // Use minimum loading to prevent jarring flashes
-  const showLoading = useMinimumLoading(isLoading, !!venues);
-
   return (
-    <AnimatePresence mode="wait">
-      {showLoading ? (
-        <LoadingState message={t('loadingVenues')} />
-      ) : !venues || venues.length === 0 ? (
-        <motion.div
-          key="empty"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <Card className="glass-card">
-            <CardContent className="py-8 text-center text-muted-foreground">
-              {t('noVenuesAvailable')}
-            </CardContent>
-          </Card>
-        </motion.div>
-      ) : (
+    <DataStateWrapper
+      isLoading={isLoading}
+      data={venues}
+      loadingMessage={t('loadingVenues')}
+      emptyMessage={t('noVenuesAvailable')}
+    >
+      {(venues) => (
         <VenuesListContent
           venues={venues}
           handleEdit={handleEdit}
@@ -128,7 +113,7 @@ export function VenuesList() {
           t={t}
         />
       )}
-    </AnimatePresence>
+    </DataStateWrapper>
   );
 }
 

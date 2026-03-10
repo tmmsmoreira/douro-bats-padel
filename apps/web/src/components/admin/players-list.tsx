@@ -12,7 +12,7 @@ import { Link } from '@/i18n/navigation';
 import { useState, useMemo, useRef } from 'react';
 import { SearchIcon, SearchIconHandle, TrendingUpIcon, XIcon, XIconHandle } from 'lucide-animated';
 import { Button } from '@/components/ui/button';
-import { Spinner } from '../ui/spinner';
+import { DataStateWrapper } from '@/components/shared/data-state-wrapper';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -61,27 +61,55 @@ export function PlayersList() {
     });
   }, [players, searchQuery]);
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <Spinner data-icon="inline-start" className="mr-2" />
-        {t('loadingPlayers')}
-      </div>
-    );
-  }
-
-  if (!players || players.length === 0) {
-    return (
-      <Card>
-        <CardContent className="py-8 text-center text-muted-foreground">
-          {t('noPlayersFound')}
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
-    <div className="space-y-4">
+    <DataStateWrapper
+      isLoading={isLoading}
+      data={players}
+      loadingMessage={t('loadingPlayers')}
+      emptyMessage={t('noPlayersFound')}
+    >
+      {() => (
+        <PlayersListContent
+          filteredPlayers={filteredPlayers}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          searchIconRef={searchIconRef}
+          xIconRef={xIconRef}
+          t={t}
+          locale={locale}
+        />
+      )}
+    </DataStateWrapper>
+  );
+}
+
+// Separate component for players list content
+function PlayersListContent({
+  filteredPlayers,
+  searchQuery,
+  setSearchQuery,
+  searchIconRef,
+  xIconRef,
+  t,
+  locale,
+}: {
+  filteredPlayers: Player[];
+  searchQuery: string;
+  setSearchQuery: (value: string) => void;
+  searchIconRef: React.RefObject<SearchIconHandle | null>;
+  xIconRef: React.RefObject<XIconHandle | null>;
+  t: any;
+  locale: string;
+}) {
+  return (
+    <motion.div
+      key="content"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-4"
+    >
       {/* Search Bar */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
@@ -243,7 +271,7 @@ export function PlayersList() {
           ))}
         </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 }
 

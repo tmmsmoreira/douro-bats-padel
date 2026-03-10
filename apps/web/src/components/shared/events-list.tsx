@@ -2,10 +2,15 @@
 
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
-import { motion, AnimatePresence } from 'motion/react';
-import { Card, CardContent } from '@/components/ui/card';
-import { useUpcomingEvents, useRSVP, useMinimumLoading } from '@/hooks';
-import { EventCard, EventStats, RSVPBadges, RSVPButtons, LoadingState } from '@/components/shared';
+import { motion } from 'motion/react';
+import { useUpcomingEvents, useRSVP } from '@/hooks';
+import {
+  EventCard,
+  EventStats,
+  RSVPBadges,
+  RSVPButtons,
+  DataStateWrapper,
+} from '@/components/shared';
 
 export function EventsList() {
   const { data: session } = useSession();
@@ -13,39 +18,20 @@ export function EventsList() {
 
   const { data: events, isLoading } = useUpcomingEvents();
   const rsvpMutation = useRSVP([['events']]);
-  const showLoading = useMinimumLoading(isLoading, !!events);
 
   const handleRSVP = (eventId: string, status: 'IN' | 'OUT') => {
     rsvpMutation.mutate({ eventId, status });
   };
 
   return (
-    <AnimatePresence mode="wait">
-      {showLoading ? (
-        <LoadingState message={t('loadingEvents')} />
-      ) : !events || events.length === 0 ? (
-        <motion.div
-          key="no-events"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          transition={{ duration: 0.3 }}
-        >
-          <Card className="glass-card">
-            <CardContent className="py-8 text-center text-muted-foreground">
-              {t('noEventsAvailable')}
-            </CardContent>
-          </Card>
-        </motion.div>
-      ) : (
-        <motion.div
-          key="events-list"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className="space-y-4"
-        >
+    <DataStateWrapper
+      isLoading={isLoading}
+      data={events}
+      loadingMessage={t('loadingEvents')}
+      emptyMessage={t('noEventsAvailable')}
+    >
+      {(events) => (
+        <div className="space-y-4">
           <motion.div
             initial="hidden"
             animate="show"
@@ -106,8 +92,8 @@ export function EventsList() {
               </motion.div>
             ))}
           </motion.div>
-        </motion.div>
+        </div>
       )}
-    </AnimatePresence>
+    </DataStateWrapper>
   );
 }

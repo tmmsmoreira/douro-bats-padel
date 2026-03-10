@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -39,9 +39,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { motion, AnimatePresence } from 'motion/react';
-import { LoadingState } from '@/components/shared/loading-state';
-import { useMinimumLoading } from '@/hooks/use-minimum-loading';
+import { motion } from 'motion/react';
+import { DataStateWrapper } from '@/components/shared';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -105,6 +104,7 @@ interface Draw {
 
 export function AdminDrawView({ eventId }: { eventId: string }) {
   const t = useTranslations('adminDrawView');
+  const locale = useLocale();
   const { data: session } = useSession();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -254,25 +254,14 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
     },
   });
 
-  // Use minimum loading to prevent jarring flashes
-  const showLoading = useMinimumLoading(isLoading, !!draw);
-
   return (
-    <AnimatePresence mode="wait">
-      {showLoading ? (
-        <LoadingState message={t('loading')} />
-      ) : !draw ? (
-        <motion.div
-          key="not-found"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className="text-center py-8"
-        >
-          {t('notAvailable')}
-        </motion.div>
-      ) : (
+    <DataStateWrapper
+      isLoading={isLoading}
+      data={draw}
+      loadingMessage={t('loading')}
+      emptyMessage={t('notAvailable')}
+    >
+      {(draw) => (
         <AdminDrawContent
           draw={draw}
           event={event}
@@ -288,9 +277,10 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
           arrowLeftIconRef={arrowLeftIconRef}
           router={router}
           t={t}
+          locale={locale}
         />
       )}
-    </AnimatePresence>
+    </DataStateWrapper>
   );
 }
 
@@ -310,6 +300,7 @@ function AdminDrawContent({
   arrowLeftIconRef,
   router,
   t,
+  locale,
 }: any) {
   // Group assignments by tier and round
   const masterAssignments = draw.assignments.filter((a: Assignment) => a.tier === 'MASTERS');
@@ -365,7 +356,7 @@ function AdminDrawContent({
             <div className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
               <span>
-                {new Date(draw.event.date).toLocaleDateString('en-US', {
+                {new Date(draw.event.date).toLocaleDateString(locale, {
                   weekday: 'long',
                   year: 'numeric',
                   month: 'long',

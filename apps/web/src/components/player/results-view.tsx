@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -57,6 +57,7 @@ interface Event {
 export function ResultsView({ eventId }: { eventId: string }) {
   const { data: session } = useSession();
   const t = useTranslations('resultsView');
+  const locale = useLocale();
   const arrowLeftIconRef = useRef<ArrowLeftIconHandle>(null);
 
   const { data: event, isLoading: isLoadingEvent } = useQuery<Event>({
@@ -111,13 +112,19 @@ export function ResultsView({ eventId }: { eventId: string }) {
               {t('eventNotFound')}
             </motion.div>
           ) : !matches || matches.length === 0 ? (
-            <NoResultsContent event={event} t={t} arrowLeftIconRef={arrowLeftIconRef} />
+            <NoResultsContent
+              event={event}
+              t={t}
+              arrowLeftIconRef={arrowLeftIconRef}
+              locale={locale}
+            />
           ) : (
             <ResultsContent
               event={event}
               matches={matches}
               t={t}
               arrowLeftIconRef={arrowLeftIconRef}
+              locale={locale}
             />
           )}
         </AnimatePresence>
@@ -132,10 +139,12 @@ function NoResultsContent({
   event,
   t,
   arrowLeftIconRef,
+  locale,
 }: {
   event: Event;
   t: any;
   arrowLeftIconRef: any;
+  locale: string;
 }) {
   return (
     <motion.div
@@ -165,12 +174,12 @@ function NoResultsContent({
         <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-1.5">
             <Calendar className="h-4 w-4" />
-            <span>{formatDate(event.date)}</span>
+            <span>{formatDate(event.date, locale)}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <Clock className="h-4 w-4" />
             <span>
-              {formatTime(event.startsAt)} - {formatTime(event.endsAt)}
+              {formatTime(event.startsAt, locale)} - {formatTime(event.endsAt, locale)}
             </span>
           </div>
           {event.venue && (
@@ -198,11 +207,13 @@ function ResultsContent({
   matches,
   t,
   arrowLeftIconRef,
+  locale,
 }: {
   event: Event;
   matches: Match[];
   t: any;
   arrowLeftIconRef: any;
+  locale: string;
 }) {
   // Group by round
   const rounds = matches.reduce(
@@ -244,12 +255,12 @@ function ResultsContent({
         <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-1.5">
             <Calendar className="h-4 w-4" />
-            <span>{formatDate(event.date)}</span>
+            <span>{formatDate(event.date, locale)}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <Clock className="h-4 w-4" />
             <span>
-              {formatTime(event.startsAt)} - {formatTime(event.endsAt)}
+              {formatTime(event.startsAt, locale)} - {formatTime(event.endsAt, locale)}
             </span>
           </div>
           {event.venue && (

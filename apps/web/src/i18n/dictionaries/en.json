@@ -238,6 +238,7 @@
     "winRate": "Win Rate",
     "playedGames": "{value} played games",
     "loadingRankings": "Loading rankings...",
+    "noRankingsAvailable": "No rankings available.",
     "leaderboardTitle": "Leaderboard",
     "weeksPlayed": "{count} weeks played",
     "topThree": "Top 3",

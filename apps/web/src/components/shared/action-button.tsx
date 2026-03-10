@@ -22,18 +22,19 @@ export function ActionButton({
   const iconRef = useRef<PlusIconHandle>(null);
 
   return (
-    <Link href={href}>
-      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-        <Button
-          variant={variant}
-          className="w-full gap-2 px-4 py-5 text-base font-medium"
-          onMouseEnter={() => iconRef.current?.startAnimation()}
-          onMouseLeave={() => iconRef.current?.stopAnimation()}
-        >
+    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+      <Button
+        variant={variant}
+        className="w-full gap-2 px-4 py-5 text-base font-medium"
+        onMouseEnter={() => iconRef.current?.startAnimation()}
+        onMouseLeave={() => iconRef.current?.stopAnimation()}
+        asChild
+      >
+        <Link href={href}>
           {icon === 'plus' && <PlusIcon size={18} aria-hidden="true" ref={iconRef} />}
           {label}
-        </Button>
-      </motion.div>
-    </Link>
+        </Link>
+      </Button>
+    </motion.div>
   );
 }

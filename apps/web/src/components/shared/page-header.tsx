@@ -37,22 +37,17 @@ export function PageHeader({
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.3 }}
+          whileTap={{ scale: 0.95 }}
+          onMouseEnter={() => arrowLeftIconRef.current?.startAnimation()}
+          onMouseLeave={() => arrowLeftIconRef.current?.stopAnimation()}
+          style={{ display: 'inline-block' }}
         >
-          <Link href={backButtonHref}>
-            <motion.div
-              whileTap={{ scale: 0.95 }}
-              onMouseEnter={() => arrowLeftIconRef.current?.startAnimation()}
-              onMouseLeave={() => arrowLeftIconRef.current?.stopAnimation()}
-              style={{ display: 'inline-block' }}
-            >
-              <Button variant="ghost" size="sm" asChild>
-                <span>
-                  <ArrowLeftIcon ref={arrowLeftIconRef} size={16} />
-                  {backButtonLabel}
-                </span>
-              </Button>
-            </motion.div>
-          </Link>
+          <Button variant="ghost" size="sm" asChild>
+            <Link href={backButtonHref}>
+              <ArrowLeftIcon ref={arrowLeftIconRef} size={16} />
+              {backButtonLabel}
+            </Link>
+          </Button>
         </motion.div>
       )}
 

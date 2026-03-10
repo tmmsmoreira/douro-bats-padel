@@ -67,29 +67,37 @@ export function RSVPButtons({
           )}
         </>
       ) : (
-        <Link href="/login" className="flex-1 sm:flex-none">
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Button className="w-full rounded-lg">{signInToRegisterText}</Button>
-          </motion.div>
-        </Link>
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="flex-1 sm:flex-none"
+        >
+          <Button className="w-full rounded-lg" asChild>
+            <Link href="/login">{signInToRegisterText}</Link>
+          </Button>
+        </motion.div>
       )}
       {showViewDetails && (
-        <Link href={`/events/${event.id}`} className="flex-1 sm:flex-none">
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Button variant="outline" className="w-full rounded-lg">
-              {viewDetailsText}
-            </Button>
-          </motion.div>
-        </Link>
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="flex-1 sm:flex-none"
+        >
+          <Button variant="outline" className="w-full rounded-lg" asChild>
+            <Link href={`/events/${event.id}`}>{viewDetailsText}</Link>
+          </Button>
+        </motion.div>
       )}
       {showViewDraw && event.state === 'PUBLISHED' && (
-        <Link href={`/events/${event.id}/draw`} className="flex-1 sm:flex-none">
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Button variant="outline" className="w-full rounded-lg">
-              {viewDrawText}
-            </Button>
-          </motion.div>
-        </Link>
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="flex-1 sm:flex-none"
+        >
+          <Button variant="outline" className="w-full rounded-lg" asChild>
+            <Link href={`/events/${event.id}/draw`}>{viewDrawText}</Link>
+          </Button>
+        </motion.div>
       )}
     </div>
   );

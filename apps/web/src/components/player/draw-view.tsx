@@ -254,7 +254,7 @@ function DrawContent({
       </div>
 
       {/* Duplas (Teams) */}
-      <Card>
+      <Card className="glass-card">
         <CardHeader className="bg-blue-50 dark:bg-blue-950/30">
           <CardTitle>{t('teams')}</CardTitle>
         </CardHeader>
@@ -293,7 +293,7 @@ function DrawContent({
           </div>
           <p className="text-sm text-muted-foreground">{t('note')}</p>
 
-          <Card className="overflow-hidden">
+          <Card className="glass-card overflow-hidden">
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse">

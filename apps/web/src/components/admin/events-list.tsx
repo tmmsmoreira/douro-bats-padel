@@ -3,23 +3,20 @@
 import { useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { DatePicker } from '@/components/shared/date-picker';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Calendar as CalendarIcon, X } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useMemo } from 'react';
 import { toast } from 'sonner';
 import { useAdminEvents, useAuthFetch } from '@/hooks';
 import { EventCard, EventStats, DataStateWrapper } from '@/components/shared';
 import { StatusBadge, type EventStatus } from '@/components/shared/status-badge';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useMediaQuery } from '@/hooks/use-media-query';
 
 type EventState = 'ALL' | EventStatus;
 
@@ -29,9 +26,11 @@ export function EventsList() {
   const queryClient = useQueryClient();
   const authFetch = useAuthFetch();
   const t = useTranslations('eventsList');
+  const locale = useLocale();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [statusFilter, setStatusFilter] = useState<EventState>('ALL');
   const [currentPage, setCurrentPage] = useState(1);
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const { data: events, isLoading } = useAdminEvents();
 
@@ -104,6 +103,9 @@ export function EventsList() {
           setCurrentPage={setCurrentPage}
           totalPages={totalPages}
           publishDrawMutation={publishDrawMutation}
+          showDatePicker={showDatePicker}
+          setShowDatePicker={setShowDatePicker}
+          locale={locale}
           t={t}
         />
       )}
@@ -123,12 +125,18 @@ function EventsListContent({
   setCurrentPage,
   totalPages,
   publishDrawMutation,
+  showDatePicker,
+  setShowDatePicker,
+  locale,
   t,
 }: any) {
   // Calculate pagination indices
   const EVENTS_PER_PAGE = 10;
   const startIndex = (currentPage - 1) * EVENTS_PER_PAGE;
   const endIndex = startIndex + EVENTS_PER_PAGE;
+
+  // Check if we're on mobile
+  const isMobile = useMediaQuery('(max-width: 640px)');
 
   return (
     <motion.div
@@ -139,56 +147,158 @@ function EventsListContent({
       transition={{ duration: 0.3 }}
       className="space-y-4"
     >
-      {/* Filters */}
+      {/* Filter Chips */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="flex flex-wrap items-center gap-4"
+        className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0"
       >
-        {/* Date Filter */}
-        <div className="w-full sm:w-auto sm:min-w-[200px]">
-          <DatePicker
-            id="eventDate"
-            value={selectedDate}
-            onChange={setSelectedDate}
-            placeholder={t('selectDate')}
-          />
-        </div>
+        <div className="flex items-center gap-2 min-w-max pb-2">
+          {/* Date Chip */}
+          {isMobile ? (
+            <>
+              <Button
+                variant={selectedDate ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setShowDatePicker(true)}
+                className="rounded-full gap-2 h-9 px-4"
+              >
+                <CalendarIcon className="h-4 w-4" />
+                {selectedDate
+                  ? new Date(selectedDate).toLocaleDateString(locale, {
+                      month: 'short',
+                      day: 'numeric',
+                    })
+                  : t('selectDate')}
+                {selectedDate && (
+                  <button
+                    type="button"
+                    className="ml-1 -mr-1 hover:opacity-70 transition-opacity"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedDate(undefined);
+                    }}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                )}
+              </Button>
+              <Dialog open={showDatePicker} onOpenChange={setShowDatePicker}>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>{t('selectDate')}</DialogTitle>
+                  </DialogHeader>
+                  <div className="flex justify-center py-4">
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={(date) => {
+                        setSelectedDate(date);
+                        setShowDatePicker(false);
+                      }}
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </>
+          ) : (
+            <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={selectedDate ? 'default' : 'outline'}
+                  size="sm"
+                  className="rounded-full gap-2 h-9 px-4"
+                >
+                  <CalendarIcon className="h-4 w-4" />
+                  {selectedDate
+                    ? new Date(selectedDate).toLocaleDateString(locale, {
+                        month: 'short',
+                        day: 'numeric',
+                      })
+                    : t('selectDate')}
+                  {selectedDate && (
+                    <button
+                      type="button"
+                      className="ml-1 -mr-1 hover:opacity-70 transition-opacity"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedDate(undefined);
+                      }}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={(date) => {
+                    setSelectedDate(date);
+                    setShowDatePicker(false);
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
+          )}
 
-        {/* Status Filter */}
-        <div className="w-full sm:w-auto sm:min-w-[200px]">
-          <Select
-            value={statusFilter}
-            onValueChange={(value) => setStatusFilter(value as EventState)}
+          {/* Status Chips */}
+          <Button
+            variant={statusFilter === 'ALL' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setStatusFilter('ALL')}
+            className="rounded-full h-9 px-4"
           >
-            <SelectTrigger id="status">
-              <SelectValue placeholder={t('status')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">{t('allStatuses')}</SelectItem>
-              <SelectItem value="DRAFT">{t('statusDraft')}</SelectItem>
-              <SelectItem value="OPEN">{t('statusOpen')}</SelectItem>
-              <SelectItem value="FROZEN">{t('statusFrozen')}</SelectItem>
-              <SelectItem value="DRAWN">{t('statusDrawn')}</SelectItem>
-              <SelectItem value="PUBLISHED">{t('statusPublished')}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+            {t('allStatuses')}
+          </Button>
 
-        {/* Clear Filters */}
-        <Button
-          variant="link"
-          size="sm"
-          onClick={() => {
-            setSelectedDate(undefined);
-            setStatusFilter('ALL');
-          }}
-          disabled={!selectedDate && statusFilter === 'ALL'}
-          className="text-sm text-court-blue hover:text-court-blue/80 transition-colors px-3 py-2.5"
-        >
-          {t('clearFilters')}
-        </Button>
+          <Button
+            variant={statusFilter === 'DRAFT' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setStatusFilter('DRAFT')}
+            className="rounded-full h-9 px-4"
+          >
+            {t('statusDraft')}
+          </Button>
+
+          <Button
+            variant={statusFilter === 'OPEN' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setStatusFilter('OPEN')}
+            className="rounded-full h-9 px-4"
+          >
+            {t('statusOpen')}
+          </Button>
+
+          <Button
+            variant={statusFilter === 'FROZEN' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setStatusFilter('FROZEN')}
+            className="rounded-full h-9 px-4"
+          >
+            {t('statusFrozen')}
+          </Button>
+
+          <Button
+            variant={statusFilter === 'DRAWN' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setStatusFilter('DRAWN')}
+            className="rounded-full h-9 px-4"
+          >
+            {t('statusDrawn')}
+          </Button>
+
+          <Button
+            variant={statusFilter === 'PUBLISHED' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setStatusFilter('PUBLISHED')}
+            className="rounded-full h-9 px-4"
+          >
+            {t('statusPublished')}
+          </Button>
+        </div>
       </motion.div>
 
       {/* Events List */}
@@ -248,24 +358,32 @@ function EventsListContent({
                         waitlistedLabel={t('waitlisted')}
                       />
                       <div className="flex gap-3 w-full sm:w-auto">
-                        <Link href={`/admin/events/${event.id}`} className="flex-1 sm:flex-none">
-                          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                            <Button variant="outline" size="default" className="rounded-lg w-full">
-                              {t('manage')}
-                            </Button>
-                          </motion.div>
-                        </Link>
+                        <motion.div
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="flex-1 sm:flex-none"
+                        >
+                          <Button
+                            variant="outline"
+                            size="default"
+                            className="rounded-lg w-full"
+                            asChild
+                          >
+                            <Link href={`/admin/events/${event.id}`}>{t('manage')}</Link>
+                          </Button>
+                        </motion.div>
                         {event.state === 'FROZEN' && !hasEventPassed && (
-                          <Link
-                            href={`/admin/events/${event.id}/draw`}
+                          <motion.div
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
                             className="flex-1 sm:flex-none"
                           >
-                            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                              <Button size="default" className="rounded-lg w-full">
+                            <Button size="default" className="rounded-lg w-full" asChild>
+                              <Link href={`/admin/events/${event.id}/draw`}>
                                 {t('generateDraw')}
-                              </Button>
-                            </motion.div>
-                          </Link>
+                              </Link>
+                            </Button>
+                          </motion.div>
                         )}
                         {event.state === 'DRAWN' && !hasEventPassed && (
                           <motion.div
@@ -284,19 +402,21 @@ function EventsListContent({
                           </motion.div>
                         )}
                         {event.state === 'PUBLISHED' && hasEventPassed && (
-                          <Link
-                            href={`/admin/events/${event.id}/results`}
+                          <motion.div
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
                             className="flex-1 sm:flex-none"
                           >
-                            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                              <Button
-                                size="default"
-                                className="bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg shadow-md w-full"
-                              >
+                            <Button
+                              size="default"
+                              className="bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg shadow-md w-full"
+                              asChild
+                            >
+                              <Link href={`/admin/events/${event.id}/results`}>
                                 {t('enterResults')}
-                              </Button>
-                            </motion.div>
-                          </Link>
+                              </Link>
+                            </Button>
+                          </motion.div>
                         )}
                       </div>
                     </div>

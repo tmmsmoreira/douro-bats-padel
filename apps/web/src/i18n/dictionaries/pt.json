@@ -211,6 +211,7 @@
     "winRate": "Taxa de Vitória",
     "playedGames": "{value} jogos jogados",
     "loadingRankings": "A carregar classificações...",
+    "noRankingsAvailable": "Nenhuma classificação disponível.",
     "leaderboardTitle": "Classificação",
     "weeksPlayed": "{count} semanas jogadas",
     "topThree": "Top 3",

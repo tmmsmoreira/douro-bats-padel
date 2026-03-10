@@ -102,23 +102,26 @@ export function PastEventsList() {
                       <div className="flex gap-2 w-full sm:w-auto">
                         {event.state === 'PUBLISHED' && (
                           <>
-                            <Link
-                              href={`/events/${event.id}/results`}
+                            <motion.div
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
                               className="flex-1 sm:flex-none"
                             >
-                              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                                <Button variant="outline" className="w-full rounded-lg">
+                              <Button variant="outline" className="w-full rounded-lg" asChild>
+                                <Link href={`/events/${event.id}/results`}>
                                   {t('home.viewResults')}
-                                </Button>
-                              </motion.div>
-                            </Link>
-                            <Link href={`/events/${event.id}/draw`} className="flex-1 sm:flex-none">
-                              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                                <Button variant="outline" className="w-full rounded-lg">
-                                  {t('home.viewDraw')}
-                                </Button>
-                              </motion.div>
-                            </Link>
+                                </Link>
+                              </Button>
+                            </motion.div>
+                            <motion.div
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              className="flex-1 sm:flex-none"
+                            >
+                              <Button variant="outline" className="w-full rounded-lg" asChild>
+                                <Link href={`/events/${event.id}/draw`}>{t('home.viewDraw')}</Link>
+                              </Button>
+                            </motion.div>
                           </>
                         )}
                       </div>

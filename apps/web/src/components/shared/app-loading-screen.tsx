@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import Image from 'next/image';
 
 interface AppLoadingScreenProps {
   /**
@@ -33,12 +34,20 @@ export function AppLoadingScreen({ minDuration = 1000, show = true }: AppLoading
     // Mark as hydrated
     setIsHydrated(true);
 
-    // Set minimum display duration
-    const timer = setTimeout(() => {
-      setIsVisible(false);
-    }, minDuration);
+    // Ensure minimum duration is met
+    const startTime = Date.now();
 
-    return () => clearTimeout(timer);
+    const hideScreen = () => {
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, minDuration - elapsed);
+
+      setTimeout(() => {
+        setIsVisible(false);
+      }, remaining);
+    };
+
+    // Wait for both hydration and minimum duration
+    hideScreen();
   }, [minDuration]);
 
   // Don't render on server
@@ -53,30 +62,25 @@ export function AppLoadingScreen({ minDuration = 1000, show = true }: AppLoading
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-background"
+          className="fixed inset-0 z-9999 flex items-center justify-center bg-background"
         >
           <div className="flex flex-col items-center gap-6">
-            {/* Logo/Icon */}
+            {/* Logo */}
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.5 }}
               className="relative"
             >
-              <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
-                <svg
-                  className="w-12 h-12 text-primary"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                  />
-                </svg>
+              <div className="w-32 h-32 relative">
+                <Image
+                  src="/icons/logo.png"
+                  alt="Douro Bats Padel"
+                  width={128}
+                  height={128}
+                  priority
+                  className="object-contain"
+                />
               </div>
             </motion.div>
 

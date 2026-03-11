@@ -91,6 +91,6 @@ export const config = {
      * - icons (PWA icons)
      * - offline.html (PWA offline page)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|favicon.svg|manifest.json|icons|offline.html).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|favicon.png|manifest.json|icons|offline.html).*)',
   ],
 };

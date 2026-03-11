@@ -6,6 +6,7 @@ import { useActivePathname } from '@/hooks/use-active-pathname';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import Image from 'next/image';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -59,11 +60,17 @@ export function AdminNav() {
           <div className="container mx-auto px-4">
             <div className="flex h-16 items-center justify-between">
               {/* Logo */}
-              <Link
-                href="/admin"
-                className="font-heading gradient-text text-xl  font-bold shrink-0"
-              >
-                Douro Bats Padel
+              <Link href="/admin" className="flex items-center gap-3 shrink-0">
+                <Image
+                  src="/icons/logo.png"
+                  alt="Douro Bats Padel"
+                  width={40}
+                  height={40}
+                  className="object-contain"
+                />
+                <span className="font-heading gradient-text text-xl font-bold hidden sm:inline">
+                  Douro Bats Padel
+                </span>
               </Link>
 
               {/* Desktop Navigation */}

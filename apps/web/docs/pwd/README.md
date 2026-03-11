@@ -90,6 +90,14 @@ Welcome to the PWA documentation for **Douro Bats Padel**. This directory contai
 - Beautiful offline fallback page
 - Auto-reconnect when network restored
 
+### 🔄 Pull-to-Refresh
+
+- Native mobile gesture - swipe down to refresh
+- Visual feedback with animated indicator
+- Smart threshold detection
+- Smooth animations with progress bar
+- Works on all pages automatically
+
 ---
 
 ## 🎨 Visual Flow Diagrams

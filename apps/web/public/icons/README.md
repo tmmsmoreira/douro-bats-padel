@@ -26,7 +26,7 @@ The following icon sizes are required:
 ### Option 2: Using an Online Tool
 
 1. Use a tool like [PWA Asset Generator](https://www.pwabuilder.com/imageGenerator)
-2. Upload your logo or use the SVG in `icon.svg`
+2. Upload your logo or use the SVG in `icon.png`
 3. Download all generated icons
 4. Place them in this directory with the naming format: `icon-{size}x{size}.png`
 
@@ -39,7 +39,7 @@ cd apps/web/public/icons
 
 # Generate all sizes from SVG
 for size in 72 96 128 144 152 192 384 512; do
-  convert icon.svg -resize ${size}x${size} icon-${size}x${size}.png
+  convert icon.png -resize ${size}x${size} icon-${size}x${size}.png
 done
 ```
 

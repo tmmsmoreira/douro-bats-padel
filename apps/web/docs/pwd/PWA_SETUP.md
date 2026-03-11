@@ -35,7 +35,7 @@ This document describes the PWA configuration for Douro Bats Padel.
 
 ### 5. **Icons**
 
-- SVG source icon created (`public/icons/icon.svg`)
+- SVG source icon created (`public/icons/icon.png`)
 - Icon generator tool (`scripts/generate-icons.html`)
 - Instructions for generating PNG icons
 
@@ -140,7 +140,7 @@ pnpm start
 cd apps/web/public/icons
 
 for size in 72 96 128 144 152 192 384 512; do
-  convert icon.svg -resize ${size}x${size} icon-${size}x${size}.png
+  convert icon.png -resize ${size}x${size} icon-${size}x${size}.png
 done
 ```
 

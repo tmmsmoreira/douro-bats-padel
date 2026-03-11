@@ -10,6 +10,7 @@ import { locales, type Locale } from '@/i18n/config';
 import { auth } from '@/lib/auth';
 import { AppLoadingScreen } from '@/components/shared/app-loading-screen';
 import { OfflineIndicator } from '@/components/shared/offline-indicator';
+import { PullToRefresh } from '@/components/shared/pull-to-refresh';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -26,8 +27,14 @@ export const metadata: Metadata = {
     telephone: false,
   },
   icons: {
-    icon: '/icons/icon-192x192.png',
-    apple: '/icons/icon-192x192.png',
+    icon: [
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon-48x48.png', sizes: '48x48', type: 'image/png' },
+      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/icon-512x512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: '/icons/apple-touch-icon.png',
   },
 };
 
@@ -73,7 +80,10 @@ export default async function LangLayout({
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="theme-color" content="#000000" />
-        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body className={inter.className} suppressHydrationWarning>
@@ -81,6 +91,7 @@ export default async function LangLayout({
           <NextIntlClientProvider locale={lang} messages={messages}>
             <AppLoadingScreen minDuration={800} />
             <OfflineIndicator />
+            <PullToRefresh />
             {children}
           </NextIntlClientProvider>
         </Providers>

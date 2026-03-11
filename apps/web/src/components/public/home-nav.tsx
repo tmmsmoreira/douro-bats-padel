@@ -8,6 +8,7 @@ import { LanguageToggleButton } from '@/components/shared/language-toggle-button
 import { MenuToggle } from '@/components/shared/menu-toggle';
 import { useTranslations } from 'next-intl';
 import { MobileMenu } from '@/components/shared/mobile-menu';
+import Image from 'next/image';
 
 /**
  * Navigation component for unauthenticated users only.
@@ -38,8 +39,17 @@ export function HomeNav() {
           <div className="container mx-auto px-4">
             <div className="flex h-16 items-center justify-between">
               {/* Logo */}
-              <Link href="/" className="font-heading gradient-text text-xl font-bold shrink-0">
-                Douro Bats Padel
+              <Link href="/" className="flex items-center gap-3 shrink-0">
+                <Image
+                  src="/icons/logo.png"
+                  alt="Douro Bats Padel"
+                  width={40}
+                  height={40}
+                  className="object-contain"
+                />
+                <span className="font-heading gradient-text text-xl font-bold hidden sm:inline">
+                  Douro Bats Padel
+                </span>
               </Link>
 
               {/* Desktop Actions */}

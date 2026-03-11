@@ -42,6 +42,14 @@ The PWA now has a complete loading screen and offline handling system with the f
 - **Beautiful offline page** with retry functionality
 - **Auto-reconnect** when network is restored
 
+### 5. 🔄 Pull-to-Refresh
+
+- **Native mobile gesture** - swipe down to refresh
+- **Visual feedback** with animated indicator
+- **Smart threshold detection** - only triggers when pulled far enough
+- **Smooth animations** with progress indicator
+- **Works on all pages** automatically
+
 ## 📁 Files Created/Modified
 
 ### New Files:
@@ -49,14 +57,16 @@ The PWA now has a complete loading screen and offline handling system with the f
 1. `src/components/shared/app-loading-screen.tsx` - Loading screen component
 2. `src/hooks/use-online-status.ts` - Online/offline detection hook
 3. `src/components/shared/offline-indicator.tsx` - Offline banner component
-4. `LOADING_AND_OFFLINE.md` - Detailed documentation
-5. `IMPLEMENTATION_SUMMARY.md` - This file
+4. `src/hooks/use-pull-to-refresh.ts` - Pull-to-refresh hook
+5. `src/components/shared/pull-to-refresh.tsx` - Pull-to-refresh component
+6. `LOADING_AND_OFFLINE.md` - Detailed documentation
+7. `IMPLEMENTATION_SUMMARY.md` - This file
 
 ### Modified Files:
 
-1. `src/app/[lang]/layout.tsx` - Added loading screen and offline indicator
+1. `src/app/[lang]/layout.tsx` - Added loading screen, offline indicator, and pull-to-refresh
 2. `src/components/shared/index.ts` - Exported new components
-3. `src/hooks/index.ts` - Exported new hook
+3. `src/hooks/index.ts` - Exported new hooks
 4. `src/i18n/dictionaries/en.json` - Added offline translations
 5. `src/i18n/dictionaries/pt.json` - Added offline translations (Portuguese)
 6. `next.config.js` - Enhanced PWA caching configuration

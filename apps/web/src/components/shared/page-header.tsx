@@ -56,12 +56,12 @@ export function PageHeader({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6"
+        className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4"
       >
         <div className="flex-1">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{title}</h1>
           {description && (
-            <div className="text-base text-muted-foreground mt-2">
+            <div className="text-base text-muted-foreground md:mt-2">
               {typeof description === 'string' ? <p>{description}</p> : description}
             </div>
           )}

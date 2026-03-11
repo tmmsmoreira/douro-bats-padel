@@ -1,17 +1,23 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations, useLocale } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar as CalendarIcon, X } from 'lucide-react';
+import { X } from 'lucide-react';
+import { CalendarDaysIcon, CalendarDaysIconHandle } from 'lucide-animated';
 import Link from 'next/link';
 import { useState, useMemo } from 'react';
 import { toast } from 'sonner';
 import { useAdminEvents, useAuthFetch } from '@/hooks';
-import { EventCard, EventStats, DataStateWrapper } from '@/components/shared';
+import {
+  EventCard,
+  EventStats,
+  DataStateWrapper,
+  ScrollableFadeContainer,
+} from '@/components/shared';
 import { StatusBadge, type EventStatus } from '@/components/shared/status-badge';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -138,6 +144,8 @@ function EventsListContent({
   // Check if we're on mobile
   const isMobile = useMediaQuery('(max-width: 640px)');
 
+  const iconRef = useRef<CalendarDaysIconHandle>(null);
+
   return (
     <motion.div
       key="content"
@@ -152,65 +160,20 @@ function EventsListContent({
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0"
+        className="-mx-4"
       >
-        <div className="flex items-center gap-2 min-w-max pb-2">
-          {/* Date Chip */}
-          {isMobile ? (
-            <>
-              <Button
-                variant={selectedDate ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setShowDatePicker(true)}
-                className="rounded-full gap-2 h-9 px-4"
-              >
-                <CalendarIcon className="h-4 w-4" />
-                {selectedDate
-                  ? new Date(selectedDate).toLocaleDateString(locale, {
-                      month: 'short',
-                      day: 'numeric',
-                    })
-                  : t('selectDate')}
-                {selectedDate && (
-                  <button
-                    type="button"
-                    className="ml-1 -mr-1 hover:opacity-70 transition-opacity"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedDate(undefined);
-                    }}
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                )}
-              </Button>
-              <Dialog open={showDatePicker} onOpenChange={setShowDatePicker}>
-                <DialogContent className="sm:max-w-[425px]">
-                  <DialogHeader>
-                    <DialogTitle>{t('selectDate')}</DialogTitle>
-                  </DialogHeader>
-                  <div className="flex justify-center py-4">
-                    <Calendar
-                      mode="single"
-                      selected={selectedDate}
-                      onSelect={(date) => {
-                        setSelectedDate(date);
-                        setShowDatePicker(false);
-                      }}
-                    />
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </>
-          ) : (
-            <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
-              <PopoverTrigger asChild>
+        <ScrollableFadeContainer className="px-4 py-1 sm:mx-0 sm:px-0" fadeWidth={70}>
+          <div className="flex items-center gap-2 min-w-max">
+            {/* Date Chip */}
+            {isMobile ? (
+              <>
                 <Button
                   variant={selectedDate ? 'default' : 'outline'}
                   size="sm"
+                  onClick={() => setShowDatePicker(true)}
                   className="rounded-full gap-2 h-9 px-4"
                 >
-                  <CalendarIcon className="h-4 w-4" />
+                  <CalendarDaysIcon className="h-4 w-4" />
                   {selectedDate
                     ? new Date(selectedDate).toLocaleDateString(locale, {
                         month: 'short',
@@ -230,75 +193,124 @@ function EventsListContent({
                     </button>
                   )}
                 </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={(date) => {
-                    setSelectedDate(date);
-                    setShowDatePicker(false);
-                  }}
-                />
-              </PopoverContent>
-            </Popover>
-          )}
+                <Dialog open={showDatePicker} onOpenChange={setShowDatePicker}>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>{t('selectDate')}</DialogTitle>
+                    </DialogHeader>
+                    <div className="flex justify-center py-4">
+                      <Calendar
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={(date) => {
+                          setSelectedDate(date);
+                          setShowDatePicker(false);
+                        }}
+                      />
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </>
+            ) : (
+              <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={selectedDate ? 'default' : 'outline'}
+                    size="sm"
+                    className="rounded-full gap-2 h-9 px-4"
+                    onMouseEnter={() => iconRef.current?.startAnimation()}
+                    onMouseLeave={() => iconRef.current?.stopAnimation()}
+                  >
+                    <CalendarDaysIcon ref={iconRef} size={16} className="h-4 w-4" />
+                    {selectedDate
+                      ? new Date(selectedDate).toLocaleDateString(locale, {
+                          month: 'short',
+                          day: 'numeric',
+                        })
+                      : t('selectDate')}
+                    {selectedDate && (
+                      <button
+                        type="button"
+                        className="ml-1 -mr-1 hover:opacity-70 transition-opacity"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedDate(undefined);
+                        }}
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(date) => {
+                      setSelectedDate(date);
+                      setShowDatePicker(false);
+                    }}
+                  />
+                </PopoverContent>
+              </Popover>
+            )}
 
-          {/* Status Chips */}
-          <Button
-            variant={statusFilter === 'ALL' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setStatusFilter('ALL')}
-            className="rounded-full h-9 px-4"
-          >
-            {t('allStatuses')}
-          </Button>
+            {/* Status Chips */}
+            <Button
+              variant={statusFilter === 'ALL' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setStatusFilter('ALL')}
+              className="rounded-full h-9 px-4"
+            >
+              {t('allStatuses')}
+            </Button>
 
-          <Button
-            variant={statusFilter === 'DRAFT' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setStatusFilter('DRAFT')}
-            className="rounded-full h-9 px-4"
-          >
-            {t('statusDraft')}
-          </Button>
+            <Button
+              variant={statusFilter === 'DRAFT' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setStatusFilter('DRAFT')}
+              className="rounded-full h-9 px-4"
+            >
+              {t('statusDraft')}
+            </Button>
 
-          <Button
-            variant={statusFilter === 'OPEN' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setStatusFilter('OPEN')}
-            className="rounded-full h-9 px-4"
-          >
-            {t('statusOpen')}
-          </Button>
+            <Button
+              variant={statusFilter === 'OPEN' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setStatusFilter('OPEN')}
+              className="rounded-full h-9 px-4"
+            >
+              {t('statusOpen')}
+            </Button>
 
-          <Button
-            variant={statusFilter === 'FROZEN' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setStatusFilter('FROZEN')}
-            className="rounded-full h-9 px-4"
-          >
-            {t('statusFrozen')}
-          </Button>
+            <Button
+              variant={statusFilter === 'FROZEN' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setStatusFilter('FROZEN')}
+              className="rounded-full h-9 px-4"
+            >
+              {t('statusFrozen')}
+            </Button>
 
-          <Button
-            variant={statusFilter === 'DRAWN' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setStatusFilter('DRAWN')}
-            className="rounded-full h-9 px-4"
-          >
-            {t('statusDrawn')}
-          </Button>
+            <Button
+              variant={statusFilter === 'DRAWN' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setStatusFilter('DRAWN')}
+              className="rounded-full h-9 px-4"
+            >
+              {t('statusDrawn')}
+            </Button>
 
-          <Button
-            variant={statusFilter === 'PUBLISHED' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setStatusFilter('PUBLISHED')}
-            className="rounded-full h-9 px-4"
-          >
-            {t('statusPublished')}
-          </Button>
-        </div>
+            <Button
+              variant={statusFilter === 'PUBLISHED' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setStatusFilter('PUBLISHED')}
+              className="rounded-full h-9 px-4"
+            >
+              {t('statusPublished')}
+            </Button>
+          </div>
+        </ScrollableFadeContainer>
       </motion.div>
 
       {/* Events List */}

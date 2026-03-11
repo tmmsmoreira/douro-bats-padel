@@ -47,7 +47,7 @@ export function HomeNav() {
                   height={40}
                   className="object-contain"
                 />
-                <span className="font-heading gradient-text text-xl font-bold hidden sm:inline">
+                <span className="font-heading gradient-text text-xl font-bold">
                   Douro Bats Padel
                 </span>
               </Link>

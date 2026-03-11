@@ -154,7 +154,7 @@ function EventDetailsContent({
 
   // Build description with event details
   const eventDescription = (
-    <div className="flex items-center justify-center gap-4 text-sm flex-wrap">
+    <div className="flex gap-4 text-sm flex-wrap">
       <div className="flex items-center gap-1">
         <Calendar className="h-4 w-4" />
         <span>

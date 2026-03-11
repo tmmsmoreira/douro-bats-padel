@@ -8,6 +8,8 @@ import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { locales, type Locale } from '@/i18n/config';
 import { auth } from '@/lib/auth';
+import { AppLoadingScreen } from '@/components/shared/app-loading-screen';
+import { OfflineIndicator } from '@/components/shared/offline-indicator';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -77,6 +79,8 @@ export default async function LangLayout({
       <body className={inter.className} suppressHydrationWarning>
         <Providers session={session}>
           <NextIntlClientProvider locale={lang} messages={messages}>
+            <AppLoadingScreen minDuration={800} />
+            <OfflineIndicator />
             {children}
           </NextIntlClientProvider>
         </Providers>

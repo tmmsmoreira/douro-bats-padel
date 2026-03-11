@@ -810,5 +810,10 @@
   "faq": {
     "title": "Perguntas Frequentes",
     "subtitle": "Encontre respostas para questões comuns sobre Douro Bats Padel"
+  },
+  "offline": {
+    "message": "Sem ligação à internet",
+    "backOnline": "Ligação restabelecida",
+    "checkConnection": "Por favor, verifique a sua ligação de rede e tente novamente"
   }
 }

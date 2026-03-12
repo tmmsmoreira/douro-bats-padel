@@ -1,4 +1,4 @@
-import { StatusBadge } from './status-badge';
+import { StatusBadge } from '../status-badge';
 import type { EventWithRSVP } from '@padel/types';
 
 interface RSVPBadgesProps {

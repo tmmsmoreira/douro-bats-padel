@@ -70,7 +70,7 @@ export function ScrollableFadeContainer({
 
     // Right fade: 1 at start, 0 when within fadeDistance of the end
     const distanceFromEnd = maxScroll - scrollLeft;
-    const rightProgress = isScrollable ? Math.min(distanceFromEnd / fadeDistance, 1) : 1;
+    const rightProgress = isScrollable ? Math.min(distanceFromEnd / fadeDistance, 1) : 0;
 
     // Debug logging (remove in production)
     if (process.env.NODE_ENV === 'development') {
@@ -99,8 +99,35 @@ export function ScrollableFadeContainer({
     // Initial check with small delay to ensure DOM is ready
     const initialCheck = setTimeout(updateShadows, 0);
 
+    // Handle horizontal scrolling with mouse wheel (only when hovering)
+    const handleWheel = (e: WheelEvent) => {
+      // Only handle horizontal scroll if content is scrollable
+      const { scrollWidth, clientWidth } = element;
+      if (scrollWidth <= clientWidth) return;
+
+      // Check if mouse is over the element
+      const rect = element.getBoundingClientRect();
+      const isMouseOver =
+        e.clientX >= rect.left &&
+        e.clientX <= rect.right &&
+        e.clientY >= rect.top &&
+        e.clientY <= rect.bottom;
+
+      if (!isMouseOver) return;
+
+      // Prevent default vertical scroll
+      e.preventDefault();
+
+      // Scroll horizontally using deltaY (vertical wheel movement)
+      element.scrollLeft += e.deltaY;
+
+      // Manually trigger shadow update for immediate feedback
+      updateShadows();
+    };
+
     // Update on scroll
     element.addEventListener('scroll', updateShadows);
+    element.addEventListener('wheel', handleWheel, { passive: false });
 
     // Update on resize
     const resizeObserver = new ResizeObserver(updateShadows);
@@ -109,6 +136,7 @@ export function ScrollableFadeContainer({
     return () => {
       clearTimeout(initialCheck);
       element.removeEventListener('scroll', updateShadows);
+      element.removeEventListener('wheel', handleWheel);
       resizeObserver.disconnect();
     };
   }, []);

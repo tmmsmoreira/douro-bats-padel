@@ -7,6 +7,7 @@ import { useRouter } from '@/i18n/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import Link from 'next/link';
 import { Calendar, MapPin, Clock, MoreVertical, Edit } from 'lucide-react';
 import {
@@ -25,32 +26,10 @@ import { motion } from 'motion/react';
 import { EventStatus, StatusBadge, DataStateWrapper } from '../shared';
 import { Spinner } from '../ui/spinner';
 import { formatTime } from '@/lib/utils';
+import { TierSection, WaitlistSection } from '@/components/shared/draw';
+import type { Player, WaitlistedPlayer, Assignment } from '@/components/shared/draw';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-
-interface Player {
-  id: string;
-  name: string;
-  rating: number;
-  tier?: string;
-}
-
-interface WaitlistedPlayer extends Player {
-  position: number;
-}
-
-interface Assignment {
-  id: string;
-  round: number;
-  courtId: string;
-  tier: string;
-  court?: {
-    id: string;
-    label: string;
-  };
-  teamA: Player[];
-  teamB: Player[];
-}
 
 interface Draw {
   id: string;
@@ -353,6 +332,22 @@ function EventDetailsContent({
                         >
                           <div className="flex items-center gap-2">
                             <Badge variant="secondary">#{player.position}</Badge>
+                            <Avatar className="h-6 w-6">
+                              <AvatarImage
+                                src={player.profilePhoto || undefined}
+                                alt={player.name || 'Player'}
+                              />
+                              <AvatarFallback className="gradient-primary text-xs">
+                                {player.name
+                                  ? player.name
+                                      .split(' ')
+                                      .map((n) => n[0])
+                                      .join('')
+                                      .toUpperCase()
+                                      .slice(0, 2)
+                                  : '?'}
+                              </AvatarFallback>
+                            </Avatar>
                             <span>{player.name}</span>
                           </div>
                           <span className="text-sm text-muted-foreground">{player.rating}</span>
@@ -384,7 +379,25 @@ function EventDetailsContent({
                       key={player.id}
                       className="flex items-center justify-between py-2 border-b last:border-0"
                     >
-                      <span>{player.name}</span>
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-6 w-6">
+                          <AvatarImage
+                            src={player.profilePhoto || undefined}
+                            alt={player.name || 'Player'}
+                          />
+                          <AvatarFallback className="gradient-primary text-xs">
+                            {player.name
+                              ? player.name
+                                  .split(' ')
+                                  .map((n) => n[0])
+                                  .join('')
+                                  .toUpperCase()
+                                  .slice(0, 2)
+                              : '?'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span>{player.name}</span>
+                      </div>
                       <span className="text-sm text-muted-foreground">{player.rating}</span>
                     </div>
                   ))}
@@ -408,6 +421,22 @@ function EventDetailsContent({
                     >
                       <div className="flex items-center gap-2">
                         <Badge variant="secondary">#{player.position}</Badge>
+                        <Avatar className="h-6 w-6">
+                          <AvatarImage
+                            src={player.profilePhoto || undefined}
+                            alt={player.name || 'Player'}
+                          />
+                          <AvatarFallback className="gradient-primary text-xs">
+                            {player.name
+                              ? player.name
+                                  .split(' ')
+                                  .map((n) => n[0])
+                                  .join('')
+                                  .toUpperCase()
+                                  .slice(0, 2)
+                              : '?'}
+                          </AvatarFallback>
+                        </Avatar>
                         <span>{player.name}</span>
                       </div>
                       <span className="text-sm text-muted-foreground">{player.rating}</span>
@@ -466,99 +495,28 @@ function DrawSummary({ draw }: { draw: Draw }) {
   return (
     <div className="space-y-6">
       {/* Masters Draw */}
-      {Object.keys(mastersRounds).length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <h2 className="text-2xl font-bold">Masters</h2>
-            {draw.event?.tierRules?.mastersTimeSlot && (
-              <Badge variant="secondary" className="text-sm">
-                <Clock className="mr-2 h-4 w-4" /> {draw.event.tierRules.mastersTimeSlot.startsAt} -{' '}
-                {draw.event.tierRules.mastersTimeSlot.endsAt}
-              </Badge>
-            )}
-          </div>
-          {Object.entries(mastersRounds).map(([round, assignments]) => (
-            <Card className="glass-card" key={`masters-${round}`}>
-              <CardHeader>
-                <CardTitle>{t('round', { round: round })}</CardTitle>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {assignments.map((assignment) => (
-                    <AssignmentSummaryCard key={assignment.id} assignment={assignment} />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+      <TierSection
+        tier="MASTERS"
+        rounds={mastersRounds}
+        timeSlot={draw.event?.tierRules?.mastersTimeSlot}
+        translations={{
+          tierName: t('masters'),
+          round: (round) => t('round', { round }),
+          courtLabel: (courtId) => `Court ${courtId}`,
+        }}
+      />
 
       {/* Explorers Draw */}
-      {Object.keys(explorersRounds).length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <h2 className="text-2xl font-bold">Explorers</h2>
-            {draw.event?.tierRules?.explorersTimeSlot && (
-              <Badge variant="secondary" className="text-sm">
-                <Clock className="mr-2 h-4 w-4" /> {draw.event.tierRules.explorersTimeSlot.startsAt}{' '}
-                - {draw.event.tierRules.explorersTimeSlot.endsAt}
-              </Badge>
-            )}
-          </div>
-          {Object.entries(explorersRounds).map(([round, assignments]) => (
-            <Card className="glass-card" key={`explorers-${round}`}>
-              <CardHeader>
-                <CardTitle>{t('round', { round: round })}</CardTitle>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {assignments.map((assignment) => (
-                    <AssignmentSummaryCard key={assignment.id} assignment={assignment} />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// Assignment Summary Card (simplified, read-only version)
-function AssignmentSummaryCard({ assignment }: { assignment: Assignment }) {
-  const t = useTranslations('eventDetails');
-
-  return (
-    <div className="border rounded-lg p-4">
-      <div className="mb-3">
-        <Badge variant="outline">{assignment.court?.label || `Court ${assignment.courtId}`}</Badge>
-      </div>
-      <div className="grid grid-cols-2 divide-x">
-        <div className="pr-4">
-          <p className="text-sm font-medium mb-2">{t('team', { team: 'A' })}</p>
-          <div className="space-y-1">
-            {assignment.teamA?.map((player) => (
-              <div key={player.id} className="flex items-center justify-between text-sm">
-                <span>{player.name}</span>
-                <span className="text-xs text-muted-foreground">{player.rating}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="pl-4">
-          <p className="text-sm font-medium mb-2">{t('team', { team: 'B' })}</p>
-          <div className="space-y-1">
-            {assignment.teamB?.map((player) => (
-              <div key={player.id} className="flex items-center justify-between text-sm">
-                <span>{player.name}</span>
-                <span className="text-xs text-muted-foreground">{player.rating}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      <TierSection
+        tier="EXPLORERS"
+        rounds={explorersRounds}
+        timeSlot={draw.event?.tierRules?.explorersTimeSlot}
+        translations={{
+          tierName: t('explorers'),
+          round: (round) => t('round', { round }),
+          courtLabel: (courtId) => `Court ${courtId}`,
+        }}
+      />
     </div>
   );
 }
@@ -698,7 +656,7 @@ function EventDetailsHeaderActionButtons({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          {!hasEventPassed && (
+          {(event.state === 'DRAFT' || !hasEventPassed) && (
             <>
               <DropdownMenuItem asChild>
                 <Link href={`/admin/events/${event.id}/edit`} className="flex gap-2">

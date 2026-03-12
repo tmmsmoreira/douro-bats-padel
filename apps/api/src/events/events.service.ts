@@ -256,6 +256,7 @@ export class EventsService {
           id: r.player.id,
           name: r.player.user.name,
           rating: r.player.rating,
+          profilePhoto: r.player.user.profilePhoto,
         })),
       waitlistedPlayers: event.rsvps
         .filter((r) => r.status === 'WAITLISTED')
@@ -264,6 +265,7 @@ export class EventsService {
           name: r.player.user.name,
           position: r.position,
           rating: r.player.rating,
+          profilePhoto: r.player.user.profilePhoto,
         })),
     };
   }

@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { HomeAdaptiveNav } from '@/components/shared/home-adaptive-nav';
 import { Footer } from '@/components/public/footer';
 import { formatTime } from '@/lib/utils';
@@ -21,6 +22,7 @@ interface Player {
   id: string;
   name: string;
   rating: number;
+  profilePhoto?: string | null;
 }
 
 interface WaitlistedPlayer extends Player {
@@ -252,7 +254,25 @@ function EventDetailsContent({
                   className="flex items-center justify-between py-2 border-b last:border-0"
                 >
                   <span className="text-2xl font-bold text-muted-foreground w-8">#{index + 1}</span>
-                  <span>{player.name}</span>
+                  <div className="flex items-center gap-2 flex-1">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage
+                        src={player.profilePhoto || undefined}
+                        alt={player.name || 'Player'}
+                      />
+                      <AvatarFallback className="gradient-primary text-sm">
+                        {player.name
+                          ? player.name
+                              .split(' ')
+                              .map((n) => n[0])
+                              .join('')
+                              .toUpperCase()
+                              .slice(0, 2)
+                          : '?'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span>{player.name}</span>
+                  </div>
                   <span className="text-2xl font-bold text-muted-foreground">{player.rating}</span>
                 </div>
               ))}
@@ -278,8 +298,24 @@ function EventDetailsContent({
                   key={player.id}
                   className="flex items-center justify-between py-2 border-b last:border-0"
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-1">
                     <Badge variant="secondary">#{player.position}</Badge>
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage
+                        src={player.profilePhoto || undefined}
+                        alt={player.name || 'Player'}
+                      />
+                      <AvatarFallback className="gradient-primary text-sm">
+                        {player.name
+                          ? player.name
+                              .split(' ')
+                              .map((n) => n[0])
+                              .join('')
+                              .toUpperCase()
+                              .slice(0, 2)
+                          : '?'}
+                      </AvatarFallback>
+                    </Avatar>
                     <span>{player.name}</span>
                   </div>
                   <span className="text-sm text-muted-foreground">{player.rating}</span>

@@ -3,24 +3,15 @@
 import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { toast } from 'sonner';
 import { useTranslations, useLocale } from 'next-intl';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  Pencil,
-  Trash2,
-  MapPin,
-  Calendar,
-  RefreshCw,
-  Send,
-  ArchiveRestore,
-  Clock,
-} from 'lucide-react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Trash2, RefreshCw, Send, ArchiveRestore } from 'lucide-react';
 import { ArrowLeftIcon, ArrowLeftIconHandle } from 'lucide-animated';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import {
   Dialog,
   DialogContent,
@@ -29,78 +20,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 import { motion } from 'motion/react';
 import { DataStateWrapper } from '@/components/shared';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-
-interface Player {
-  id: string;
-  name: string;
-  rating: number;
-  tier: string;
-}
-
-interface WaitlistedPlayer extends Player {
-  position: number;
-}
-
-interface Assignment {
-  id: string;
-  round: number;
-  courtId: string;
-  tier: string;
-  court?: {
-    id: string;
-    label: string;
-  };
-  teamA: Player[];
-  teamB: Player[];
-}
-
-interface Draw {
-  id: string;
-  eventId: string;
-  event: {
-    id: string;
-    title: string;
-    date: string;
-    startsAt: string;
-    endsAt: string;
-    state: string;
-    venue?: {
-      id: string;
-      name: string;
-      courts: Array<{
-        id: string;
-        label: string;
-      }>;
-    };
-    tierRules?: {
-      mastersTimeSlot?: {
-        startsAt: string;
-        endsAt: string;
-        courtIds?: string[];
-      };
-      explorersTimeSlot?: {
-        startsAt: string;
-        endsAt: string;
-        courtIds?: string[];
-      };
-    };
-  };
-  assignments: Assignment[];
-}
+import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
+import { DrawHeader, TierSection, WaitlistSection } from '@/components/shared/draw';
+import type { Draw, Assignment } from '@/components/shared/draw';
+import { useAuthFetch } from '@/hooks/use-api';
 
 export function AdminDrawView({ eventId }: { eventId: string }) {
   const t = useTranslations('adminDrawView');
@@ -108,39 +33,34 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
   const { data: session } = useSession();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const authFetch = useAuthFetch();
   const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const arrowLeftIconRef = useRef<ArrowLeftIconHandle>(null);
 
   const { data: draw, isLoading } = useQuery<Draw>({
-    queryKey: ['draw', eventId],
+    queryKey: ['draw', eventId, session?.accessToken],
     queryFn: async () => {
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-      };
-      if (session?.accessToken) {
-        headers.Authorization = `Bearer ${session.accessToken}`;
+      try {
+        return await authFetch.get<Draw>(`/draws/events/${eventId}`);
+      } catch (error) {
+        throw new Error(t('errorFetchingDraw'));
       }
-      const res = await fetch(`${API_URL}/draws/events/${eventId}`, { headers });
-      if (!res.ok) throw new Error(t('errorFetchingDraw'));
-      return res.json();
     },
+    enabled: !!session?.accessToken,
   });
 
   // Fetch event data to get waitlist
   const { data: event } = useQuery({
-    queryKey: ['event', eventId],
+    queryKey: ['event', eventId, session?.accessToken],
     queryFn: async () => {
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-      };
-      if (session?.accessToken) {
-        headers.Authorization = `Bearer ${session.accessToken}`;
+      try {
+        return await authFetch.get(`/events/${eventId}?includeUnpublished=true`);
+      } catch {
+        return null;
       }
-      const res = await fetch(`${API_URL}/events/${eventId}?includeUnpublished=true`, { headers });
-      if (!res.ok) return null;
-      return res.json();
     },
+    enabled: !!session?.accessToken,
   });
 
   const updateAssignmentMutation = useMutation({
@@ -154,18 +74,7 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
       teamB: string[];
     }) => {
       if (!session?.accessToken) throw new Error(t('notAuthenticated'));
-
-      const res = await fetch(`${API_URL}/draws/assignments/${assignmentId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.accessToken}`,
-        },
-        body: JSON.stringify({ teamA, teamB }),
-      });
-
-      if (!res.ok) throw new Error(t('errorUpdatingAssignment', { message: '' }));
-      return res.json();
+      return await authFetch.patch(`/draws/assignments/${assignmentId}`, { teamA, teamB });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['draw', eventId] });
@@ -180,17 +89,7 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
   const publishDrawMutation = useMutation({
     mutationFn: async () => {
       if (!session?.accessToken) throw new Error(t('notAuthenticated'));
-
-      const res = await fetch(`${API_URL}/draws/events/${eventId}/publish`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.accessToken}`,
-        },
-      });
-
-      if (!res.ok) throw new Error(t('errorPublishingDraw', { message: '' }));
-      return res.json();
+      return await authFetch.post(`/draws/events/${eventId}/publish`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['draw', eventId] });
@@ -205,17 +104,7 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
   const unpublishDrawMutation = useMutation({
     mutationFn: async () => {
       if (!session?.accessToken) throw new Error(t('notAuthenticated'));
-
-      const res = await fetch(`${API_URL}/draws/events/${eventId}/unpublish`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.accessToken}`,
-        },
-      });
-
-      if (!res.ok) throw new Error(t('errorUnpublishingDraw', { message: '' }));
-      return res.json();
+      return await authFetch.post(`/draws/events/${eventId}/unpublish`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['draw', eventId] });
@@ -230,17 +119,7 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
   const deleteDrawMutation = useMutation({
     mutationFn: async () => {
       if (!session?.accessToken) throw new Error(t('notAuthenticated'));
-
-      const res = await fetch(`${API_URL}/draws/events/${eventId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.accessToken}`,
-        },
-      });
-
-      if (!res.ok) throw new Error(t('errorDeletingDraw', { message: '' }));
-      return res.json();
+      return await authFetch.delete(`/draws/events/${eventId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['draw', eventId] });
@@ -348,173 +227,91 @@ function AdminDrawContent({
         </Link>
       </div>
 
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">{hasEventPassed ? t('viewDraw') : t('manageDraw')}</h1>
-          <p className="text-muted-foreground">{draw.event.title}</p>
-          <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
-              <span>
-                {new Date(draw.event.date).toLocaleDateString(locale, {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-              </span>
-            </div>
-            {draw.event.venue && (
-              <div className="flex items-center gap-1">
-                <MapPin className="h-4 w-4" />
-                <span>{draw.event.venue.name}</span>
-              </div>
-            )}
-          </div>
-        </div>
-        {!hasEventPassed && (
-          <div className="flex gap-2 self-end sm:self-auto">
-            {draw.event.state !== 'PUBLISHED' && (
-              <>
+      <DrawHeader
+        title={draw.event.title}
+        date={draw.event.date}
+        venue={draw.event.venue}
+        locale={locale}
+        actions={
+          !hasEventPassed ? (
+            <>
+              {draw.event.state !== 'PUBLISHED' && (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => router.push(`/admin/events/${eventId}/draw`)}
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                    {t('generateNew')}
+                  </Button>
+                  <Button
+                    onClick={() => publishDrawMutation.mutate()}
+                    disabled={publishDrawMutation.isPending}
+                  >
+                    <Send className="h-4 w-4" />
+                    {publishDrawMutation.isPending ? t('publishing') : t('publish')}
+                  </Button>
+                </>
+              )}
+              {draw.event.state === 'PUBLISHED' && (
                 <Button
                   variant="outline"
-                  onClick={() => router.push(`/admin/events/${eventId}/draw`)}
+                  onClick={() => unpublishDrawMutation.mutate()}
+                  disabled={unpublishDrawMutation.isPending}
                 >
-                  <RefreshCw className="h-4 w-4" />
-                  {t('generateNew')}
+                  <ArchiveRestore className="h-4 w-4" />
+                  {unpublishDrawMutation.isPending ? t('unpublishing') : t('unpublish')}
                 </Button>
-                <Button
-                  onClick={() => publishDrawMutation.mutate()}
-                  disabled={publishDrawMutation.isPending}
-                >
-                  <Send className="h-4 w-4" />
-                  {publishDrawMutation.isPending ? t('publishing') : t('publish')}
-                </Button>
-              </>
-            )}
-            {draw.event.state === 'PUBLISHED' && (
+              )}
               <Button
-                variant="outline"
-                onClick={() => unpublishDrawMutation.mutate()}
-                disabled={unpublishDrawMutation.isPending}
+                variant="destructive"
+                onClick={() => setShowDeleteDialog(true)}
+                disabled={deleteDrawMutation.isPending}
               >
-                <ArchiveRestore className="h-4 w-4" />
-                {unpublishDrawMutation.isPending ? t('unpublishing') : t('unpublish')}
+                <Trash2 className="h-4 w-4" />
+                {deleteDrawMutation.isPending ? t('deleting') : t('delete')}
               </Button>
-            )}
-            <Button
-              variant="destructive"
-              onClick={() => setShowDeleteDialog(true)}
-              disabled={deleteDrawMutation.isPending}
-            >
-              <Trash2 className="h-4 w-4" />
-              {deleteDrawMutation.isPending ? t('deleting') : t('delete')}
-            </Button>
-          </div>
-        )}
-      </div>
+            </>
+          ) : undefined
+        }
+      />
 
       {/* Masters Assignments */}
-      {Object.keys(mastersRounds).length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <h2 className="text-2xl font-bold">{t('masters')}</h2>
-            {draw.event.tierRules?.mastersTimeSlot && (
-              <Badge variant="secondary" className="text-sm">
-                <Clock className="mr-2 h-4 w-4" /> {draw.event.tierRules.mastersTimeSlot.startsAt} -{' '}
-                {draw.event.tierRules.mastersTimeSlot.endsAt}
-              </Badge>
-            )}
-          </div>
-          {Object.entries(mastersRounds).map(([round, assignments]) => (
-            <Card className="glass-card" key={`masters-${round}`}>
-              <CardHeader>
-                <CardTitle>{t('round', { number: round })}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {assignments.map((assignment) => (
-                    <AssignmentCard
-                      key={assignment.id}
-                      assignment={assignment}
-                      onEdit={() => setEditingAssignment(assignment)}
-                      canEdit={!hasEventPassed}
-                    />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+      <TierSection
+        tier="MASTERS"
+        rounds={mastersRounds}
+        timeSlot={draw.event.tierRules?.mastersTimeSlot}
+        translations={{
+          tierName: t('masters'),
+          round: (round) => t('round', { number: round }),
+          courtLabel: (courtId) => t('court', { id: courtId }),
+        }}
+        onEditAssignment={(assignment) => setEditingAssignment(assignment)}
+        canEdit={!hasEventPassed}
+      />
 
       {/* Explorers Assignments */}
-      {Object.keys(explorersRounds).length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <h2 className="text-2xl font-bold">{t('explorers')}</h2>
-            {draw.event.tierRules?.explorersTimeSlot && (
-              <Badge variant="secondary" className="text-sm">
-                <Clock className="mr-2 h-4 w-4" />
-                {draw.event.tierRules.explorersTimeSlot.startsAt} -{' '}
-                {draw.event.tierRules.explorersTimeSlot.endsAt}
-              </Badge>
-            )}
-          </div>
-          {Object.entries(explorersRounds).map(([round, assignments]) => (
-            <Card className="glass-card" key={`explorers-${round}`}>
-              <CardHeader>
-                <CardTitle>{t('round', { number: round })}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {assignments.map((assignment) => (
-                    <AssignmentCard
-                      key={assignment.id}
-                      assignment={assignment}
-                      onEdit={() => setEditingAssignment(assignment)}
-                      canEdit={!hasEventPassed}
-                    />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+      <TierSection
+        tier="EXPLORERS"
+        rounds={explorersRounds}
+        timeSlot={draw.event.tierRules?.explorersTimeSlot}
+        translations={{
+          tierName: t('explorers'),
+          round: (round) => t('round', { number: round }),
+          courtLabel: (courtId) => t('court', { id: courtId }),
+        }}
+        onEditAssignment={(assignment) => setEditingAssignment(assignment)}
+        canEdit={!hasEventPassed}
+      />
 
       {/* Waitlist Section */}
-      {event && (event.waitlistCount > 0 || event.waitlistedPlayers?.length > 0) && (
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {t('waitlist', {
-                count: event.waitlistCount || event.waitlistedPlayers?.length || 0,
-              })}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {event.waitlistedPlayers && event.waitlistedPlayers.length > 0 ? (
-              <div className="space-y-2">
-                {event.waitlistedPlayers.map((player: WaitlistedPlayer) => (
-                  <div
-                    key={player.id}
-                    className="flex items-center justify-between py-2 border-b last:border-0"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary">#{player.position}</Badge>
-                      <span>{player.name}</span>
-                    </div>
-                    <span className="text-sm text-muted-foreground">{player.rating}</span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">{t('noPlayersOnWaitlist')}</p>
-            )}
-          </CardContent>
-        </Card>
-      )}
+      <WaitlistSection
+        players={event?.waitlistedPlayers || []}
+        title={t('waitlist', {
+          count: event?.waitlistCount || event?.waitlistedPlayers?.length || 0,
+        })}
+        showAvatar={true}
+      />
 
       {/* Edit Dialog */}
       {editingAssignment && (
@@ -533,78 +330,21 @@ function AdminDrawContent({
       )}
 
       {/* Delete Draw Confirmation Dialog */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t('deleteDrawTitle')}</AlertDialogTitle>
-            <AlertDialogDescription>{t('deleteDrawDescription')}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => {
-                deleteDrawMutation.mutate();
-                setShowDeleteDialog(false);
-              }}
-            >
-              {t('deleteDraw')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmationDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title={t('deleteDrawTitle')}
+        description={t('deleteDrawDescription')}
+        confirmText={t('deleteDraw')}
+        cancelText={t('cancel')}
+        variant="destructive"
+        isLoading={deleteDrawMutation.isPending}
+        onConfirm={() => {
+          deleteDrawMutation.mutate();
+          setShowDeleteDialog(false);
+        }}
+      />
     </motion.div>
-  );
-}
-
-function AssignmentCard({
-  assignment,
-  onEdit,
-  canEdit = true,
-}: {
-  assignment: Assignment;
-  onEdit: () => void;
-  canEdit?: boolean;
-}) {
-  const t = useTranslations('adminDrawView');
-
-  return (
-    <div className="border rounded-lg p-4">
-      <div className="flex items-center justify-between mb-3">
-        <Badge variant="outline">
-          {assignment.court?.label || t('court', { id: assignment.courtId })}
-        </Badge>
-        {canEdit && (
-          <Button variant="ghost" size="sm" onClick={onEdit}>
-            <Pencil className="h-4 w-4" />
-          </Button>
-        )}
-      </div>
-      <div className="grid grid-cols-2 divide-x">
-        <div className="pr-4">
-          <p className="text-sm font-medium mb-2">{t('teamA')}</p>
-          <div className="space-y-1">
-            {assignment.teamA.map((player) => (
-              <div key={player.id} className="flex items-center justify-between text-sm">
-                <span>{player.name}</span>
-                <span className="text-xs text-muted-foreground">{player.rating}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="pl-4">
-          <p className="text-sm font-medium mb-2">{t('teamB')}</p>
-          <div className="space-y-1">
-            {assignment.teamB.map((player) => (
-              <div key={player.id} className="flex items-center justify-between text-sm">
-                <span>{player.name}</span>
-                <span className="text-xs text-muted-foreground">{player.rating}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -683,7 +423,25 @@ function EditAssignmentDialog({
                     className="w-full p-3 border rounded-lg hover:bg-secondary transition-colors text-left"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-medium">{player.name}</span>
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage
+                            src={player.profilePhoto || undefined}
+                            alt={player.name || 'Player'}
+                          />
+                          <AvatarFallback className="gradient-primary text-sm">
+                            {player.name
+                              ? player.name
+                                  .split(' ')
+                                  .map((n) => n[0])
+                                  .join('')
+                                  .toUpperCase()
+                                  .slice(0, 2)
+                              : '?'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium">{player.name}</span>
+                      </div>
                       <div className="flex items-center gap-2">
                         <Badge variant="outline" className="text-xs">
                           {player.tier}
@@ -710,7 +468,25 @@ function EditAssignmentDialog({
                     className="w-full p-3 border rounded-lg hover:bg-secondary transition-colors text-left"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-medium">{player.name}</span>
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage
+                            src={player.profilePhoto || undefined}
+                            alt={player.name || 'Player'}
+                          />
+                          <AvatarFallback className="gradient-primary text-sm">
+                            {player.name
+                              ? player.name
+                                  .split(' ')
+                                  .map((n) => n[0])
+                                  .join('')
+                                  .toUpperCase()
+                                  .slice(0, 2)
+                              : '?'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium">{player.name}</span>
+                      </div>
                       <div className="flex items-center gap-2">
                         <Badge variant="outline" className="text-xs">
                           {player.tier}

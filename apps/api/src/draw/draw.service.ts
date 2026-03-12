@@ -186,6 +186,9 @@ export class DrawService {
       constraints?.avoidRecentSessions || 4
     );
 
+    // Get previous week's team pairings to avoid duplicates
+    const previousWeekTeams = await this.getPreviousWeekTeams(eventId);
+
     // Generate matches with tier-specific courts
     const matches = this.createMatches(
       finalPlayers,
@@ -193,7 +196,8 @@ export class DrawService {
       explorersCourtObjects,
       seed,
       recentHistory,
-      constraints
+      constraints,
+      previousWeekTeams
     );
 
     // Save draw to database
@@ -276,7 +280,8 @@ export class DrawService {
     explorersCourts: any[],
     seed: string,
     recentHistory: Map<string, Set<string>>,
-    constraints?: DrawConstraints
+    constraints?: DrawConstraints,
+    previousWeekTeams?: Set<string>
   ): Match[] {
     const rng = seedrandom(seed);
     const matches: Match[] = [];
@@ -294,7 +299,8 @@ export class DrawService {
         rng,
         recentHistory,
         constraints,
-        Tier.MASTERS
+        Tier.MASTERS,
+        previousWeekTeams
       );
       matches.push(...masterMatches);
     }
@@ -306,7 +312,8 @@ export class DrawService {
         rng,
         recentHistory,
         constraints,
-        Tier.EXPLORERS
+        Tier.EXPLORERS,
+        previousWeekTeams
       );
       matches.push(...explorerMatches);
     }
@@ -324,7 +331,8 @@ export class DrawService {
         rng,
         recentHistory,
         constraints,
-        Tier.EXPLORERS // Use EXPLORERS tier for mixed matches
+        Tier.EXPLORERS, // Use EXPLORERS tier for mixed matches
+        previousWeekTeams
       );
       matches.push(...mixedMatches);
     }
@@ -338,7 +346,8 @@ export class DrawService {
     rng: () => number,
     recentHistory: Map<string, Set<string>>,
     constraints?: DrawConstraints,
-    tier: Tier = Tier.EXPLORERS
+    tier: Tier = Tier.EXPLORERS,
+    previousWeekTeams?: Set<string>
   ): Match[] {
     const matches: Match[] = [];
     const numTeams = players.length / 2;
@@ -348,7 +357,13 @@ export class DrawService {
     const maxSimultaneousMatches = Math.min(courts.length, Math.floor(numTeams / 2));
 
     // Create balanced teams (pairs of players) - only from the same tier
-    const teams = this.createBalancedTeams(players, rng, recentHistory, constraints);
+    const teams = this.createBalancedTeams(
+      players,
+      rng,
+      recentHistory,
+      constraints,
+      previousWeekTeams
+    );
 
     // Generate complete round-robin schedule
     // All teams play against each other, distributed across multiple rounds
@@ -374,7 +389,8 @@ export class DrawService {
     players: Player[],
     rng: () => number,
     recentHistory: Map<string, Set<string>>,
-    constraints?: DrawConstraints
+    constraints?: DrawConstraints,
+    previousWeekTeams?: Set<string>
   ): Team[] {
     // Sort by rating for balanced pairing
     const sortedPlayers = [...players].sort((a, b) => b.rating - a.rating);
@@ -388,7 +404,7 @@ export class DrawService {
       sortedPlayers.map((p) => ({ name: p.name, tier: p.tier }))
     );
 
-    // Try to create balanced teams avoiding recent partners
+    // Try to create balanced teams avoiding recent partners and previous week's exact pairings
     for (let i = 0; i < sortedPlayers.length; i++) {
       if (used.has(sortedPlayers[i].id)) continue;
 
@@ -413,6 +429,17 @@ export class DrawService {
           const recentPartners = recentHistory.get(player1.id) || new Set();
           if (recentPartners.has(player2.id)) {
             score -= 1000; // Heavy penalty for recent partners
+          }
+        }
+
+        // Avoid previous week's exact team pairings (VERY heavy penalty)
+        if (previousWeekTeams) {
+          const teamKey1 = this.getTeamKey(player1.id, player2.id);
+          if (previousWeekTeams.has(teamKey1)) {
+            score -= 5000; // Extra heavy penalty for duplicate teams from previous week
+            console.log(
+              `Avoiding duplicate team from previous week: ${player1.name} + ${player2.name}`
+            );
           }
         }
 
@@ -543,6 +570,79 @@ export class DrawService {
   }
 
   /**
+   * Get team pairings from the previous week's event to avoid duplicates
+   * Returns a Set of team keys (sorted player IDs joined by '-')
+   */
+  private async getPreviousWeekTeams(currentEventId: string): Promise<Set<string>> {
+    const teamKeys = new Set<string>();
+
+    // Get the current event to find its date
+    const currentEvent = await this.prisma.event.findUnique({
+      where: { id: currentEventId },
+      select: { date: true },
+    });
+
+    if (!currentEvent) {
+      return teamKeys;
+    }
+
+    // Find the most recent previous event (before current event's date)
+    const previousEvent = await this.prisma.event.findFirst({
+      where: {
+        date: {
+          lt: currentEvent.date,
+        },
+        state: {
+          in: [EventState.PUBLISHED, EventState.DRAWN],
+        },
+      },
+      include: {
+        draws: {
+          include: {
+            assignments: true,
+          },
+        },
+      },
+      orderBy: {
+        date: 'desc',
+      },
+    });
+
+    if (!previousEvent || previousEvent.draws.length === 0) {
+      console.log('No previous event found or no draws available');
+      return teamKeys;
+    }
+
+    console.log(`Found previous event: ${previousEvent.id} on ${previousEvent.date}`);
+
+    // Extract all team pairings from the previous event
+    for (const draw of previousEvent.draws) {
+      for (const assignment of draw.assignments) {
+        // Add teamA pairing
+        if (assignment.teamA.length === 2) {
+          const teamKey = this.getTeamKey(assignment.teamA[0], assignment.teamA[1]);
+          teamKeys.add(teamKey);
+        }
+        // Add teamB pairing
+        if (assignment.teamB.length === 2) {
+          const teamKey = this.getTeamKey(assignment.teamB[0], assignment.teamB[1]);
+          teamKeys.add(teamKey);
+        }
+      }
+    }
+
+    console.log(`Found ${teamKeys.size} team pairings from previous week to avoid`);
+    return teamKeys;
+  }
+
+  /**
+   * Create a consistent key for a team pairing (order-independent)
+   */
+  private getTeamKey(player1Id: string, player2Id: string): string {
+    return [player1Id, player2Id].sort().join('-');
+  }
+
+  /**
    * Assign tier dynamically based on player position in sorted rating list
    * Top half of players get MASTERS, bottom half get EXPLORERS
    * This can be customized per event using tierRules if needed
@@ -651,6 +751,7 @@ export class DrawService {
             name: p.user.name,
             rating: p.rating,
             tier,
+            profilePhoto: p.user.profilePhoto,
           };
         }),
         teamB: a.teamB.map((id) => {
@@ -663,6 +764,7 @@ export class DrawService {
             name: p.user.name,
             rating: p.rating,
             tier,
+            profilePhoto: p.user.profilePhoto,
           };
         }),
       })),

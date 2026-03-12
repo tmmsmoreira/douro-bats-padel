@@ -13,18 +13,14 @@ import { ClockIcon } from 'lucide-animated';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useMediaQuery } from '@/hooks/use-media-query';
-import { useLocale } from 'next-intl';
 
-function formatTime(date: Date | undefined, locale?: string) {
+function formatTime(date: Date | undefined): string {
   if (!date) {
     return '';
   }
-
-  return date.toLocaleTimeString(locale || 'en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  });
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${hours}:${minutes}`;
 }
 
 function parseTimeString(timeString: string, baseDate?: Date): Date | undefined {
@@ -46,24 +42,27 @@ interface TimePickerProps {
   placeholder?: string;
   disabled?: boolean;
   id?: string;
+  showHint?: boolean;
+  hint?: string;
 }
 
 export function TimePicker({
   value,
   onChange,
-  placeholder = 'Select time',
+  placeholder = 'HH:MM',
   disabled,
   id,
+  showHint = true,
+  hint = 'Format: HH:MM (24h)',
 }: TimePickerProps) {
-  const locale = useLocale();
   const [open, setOpen] = React.useState(false);
-  const [inputValue, setInputValue] = React.useState(formatTime(value, locale));
+  const [inputValue, setInputValue] = React.useState(formatTime(value));
   const isMobile = useMediaQuery('(max-width: 768px)');
 
   // Sync with external value changes
   React.useEffect(() => {
-    setInputValue(formatTime(value, locale));
-  }, [value, locale]);
+    setInputValue(formatTime(value));
+  }, [value]);
 
   // Generate time options (every 15 minutes)
   const timeOptions = React.useMemo(() => {
@@ -87,22 +86,61 @@ export function TimePicker({
     setOpen(false);
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let newValue = e.target.value;
+
+    // Only allow digits and colons
+    newValue = newValue.replace(/[^\d:]/g, '');
+
+    // Limit to HH:MM format (5 characters)
+    if (newValue.length > 5) {
+      newValue = newValue.slice(0, 5);
+    }
+
+    // Auto-insert colon after HH
+    if (newValue.length === 2 && inputValue.length === 1) {
+      newValue += ':';
+    }
+
+    setInputValue(newValue);
+
+    // Try to parse the time if it matches the full format
+    const parsedTime = parseTimeString(newValue, value);
+    if (parsedTime) {
+      if (onChange) {
+        onChange(parsedTime);
+      }
+    } else if (newValue === '') {
+      if (onChange) {
+        onChange(undefined);
+      }
+    }
+  };
+
   const timeListComponent = (
-    <div className="max-h-[300px] overflow-y-auto p-1">
+    <div className="max-h-[300px] overflow-y-auto p-1" tabIndex={-1}>
       {timeOptions.map((timeOption) => {
         const isSelected = inputValue === timeOption;
         return (
           <button
             key={timeOption}
             type="button"
+            tabIndex={-1}
             className={cn(
-              'relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground',
-              isSelected && 'bg-accent text-accent-foreground font-medium'
+              'relative flex w-full cursor-default select-none items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground',
+              isSelected && 'bg-accent/50'
             )}
-            onClick={() => handleTimeSelect(timeOption)}
+            onMouseDown={(e) => {
+              e.preventDefault(); // Prevent focus
+              handleTimeSelect(timeOption);
+            }}
           >
             <span className="flex-1 font-mono">{timeOption}</span>
-            {isSelected && <Check size={16} />}
+            {isSelected && (
+              <span className="absolute right-2 flex size-3.5 items-center justify-center">
+                <Check className="size-4" />
+              </span>
+            )}
           </button>
         );
       })}
@@ -110,77 +148,72 @@ export function TimePicker({
   );
 
   return (
-    <InputGroup>
-      <InputGroupInput
-        id={id}
-        value={inputValue}
-        placeholder={placeholder}
-        disabled={disabled}
-        onChange={(e) => {
-          const newValue = e.target.value;
-          setInputValue(newValue);
-
-          // Only parse and trigger onChange if we have a complete time (HH:MM format)
-          if (newValue.match(/^\d{2}:\d{2}$/)) {
-            const parsedTime = parseTimeString(newValue, value);
-            if (parsedTime && onChange) {
-              onChange(parsedTime);
+    <div className="space-y-1.5">
+      <InputGroup>
+        <InputGroupInput
+          id={id}
+          type="time"
+          value={inputValue}
+          placeholder={placeholder}
+          disabled={disabled}
+          className="appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+          onChange={handleInputChange}
+          onKeyDown={(e) => {
+            if (e.key === 'ArrowDown') {
+              e.preventDefault();
+              setOpen(true);
             }
-          }
-        }}
-        onKeyDown={(e) => {
-          if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            setOpen(true);
-          }
-        }}
-      />
-      <InputGroupAddon align="inline-end">
-        {isMobile ? (
-          <>
-            <InputGroupButton
-              variant="ghost"
-              size="icon-xs"
-              aria-label="Select time"
-              disabled={disabled}
-              onClick={() => setOpen(true)}
-            >
-              <ClockIcon size={16} />
-              <span className="sr-only">Select time</span>
-            </InputGroupButton>
-            <Dialog open={open} onOpenChange={setOpen}>
-              <DialogContent className="sm:max-w-[425px]" aria-describedby={undefined}>
-                <DialogHeader>
-                  <DialogTitle>Select time</DialogTitle>
-                </DialogHeader>
-                {timeListComponent}
-              </DialogContent>
-            </Dialog>
-          </>
-        ) : (
-          <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
+          }}
+          maxLength={5}
+        />
+        <InputGroupAddon align="inline-end">
+          {isMobile ? (
+            <>
               <InputGroupButton
                 variant="ghost"
                 size="icon-xs"
                 aria-label="Select time"
                 disabled={disabled}
+                onClick={() => setOpen(true)}
               >
                 <ClockIcon size={16} />
                 <span className="sr-only">Select time</span>
               </InputGroupButton>
-            </PopoverTrigger>
-            <PopoverContent
-              className="w-auto overflow-hidden p-0"
-              align="end"
-              alignOffset={-8}
-              sideOffset={10}
-            >
-              {timeListComponent}
-            </PopoverContent>
-          </Popover>
-        )}
-      </InputGroupAddon>
-    </InputGroup>
+              <Dialog open={open} onOpenChange={setOpen}>
+                <DialogContent className="sm:max-w-[425px]" aria-describedby={undefined}>
+                  <DialogHeader>
+                    <DialogTitle>Select time</DialogTitle>
+                  </DialogHeader>
+                  {timeListComponent}
+                </DialogContent>
+              </Dialog>
+            </>
+          ) : (
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <InputGroupButton
+                  variant="ghost"
+                  size="icon-xs"
+                  aria-label="Select time"
+                  disabled={disabled}
+                >
+                  <ClockIcon size={16} />
+                  <span className="sr-only">Select time</span>
+                </InputGroupButton>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-auto overflow-hidden p-0"
+                align="end"
+                alignOffset={-8}
+                sideOffset={10}
+              >
+                {timeListComponent}
+              </PopoverContent>
+            </Popover>
+          )}
+        </InputGroupAddon>
+      </InputGroup>
+      {showHint && <p className="text-xs text-muted-foreground">{hint}</p>}
+    </div>
   );
 }

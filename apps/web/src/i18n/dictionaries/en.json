@@ -461,7 +461,9 @@
     "accountCreated": "Account created",
     "searchPlayers": "Search players by name or email...",
     "noPlayersMatchSearch": "No players match your search.",
-    "backToPlayers": "Back to Players"
+    "backToPlayers": "Back to Players",
+    "playerProfile": "Player Profile",
+    "playerProfileDescription": "View detailed player statistics, performance history, and account information"
   },
   "playerActions": {
     "actions": "Actions",
@@ -638,7 +640,8 @@
     "description": "Update event information",
     "loading": "Loading event data...",
     "eventNotFound": "Event not found",
-    "cannotEditPastEvents": "Cannot edit past events. Redirecting..."
+    "cannotEditPastEvents": "Cannot edit past events. Redirecting...",
+    "backToEvent": "Back to Event"
   },
   "clearSessionPage": {
     "title": "Clearing Session...",
@@ -710,7 +713,8 @@
     "drawGenerationError": "Failed to generate draw",
     "notAuthenticated": "Not authenticated",
     "drawGeneratedSuccess": "Draw generated successfully!",
-    "minimumPlayersRequired": "At least 4 players are required to generate a draw"
+    "minimumPlayersRequired": "Minimum Players Required",
+    "minimumPlayersDescription": "You currently have {confirmedCount} confirmed player(s). Padel requires exactly 4 players per match, so you need at least 4 confirmed players to generate a draw."
   },
   "drawView": {
     "loadingDraw": "Loading draw...",
@@ -719,8 +723,8 @@
     "error": "Error",
     "gameDraw": "Game Draw",
     "teams": "Duplas",
-    "mastersTier": "Padeleiras - Masters",
-    "explorersTier": "Padeleiras - Explorers",
+    "mastersTier": "Masters",
+    "explorersTier": "Explorers",
     "note": "Nota: 25 minutos cada jogo, 2 minutos para troca",
     "court": "Campo",
     "teamA": "Dupla A",

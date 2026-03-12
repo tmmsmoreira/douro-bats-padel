@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations, useLocale } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,8 +9,7 @@ import { X } from 'lucide-react';
 import { CalendarDaysIcon, CalendarDaysIconHandle } from 'lucide-animated';
 import Link from 'next/link';
 import { useState, useMemo } from 'react';
-import { toast } from 'sonner';
-import { useAdminEvents, useAuthFetch } from '@/hooks';
+import { useAdminEvents } from '@/hooks';
 import {
   EventCard,
   EventStats,
@@ -29,8 +27,6 @@ type EventState = 'ALL' | EventStatus;
 const EVENTS_PER_PAGE = 10;
 
 export function EventsList() {
-  const queryClient = useQueryClient();
-  const authFetch = useAuthFetch();
   const t = useTranslations('eventsList');
   const locale = useLocale();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
@@ -39,19 +35,6 @@ export function EventsList() {
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const { data: events, isLoading } = useAdminEvents();
-
-  const publishDrawMutation = useMutation({
-    mutationFn: async (eventId: string) => {
-      return authFetch.post(`/draws/events/${eventId}/publish`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-events'] });
-      toast.success('Draw published successfully! Players have been notified.');
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to publish draw: ${error.message}`);
-    },
-  });
 
   // Filter events based on selected date and status
   const filteredEvents = useMemo(() => {
@@ -108,7 +91,6 @@ export function EventsList() {
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
           totalPages={totalPages}
-          publishDrawMutation={publishDrawMutation}
           showDatePicker={showDatePicker}
           setShowDatePicker={setShowDatePicker}
           locale={locale}
@@ -130,7 +112,6 @@ function EventsListContent({
   currentPage,
   setCurrentPage,
   totalPages,
-  publishDrawMutation,
   showDatePicker,
   setShowDatePicker,
   locale,
@@ -160,7 +141,7 @@ function EventsListContent({
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="-mx-4"
+        className="-mx-4 sm:mx-0"
       >
         <ScrollableFadeContainer className="px-4 py-1 sm:mx-0 sm:px-0" fadeWidth={70}>
           <div className="flex items-center gap-2 min-w-max">
@@ -181,16 +162,15 @@ function EventsListContent({
                       })
                     : t('selectDate')}
                   {selectedDate && (
-                    <button
-                      type="button"
-                      className="ml-1 -mr-1 hover:opacity-70 transition-opacity"
+                    <span
+                      className="ml-1 -mr-1 hover:opacity-70 transition-opacity cursor-pointer"
                       onClick={(e) => {
                         e.stopPropagation();
                         setSelectedDate(undefined);
                       }}
                     >
                       <X className="h-3 w-3" />
-                    </button>
+                    </span>
                   )}
                 </Button>
                 <Dialog open={showDatePicker} onOpenChange={setShowDatePicker}>
@@ -346,10 +326,6 @@ function EventsListContent({
             className="space-y-6"
           >
             {paginatedEvents.map((event: any) => {
-              // Check if event has passed
-              const eventEndTime = new Date(event.endsAt);
-              const hasEventPassed = eventEndTime < new Date();
-
               return (
                 <motion.div
                   key={event.id}
@@ -357,82 +333,22 @@ function EventsListContent({
                     hidden: { opacity: 0, y: 20 },
                     show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
                   }}
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
                 >
-                  <EventCard
-                    event={event}
-                    animate={false}
-                    headerActions={<StatusBadge status={event.state as EventStatus} />}
-                  >
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <Link href={`/admin/events/${event.id}`} className="block">
+                    <EventCard
+                      event={event}
+                      animate={false}
+                      headerActions={<StatusBadge status={event.state as EventStatus} />}
+                    >
                       <EventStats
                         event={event}
                         confirmedLabel={t('confirmed')}
                         waitlistedLabel={t('waitlisted')}
                       />
-                      <div className="flex gap-3 w-full sm:w-auto">
-                        <motion.div
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          className="flex-1 sm:flex-none"
-                        >
-                          <Button
-                            variant="outline"
-                            size="default"
-                            className="rounded-lg w-full"
-                            asChild
-                          >
-                            <Link href={`/admin/events/${event.id}`}>{t('manage')}</Link>
-                          </Button>
-                        </motion.div>
-                        {event.state === 'FROZEN' && !hasEventPassed && (
-                          <motion.div
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            className="flex-1 sm:flex-none"
-                          >
-                            <Button size="default" className="rounded-lg w-full" asChild>
-                              <Link href={`/admin/events/${event.id}/draw`}>
-                                {t('generateDraw')}
-                              </Link>
-                            </Button>
-                          </motion.div>
-                        )}
-                        {event.state === 'DRAWN' && !hasEventPassed && (
-                          <motion.div
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            className="flex-1 sm:flex-none"
-                          >
-                            <Button
-                              size="default"
-                              className="rounded-lg w-full"
-                              onClick={() => publishDrawMutation.mutate(event.id)}
-                              disabled={publishDrawMutation.isPending}
-                            >
-                              {publishDrawMutation.isPending ? 'Publishing...' : t('publish')}
-                            </Button>
-                          </motion.div>
-                        )}
-                        {event.state === 'PUBLISHED' && hasEventPassed && (
-                          <motion.div
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            className="flex-1 sm:flex-none"
-                          >
-                            <Button
-                              size="default"
-                              className="bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg shadow-md w-full"
-                              asChild
-                            >
-                              <Link href={`/admin/events/${event.id}/results`}>
-                                {t('enterResults')}
-                              </Link>
-                            </Button>
-                          </motion.div>
-                        )}
-                      </div>
-                    </div>
-                  </EventCard>
+                    </EventCard>
+                  </Link>
                 </motion.div>
               );
             })}

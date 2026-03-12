@@ -354,9 +354,9 @@
     "venue": "Local",
     "loadingVenues": "A carregar locais...",
     "selectVenue": "Selecionar um local",
-    "rsvpOpensAt": "Confirmações Abrem Em",
+    "rsvpOpensAt": "Abertura das Incrições",
     "rsvpOpensAtPlaceholder": "Selecionar data e hora de abertura das confirmações",
-    "rsvpClosesAt": "Confirmações Fecham Em",
+    "rsvpClosesAt": "Fecho das Inscrições",
     "rsvpClosesAtPlaceholder": "Selecionar data e hora de fecho das confirmações",
     "tierAssignmentRules": "Regras de Atribuição de Níveis",
     "tierAssignmentDescription": "Configure como os jogadores são divididos nos níveis MASTERS e EXPLORERS com base nas suas classificações",
@@ -434,7 +434,9 @@
     "accountCreated": "Conta criada",
     "searchPlayers": "Pesquisar jogadores por nome ou email...",
     "noPlayersMatchSearch": "Nenhum jogador corresponde à sua pesquisa.",
-    "backToPlayers": "Voltar aos Jogadores"
+    "backToPlayers": "Voltar aos Jogadores",
+    "playerProfile": "Perfil do Jogador",
+    "playerProfileDescription": "Ver estatísticas detalhadas do jogador, histórico de desempenho e informações da conta"
   },
   "playerActions": {
     "actions": "Ações",
@@ -611,7 +613,8 @@
     "description": "Atualizar informação do evento",
     "loading": "A carregar dados do evento...",
     "eventNotFound": "Evento não encontrado",
-    "cannotEditPastEvents": "Não é possível editar eventos passados. A redirecionar..."
+    "cannotEditPastEvents": "Não é possível editar eventos passados. A redirecionar...",
+    "backToEvent": "Voltar ao Evento"
   },
   "clearSessionPage": {
     "title": "A Limpar Sessão...",
@@ -683,7 +686,8 @@
     "drawGenerationError": "Falha ao gerar sorteio",
     "notAuthenticated": "Não autenticado",
     "drawGeneratedSuccess": "Sorteio gerado com sucesso!",
-    "minimumPlayersRequired": "São necessários pelo menos 4 jogadores para gerar um sorteio"
+    "minimumPlayersRequired": "Número Mínimo de Jogadores Necessário",
+    "minimumPlayersDescription": "Atualmente tem {confirmedCount} jogador(es) confirmado(s). O padel requer exatamente 4 jogadores por jogo, portanto precisa de pelo menos 4 jogadores confirmados para gerar um sorteio."
   },
   "drawView": {
     "loadingDraw": "A carregar sorteio...",
@@ -692,8 +696,8 @@
     "error": "Erro",
     "gameDraw": "Sorteio do Jogo",
     "teams": "Duplas",
-    "mastersTier": "Padeleiras - Masters",
-    "explorersTier": "Padeleiras - Explorers",
+    "mastersTier": "Masters",
+    "explorersTier": "Explorers",
     "note": "Nota: 25 minutos cada jogo, 2 minutos para troca",
     "court": "Campo",
     "teamA": "Dupla A",

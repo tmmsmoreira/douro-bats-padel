@@ -383,15 +383,26 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
     if (isEditMode) {
       // Check if any field has changed
       if (initialData) {
+        // Convert initialData dates to Date objects for comparison
+        const initialDate = initialData.date ? new Date(initialData.date) : null;
+        const initialStartsAt = initialData.startsAt ? new Date(initialData.startsAt) : null;
+        const initialEndsAt = initialData.endsAt ? new Date(initialData.endsAt) : null;
+        const initialRsvpOpensAt = initialData.rsvpOpensAt
+          ? new Date(initialData.rsvpOpensAt)
+          : null;
+        const initialRsvpClosesAt = initialData.rsvpClosesAt
+          ? new Date(initialData.rsvpClosesAt)
+          : null;
+
         const hasChanges =
           formData.title !== initialData.title ||
-          formData.date?.getTime() !== initialData.date?.getTime() ||
-          startsAt.getTime() !== initialData.startsAt?.getTime() ||
-          endsAt.getTime() !== initialData.endsAt?.getTime() ||
+          formData.date?.getTime() !== initialDate?.getTime() ||
+          startsAt.getTime() !== initialStartsAt?.getTime() ||
+          endsAt.getTime() !== initialEndsAt?.getTime() ||
           formData.venueId !== initialData.venueId ||
           parseInt(formData.capacity) !== initialData.capacity ||
-          formData.rsvpOpensAt?.getTime() !== initialData.rsvpOpensAt?.getTime() ||
-          formData.rsvpClosesAt?.getTime() !== initialData.rsvpClosesAt?.getTime() ||
+          formData.rsvpOpensAt?.getTime() !== initialRsvpOpensAt?.getTime() ||
+          formData.rsvpClosesAt?.getTime() !== initialRsvpClosesAt?.getTime() ||
           JSON.stringify(allCourtIds.sort()) !== JSON.stringify(initialData.courtIds?.sort()) ||
           JSON.stringify(tierRules) !== JSON.stringify(initialData.tierRules);
 
@@ -576,7 +587,7 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
 
               <div className="space-y-4 pt-4 border-t">
                 <div className="space-y-2">
-                  <Label className="text-base">{t('timeSlotsAndCourts')}</Label>
+                  <Label>{t('timeSlotsAndCourts')}</Label>
                   <p className="text-sm text-muted-foreground">{t('timeSlotsDescription')}</p>
                 </div>
 
@@ -715,22 +726,34 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
             )}
           </CardContent>
           <CardFooter className="flex justify-end gap-2">
-            <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
-              {isEditMode
-                ? updateMutation.isPending
-                  ? t('updating')
-                  : t('updateEvent')
-                : createMutation.isPending
-                  ? t('creating')
-                  : t('createEvent')}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => router.push(isEditMode ? `/admin/events/${eventId}` : '/admin')}
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="flex-1 sm:flex-none"
             >
-              {t('cancel')}
-            </Button>
+              <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
+                {isEditMode
+                  ? updateMutation.isPending
+                    ? t('updating')
+                    : t('updateEvent')
+                  : createMutation.isPending
+                    ? t('creating')
+                    : t('createEvent')}
+              </Button>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="flex-1 sm:flex-none"
+            >
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.push(isEditMode ? `/admin/events/${eventId}` : '/admin')}
+              >
+                {t('cancel')}
+              </Button>
+            </motion.div>
           </CardFooter>
         </form>
       </Card>

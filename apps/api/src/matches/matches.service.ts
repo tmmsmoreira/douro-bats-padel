@@ -160,10 +160,12 @@ export class MatchesService {
         teamA: assignment?.teamA.map((id) => ({
           id,
           name: playerMap.get(id)?.user.name,
+          profilePhoto: playerMap.get(id)?.user.profilePhoto,
         })),
         teamB: assignment?.teamB.map((id) => ({
           id,
           name: playerMap.get(id)?.user.name,
+          profilePhoto: playerMap.get(id)?.user.profilePhoto,
         })),
       };
     });

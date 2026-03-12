@@ -6,6 +6,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { PlayerNav } from './player-nav';
 import { Footer } from '@/components/public/footer';
 import { ArrowLeftIcon, ArrowLeftIconHandle } from 'lucide-animated';
@@ -23,6 +24,7 @@ interface Player {
   id: string;
   name: string;
   rating: number;
+  profilePhoto?: string | null;
 }
 
 interface Court {
@@ -293,12 +295,28 @@ function ResultsContent({
                       {match.tier && <Badge variant="secondary">{match.tier}</Badge>}
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                      <div className={`space-y-1 ${teamAWon ? 'font-bold' : ''}`}>
+                      <div className={`space-y-2 ${teamAWon ? 'font-bold' : ''}`}>
                         <p className="text-sm font-medium">{t('teamA')}</p>
                         {match.teamA?.map((player) => (
-                          <p key={player.id} className="text-sm">
-                            {player.name}
-                          </p>
+                          <div key={player.id} className="flex items-center gap-2 text-sm">
+                            <Avatar className="h-6 w-6">
+                              <AvatarImage
+                                src={player.profilePhoto || undefined}
+                                alt={player.name || 'Player'}
+                              />
+                              <AvatarFallback className="gradient-primary text-xs">
+                                {player.name
+                                  ? player.name
+                                      .split(' ')
+                                      .map((n) => n[0])
+                                      .join('')
+                                      .toUpperCase()
+                                      .slice(0, 2)
+                                  : '?'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span>{player.name}</span>
+                          </div>
                         ))}
                       </div>
                       <div className="text-center">
@@ -309,12 +327,28 @@ function ResultsContent({
                         </div>
                         {tie && <p className="text-xs text-muted-foreground mt-1">{t('tie')}</p>}
                       </div>
-                      <div className={`space-y-1 ${teamBWon ? 'font-bold' : ''}`}>
+                      <div className={`space-y-2 ${teamBWon ? 'font-bold' : ''}`}>
                         <p className="text-sm font-medium">{t('teamB')}</p>
                         {match.teamB?.map((player) => (
-                          <p key={player.id} className="text-sm">
-                            {player.name}
-                          </p>
+                          <div key={player.id} className="flex items-center gap-2 text-sm">
+                            <Avatar className="h-6 w-6">
+                              <AvatarImage
+                                src={player.profilePhoto || undefined}
+                                alt={player.name || 'Player'}
+                              />
+                              <AvatarFallback className="gradient-primary text-xs">
+                                {player.name
+                                  ? player.name
+                                      .split(' ')
+                                      .map((n) => n[0])
+                                      .join('')
+                                      .toUpperCase()
+                                      .slice(0, 2)
+                                  : '?'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span>{player.name}</span>
+                          </div>
                         ))}
                       </div>
                     </div>

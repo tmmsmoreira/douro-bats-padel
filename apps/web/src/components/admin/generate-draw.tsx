@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
@@ -11,10 +11,9 @@ import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { AlertTriangle } from 'lucide-react';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+import { useAuthFetch } from '@/hooks/use-api';
 
 interface Court {
   id: string;
@@ -32,6 +31,34 @@ interface Player {
   tier?: string;
 }
 
+interface TierTimeSlot {
+  startsAt: string;
+  endsAt: string;
+  courtIds: string[];
+}
+
+interface TierRules {
+  masterCount?: number;
+  masterPercentage?: number;
+  mastersTimeSlot?: TierTimeSlot;
+  explorersTimeSlot?: TierTimeSlot;
+}
+
+interface EventDetails {
+  id: string;
+  title: string | null;
+  date: string;
+  startsAt: string;
+  endsAt: string;
+  capacity: number;
+  state: 'DRAFT' | 'OPEN' | 'FROZEN' | 'DRAWN' | 'PUBLISHED';
+  tierRules?: TierRules;
+  confirmedCount: number;
+  waitlistCount: number;
+  confirmedPlayers?: Player[];
+  eventCourts?: EventCourt[];
+}
+
 interface GenerateDrawProps {
   eventId: string;
 }
@@ -40,8 +67,8 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
   const { data: session } = useSession();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const locale = useLocale();
   const t = useTranslations('generateDraw');
+  const authFetch = useAuthFetch();
 
   const [constraints, setConstraints] = useState({
     avoidRecentSessions: 4,
@@ -54,43 +81,29 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
   const [selectedExplorersCourts, setSelectedExplorersCourts] = useState<string[]>([]);
 
   // Fetch event details
-  const { data: event, isLoading: eventLoading } = useQuery({
-    queryKey: ['event', eventId],
+  const { data: event, isLoading: eventLoading } = useQuery<EventDetails>({
+    queryKey: ['event', eventId, session?.accessToken],
     queryFn: async () => {
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-      };
-
-      if (session?.accessToken) {
-        headers.Authorization = `Bearer ${session.accessToken}`;
+      try {
+        return await authFetch.get(`/events/${eventId}?includeUnpublished=true`);
+      } catch (error) {
+        throw new Error(`API Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
-
-      const res = await fetch(`${API_URL}/events/${eventId}?includeUnpublished=true`, { headers });
-
-      if (!res.ok) {
-        throw new Error(`API Error: ${res.statusText}`);
-      }
-
-      return res.json();
     },
+    enabled: !!session?.accessToken,
   });
 
   // Check if draw already exists
-  const { data: existingDraw } = useQuery({
-    queryKey: ['draw', eventId],
+  const { data: existingDraw } = useQuery<{ id: string } | null>({
+    queryKey: ['draw', eventId, session?.accessToken],
     queryFn: async () => {
       try {
-        const headers: HeadersInit = {};
-        if (session?.accessToken) {
-          headers.Authorization = `Bearer ${session.accessToken}`;
-        }
-        const res = await fetch(`${API_URL}/draws/events/${eventId}`, { headers });
-        if (!res.ok) return null;
-        return res.json();
+        return await authFetch.get(`/draws/events/${eventId}`);
       } catch {
         return null;
       }
     },
+    enabled: !!session?.accessToken,
   });
 
   // Get available courts from tierRules (must be before useEffect)
@@ -125,33 +138,19 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
         throw new Error(t('notAuthenticated'));
       }
 
-      const res = await fetch(`${API_URL}/draws/events/${eventId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.accessToken}`,
+      return await authFetch.post(`/draws/events/${eventId}`, {
+        constraints,
+        selectedCourts: {
+          masters: selectedMastersCourts,
+          explorers: selectedExplorersCourts,
         },
-        body: JSON.stringify({
-          constraints,
-          selectedCourts: {
-            masters: selectedMastersCourts,
-            explorers: selectedExplorersCourts,
-          },
-        }),
       });
-
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || t('drawGenerationError'));
-      }
-
-      return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['draw', eventId] });
       queryClient.invalidateQueries({ queryKey: ['event', eventId] });
       toast.success(t('drawGeneratedSuccess'));
-      router.push(`/${locale}/admin/events/${eventId}/draw/view`);
+      router.push(`/admin/events/${eventId}/draw/view`);
     },
     onError: (error: Error) => {
       toast.error(`${t('drawGenerationError')}: ${error.message}`);
@@ -171,7 +170,7 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
   const hasEventPassed = eventEndTime < new Date();
 
   if (hasEventPassed) {
-    router.push(`/${locale}/admin/events/${eventId}`);
+    router.push(`/admin/events/${eventId}`);
     return <div className="text-center py-8">{t('redirecting')}</div>;
   }
 
@@ -234,11 +233,11 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
               {event.state === 'PUBLISHED' && <AlertTriangle className="h-5 w-5" />}
               {t('drawAlreadyExists')}
             </CardTitle>
-            <CardDescription
+            <div
               className={
                 event.state === 'PUBLISHED'
-                  ? 'text-red-700 dark:text-red-300'
-                  : 'text-yellow-700 dark:text-yellow-300'
+                  ? 'text-sm text-red-700 dark:text-red-300'
+                  : 'text-sm text-yellow-700 dark:text-yellow-300'
               }
             >
               {event.state === 'PUBLISHED' ? (
@@ -254,12 +253,12 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
                   }}
                 />
               )}
-            </CardDescription>
+            </div>
           </CardHeader>
           <CardContent>
             <Button
               variant="outline"
-              onClick={() => router.push(`/${locale}/admin/events/${eventId}/draw/view`)}
+              onClick={() => router.push(`/admin/events/${eventId}/draw/view`)}
             >
               {t('viewManageDraw')}
             </Button>
@@ -267,14 +266,29 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
         </Card>
       )}
 
+      {/* Minimum Players Warning (less than 4 players) */}
+      {confirmedCount < 4 && (
+        <Card className="glass-card border-red-500 bg-red-50 dark:bg-red-950/20">
+          <CardHeader>
+            <CardTitle className="text-red-800 dark:text-red-200 flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5" />
+              {t('minimumPlayersRequired')}
+            </CardTitle>
+            <CardDescription className="text-red-700 dark:text-red-300">
+              {t('minimumPlayersDescription', { confirmedCount })}
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      )}
+
       {/* Insufficient Players Warning (not enough to fill all courts) */}
-      {hasInsufficientPlayers && (
+      {hasInsufficientPlayers && confirmedCount >= 4 && (
         <Card className="glass-card border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20">
           <CardHeader>
             <CardTitle className="text-yellow-800 dark:text-yellow-200">
               ℹ️ {t('insufficientPlayers')}
             </CardTitle>
-            <CardDescription className="text-yellow-700 dark:text-yellow-300">
+            <div className="text-sm text-yellow-700 dark:text-yellow-300">
               <div
                 dangerouslySetInnerHTML={{
                   __html: t('insufficientPlayersDescription', {
@@ -308,7 +322,7 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
               />
               <br />
               <strong>{t('considerReducingCourts')}</strong>
-            </CardDescription>
+            </div>
           </CardHeader>
         </Card>
       )}
@@ -321,7 +335,7 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
               <AlertTriangle className="h-5 w-5" />
               {t('excessPlayersDetected')}
             </CardTitle>
-            <CardDescription className="text-orange-700 dark:text-orange-300">
+            <div className="text-sm text-orange-700 dark:text-orange-300">
               <div
                 dangerouslySetInnerHTML={{
                   __html: t('excessPlayersDescription', {
@@ -343,7 +357,7 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
               />
               <br />
               {t('allCourtsUsed')}
-            </CardDescription>
+            </div>
           </CardHeader>
         </Card>
       )}
@@ -355,7 +369,7 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
             <CardTitle className="text-blue-800 dark:text-blue-200">
               💡 {t('courtOptimization')}
             </CardTitle>
-            <CardDescription className="text-blue-700 dark:text-blue-300">
+            <div className="text-sm text-blue-700 dark:text-blue-300">
               <div
                 dangerouslySetInnerHTML={{
                   __html: t('courtOptimizationDescription', {
@@ -375,7 +389,7 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
               />
               <br />
               <strong>{t('considerReducingCourts')}</strong>
-            </CardDescription>
+            </div>
           </CardHeader>
         </Card>
       )}

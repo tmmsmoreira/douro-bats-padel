@@ -7,16 +7,15 @@ import { useRouter } from '@/i18n/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Mail, CheckCircle, XCircle } from 'lucide-react';
-import { ArrowLeftIcon, ArrowLeftIconHandle, DeleteIcon, DeleteIconHandle } from 'lucide-animated';
+import { Mail, CheckCircle, XCircle, TrendingUp } from 'lucide-react';
+import { DeleteIcon, DeleteIconHandle } from 'lucide-animated';
 import { Button } from '@/components/ui/button';
-import { Link } from '@/i18n/navigation';
 import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { ConfirmationDialog } from '../shared/confirmation-dialog';
-import { motion, AnimatePresence } from 'motion/react';
-import { LoadingState } from '@/components/shared/loading-state';
-import { useMinimumLoading } from '@/hooks/use-minimum-loading';
+import { motion } from 'motion/react';
+import { DataStateWrapper } from '@/components/shared/data-state-wrapper';
+import { PageHeader } from '@/components/shared/page-header';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -71,7 +70,6 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  const arrowLeftIconRef = useRef<ArrowLeftIconHandle>(null);
   const deleteIconRef = useRef<DeleteIconHandle>(null);
 
   // Check if user is admin or editor
@@ -128,44 +126,46 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
     setShowDeleteDialog(true);
   };
 
-  // Use minimum loading to prevent jarring flashes
-  const showLoading = useMinimumLoading(isLoading, !!player);
+  // Custom empty component with PageHeader
+  const emptyComponent = (
+    <motion.div
+      key="not-found"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-6"
+    >
+      <PageHeader
+        title={tList('playerProfile')}
+        description={tList('playerProfileDescription')}
+        showBackButton
+        backButtonHref="/admin/players"
+        backButtonLabel={tList('backToPlayers')}
+      />
+      <Card>
+        <CardContent className="py-8 text-center text-muted-foreground">
+          {t('profileNotFound')}
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
 
   return (
-    <AnimatePresence mode="wait">
-      {showLoading ? (
-        <LoadingState message={t('loadingProfile')} />
-      ) : error || !player ? (
-        <motion.div
-          key="not-found"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <div className="space-y-6">
-            <Link
-              href="/admin/players"
-              onMouseEnter={() => arrowLeftIconRef.current?.startAnimation()}
-            >
-              <Button variant="ghost" size="sm">
-                <ArrowLeftIcon ref={arrowLeftIconRef} size={16} />
-                {tList('backToPlayers')}
-              </Button>
-            </Link>
-            <Card>
-              <CardContent className="py-8 text-center text-muted-foreground">
-                {t('profileNotFound')}
-              </CardContent>
-            </Card>
-          </div>
-        </motion.div>
-      ) : (
+    <DataStateWrapper
+      isLoading={isLoading}
+      data={player}
+      loadingMessage={t('loadingProfile')}
+      emptyMessage={t('profileNotFound')}
+      emptyComponent={emptyComponent}
+      error={error as Error}
+      errorMessage={`${t('errorLoadingProfile')}: ${(error as Error)?.message || ''}`}
+    >
+      {(player) => (
         <PublicPlayerProfileContent
           player={player}
           isAdminOrEditor={isAdminOrEditor}
           handleDeleteUser={handleDeleteUser}
-          arrowLeftIconRef={arrowLeftIconRef}
           deleteIconRef={deleteIconRef}
           isDeleting={isDeleting}
           showDeleteDialog={showDeleteDialog}
@@ -178,7 +178,7 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
           locale={locale}
         />
       )}
-    </AnimatePresence>
+    </DataStateWrapper>
   );
 }
 
@@ -187,7 +187,6 @@ function PublicPlayerProfileContent({
   player,
   isAdminOrEditor,
   handleDeleteUser,
-  arrowLeftIconRef,
   deleteIconRef,
   isDeleting,
   showDeleteDialog,
@@ -202,7 +201,6 @@ function PublicPlayerProfileContent({
   player: PlayerData;
   isAdminOrEditor: boolean;
   handleDeleteUser: () => void;
-  arrowLeftIconRef: React.RefObject<ArrowLeftIconHandle | null>;
   deleteIconRef: React.RefObject<DeleteIconHandle | null>;
   isDeleting: boolean;
   showDeleteDialog: boolean;
@@ -223,16 +221,6 @@ function PublicPlayerProfileContent({
       transition={{ duration: 0.3 }}
       className="space-y-6"
     >
-      {/* Back Button */}
-      <div>
-        <Link href="/admin/players" onMouseEnter={() => arrowLeftIconRef.current?.startAnimation()}>
-          <Button variant="ghost" size="sm">
-            <ArrowLeftIcon ref={arrowLeftIconRef} size={16} />
-            {tList('backToPlayers')}
-          </Button>
-        </Link>
-      </div>
-
       {/* Player Header */}
       <Card className="glass-card">
         <CardHeader>
@@ -262,8 +250,13 @@ function PublicPlayerProfileContent({
             </div>
             {player.player && (
               <div className="flex flex-col items-center sm:items-end gap-1 bg-primary/10 px-6 py-4 rounded-lg">
-                <div className="text-4xl font-bold text-primary">{player.player.rating}</div>
-                <div className="text-sm text-muted-foreground">{t('currentRating')}</div>
+                <div className="flex items-center gap-1.5 text-3xl font-bold text-primary font-heading">
+                  <TrendingUp size={20} className="text-primary" />
+                  <span className="gradient-text">{player.player.rating}</span>
+                </div>
+                <div className="text-xs text-muted-foreground font-medium">
+                  {t('currentRating')}
+                </div>
               </div>
             )}
           </div>
@@ -283,14 +276,17 @@ function PublicPlayerProfileContent({
                   <p className="text-sm text-muted-foreground">{tList('status')}</p>
                   <Badge
                     variant={player.player.status === 'ACTIVE' ? 'default' : 'secondary'}
-                    className="mt-1"
+                    className="mt-1 uppercase text-xs"
                   >
                     {player.player.status}
                   </Badge>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">{t('currentRating')}</p>
-                  <p className="text-2xl font-bold text-primary mt-1">{player.player.rating}</p>
+                  <div className="flex items-center gap-1.5 text-2xl font-bold text-primary font-heading mt-1">
+                    <TrendingUp size={16} className="text-primary" />
+                    <span className="gradient-text">{player.player.rating}</span>
+                  </div>
                 </div>
               </div>
               <div className="pt-4 border-t">

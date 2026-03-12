@@ -10,12 +10,13 @@ import { Button } from '@/components/ui/button';
 import { DatePicker } from '@/components/shared/date-picker';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Edit2, X, Check } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { toast } from 'sonner';
-import { motion, AnimatePresence } from 'motion/react';
-import { LoadingState } from '@/components/shared/loading-state';
-import { useMinimumLoading } from '@/hooks/use-minimum-loading';
+import { motion } from 'motion/react';
+import { DataStateWrapper } from '@/components/shared/data-state-wrapper';
+import { SquarePenIcon, SquarePenIconHandle } from 'lucide-animated';
+import { PageHeader } from '@/components/shared/page-header';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -258,38 +259,16 @@ export function PlayerProfile() {
     return email?.[0]?.toUpperCase() || 'U';
   };
 
-  // Use minimum loading to prevent jarring flashes
-  const showLoading = useMinimumLoading(status === 'loading' || isLoading, !!profile);
-
   return (
-    <AnimatePresence mode="wait">
-      {showLoading ? (
-        <LoadingState message={t('loadingProfile')} />
-      ) : error ? (
-        <motion.div
-          key="error"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className="text-center py-8"
-        >
-          <p className="text-destructive">
-            {t('errorLoadingProfile')}: {(error as Error).message}
-          </p>
-        </motion.div>
-      ) : !profile ? (
-        <motion.div
-          key="not-found"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className="text-center py-8"
-        >
-          {t('profileNotFound')}
-        </motion.div>
-      ) : (
+    <DataStateWrapper
+      isLoading={status === 'loading' || isLoading}
+      data={profile}
+      loadingMessage={t('loadingProfile')}
+      emptyMessage={t('profileNotFound')}
+      error={error as Error}
+      errorMessage={`${t('errorLoadingProfile')}: ${(error as Error)?.message || ''}`}
+    >
+      {(profile) => (
         <ProfileContent
           profile={profile}
           isEditingProfile={isEditingProfile}
@@ -311,7 +290,7 @@ export function PlayerProfile() {
           locale={locale}
         />
       )}
-    </AnimatePresence>
+    </DataStateWrapper>
   );
 }
 
@@ -336,6 +315,8 @@ function ProfileContent({
   t,
   locale,
 }: any) {
+  const squarePenIconRef = useRef<SquarePenIconHandle>(null);
+
   return (
     <motion.div
       key="content"
@@ -345,34 +326,59 @@ function ProfileContent({
       transition={{ duration: 0.3 }}
       className="space-y-6"
     >
-      <div>
-        <h1 className="text-3xl font-bold">{t('title')}</h1>
-        <p className="text-muted-foreground">{t('description')}</p>
-      </div>
+      <PageHeader title={t('title')} description={t('description')} />
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+        className="grid gap-6 md:grid-cols-2"
+      >
         <Card className="glass-card">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>{t('playerInformation')}</CardTitle>
             {!isEditingProfile ? (
-              <Button onClick={handleEditProfile} variant="outline" size="sm">
-                <Edit2 className="h-4 w-4" />
-                {t('edit')}
-              </Button>
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="flex-1 sm:flex-none"
+              >
+                <Button
+                  onClick={handleEditProfile}
+                  variant="outline"
+                  size="sm"
+                  onMouseEnter={() => squarePenIconRef.current?.startAnimation()}
+                  onMouseLeave={() => squarePenIconRef.current?.stopAnimation()}
+                >
+                  <SquarePenIcon ref={squarePenIconRef} size={16} className="h-4 w-4" />
+                  {t('edit')}
+                </Button>
+              </motion.div>
             ) : (
               <div className="flex gap-2">
-                <Button
-                  onClick={handleSaveProfile}
-                  disabled={updateProfileMutation.isPending}
-                  size="sm"
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="flex-1 sm:flex-none"
                 >
-                  <Check className="h-4 w-4" />
-                  {updateProfileMutation.isPending ? t('saving') : t('save')}
-                </Button>
-                <Button onClick={handleCancelProfileEdit} variant="outline" size="sm">
-                  <X className="h-4 w-4" />
-                  {t('cancel')}
-                </Button>
+                  <Button
+                    onClick={handleSaveProfile}
+                    disabled={updateProfileMutation.isPending}
+                    size="sm"
+                  >
+                    {updateProfileMutation.isPending ? t('saving') : t('save')}
+                  </Button>
+                </motion.div>
+
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="flex-1 sm:flex-none"
+                >
+                  <Button onClick={handleCancelProfileEdit} variant="outline" size="sm">
+                    {t('cancel')}
+                  </Button>
+                </motion.div>
               </div>
             )}
           </CardHeader>
@@ -513,7 +519,7 @@ function ProfileContent({
             </div>
           </CardContent>
         </Card>
-      </div>
+      </motion.div>
     </motion.div>
   );
 }

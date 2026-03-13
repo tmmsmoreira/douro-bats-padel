@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import Link from 'next/link';
 import { MoreVertical, Edit } from 'lucide-react';
+import { LockIcon, SquarePenIcon, SquarePenIconHandle } from 'lucide-animated';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,7 +27,6 @@ import { motion } from 'motion/react';
 import { DataStateWrapper } from '../shared';
 import { EventHeaderInfo } from '../shared/event';
 import { Spinner } from '../ui/spinner';
-import { formatTime } from '@/lib/utils';
 import { TierSection } from '@/components/shared/draw';
 import type { Player, WaitlistedPlayer, Assignment } from '@/components/shared/draw';
 
@@ -136,13 +136,18 @@ export function EventDetails({ eventId }: { eventId: string }) {
       });
 
       if (!res.ok) {
-        throw new Error(`API Error: ${res.statusText}`);
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || `API Error: ${res.statusText}`);
       }
 
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['event', eventId] });
+      toast.success(t('freezeSuccess') || 'Event RSVPs frozen successfully');
+    },
+    onError: (error: Error) => {
+      toast.error(t('freezeError') + ': ' + error.message);
     },
   });
 
@@ -541,6 +546,8 @@ function EventDetailsHeaderActionButtons({
   const eventEndTime = new Date(event.endsAt);
   const hasEventPassed = eventEndTime < new Date();
   const deleteIconRef = useRef<DeleteIconHandle>(null);
+  const squarePenIconRef = useRef<SquarePenIconHandle>(null);
+  const lockIconRef = useRef<LockIconHandle>(null);
 
   // Determine the primary action based on event state
   const getPrimaryAction = () => {
@@ -624,24 +631,31 @@ function EventDetailsHeaderActionButtons({
         <DropdownMenuContent align="end">
           {(event.state === 'DRAFT' || !hasEventPassed) && (
             <>
-              <DropdownMenuItem asChild>
-                <Link href={`/admin/events/${event.id}/edit`} className="flex gap-2">
-                  <Edit className="h-4 w-4" />
-                  <span>{t('editEvent')}</span>
-                </Link>
-              </DropdownMenuItem>
               {event.state === 'FROZEN' && !draw && (
                 <DropdownMenuItem
                   onClick={() => unfreezeMutation.mutate()}
                   disabled={unfreezeMutation.isPending}
                   className="gap-2"
+                  onMouseEnter={() => lockIconRef.current?.startAnimation()}
+                  onMouseLeave={() => lockIconRef.current?.stopAnimation()}
                 >
                   {unfreezeMutation.isPending && (
                     <Spinner data-icon="inline-start" className="h-4 w-4" />
                   )}
+                  <LockIcon ref={lockIconRef} size={16} className="h-4 w-4" />
                   <span>{unfreezeMutation.isPending ? t('unfreezing') : t('unfreezeEvent')}</span>
                 </DropdownMenuItem>
               )}
+              <DropdownMenuItem
+                asChild
+                onMouseEnter={() => squarePenIconRef.current?.startAnimation()}
+                onMouseLeave={() => squarePenIconRef.current?.stopAnimation()}
+              >
+                <Link href={`/admin/events/${event.id}/edit`} className="flex gap-2">
+                  <SquarePenIcon ref={squarePenIconRef} size={16} className="h-4 w-4" />
+                  <span>{t('editEvent')}</span>
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
             </>
           )}

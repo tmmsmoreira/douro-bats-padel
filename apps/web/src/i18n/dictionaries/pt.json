@@ -460,6 +460,8 @@
     "publishing": "A publicar...",
     "freezeRsvps": "Congelar RSVPs",
     "freezing": "A congelar...",
+    "freezeSuccess": "RSVPs do evento congelados com sucesso",
+    "freezeError": "Falha ao congelar RSVPs do evento",
     "unfreezeEvent": "Reabrir Evento",
     "unfreezing": "A reabrir...",
     "unfreezeSuccess": "Evento reaberto com sucesso",

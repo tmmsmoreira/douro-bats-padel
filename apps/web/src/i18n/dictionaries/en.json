@@ -487,6 +487,8 @@
     "publishing": "Publishing...",
     "freezeRsvps": "Freeze RSVPs",
     "freezing": "Freezing...",
+    "freezeSuccess": "Event RSVPs frozen successfully",
+    "freezeError": "Failed to freeze event RSVPs",
     "unfreezeEvent": "Reopen Event",
     "unfreezing": "Reopening...",
     "unfreezeSuccess": "Event reopened successfully",

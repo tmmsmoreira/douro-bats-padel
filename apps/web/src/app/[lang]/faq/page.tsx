@@ -4,8 +4,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import { HomeNav } from '@/components/public/home-nav';
-import { Footer } from '@/components/public/footer';
+import { HomeNavClient } from '@/components/shared/client-nav-wrapper';
+import { PageLayout, SectionHeader } from '@/components/shared';
 
 interface FAQItem {
   question: string;
@@ -122,79 +122,72 @@ export default function FAQPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <HomeNav />
-      <main className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 md:py-12 max-w-4xl flex-1 min-h-[500px]">
-        <div className="space-y-6 sm:space-y-8">
-          {/* Header */}
-          <div className="text-center space-y-3 sm:space-y-4">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">
-              Frequently Asked Questions
-            </h1>
-            <p className="text-base sm:text-lg md:text-xl text-muted-foreground">
-              Find answers to common questions about Douro Bats Padel
-            </p>
-          </div>
+    <PageLayout nav={<HomeNavClient />}>
+      <div className="space-y-6 sm:space-y-8">
+        {/* Header */}
+        <SectionHeader
+          title="Frequently Asked Questions"
+          description="Find answers to common questions about Douro Bats Padel"
+          align="center"
+        />
 
-          {/* FAQ by Category */}
-          {categories.map((category) => (
-            <div key={category} className="space-y-3 sm:space-y-4">
-              <h2 className="text-xl sm:text-2xl font-bold">{category}</h2>
-              <div className="space-y-2 sm:space-y-3">
-                {faqs
-                  .filter((faq) => faq.category === category)
-                  .map((faq) => {
-                    const globalIndex = faqs.indexOf(faq);
-                    const isOpen = openIndex === globalIndex;
+        {/* FAQ by Category */}
+        {categories.map((category) => (
+          <div key={category} className="space-y-3 sm:space-y-4">
+            <h2 className="text-xl sm:text-2xl font-bold">{category}</h2>
+            <div className="space-y-2 sm:space-y-3">
+              {faqs
+                .filter((faq) => faq.category === category)
+                .map((faq) => {
+                  const globalIndex = faqs.indexOf(faq);
+                  const isOpen = openIndex === globalIndex;
 
-                    return (
-                      <Card key={globalIndex} className="overflow-hidden">
-                        <CardHeader
-                          className="cursor-pointer hover:bg-muted/50 transition-colors"
-                          onClick={() => toggleFAQ(globalIndex)}
-                        >
-                          <div className="flex items-center justify-between">
-                            <CardTitle className="text-lg font-medium">{faq.question}</CardTitle>
-                            {isOpen ? (
-                              <ChevronUp className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                            ) : (
-                              <ChevronDown className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                            )}
-                          </div>
-                        </CardHeader>
-                        {isOpen && (
-                          <CardContent className="pt-0">
-                            <p className="text-muted-foreground">{faq.answer}</p>
-                          </CardContent>
-                        )}
-                      </Card>
-                    );
-                  })}
-              </div>
+                  return (
+                    <Card key={globalIndex} className="overflow-hidden glass-card">
+                      <CardHeader
+                        className="cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => toggleFAQ(globalIndex)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-lg font-medium">{faq.question}</CardTitle>
+                          {isOpen ? (
+                            <ChevronUp className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                          ) : (
+                            <ChevronDown className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                          )}
+                        </div>
+                      </CardHeader>
+                      {isOpen && (
+                        <CardContent className="pt-0">
+                          <p className="text-muted-foreground">{faq.answer}</p>
+                        </CardContent>
+                      )}
+                    </Card>
+                  );
+                })}
             </div>
-          ))}
+          </div>
+        ))}
 
-          {/* Contact Card */}
-          <Card className="bg-primary/5 border-primary/20">
-            <CardHeader>
-              <CardTitle>Still have questions?</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <p className="text-muted-foreground mb-4">
-                If you couldn&apos;t find the answer you&apos;re looking for, feel free to reach out
-                to our support team.
-              </p>
-              <Link
-                href="/contact"
-                className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-              >
-                Contact Us
-              </Link>
-            </CardContent>
-          </Card>
-        </div>
-      </main>
-      <Footer />
-    </div>
+        {/* Contact Card */}
+        <Card className="bg-primary/5 border-primary/20">
+          <CardHeader>
+            <CardTitle>Still have questions?</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <p className="text-muted-foreground mb-4">
+              If you couldn&apos;t find the answer you&apos;re looking for, feel free to reach out
+              to our support team.
+            </p>
+            <Link
+              href="/contact"
+              className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+            >
+              Contact Us
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    </PageLayout>
   );
 }

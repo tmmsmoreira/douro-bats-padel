@@ -2,10 +2,12 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'motion/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { HomeNavClient } from '@/components/shared/client-nav-wrapper';
 import { PageLayout, SectionHeader } from '@/components/shared';
+import { staggerContainer, staggerItem } from '@/lib/animations';
 
 interface FAQItem {
   question: string;
@@ -133,7 +135,13 @@ export default function FAQPage() {
 
         {/* FAQ by Category */}
         {categories.map((category) => (
-          <div key={category} className="space-y-3 sm:space-y-4">
+          <motion.div
+            key={category}
+            variants={staggerContainer}
+            initial="hidden"
+            animate="show"
+            className="space-y-3 sm:space-y-4"
+          >
             <h2 className="text-xl sm:text-2xl font-bold">{category}</h2>
             <div className="space-y-2 sm:space-y-3">
               {faqs
@@ -143,50 +151,63 @@ export default function FAQPage() {
                   const isOpen = openIndex === globalIndex;
 
                   return (
-                    <Card key={globalIndex} className="overflow-hidden glass-card">
-                      <CardHeader
-                        className="cursor-pointer hover:bg-muted/50 transition-colors"
-                        onClick={() => toggleFAQ(globalIndex)}
-                      >
-                        <div className="flex items-center justify-between">
-                          <CardTitle className="text-lg font-medium">{faq.question}</CardTitle>
-                          {isOpen ? (
-                            <ChevronUp className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                          ) : (
-                            <ChevronDown className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                    <motion.div key={globalIndex} variants={staggerItem}>
+                      <Card className="overflow-hidden glass-card">
+                        <CardHeader
+                          className="cursor-pointer hover:bg-muted/50 transition-colors"
+                          onClick={() => toggleFAQ(globalIndex)}
+                        >
+                          <div className="flex items-center justify-between">
+                            <CardTitle className="text-lg font-medium">{faq.question}</CardTitle>
+                            {isOpen ? (
+                              <ChevronUp className="h-5 w-5 text-muted-foreground shrink-0" />
+                            ) : (
+                              <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0" />
+                            )}
+                          </div>
+                        </CardHeader>
+                        <AnimatePresence>
+                          {isOpen && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.2 }}
+                            >
+                              <CardContent className="pt-0">
+                                <p className="text-muted-foreground">{faq.answer}</p>
+                              </CardContent>
+                            </motion.div>
                           )}
-                        </div>
-                      </CardHeader>
-                      {isOpen && (
-                        <CardContent className="pt-0">
-                          <p className="text-muted-foreground">{faq.answer}</p>
-                        </CardContent>
-                      )}
-                    </Card>
+                        </AnimatePresence>
+                      </Card>
+                    </motion.div>
                   );
                 })}
             </div>
-          </div>
+          </motion.div>
         ))}
 
         {/* Contact Card */}
-        <Card className="bg-primary/5 border-primary/20">
-          <CardHeader>
-            <CardTitle>Still have questions?</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <p className="text-muted-foreground mb-4">
-              If you couldn&apos;t find the answer you&apos;re looking for, feel free to reach out
-              to our support team.
-            </p>
-            <Link
-              href="/contact"
-              className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-            >
-              Contact Us
-            </Link>
-          </CardContent>
-        </Card>
+        <motion.div {...staggerItem}>
+          <Card className="bg-primary/5 border-primary/20">
+            <CardHeader>
+              <CardTitle>Still have questions?</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <p className="text-muted-foreground mb-4">
+                If you couldn&apos;t find the answer you&apos;re looking for, feel free to reach out
+                to our support team.
+              </p>
+              <Link
+                href="/contact"
+                className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+              >
+                Contact Us
+              </Link>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
     </PageLayout>
   );

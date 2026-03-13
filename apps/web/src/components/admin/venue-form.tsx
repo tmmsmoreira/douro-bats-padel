@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Spinner } from '@/components/ui/spinner';
 import type { CreateVenueDto, UpdateVenueDto } from '@padel/types';
 import { XIcon } from 'lucide-animated';
 import { useTranslations } from 'next-intl';
@@ -258,21 +259,29 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
             )}
           </div>
         </CardContent>
-        <CardFooter>
-          <div className="flex gap-2 justify-end">
-            <Button type="button" variant="outline" onClick={() => router.push('/admin/venues')}>
-              {t('cancel')}
-            </Button>
-            <Button type="submit" disabled={saveMutation.isPending}>
-              {saveMutation.isPending
-                ? venueId
-                  ? t('updating')
-                  : t('creating')
-                : venueId
-                  ? t('updateVenue')
-                  : t('createVenue')}
-            </Button>
-          </div>
+        <CardFooter className="flex justify-end gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.push('/admin/venues')}
+            animate
+          >
+            {t('cancel')}
+          </Button>
+          <Button type="submit" disabled={saveMutation.isPending} animate>
+            {saveMutation.isPending && (
+              <div aria-hidden="true">
+                <Spinner />
+              </div>
+            )}
+            {saveMutation.isPending
+              ? venueId
+                ? t('updating')
+                : t('creating')
+              : venueId
+                ? t('updateVenue')
+                : t('createVenue')}
+          </Button>
         </CardFooter>
       </Card>
     </form>

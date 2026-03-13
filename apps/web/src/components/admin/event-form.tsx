@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Spinner } from '@/components/ui/spinner';
 import {
   Select,
   SelectContent,
@@ -726,34 +727,32 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
             )}
           </CardContent>
           <CardFooter className="flex justify-end gap-2">
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="flex-1 sm:flex-none"
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.push(isEditMode ? `/admin/events/${eventId}` : '/admin')}
+              animate
             >
-              <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
-                {isEditMode
-                  ? updateMutation.isPending
-                    ? t('updating')
-                    : t('updateEvent')
-                  : createMutation.isPending
-                    ? t('creating')
-                    : t('createEvent')}
-              </Button>
-            </motion.div>
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="flex-1 sm:flex-none"
+              {t('cancel')}
+            </Button>
+            <Button
+              type="submit"
+              disabled={createMutation.isPending || updateMutation.isPending}
+              animate
             >
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => router.push(isEditMode ? `/admin/events/${eventId}` : '/admin')}
-              >
-                {t('cancel')}
-              </Button>
-            </motion.div>
+              {(createMutation.isPending || updateMutation.isPending) && (
+                <div aria-hidden="true">
+                  <Spinner />
+                </div>
+              )}
+              {isEditMode
+                ? updateMutation.isPending
+                  ? t('updating')
+                  : t('updateEvent')
+                : createMutation.isPending
+                  ? t('creating')
+                  : t('createEvent')}
+            </Button>
           </CardFooter>
         </form>
       </Card>

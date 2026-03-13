@@ -66,6 +66,7 @@ export function PlayerNav() {
                   alt="Douro Bats Padel"
                   width={40}
                   height={40}
+                  priority
                   className="object-contain"
                 />
                 <span className="font-heading gradient-text text-xl font-bold">

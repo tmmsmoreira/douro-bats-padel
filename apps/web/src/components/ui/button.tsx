@@ -1,6 +1,9 @@
+'use client';
+
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Slot } from 'radix-ui';
+import { motion } from 'motion/react';
 
 import { cn } from '@/lib/utils';
 
@@ -42,14 +45,20 @@ function Button({
   variant = 'default',
   size = 'default',
   asChild = false,
+  animate = false,
   ...props
 }: React.ComponentProps<'button'> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
+    /**
+     * Whether to wrap the button with motion animations (hover scale and tap scale)
+     * @default false
+     */
+    animate?: boolean;
   }) {
   const Comp = asChild ? Slot.Root : 'button';
 
-  return (
+  const button = (
     <Comp
       data-slot="button"
       data-variant={variant}
@@ -58,6 +67,20 @@ function Button({
       {...props}
     />
   );
+
+  if (animate) {
+    return (
+      <motion.div
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        className="flex-1 sm:flex-none"
+      >
+        {button}
+      </motion.div>
+    );
+  }
+
+  return button;
 }
 
 export { Button, buttonVariants };

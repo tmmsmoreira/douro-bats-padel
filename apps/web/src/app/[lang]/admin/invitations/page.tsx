@@ -1,7 +1,26 @@
-import { InvitationsList } from '@/components/admin/invitations-list';
-import { CreateInvitationDialog } from '@/components/admin/create-invitation-dialog';
+import dynamic from 'next/dynamic';
 import { PageHeader } from '@/components/shared/page-header';
 import { getTranslations } from 'next-intl/server';
+import { LoadingState } from '@/components/shared';
+
+const InvitationsList = dynamic(
+  () =>
+    import('@/components/admin/invitations-list').then((mod) => ({ default: mod.InvitationsList })),
+  {
+    loading: () => <LoadingState />,
+    ssr: false,
+  }
+);
+
+const CreateInvitationDialog = dynamic(
+  () =>
+    import('@/components/admin/create-invitation-dialog').then((mod) => ({
+      default: mod.CreateInvitationDialog,
+    })),
+  {
+    ssr: false,
+  }
+);
 
 export default async function InvitationsPage() {
   const t = await getTranslations('admin');

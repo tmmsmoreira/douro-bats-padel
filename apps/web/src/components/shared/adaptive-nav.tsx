@@ -53,7 +53,15 @@ export function AdaptiveNav() {
       return;
     }
 
-    // If not on admin route, check sessionStorage
+    // If on home page (/), always show player nav
+    if (pathname === '/') {
+      setShowAdminNav(false);
+      sessionStorage.setItem('lastView', 'player');
+      setIsReady(true);
+      return;
+    }
+
+    // If not on admin route or home page, check sessionStorage
     const lastView = sessionStorage.getItem('lastView');
     const shouldShowAdmin = lastView === 'admin' && !!isEditor && !isOnAdminRoute;
 

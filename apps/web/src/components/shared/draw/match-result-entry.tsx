@@ -116,7 +116,7 @@ export function MatchResultEntry({
               value={result.setsA ?? 0}
               onChange={(e) => onScoreChange('A', e.target.value)}
               disabled={isPublished}
-              className="w-20 text-center text-lg font-bold"
+              className="w-20 text-center text-lg font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
           </div>
           <span className="text-2xl font-bold">-</span>
@@ -132,7 +132,7 @@ export function MatchResultEntry({
               value={result.setsB ?? 0}
               onChange={(e) => onScoreChange('B', e.target.value)}
               disabled={isPublished}
-              className="w-20 text-center text-lg font-bold"
+              className="w-20 text-center text-lg font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
           </div>
         </div>

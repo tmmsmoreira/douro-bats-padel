@@ -10,10 +10,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { HomeAdaptiveNav } from '@/components/shared/home-adaptive-nav';
-import { Footer } from '@/components/public/footer';
 import { formatTime } from '@/lib/utils';
-import { DataStateWrapper } from '@/components/shared';
-import { PageHeader } from '@/components/shared/page-header';
+import { DataStateWrapper, PageLayout, PageHeader } from '@/components/shared';
 import { motion } from 'motion/react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
@@ -82,20 +80,16 @@ export function EventDetails({ eventId }: { eventId: string }) {
   });
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <HomeAdaptiveNav />
-      <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl min-h-[500px]">
-        <DataStateWrapper
-          isLoading={isLoading}
-          data={event}
-          loadingMessage={t('loadingEvent')}
-          emptyMessage={t('eventNotFound')}
-        >
-          {(event) => <EventDetailsContent event={event} locale={locale} t={t} />}
-        </DataStateWrapper>
-      </main>
-      <Footer />
-    </div>
+    <PageLayout nav={<HomeAdaptiveNav />}>
+      <DataStateWrapper
+        isLoading={isLoading}
+        data={event}
+        loadingMessage={t('loadingEvent')}
+        emptyMessage={t('eventNotFound')}
+      >
+        {(event) => <EventDetailsContent event={event} locale={locale} t={t} />}
+      </DataStateWrapper>
+    </PageLayout>
   );
 }
 

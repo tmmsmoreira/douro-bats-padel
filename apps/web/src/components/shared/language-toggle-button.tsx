@@ -34,17 +34,16 @@ export function LanguageToggleButton() {
 
   // Show the same flag during SSR and after hydration to prevent flash
   return (
-    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={toggleLanguage}
-        disabled={!mounted}
-        className="text-xl"
-        aria-label={`Switch to ${currentLocale === 'en' ? 'Portuguese' : 'English'}`}
-      >
-        {displayFlag}
-      </Button>
-    </motion.div>
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={toggleLanguage}
+      disabled={!mounted}
+      className="text-xl"
+      aria-label={`Switch to ${currentLocale === 'en' ? 'Portuguese' : 'English'}`}
+      animate
+    >
+      {displayFlag}
+    </Button>
   );
 }

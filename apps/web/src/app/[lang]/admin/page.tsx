@@ -1,7 +1,16 @@
-import { EventsList } from '@/components/admin/events-list';
+import dynamic from 'next/dynamic';
 import { PageHeader } from '@/components/shared/page-header';
 import { ActionButton } from '@/components/shared/action-button';
 import { getTranslations } from 'next-intl/server';
+import { LoadingState } from '@/components/shared';
+
+const EventsList = dynamic(
+  () => import('@/components/admin/events-list').then((mod) => ({ default: mod.EventsList })),
+  {
+    loading: () => <LoadingState />,
+    ssr: false,
+  }
+);
 
 export default async function AdminPage() {
   const t = await getTranslations('admin');

@@ -1,8 +1,11 @@
+'use client';
+
+import { useState, useTransition } from 'react';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
+import { Spinner } from '@/components/ui/spinner';
+import { useRouter } from 'next/navigation';
 import type { EventWithRSVP } from '@padel/types';
 import type { Session } from 'next-auth';
-import { motion } from 'motion/react';
 
 interface RSVPButtonsProps {
   event: EventWithRSVP;
@@ -33,6 +36,12 @@ export function RSVPButtons({
   showViewDetails = true,
   showViewDraw = true,
 }: RSVPButtonsProps) {
+  const router = useRouter();
+  const [isNavigatingDetails, startDetailsTransition] = useTransition();
+  const [isNavigatingDraw, startDrawTransition] = useTransition();
+  const [clickedDetails, setClickedDetails] = useState(false);
+  const [clickedDraw, setClickedDraw] = useState(false);
+
   const userStatus = event.userRSVP?.status;
   const isConfirmed = userStatus === 'CONFIRMED';
   const isWaitlisted = userStatus === 'WAITLISTED';
@@ -42,62 +51,74 @@ export function RSVPButtons({
     new Date() >= new Date(event.rsvpOpensAt) &&
     new Date() <= new Date(event.rsvpClosesAt);
 
+  // Don't show any buttons for unauthenticated users
+  if (!session) {
+    return null;
+  }
+
+  const handleDetailsClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setClickedDetails(true);
+    startDetailsTransition(() => {
+      router.push(`/events/${event.id}`);
+    });
+  };
+
+  const handleDrawClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setClickedDraw(true);
+    startDrawTransition(() => {
+      router.push(`/events/${event.id}/draw`);
+    });
+  };
+
+  const showDetailsLoading = isNavigatingDetails || clickedDetails;
+  const showDrawLoading = isNavigatingDraw || clickedDraw;
+
   return (
     <div className="flex gap-2 w-full sm:w-auto">
-      {session ? (
-        <>
-          {canRegister && !isConfirmed && !isWaitlisted && (
-            <Button
-              onClick={() => onRSVP(event.id, 'IN')}
-              disabled={isPending}
-              className="flex-1 sm:flex-none"
-            >
-              {isFull ? registerToWaitlistText : registerText}
-            </Button>
-          )}
-          {(isConfirmed || isWaitlisted) && (
-            <Button
-              variant="outline"
-              onClick={() => onRSVP(event.id, 'OUT')}
-              disabled={isPending}
-              className="flex-1 sm:flex-none"
-            >
-              {unregisterText}
-            </Button>
-          )}
-        </>
-      ) : (
-        <motion.div
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+      {canRegister && !isConfirmed && !isWaitlisted && (
+        <Button
+          onClick={() => onRSVP(event.id, 'IN')}
+          disabled={isPending}
           className="flex-1 sm:flex-none"
         >
-          <Button className="w-full rounded-lg" asChild>
-            <Link href="/login">{signInToRegisterText}</Link>
-          </Button>
-        </motion.div>
+          {isFull ? registerToWaitlistText : registerText}
+        </Button>
+      )}
+      {(isConfirmed || isWaitlisted) && (
+        <Button
+          variant="outline"
+          onClick={() => onRSVP(event.id, 'OUT')}
+          disabled={isPending}
+          className="flex-1 sm:flex-none"
+        >
+          {unregisterText}
+        </Button>
       )}
       {showViewDetails && (
-        <motion.div
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="flex-1 sm:flex-none"
+        <Button
+          variant="outline"
+          className="rounded-lg"
+          onClick={handleDetailsClick}
+          disabled={showDetailsLoading}
+          animate
         >
-          <Button variant="outline" className="w-full rounded-lg" asChild>
-            <Link href={`/events/${event.id}`}>{viewDetailsText}</Link>
-          </Button>
-        </motion.div>
+          {showDetailsLoading && <Spinner className="mr-2" />}
+          {viewDetailsText}
+        </Button>
       )}
       {showViewDraw && event.state === 'PUBLISHED' && (
-        <motion.div
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="flex-1 sm:flex-none"
+        <Button
+          variant="outline"
+          className="rounded-lg"
+          onClick={handleDrawClick}
+          disabled={showDrawLoading}
+          animate
         >
-          <Button variant="outline" className="w-full rounded-lg" asChild>
-            <Link href={`/events/${event.id}/draw`}>{viewDrawText}</Link>
-          </Button>
-        </motion.div>
+          {showDrawLoading && <Spinner className="mr-2" />}
+          {viewDrawText}
+        </Button>
       )}
     </div>
   );

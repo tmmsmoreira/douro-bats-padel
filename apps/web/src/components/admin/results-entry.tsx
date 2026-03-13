@@ -421,14 +421,14 @@ function ResultsEntryContent({
         {/* Header with stats */}
         <Card className="glass-card">
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <CardTitle>{t('matchResultsEntry')}</CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
                   {t('matchesEntered', { entered: enteredMatches, total: totalMatches })}
                 </p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {hasPublishedMatches && (
                   <Badge variant="default" className="gap-1">
                     <Lock className="h-3 w-3" />
@@ -437,7 +437,12 @@ function ResultsEntryContent({
                 )}
                 {!hasPublishedMatches && (
                   <>
-                    <Button onClick={handleSaveAllResults} variant="outline" className="gap-2">
+                    <Button
+                      onClick={handleSaveAllResults}
+                      variant="outline"
+                      className="gap-2"
+                      animate
+                    >
                       {t('saveAllResults')}
                     </Button>
                     <Button
@@ -446,6 +451,7 @@ function ResultsEntryContent({
                       className="gap-2"
                       onMouseEnter={() => lockIconRef.current?.startAnimation()}
                       onMouseLeave={() => lockIconRef.current?.stopAnimation()}
+                      animate
                     >
                       <LockIcon ref={lockIconRef} size={16} />
                       {t('publishResults')}

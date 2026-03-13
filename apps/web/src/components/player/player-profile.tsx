@@ -338,47 +338,31 @@ function ProfileContent({
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>{t('playerInformation')}</CardTitle>
             {!isEditingProfile ? (
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="flex-1 sm:flex-none"
+              <Button
+                onClick={handleEditProfile}
+                variant="outline"
+                size="sm"
+                onMouseEnter={() => squarePenIconRef.current?.startAnimation()}
+                onMouseLeave={() => squarePenIconRef.current?.stopAnimation()}
+                animate
               >
-                <Button
-                  onClick={handleEditProfile}
-                  variant="outline"
-                  size="sm"
-                  onMouseEnter={() => squarePenIconRef.current?.startAnimation()}
-                  onMouseLeave={() => squarePenIconRef.current?.stopAnimation()}
-                >
-                  <SquarePenIcon ref={squarePenIconRef} size={16} className="h-4 w-4" />
-                  {t('edit')}
-                </Button>
-              </motion.div>
+                <SquarePenIcon ref={squarePenIconRef} size={16} className="h-4 w-4" />
+                {t('edit')}
+              </Button>
             ) : (
               <div className="flex gap-2">
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex-1 sm:flex-none"
+                <Button
+                  onClick={handleSaveProfile}
+                  disabled={updateProfileMutation.isPending}
+                  size="sm"
+                  animate
                 >
-                  <Button
-                    onClick={handleSaveProfile}
-                    disabled={updateProfileMutation.isPending}
-                    size="sm"
-                  >
-                    {updateProfileMutation.isPending ? t('saving') : t('save')}
-                  </Button>
-                </motion.div>
+                  {updateProfileMutation.isPending ? t('saving') : t('save')}
+                </Button>
 
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex-1 sm:flex-none"
-                >
-                  <Button onClick={handleCancelProfileEdit} variant="outline" size="sm">
-                    {t('cancel')}
-                  </Button>
-                </motion.div>
+                <Button onClick={handleCancelProfileEdit} variant="outline" size="sm" animate>
+                  {t('cancel')}
+                </Button>
               </div>
             )}
           </CardHeader>

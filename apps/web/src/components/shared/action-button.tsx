@@ -1,9 +1,9 @@
 'use client';
 
-import { useRef } from 'react';
-import { motion } from 'motion/react';
-import { Link } from '@/i18n/navigation';
+import { useRef, useState, useTransition } from 'react';
+import { useRouter } from '@/i18n/navigation';
 import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 import { PlusIcon, PlusIconHandle } from 'lucide-animated';
 
 interface ActionButtonProps {
@@ -20,21 +20,38 @@ export function ActionButton({
   variant = 'gradient',
 }: ActionButtonProps) {
   const iconRef = useRef<PlusIconHandle>(null);
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [isNavigating, setIsNavigating] = useState(false);
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsNavigating(true);
+    startTransition(() => {
+      router.push(href);
+    });
+  };
+
+  const showLoading = isPending || isNavigating;
 
   return (
-    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-      <Button
-        variant={variant}
-        className="w-full gap-2 px-4 py-5 text-base font-medium"
-        onMouseEnter={() => iconRef.current?.startAnimation()}
-        onMouseLeave={() => iconRef.current?.stopAnimation()}
-        asChild
-      >
-        <Link href={href}>
-          {icon === 'plus' && <PlusIcon size={18} aria-hidden="true" ref={iconRef} />}
-          {label}
-        </Link>
-      </Button>
-    </motion.div>
+    <Button
+      variant={variant}
+      className="gap-2 px-4 py-5 text-base font-medium"
+      onMouseEnter={() => iconRef.current?.startAnimation()}
+      onMouseLeave={() => iconRef.current?.stopAnimation()}
+      onClick={handleClick}
+      disabled={showLoading}
+      animate
+    >
+      {showLoading ? (
+        <div aria-hidden="true">
+          <Spinner />
+        </div>
+      ) : (
+        icon === 'plus' && <PlusIcon size={18} aria-hidden="true" ref={iconRef} />
+      )}
+      {label}
+    </Button>
   );
 }

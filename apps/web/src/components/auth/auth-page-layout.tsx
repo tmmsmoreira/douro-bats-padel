@@ -3,8 +3,10 @@
 import { ThemeToggleButton } from '@/components/shared/theme-toggle-button';
 import { LanguageToggleButton } from '@/components/shared/language-toggle-button';
 import Image from 'next/image';
+import Link from 'next/link';
 import { motion } from 'motion/react';
-import { fadeIn } from '@/lib/animations';
+import { fadeIn, slideUp } from '@/lib/animations';
+import { useLocale } from 'next-intl';
 
 interface AuthPageLayoutProps {
   /**
@@ -82,6 +84,7 @@ export function AuthPageLayout({
   fancyTitle = false,
   animate = true,
 }: AuthPageLayoutProps) {
+  const locale = useLocale();
   const formContent = (
     <div className="flex-1 flex items-center justify-center bg-background p-8">{children}</div>
   );
@@ -95,27 +98,29 @@ export function AuthPageLayout({
       </div>
 
       {/* Left side - Image */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-linear-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="hidden lg:flex lg:w-1/2 relative bg-linear-to-br from-slate-900 via-secondary/80 to-slate-900">
         <div className="absolute inset-0 bg-black/20" />
         <Image src={imageUrl} alt={imageAlt} fill className="object-cover opacity-80" priority />
         <div className="relative z-10 flex flex-col justify-between text-white p-12">
           {/* Top section - Title */}
           <div className="relative">
             {fancyTitle ? (
-              <div className="relative inline-block">
+              <Link href={`/${locale}`} className="relative inline-block group">
                 {/* Gradient background */}
-                <div className="absolute inset-0 bg-linear-to-r from-primary/30 via-purple-500/30 to-pink-500/30 blur-2xl -z-10" />
+                <div className="absolute inset-0 bg-linear-to-r from-primary/30 via-purple-500/30 to-pink-500/30 blur-2xl -z-10 group-hover:blur-3xl transition-all" />
                 {/* Glass container */}
-                <div className="relative bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 shadow-2xl">
+                <div className="relative bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 shadow-2xl group-hover:border-white/30 transition-all">
                   <h1 className="text-4xl font-bold mb-2 font-heading gradient-text">{title}</h1>
                   {subtitle && <p className="text-lg text-white/90">{subtitle}</p>}
                 </div>
-              </div>
+              </Link>
             ) : (
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                <h1 className="text-4xl font-bold mb-2 font-heading gradient-text">{title}</h1>
-                {subtitle && <p className="text-lg text-white/90">{subtitle}</p>}
-              </div>
+              <Link href={`/${locale}`} className="inline-block group">
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 group-hover:border-white/30 transition-all">
+                  <h1 className="text-4xl font-bold mb-2 font-heading gradient-text">{title}</h1>
+                  {subtitle && <p className="text-lg text-white/90">{subtitle}</p>}
+                </div>
+              </Link>
             )}
           </div>
 
@@ -134,7 +139,16 @@ export function AuthPageLayout({
       </div>
 
       {/* Right side - Form */}
-      {animate ? <motion.div {...fadeIn}>{formContent}</motion.div> : formContent}
+      {animate ? (
+        <motion.div
+          {...slideUp}
+          className="flex-1 flex items-center justify-center bg-background p-8"
+        >
+          {children}
+        </motion.div>
+      ) : (
+        formContent
+      )}
     </div>
   );
 }

@@ -55,6 +55,17 @@ export function MobileMenu({
           className="md:hidden fixed inset-0 top-16 bg-card z-100 overflow-y-auto"
         >
           <div className="container mx-auto px-4 py-6 space-y-2">
+            {/* Sign In Section - First for non-authenticated users */}
+            {!session && showSignInButton && (
+              <div className="pb-2">
+                <Link href="/login" onClick={onClose}>
+                  <Button className="w-full" size="lg">
+                    {t('signIn')}
+                  </Button>
+                </Link>
+              </div>
+            )}
+
             {/* User Profile Section */}
             {session && (
               <div className="flex items-center gap-4 pb-6 border-b">
@@ -86,23 +97,25 @@ export function MobileMenu({
             )}
 
             {/* Navigation Section */}
-            <div className="space-y-1">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={onClose}
-                  className={cn(
-                    'flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-colors',
-                    pathname === item.href
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-foreground hover:bg-secondary'
-                  )}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </div>
+            {navItems.length > 0 && (
+              <div className="space-y-1">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={onClose}
+                    className={cn(
+                      'flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-colors',
+                      pathname === item.href
+                        ? 'bg-primary text-primary-foreground'
+                        : 'text-foreground hover:bg-secondary'
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            )}
 
             {/* Account Section */}
             {session && showAccountSection && (
@@ -192,9 +205,9 @@ export function MobileMenu({
               </Link>
             </div>
 
-            {/* Sign In/Out Section */}
-            <div className="pt-2 border-t">
-              {session ? (
+            {/* Sign Out Section */}
+            {session && (
+              <div className="pt-2 border-t">
                 <button
                   onClick={() => {
                     onClose();
@@ -205,14 +218,8 @@ export function MobileMenu({
                   <LogoutIcon size={20} />
                   {t('signOut')}
                 </button>
-              ) : showSignInButton ? (
-                <Link href="/login" onClick={onClose}>
-                  <Button className="w-full" size="lg">
-                    {t('signIn')}
-                  </Button>
-                </Link>
-              ) : null}
-            </div>
+              </div>
+            )}
 
             {/* Role Switching Section */}
             {showRoleSwitch && roleSwitchHref && roleSwitchLabel && (

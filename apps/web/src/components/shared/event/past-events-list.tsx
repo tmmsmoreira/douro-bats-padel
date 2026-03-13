@@ -102,26 +102,14 @@ export function PastEventsList() {
                       <div className="flex gap-2 w-full sm:w-auto">
                         {event.state === 'PUBLISHED' && (
                           <>
-                            <motion.div
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                              className="flex-1 sm:flex-none"
-                            >
-                              <Button variant="outline" className="w-full rounded-lg" asChild>
-                                <Link href={`/events/${event.id}/results`}>
-                                  {t('home.viewResults')}
-                                </Link>
-                              </Button>
-                            </motion.div>
-                            <motion.div
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                              className="flex-1 sm:flex-none"
-                            >
-                              <Button variant="outline" className="w-full rounded-lg" asChild>
-                                <Link href={`/events/${event.id}/draw`}>{t('home.viewDraw')}</Link>
-                              </Button>
-                            </motion.div>
+                            <Button variant="outline" className="rounded-lg" asChild animate>
+                              <Link href={`/events/${event.id}/results`}>
+                                {t('home.viewResults')}
+                              </Link>
+                            </Button>
+                            <Button variant="outline" className="rounded-lg" asChild animate>
+                              <Link href={`/events/${event.id}/draw`}>{t('home.viewDraw')}</Link>
+                            </Button>
                           </>
                         )}
                       </div>

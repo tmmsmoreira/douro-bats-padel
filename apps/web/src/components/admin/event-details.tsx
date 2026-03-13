@@ -546,12 +546,10 @@ function EventDetailsHeaderActionButtons({
   const getPrimaryAction = () => {
     if (hasEventPassed && event.state === 'PUBLISHED') {
       return (
-        <Link href={`/admin/events/${event.id}/results`} className="w-full">
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Button variant="secondary" className="w-full">
-              {t('enterResults')}
-            </Button>
-          </motion.div>
+        <Link href={`/admin/events/${event.id}/results`}>
+          <Button variant="secondary" animate>
+            {t('enterResults')}
+          </Button>
         </Link>
       );
     }

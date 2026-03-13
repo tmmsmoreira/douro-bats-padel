@@ -8,14 +8,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { PlayerNav } from './player-nav';
-import { Footer } from '@/components/public/footer';
 import { ArrowLeftIcon, ArrowLeftIconHandle } from 'lucide-animated';
 import { Calendar, Clock, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import { useRef } from 'react';
 import { formatDate, formatTime } from '@/lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
-import { LoadingState } from '@/components/shared/loading-state';
+import { LoadingState, PageLayout } from '@/components/shared';
 import { useMinimumLoading } from '@/hooks/use-minimum-loading';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -96,43 +95,39 @@ export function ResultsView({ eventId }: { eventId: string }) {
   const showLoading = useMinimumLoading(isLoading, !!event && !!matches);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <PlayerNav />
-      <main className="container mx-auto px-4 py-8 flex-1 max-w-4xl min-h-[500px]">
-        <AnimatePresence mode="wait">
-          {showLoading ? (
-            <LoadingState message={t('loadingResults')} />
-          ) : !event ? (
-            <motion.div
-              key="not-found"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="text-center py-8"
-            >
-              {t('eventNotFound')}
-            </motion.div>
-          ) : !matches || matches.length === 0 ? (
-            <NoResultsContent
-              event={event}
-              t={t}
-              arrowLeftIconRef={arrowLeftIconRef}
-              locale={locale}
-            />
-          ) : (
-            <ResultsContent
-              event={event}
-              matches={matches}
-              t={t}
-              arrowLeftIconRef={arrowLeftIconRef}
-              locale={locale}
-            />
-          )}
-        </AnimatePresence>
-      </main>
-      <Footer />
-    </div>
+    <PageLayout nav={<PlayerNav />}>
+      <AnimatePresence mode="wait">
+        {showLoading ? (
+          <LoadingState message={t('loadingResults')} />
+        ) : !event ? (
+          <motion.div
+            key="not-found"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="text-center py-8"
+          >
+            {t('eventNotFound')}
+          </motion.div>
+        ) : !matches || matches.length === 0 ? (
+          <NoResultsContent
+            event={event}
+            t={t}
+            arrowLeftIconRef={arrowLeftIconRef}
+            locale={locale}
+          />
+        ) : (
+          <ResultsContent
+            event={event}
+            matches={matches}
+            t={t}
+            arrowLeftIconRef={arrowLeftIconRef}
+            locale={locale}
+          />
+        )}
+      </AnimatePresence>
+    </PageLayout>
   );
 }
 

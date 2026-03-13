@@ -71,17 +71,16 @@ export function CreateInvitationDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-          <Button
-            variant="gradient"
-            className="w-full sm:w-auto gap-2 px-4 py-5 text-base font-medium"
-            onMouseEnter={() => iconRef.current?.startAnimation()}
-            onMouseLeave={() => iconRef.current?.stopAnimation()}
-          >
-            <SendIcon size={18} ref={iconRef} />
-            {t('createInvitation')}
-          </Button>
-        </motion.div>
+        <Button
+          variant="gradient"
+          className="gap-2 px-4 py-5 text-base font-medium"
+          onMouseEnter={() => iconRef.current?.startAnimation()}
+          onMouseLeave={() => iconRef.current?.stopAnimation()}
+          animate
+        >
+          <SendIcon size={18} ref={iconRef} />
+          {t('createInvitation')}
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <form onSubmit={handleSubmit}>

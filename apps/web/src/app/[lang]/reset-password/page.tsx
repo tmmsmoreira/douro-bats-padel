@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { ResetPasswordForm } from '@/components/auth/reset-password-form';
 import { CenteredAuthLayout } from '@/components/auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { LoadingState } from '@/components/shared';
 import Link from 'next/link';
 
 function ResetPasswordContent() {
@@ -36,7 +37,7 @@ function ResetPasswordContent() {
 export default function ResetPasswordPage() {
   return (
     <CenteredAuthLayout>
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<LoadingState />}>
         <ResetPasswordContent />
       </Suspense>
     </CenteredAuthLayout>

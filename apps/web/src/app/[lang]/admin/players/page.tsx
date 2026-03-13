@@ -1,6 +1,15 @@
-import { PlayersList } from '@/components/admin/players-list';
+import dynamic from 'next/dynamic';
 import { PageHeader } from '@/components/shared/page-header';
 import { getTranslations } from 'next-intl/server';
+import { LoadingState } from '@/components/shared';
+
+const PlayersList = dynamic(
+  () => import('@/components/admin/players-list').then((mod) => ({ default: mod.PlayersList })),
+  {
+    loading: () => <LoadingState />,
+    ssr: false,
+  }
+);
 
 export default async function PlayersPage() {
   const t = await getTranslations('admin');

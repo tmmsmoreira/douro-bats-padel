@@ -4,9 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useTranslations, useLocale } from 'next-intl';
 import { PlayerNav } from './player-nav';
-import { Footer } from '@/components/public/footer';
 import { motion, AnimatePresence } from 'motion/react';
-import { LoadingState } from '@/components/shared/loading-state';
+import { LoadingState, PageLayout } from '@/components/shared';
 import { useMinimumLoading } from '@/hooks/use-minimum-loading';
 import { DrawHeader, TierSection, WaitlistSection } from '@/components/shared/draw';
 import type { Draw, Assignment } from '@/components/shared/draw';
@@ -60,38 +59,32 @@ export function DrawView({ eventId }: { eventId: string }) {
   const showLoading = useMinimumLoading(isLoading, !!draw);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <PlayerNav />
-      <main className="container mx-auto px-4 py-8 flex-1 max-w-7xl min-h-[500px]">
-        <AnimatePresence mode="wait">
-          {showLoading ? (
-            <LoadingState message={t('loadingDraw')} />
-          ) : error || !draw ? (
-            <motion.div
-              key="not-found"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="text-center py-8"
-            >
-              <p className="text-lg font-medium">{t('drawNotAvailable')}</p>
-              <p className="text-sm text-muted-foreground mt-2">
-                {t('drawNotAvailableDescription')}
+    <PageLayout nav={<PlayerNav />} maxWidth="7xl">
+      <AnimatePresence mode="wait">
+        {showLoading ? (
+          <LoadingState message={t('loadingDraw')} />
+        ) : error || !draw ? (
+          <motion.div
+            key="not-found"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="text-center py-8"
+          >
+            <p className="text-lg font-medium">{t('drawNotAvailable')}</p>
+            <p className="text-sm text-muted-foreground mt-2">{t('drawNotAvailableDescription')}</p>
+            {error && (
+              <p className="text-xs text-red-500 mt-2">
+                {t('error')}: {error instanceof Error ? error.message : 'Failed to load draw'}
               </p>
-              {error && (
-                <p className="text-xs text-red-500 mt-2">
-                  {t('error')}: {error instanceof Error ? error.message : 'Failed to load draw'}
-                </p>
-              )}
-            </motion.div>
-          ) : (
-            <DrawContent draw={draw} event={event} t={t} locale={locale} />
-          )}
-        </AnimatePresence>
-      </main>
-      <Footer />
-    </div>
+            )}
+          </motion.div>
+        ) : (
+          <DrawContent draw={draw} event={event} t={t} locale={locale} />
+        )}
+      </AnimatePresence>
+    </PageLayout>
   );
 }
 

@@ -3,7 +3,7 @@
 import type React from 'react';
 
 import { useState, useEffect } from 'react';
-import { signIn } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -48,7 +48,20 @@ export function LoginForm() {
       if (result?.error) {
         setError(t('invalidCredentials'));
       } else {
-        router.push(`/${locale}`);
+        // Fetch the session to get user roles
+        const response = await fetch('/api/auth/session');
+        const session = await response.json();
+
+        // Check if user is admin or editor
+        const isAdmin = session?.user?.roles?.includes('ADMIN');
+        const isEditor = session?.user?.roles?.includes('EDITOR');
+
+        // Redirect based on role
+        if (isAdmin || isEditor) {
+          router.push(`/${locale}/admin`);
+        } else {
+          router.push(`/${locale}`);
+        }
         router.refresh();
       }
     } catch {

@@ -1,7 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -46,7 +53,7 @@ export default function ContactPage() {
         <div className="grid lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Contact Information */}
           <div className="lg:col-span-1 space-y-6">
-            <Card className="glass-card">
+            <Card className="glass-card h-full">
               <CardHeader>
                 <CardTitle>{t('getInTouch')}</CardTitle>
                 <CardDescription>{t('getInTouchDescription')}</CardDescription>
@@ -169,10 +176,6 @@ export default function ContactPage() {
                     />
                   </div>
 
-                  <Button type="submit" disabled={isSubmitting} className="w-full md:w-auto">
-                    {isSubmitting ? t('sending') : t('sendMessageButton')}
-                  </Button>
-
                   {submitted && (
                     <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg text-green-700 dark:text-green-400">
                       {t('successMessage')}
@@ -180,6 +183,11 @@ export default function ContactPage() {
                   )}
                 </form>
               </CardContent>
+              <CardFooter className="pt-0 justify-end">
+                <Button type="submit" disabled={isSubmitting} animate>
+                  {isSubmitting ? t('sending') : t('sendMessageButton')}
+                </Button>
+              </CardFooter>
             </Card>
           </div>
         </div>

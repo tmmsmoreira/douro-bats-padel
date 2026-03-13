@@ -7,7 +7,6 @@ const EventForm = dynamic(
   () => import('@/components/admin/event-form').then((mod) => ({ default: mod.EventForm })),
   {
     loading: () => <LoadingState />,
-    ssr: false,
   }
 );
 

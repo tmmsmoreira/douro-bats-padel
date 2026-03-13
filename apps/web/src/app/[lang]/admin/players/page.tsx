@@ -7,7 +7,6 @@ const PlayersList = dynamic(
   () => import('@/components/admin/players-list').then((mod) => ({ default: mod.PlayersList })),
   {
     loading: () => <LoadingState />,
-    ssr: false,
   }
 );
 

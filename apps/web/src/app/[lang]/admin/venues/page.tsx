@@ -8,7 +8,6 @@ const VenuesList = dynamic(
   () => import('@/components/admin/venues-list').then((mod) => ({ default: mod.VenuesList })),
   {
     loading: () => <LoadingState />,
-    ssr: false,
   }
 );
 

@@ -8,7 +8,6 @@ const EventsList = dynamic(
   () => import('@/components/admin/events-list').then((mod) => ({ default: mod.EventsList })),
   {
     loading: () => <LoadingState />,
-    ssr: false,
   }
 );
 

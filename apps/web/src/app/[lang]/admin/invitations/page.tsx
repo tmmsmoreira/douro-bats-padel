@@ -8,18 +8,13 @@ const InvitationsList = dynamic(
     import('@/components/admin/invitations-list').then((mod) => ({ default: mod.InvitationsList })),
   {
     loading: () => <LoadingState />,
-    ssr: false,
   }
 );
 
-const CreateInvitationDialog = dynamic(
-  () =>
-    import('@/components/admin/create-invitation-dialog').then((mod) => ({
-      default: mod.CreateInvitationDialog,
-    })),
-  {
-    ssr: false,
-  }
+const CreateInvitationDialog = dynamic(() =>
+  import('@/components/admin/create-invitation-dialog').then((mod) => ({
+    default: mod.CreateInvitationDialog,
+  }))
 );
 
 export default async function InvitationsPage() {

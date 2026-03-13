@@ -7,7 +7,6 @@ const VenueForm = dynamic(
   () => import('@/components/admin/venue-form').then((mod) => ({ default: mod.VenueForm })),
   {
     loading: () => <LoadingState />,
-    ssr: false,
   }
 );
 

@@ -629,7 +629,10 @@
     "cancel": "Cancel",
     "resultSaved": "Result saved",
     "resultsPublished": "Results published! Rankings will be updated.",
-    "enterValidScore": "Please enter a valid score"
+    "enterValidScore": "Please enter a valid score",
+    "saveAllResults": "Save All Results",
+    "resultsSaved": "{count, plural, one {# result saved} other {# results saved}}",
+    "noChangesToSave": "No changes to save"
   },
   "newEventPage": {
     "title": "Create Event",

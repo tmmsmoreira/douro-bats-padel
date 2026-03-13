@@ -4,3 +4,4 @@ export { EventsList } from './events-list';
 export { PastEventsList } from './past-events-list';
 export { RSVPBadges } from './rsvp-badges';
 export { RSVPButtons } from './rsvp-buttons';
+export { EventHeaderInfo } from './event-header';

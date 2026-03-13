@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import Link from 'next/link';
-import { Calendar, MapPin, Clock, MoreVertical, Edit } from 'lucide-react';
+import { MoreVertical, Edit } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,10 +23,11 @@ import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
 import { PageHeader } from '../shared/page-header';
 import { DeleteIcon, DeleteIconHandle } from 'lucide-animated';
 import { motion } from 'motion/react';
-import { EventStatus, StatusBadge, DataStateWrapper } from '../shared';
+import { DataStateWrapper } from '../shared';
+import { EventHeaderInfo } from '../shared/event';
 import { Spinner } from '../ui/spinner';
 import { formatTime } from '@/lib/utils';
-import { TierSection, WaitlistSection } from '@/components/shared/draw';
+import { TierSection } from '@/components/shared/draw';
 import type { Player, WaitlistedPlayer, Assignment } from '@/components/shared/draw';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -291,7 +292,7 @@ function EventDetailsContent({
     >
       <PageHeader
         title={event.title || t('untitledEvent')}
-        description={<EventDetailsHeaderInfo event={event} locale={locale} />}
+        description={<EventHeaderInfo event={event} locale={locale} />}
         showBackButton
         backButtonHref="/admin"
         backButtonLabel={t('backToEvents')}
@@ -517,39 +518,6 @@ function DrawSummary({ draw }: { draw: Draw }) {
           courtLabel: (courtId) => `Court ${courtId}`,
         }}
       />
-    </div>
-  );
-}
-
-function EventDetailsHeaderInfo({ event, locale }: { event: EventDetails; locale: string }) {
-  return (
-    <div>
-      <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground flex-wrap">
-        <div className="flex items-center gap-1">
-          <Calendar className="h-4 w-4" />
-          <span>
-            {new Date(event.date).toLocaleDateString(locale, {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </span>
-        </div>
-        <div className="flex items-center gap-1">
-          <Clock className="h-4 w-4" />
-          <span>
-            {formatTime(event.startsAt, locale)} - {formatTime(event.endsAt, locale)}
-          </span>
-        </div>
-        {event.venue && (
-          <div className="flex items-center gap-1">
-            <MapPin className="h-4 w-4" />
-            <span>{event.venue.name}</span>
-          </div>
-        )}
-        <StatusBadge status={event.state as EventStatus} />
-      </div>
     </div>
   );
 }

@@ -602,7 +602,10 @@
     "cancel": "Cancelar",
     "resultSaved": "Resultado guardado",
     "resultsPublished": "Resultados publicados! As classificações serão atualizadas.",
-    "enterValidScore": "Por favor, insira um resultado válido"
+    "enterValidScore": "Por favor, insira um resultado válido",
+    "saveAllResults": "Guardar Todos os Resultados",
+    "resultsSaved": "{count, plural, one {# resultado guardado} other {# resultados guardados}}",
+    "noChangesToSave": "Sem alterações para guardar"
   },
   "newEventPage": {
     "title": "Criar Evento",

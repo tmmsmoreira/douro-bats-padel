@@ -6,16 +6,17 @@ import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
-import { Lock, Save } from 'lucide-react';
+import { Lock } from 'lucide-react';
 import { LockIcon, LockIconHandle } from 'lucide-animated';
 import { useAuthFetch, useMinimumLoading } from '@/hooks';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { PageHeader } from '../shared/page-header';
+import { EventHeaderInfo } from '../shared/event';
+import { MatchResultEntry } from '../shared/draw';
 import { motion, AnimatePresence } from 'motion/react';
 import { LoadingState } from '@/components/shared/loading-state';
+import type { Assignment as DrawAssignment } from '../shared/draw/types';
 
 interface Match {
   id: string;
@@ -31,34 +32,23 @@ interface Match {
   teamB?: Array<{ id: string; name: string }>;
 }
 
-interface Player {
-  id: string;
-  name: string;
-  rating: number;
-  tier: string;
-}
-
-interface Assignment {
-  id: string;
-  courtId: string;
-  court?: { label: string };
-  round: number;
-  teamA: Player[];
-  teamB: Player[];
-  tier: string;
-}
-
 interface Event {
   id: string;
-  state: string;
+  title: string | null;
+  date: string;
+  state: 'DRAFT' | 'OPEN' | 'FROZEN' | 'DRAWN' | 'PUBLISHED';
   endsAt: string;
   startsAt: string;
+  venue?: {
+    id: string;
+    name: string;
+  };
 }
 
 interface Draw {
   id: string;
   eventId: string;
-  assignments: Assignment[];
+  assignments: DrawAssignment[];
 }
 
 interface ResultsEntryProps {
@@ -67,6 +57,7 @@ interface ResultsEntryProps {
 
 export function ResultsEntry({ eventId }: ResultsEntryProps) {
   const t = useTranslations('resultsEntry');
+  const locale = useLocale();
   const queryClient = useQueryClient();
   const authFetch = useAuthFetch();
   const [showPublishDialog, setShowPublishDialog] = useState(false);
@@ -105,27 +96,6 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
     }
   }, [matches]);
 
-  // Save match mutation
-  const saveMatchMutation = useMutation({
-    mutationFn: async (data: {
-      eventId: string;
-      courtId: string;
-      round: number;
-      setsA: number;
-      setsB: number;
-      tier: string;
-    }) => {
-      return authFetch.post('/matches', data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['matches', eventId] });
-      toast.success(t('resultSaved'));
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to save result: ${error.message}`);
-    },
-  });
-
   // Publish matches mutation
   const publishMutation = useMutation({
     mutationFn: async () => {
@@ -155,38 +125,58 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
     }));
   };
 
-  const handleSaveMatch = (assignment: Assignment) => {
-    const key = `${assignment.courtId}-${assignment.round}`;
-    const result = matchResults[key];
+  const handleSaveAllResults = () => {
+    if (!draw) return;
 
-    if (!result || (result.setsA === 0 && result.setsB === 0)) {
-      toast.error(t('enterValidScore'));
+    // Collect all results that have been entered
+    const resultsToSave = draw.assignments
+      .map((assignment) => {
+        const key = `${assignment.courtId}-${assignment.round}`;
+        const result = matchResults[key];
+
+        if (!result || (result.setsA === 0 && result.setsB === 0)) {
+          return null;
+        }
+
+        // Check if the result has changed from the existing match
+        const existingMatch = matches?.find(
+          (m) => m.courtId === assignment.courtId && m.round === assignment.round
+        );
+
+        if (existingMatch) {
+          const hasChanges =
+            existingMatch.setsA !== result.setsA || existingMatch.setsB !== result.setsB;
+
+          if (!hasChanges) {
+            return null; // No changes, skip this match
+          }
+        }
+
+        return {
+          eventId,
+          courtId: assignment.courtId,
+          round: assignment.round,
+          setsA: result.setsA,
+          setsB: result.setsB,
+          tier: assignment.tier,
+        };
+      })
+      .filter(Boolean);
+
+    if (resultsToSave.length === 0) {
+      toast.info(t('noChangesToSave') || 'No changes to save');
       return;
     }
 
-    // Check if the result has changed from the existing match
-    const existingMatch = matches?.find(
-      (m) => m.courtId === assignment.courtId && m.round === assignment.round
-    );
-
-    if (existingMatch) {
-      const hasChanges =
-        existingMatch.setsA !== result.setsA || existingMatch.setsB !== result.setsB;
-
-      if (!hasChanges) {
-        toast.info(t('noChangesToSave') || 'No changes to save');
-        return;
-      }
-    }
-
-    saveMatchMutation.mutate({
-      eventId,
-      courtId: assignment.courtId,
-      round: assignment.round,
-      setsA: result.setsA,
-      setsB: result.setsB,
-      tier: assignment.tier,
-    });
+    // Save all results
+    Promise.all(resultsToSave.map((result) => authFetch.post('/matches', result)))
+      .then(() => {
+        queryClient.invalidateQueries({ queryKey: ['matches', eventId] });
+        toast.success(t('resultsSaved', { count: resultsToSave.length }));
+      })
+      .catch((error: Error) => {
+        toast.error(`Failed to save results: ${error.message}`);
+      });
   };
 
   // Use minimum loading to prevent jarring flashes
@@ -259,16 +249,17 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
         </motion.div>
       ) : (
         <ResultsEntryContent
+          event={event}
           draw={draw}
           matches={matches}
           matchResults={matchResults}
           handleScoreChange={handleScoreChange}
-          handleSaveMatch={handleSaveMatch}
-          saveMatchMutation={saveMatchMutation}
+          handleSaveAllResults={handleSaveAllResults}
           publishMutation={publishMutation}
           showPublishDialog={showPublishDialog}
           setShowPublishDialog={setShowPublishDialog}
           lockIconRef={lockIconRef}
+          locale={locale}
           t={t}
           eventId={eventId}
         />
@@ -277,31 +268,112 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
   );
 }
 
+// Component for rendering a tier section with result entry
+function ResultsTierSection({
+  tier,
+  rounds,
+  matchResults,
+  matches,
+  handleScoreChange,
+  t,
+}: {
+  tier: 'MASTERS' | 'EXPLORERS';
+  rounds: Record<number, DrawAssignment[]>;
+  matchResults: Record<string, { setsA: number; setsB: number }>;
+  matches: Match[] | undefined;
+  handleScoreChange: (courtId: string, round: number, team: 'A' | 'B', value: string) => void;
+  t: any;
+}) {
+  const tierIndicatorClass =
+    tier === 'MASTERS' ? 'w-2 h-6 bg-yellow-500 rounded-full' : 'w-2 h-6 bg-blue-500 rounded-full';
+
+  if (Object.keys(rounds).length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-3">
+        <div className={tierIndicatorClass}></div>
+        <h2 className="text-2xl font-bold">{tier === 'MASTERS' ? t('masters') : t('explorers')}</h2>
+      </div>
+
+      {Object.entries(rounds)
+        .sort(([a], [b]) => Number(a) - Number(b))
+        .map(([round, assignments]) => (
+          <Card key={`${tier}-${round}`} className="glass-card">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg">{t('round', { round })}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 pt-0">
+              <div className="grid grid-cols-1 gap-2">
+                {assignments.map((assignment) => {
+                  const key = `${assignment.courtId}-${assignment.round}`;
+                  const result = matchResults[key] || { setsA: 0, setsB: 0 };
+                  const existingMatch = matches?.find(
+                    (m) => m.courtId === assignment.courtId && m.round === assignment.round
+                  );
+                  const isPublished = existingMatch ? existingMatch.publishedAt !== null : false;
+                  const isSaved = !!existingMatch;
+
+                  return (
+                    <MatchResultEntry
+                      key={assignment.id}
+                      assignment={assignment}
+                      courtLabel={(courtId: string) => t('court', { id: courtId })}
+                      result={result}
+                      onScoreChange={(team: 'A' | 'B', value: string) =>
+                        handleScoreChange(assignment.courtId, assignment.round, team, value)
+                      }
+                      isSaved={isSaved}
+                      isPublished={isPublished}
+                      showSaveButton={false}
+                      translations={{
+                        teamA: t('teamA'),
+                        teamB: t('teamB'),
+                        teamASets: t('teamASets'),
+                        teamBSets: t('teamBSets'),
+                        saved: t('saved'),
+                        published: t('published'),
+                      }}
+                    />
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+    </div>
+  );
+}
+
 // Separate component for results entry content
 function ResultsEntryContent({
+  event,
   draw,
   matches,
   matchResults,
   handleScoreChange,
-  handleSaveMatch,
-  saveMatchMutation,
+  handleSaveAllResults,
   publishMutation,
   showPublishDialog,
   setShowPublishDialog,
   lockIconRef,
+  locale,
   t,
   eventId,
 }: {
+  event: Event;
   draw: Draw;
   matches: Match[] | undefined;
   matchResults: Record<string, { setsA: number; setsB: number }>;
   handleScoreChange: (courtId: string, round: number, team: 'A' | 'B', value: string) => void;
-  handleSaveMatch: (assignment: Assignment) => void;
-  saveMatchMutation: any;
+  handleSaveAllResults: () => void;
   publishMutation: any;
   showPublishDialog: boolean;
   setShowPublishDialog: (show: boolean) => void;
   lockIconRef: React.RefObject<LockIconHandle | null>;
+  locale: string;
   t: any;
   eventId: string;
 }) {
@@ -309,14 +381,17 @@ function ResultsEntryContent({
   const masterAssignments = draw.assignments.filter((a) => a.tier === 'MASTERS');
   const explorerAssignments = draw.assignments.filter((a) => a.tier === 'EXPLORERS');
 
-  const groupByRound = (assignments: Assignment[]) => {
-    return assignments.reduce((acc: Record<number, Assignment[]>, assignment: Assignment) => {
-      if (!acc[assignment.round]) {
-        acc[assignment.round] = [];
-      }
-      acc[assignment.round].push(assignment);
-      return acc;
-    }, {});
+  const groupByRound = (assignments: DrawAssignment[]) => {
+    return assignments.reduce(
+      (acc: Record<number, DrawAssignment[]>, assignment: DrawAssignment) => {
+        if (!acc[assignment.round]) {
+          acc[assignment.round] = [];
+        }
+        acc[assignment.round].push(assignment);
+        return acc;
+      },
+      {}
+    );
   };
 
   const mastersRounds = groupByRound(masterAssignments);
@@ -335,8 +410,8 @@ function ResultsEntryContent({
   return (
     <div className="space-y-8">
       <PageHeader
-        title={t('title')}
-        description={t('description')}
+        title={event.title || t('untitledEvent')}
+        description={<EventHeaderInfo event={event} locale={locale} showStatus={false} />}
         showBackButton
         backButtonHref={`/admin/events/${eventId}`}
         backButtonLabel={t('backToEvent')}
@@ -361,310 +436,49 @@ function ResultsEntryContent({
                   </Badge>
                 )}
                 {!hasPublishedMatches && (
-                  <Button
-                    onClick={() => setShowPublishDialog(true)}
-                    disabled={!allMatchesEntered || publishMutation.isPending}
-                    className="gap-2"
-                    onMouseEnter={() => lockIconRef.current?.startAnimation()}
-                    onMouseLeave={() => lockIconRef.current?.stopAnimation()}
-                  >
-                    <LockIcon ref={lockIconRef} size={16} />
-                    {t('publishResults')}
-                  </Button>
+                  <>
+                    <Button onClick={handleSaveAllResults} variant="outline" className="gap-2">
+                      {t('saveAllResults')}
+                    </Button>
+                    <Button
+                      onClick={() => setShowPublishDialog(true)}
+                      disabled={!allMatchesEntered || publishMutation.isPending}
+                      className="gap-2"
+                      onMouseEnter={() => lockIconRef.current?.startAnimation()}
+                      onMouseLeave={() => lockIconRef.current?.stopAnimation()}
+                    >
+                      <LockIcon ref={lockIconRef} size={16} />
+                      {t('publishResults')}
+                    </Button>
+                  </>
                 )}
               </div>
             </div>
           </CardHeader>
         </Card>
 
-        {/* Masters Results */}
+        {/* Masters Results - Using TierSection with custom render */}
         {Object.keys(mastersRounds).length > 0 && (
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold">{t('masters')}</h2>
-            {Object.entries(mastersRounds)
-              .sort(([a], [b]) => parseInt(a) - parseInt(b))
-              .map(([round, assignments]) => (
-                <Card className="glass-card" key={`masters-${round}`}>
-                  <CardHeader>
-                    <CardTitle className="text-lg">{t('round', { round })}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="space-y-4">
-                      {assignments.map((assignment) => {
-                        const key = `${assignment.courtId}-${assignment.round}`;
-                        const result = matchResults[key] || { setsA: 0, setsB: 0 };
-                        const existingMatch = matches?.find(
-                          (m) => m.courtId === assignment.courtId && m.round === assignment.round
-                        );
-                        const isPublished = existingMatch
-                          ? existingMatch.publishedAt !== null
-                          : false;
-                        const isSaved = !!existingMatch;
-
-                        return (
-                          <div
-                            key={assignment.id}
-                            className={`border rounded-lg p-4 ${isPublished ? 'bg-muted/50' : ''}`}
-                          >
-                            <div className="flex items-center justify-between mb-4">
-                              <div className="flex items-center gap-2">
-                                <Badge variant="outline">
-                                  {assignment.court?.label || `Court ${assignment.courtId}`}
-                                </Badge>
-                                <Badge variant="secondary">{assignment.tier}</Badge>
-                                {isSaved && !isPublished && (
-                                  <Badge variant="outline" className="bg-blue-50 dark:bg-blue-950">
-                                    {t('saved')}
-                                  </Badge>
-                                )}
-                                {isPublished && (
-                                  <Badge variant="default" className="gap-1">
-                                    <Lock className="h-3 w-3" />
-                                    {t('published')}
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                              {/* Team A */}
-                              <div className="space-y-1">
-                                <p className="text-sm font-medium">{t('teamA')}</p>
-                                {assignment.teamA?.map((player, idx) => (
-                                  <p key={idx} className="text-sm text-muted-foreground">
-                                    {player.name}
-                                  </p>
-                                ))}
-                              </div>
-
-                              {/* Score Input */}
-                              <div className="flex items-center justify-center gap-4">
-                                <div className="space-y-2">
-                                  <Label htmlFor={`${key}-setsA`} className="sr-only">
-                                    {t('teamASets')}
-                                  </Label>
-                                  <Input
-                                    id={`${key}-setsA`}
-                                    type="number"
-                                    min="0"
-                                    max="6"
-                                    value={result.setsA}
-                                    onChange={(e) =>
-                                      handleScoreChange(
-                                        assignment.courtId,
-                                        assignment.round,
-                                        'A',
-                                        e.target.value
-                                      )
-                                    }
-                                    disabled={isPublished}
-                                    className="w-20 text-center text-lg font-bold"
-                                  />
-                                </div>
-                                <span className="text-2xl font-bold">-</span>
-                                <div className="space-y-2">
-                                  <Label htmlFor={`${key}-setsB`} className="sr-only">
-                                    {t('teamBSets')}
-                                  </Label>
-                                  <Input
-                                    id={`${key}-setsB`}
-                                    type="number"
-                                    min="0"
-                                    max="6"
-                                    value={result.setsB}
-                                    onChange={(e) =>
-                                      handleScoreChange(
-                                        assignment.courtId,
-                                        assignment.round,
-                                        'B',
-                                        e.target.value
-                                      )
-                                    }
-                                    disabled={isPublished}
-                                    className="w-20 text-center text-lg font-bold"
-                                  />
-                                </div>
-                              </div>
-
-                              {/* Team B */}
-                              <div className="space-y-1">
-                                <p className="text-sm font-medium">{t('teamB')}</p>
-                                {assignment.teamB?.map((player, idx) => (
-                                  <p key={idx} className="text-sm text-muted-foreground">
-                                    {player.name}
-                                  </p>
-                                ))}
-                              </div>
-                            </div>
-
-                            {/* Save button */}
-                            {!isPublished && (
-                              <div className="mt-4 flex justify-end">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleSaveMatch(assignment)}
-                                  disabled={saveMatchMutation.isPending}
-                                  className="gap-2"
-                                >
-                                  <Save className="h-4 w-4" />
-                                  {isSaved ? t('update') : t('save')}
-                                </Button>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-          </div>
+          <ResultsTierSection
+            tier="MASTERS"
+            rounds={mastersRounds}
+            matchResults={matchResults}
+            matches={matches}
+            handleScoreChange={handleScoreChange}
+            t={t}
+          />
         )}
 
-        {/* Explorers Results */}
+        {/* Explorers Results - Using TierSection with custom render */}
         {Object.keys(explorersRounds).length > 0 && (
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold">{t('explorers')}</h2>
-            {Object.entries(explorersRounds)
-              .sort(([a], [b]) => parseInt(a) - parseInt(b))
-              .map(([round, assignments]) => (
-                <Card className="glass-card" key={`explorers-${round}`}>
-                  <CardHeader>
-                    <CardTitle className="text-lg">{t('round', { round })}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="space-y-4">
-                      {assignments.map((assignment) => {
-                        const key = `${assignment.courtId}-${assignment.round}`;
-                        const result = matchResults[key] || { setsA: 0, setsB: 0 };
-                        const existingMatch = matches?.find(
-                          (m) => m.courtId === assignment.courtId && m.round === assignment.round
-                        );
-                        const isPublished = existingMatch
-                          ? existingMatch.publishedAt !== null
-                          : false;
-                        const isSaved = !!existingMatch;
-
-                        return (
-                          <div
-                            key={assignment.id}
-                            className={`border rounded-lg p-4 ${isPublished ? 'bg-muted/50' : ''}`}
-                          >
-                            <div className="flex items-center justify-between mb-4">
-                              <div className="flex items-center gap-2">
-                                <Badge variant="outline">
-                                  {assignment.court?.label || `Court ${assignment.courtId}`}
-                                </Badge>
-                                <Badge variant="secondary">{assignment.tier}</Badge>
-                                {isSaved && !isPublished && (
-                                  <Badge variant="outline" className="bg-blue-50 dark:bg-blue-950">
-                                    {t('saved')}
-                                  </Badge>
-                                )}
-                                {isPublished && (
-                                  <Badge variant="default" className="gap-1">
-                                    <Lock className="h-3 w-3" />
-                                    {t('published')}
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                              {/* Team A */}
-                              <div className="space-y-1">
-                                <p className="text-sm font-medium">{t('teamA')}</p>
-                                {assignment.teamA?.map((player, idx) => (
-                                  <p key={idx} className="text-sm text-muted-foreground">
-                                    {player.name}
-                                  </p>
-                                ))}
-                              </div>
-
-                              {/* Score Input */}
-                              <div className="flex items-center justify-center gap-4">
-                                <div className="space-y-2">
-                                  <Label htmlFor={`${key}-setsA`} className="sr-only">
-                                    {t('teamASets')}
-                                  </Label>
-                                  <Input
-                                    id={`${key}-setsA`}
-                                    type="number"
-                                    min="0"
-                                    max="6"
-                                    value={result.setsA}
-                                    onChange={(e) =>
-                                      handleScoreChange(
-                                        assignment.courtId,
-                                        assignment.round,
-                                        'A',
-                                        e.target.value
-                                      )
-                                    }
-                                    disabled={isPublished}
-                                    className="w-20 text-center text-lg font-bold"
-                                  />
-                                </div>
-                                <span className="text-2xl font-bold">-</span>
-                                <div className="space-y-2">
-                                  <Label htmlFor={`${key}-setsB`} className="sr-only">
-                                    {t('teamBSets')}
-                                  </Label>
-                                  <Input
-                                    id={`${key}-setsB`}
-                                    type="number"
-                                    min="0"
-                                    max="6"
-                                    value={result.setsB}
-                                    onChange={(e) =>
-                                      handleScoreChange(
-                                        assignment.courtId,
-                                        assignment.round,
-                                        'B',
-                                        e.target.value
-                                      )
-                                    }
-                                    disabled={isPublished}
-                                    className="w-20 text-center text-lg font-bold"
-                                  />
-                                </div>
-                              </div>
-
-                              {/* Team B */}
-                              <div className="space-y-1">
-                                <p className="text-sm font-medium">{t('teamB')}</p>
-                                {assignment.teamB?.map((player, idx) => (
-                                  <p key={idx} className="text-sm text-muted-foreground">
-                                    {player.name}
-                                  </p>
-                                ))}
-                              </div>
-                            </div>
-
-                            {/* Save button */}
-                            {!isPublished && (
-                              <div className="mt-4 flex justify-end">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleSaveMatch(assignment)}
-                                  disabled={saveMatchMutation.isPending}
-                                  className="gap-2"
-                                >
-                                  <Save className="h-4 w-4" />
-                                  {isSaved ? t('update') : t('save')}
-                                </Button>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-          </div>
+          <ResultsTierSection
+            tier="EXPLORERS"
+            rounds={explorersRounds}
+            matchResults={matchResults}
+            matches={matches}
+            handleScoreChange={handleScoreChange}
+            t={t}
+          />
         )}
       </div>
 

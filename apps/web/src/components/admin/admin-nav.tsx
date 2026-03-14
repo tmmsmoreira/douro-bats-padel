@@ -24,7 +24,7 @@ import { MobileMenu } from '@/components/shared/mobile-menu';
 
 export function AdminNav() {
   const pathname = useActivePathname();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const t = useTranslations('nav');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -52,6 +52,36 @@ export function AdminNav() {
     { href: '/admin/venues', label: t('venues') },
     { href: '/admin/invitations', label: t('invitations') },
   ];
+
+  // Show loading skeleton while session is loading
+  if (status === 'loading') {
+    return (
+      <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border/50">
+        <nav className="border-b bg-card sticky top-0 z-50">
+          <div className="container mx-auto px-4">
+            <div className="flex h-16 items-center justify-between">
+              {/* Logo */}
+              <Link href="/admin" className="flex items-center gap-3 shrink-0">
+                <Image
+                  src="/icons/logo.png"
+                  alt="Douro Bats Padel"
+                  width={40}
+                  height={40}
+                  priority
+                  className="object-contain"
+                />
+                <span className="font-heading gradient-text text-xl font-bold">
+                  Douro Bats Padel
+                </span>
+              </Link>
+              {/* Loading skeleton for user avatar */}
+              <div className="h-10 w-10 rounded-full bg-muted animate-pulse" />
+            </div>
+          </div>
+        </nav>
+      </header>
+    );
+  }
 
   return (
     <>

@@ -1,7 +1,6 @@
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { usePastEvents, useMinimumLoading } from '@/hooks';
@@ -78,43 +77,32 @@ export function PastEventsList() {
                     show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
                   }}
                   className="opacity-90"
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
                 >
-                  <EventCard
-                    event={event}
-                    showVenue
-                    headerActions={
-                      <>
-                        {isConfirmed && (
-                          <StatusBadge status="PARTICIPATED" label={t('home.participated')} />
-                        )}
-                        {isWaitlisted && (
-                          <StatusBadge status="WAITLISTED" label={t('home.waitlisted')} />
-                        )}
-                      </>
-                    }
-                  >
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <Link href={`/events/${event.id}`} className="block">
+                    <EventCard
+                      event={event}
+                      showVenue
+                      animate={false}
+                      headerActions={
+                        <>
+                          {isConfirmed && (
+                            <StatusBadge status="PARTICIPATED" label={t('home.participated')} />
+                          )}
+                          {isWaitlisted && (
+                            <StatusBadge status="WAITLISTED" label={t('home.waitlisted')} />
+                          )}
+                        </>
+                      }
+                    >
                       <EventStats
                         event={event}
                         confirmedLabel={t('home.confirmed')}
                         waitlistedLabel={t('home.waitlisted')}
                       />
-                      <div className="flex gap-2 w-full sm:w-auto">
-                        {event.state === 'PUBLISHED' && (
-                          <>
-                            <Button variant="outline" className="rounded-lg" asChild animate>
-                              <Link href={`/events/${event.id}/results`}>
-                                {t('home.viewResults')}
-                              </Link>
-                            </Button>
-                            <Button variant="outline" className="rounded-lg" asChild animate>
-                              <Link href={`/events/${event.id}/draw`}>{t('home.viewDraw')}</Link>
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </EventCard>
+                    </EventCard>
+                  </Link>
                 </motion.div>
               );
             })}

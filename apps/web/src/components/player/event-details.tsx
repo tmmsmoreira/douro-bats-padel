@@ -4,14 +4,16 @@ import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Calendar, MapPin, Clock } from 'lucide-react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Spinner } from '@/components/ui/spinner';
 import { HomeAdaptiveNav } from '@/components/shared/home-adaptive-nav';
 import { formatTime } from '@/lib/utils';
 import { DataStateWrapper, PageLayout, PageHeader } from '@/components/shared';
+import { useRSVP } from '@/hooks';
 import { motion } from 'motion/react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
@@ -46,6 +48,8 @@ interface EventDetails {
   date: string;
   startsAt: string;
   endsAt: string;
+  rsvpOpensAt: string;
+  rsvpClosesAt: string;
   capacity: number;
   state: string;
   venue?: {
@@ -57,6 +61,10 @@ interface EventDetails {
   confirmedPlayers: Player[];
   waitlistedPlayers: WaitlistedPlayer[];
   tierRules?: TierRules;
+  userRSVP?: {
+    status: 'CONFIRMED' | 'WAITLISTED';
+    position?: number;
+  };
 }
 
 export function EventDetails({ eventId }: { eventId: string }) {
@@ -103,6 +111,22 @@ function EventDetailsContent({
   locale: string;
   t: any;
 }) {
+  const { data: session } = useSession();
+  const rsvpMutation = useRSVP([['event', event.id]]);
+
+  const userStatus = event.userRSVP?.status;
+  const isConfirmed = userStatus === 'CONFIRMED';
+  const isWaitlisted = userStatus === 'WAITLISTED';
+  const isFull = event.confirmedCount >= event.capacity;
+  const now = new Date();
+  const rsvpOpens = new Date(event.rsvpOpensAt);
+  const rsvpCloses = new Date(event.rsvpClosesAt);
+  const canRegister = session && now >= rsvpOpens && now <= rsvpCloses;
+
+  const handleRSVP = (status: 'IN' | 'OUT') => {
+    rsvpMutation.mutate({ eventId: event.id, status });
+  };
+
   // Show message for published events
   if (event.state === 'PUBLISHED') {
     return (
@@ -191,6 +215,62 @@ function EventDetailsContent({
         backButtonHref="/"
         backButtonLabel={t('backToEvents')}
       />
+
+      {/* RSVP Buttons */}
+      {session && event.state !== 'PUBLISHED' && (
+        <Card className="glass-card">
+          <CardContent className="pt-6 pb-6">
+            <div className="flex flex-col gap-3">
+              {canRegister && !isConfirmed && !isWaitlisted && (
+                <Button
+                  onClick={() => handleRSVP('IN')}
+                  disabled={rsvpMutation.isPending}
+                  className="w-full gap-2"
+                  animate
+                >
+                  {rsvpMutation.isPending && (
+                    <Spinner data-icon="inline-start" className="h-4 w-4" />
+                  )}
+                  {isFull ? t('registerToWaitlist') : t('register')}
+                </Button>
+              )}
+              {(isConfirmed || isWaitlisted) && (
+                <div className="flex flex-col sm:flex-row gap-3 items-center justify-center">
+                  <div className="flex items-center gap-2">
+                    {isConfirmed && (
+                      <Badge variant="default" className="text-sm">
+                        {t('confirmedBadge')}
+                      </Badge>
+                    )}
+                    {isWaitlisted && (
+                      <Badge variant="secondary" className="text-sm">
+                        {t('waitlistedPosition', { position: event.userRSVP?.position || 0 })}
+                      </Badge>
+                    )}
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleRSVP('OUT')}
+                    disabled={rsvpMutation.isPending}
+                    className="w-full sm:w-auto gap-2"
+                    animate
+                  >
+                    {rsvpMutation.isPending && (
+                      <Spinner data-icon="inline-start" className="h-4 w-4" />
+                    )}
+                    {t('unregister')}
+                  </Button>
+                </div>
+              )}
+              {!canRegister && !isConfirmed && !isWaitlisted && (
+                <p className="text-sm text-muted-foreground text-center">
+                  {now < rsvpOpens ? t('rsvpNotOpenYet') : t('rsvpClosed')}
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Tier Time Slots */}
       {event.tierRules &&

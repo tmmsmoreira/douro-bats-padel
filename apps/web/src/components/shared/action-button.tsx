@@ -37,7 +37,7 @@ export function ActionButton({
   return (
     <Button
       variant={variant}
-      className="gap-2 px-4 py-5 text-base font-medium"
+      className="w-full sm:w-auto gap-2 px-4 py-5 text-base font-medium"
       onMouseEnter={() => iconRef.current?.startAnimation()}
       onMouseLeave={() => iconRef.current?.stopAnimation()}
       onClick={handleClick}

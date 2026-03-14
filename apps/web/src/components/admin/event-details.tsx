@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import Link from 'next/link';
 import { MoreVertical, Edit } from 'lucide-react';
-import { LockIcon, SquarePenIcon, SquarePenIconHandle } from 'lucide-animated';
+import { LockIcon, LockIconHandle, SquarePenIcon, SquarePenIconHandle } from 'lucide-animated';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -554,7 +554,7 @@ function EventDetailsHeaderActionButtons({
     if (hasEventPassed && event.state === 'PUBLISHED') {
       return (
         <Link href={`/admin/events/${event.id}/results`}>
-          <Button variant="secondary" animate>
+          <Button variant="secondary" animate className="w-full">
             {t('enterResults')}
           </Button>
         </Link>

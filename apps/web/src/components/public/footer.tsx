@@ -50,42 +50,13 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Quick Links and Legal - Side by side on mobile */}
+          {/* Legal and Information - Side by side on mobile */}
           <div className="grid grid-cols-2 gap-6 sm:col-span-2 lg:col-span-2 lg:grid-cols-2">
-            {/* Quick Links */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold">{tFooter('quickLinks')}</h3>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <Link
-                    href="/"
-                    className="text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    {tNav('home')}
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/"
-                    className="text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    {tNav('events')}
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/about"
-                    className="text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    {tNav('about')}
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
             {/* Legal */}
             <div className="space-y-4">
-              <h3 className="text-lg font-bold">{tFooter('legal')}</h3>
+              <h3 className="text-lg font-bold uppercase text-muted-foreground">
+                {tFooter('legal')}
+              </h3>
               <ul className="space-y-2 text-sm">
                 <li>
                   <Link
@@ -109,6 +80,31 @@ export function Footer() {
                     className="text-muted-foreground hover:text-primary transition-colors"
                   >
                     {tFooter('cookiePolicy')}
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Information */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-bold uppercase text-muted-foreground">
+                {tFooter('information')}
+              </h3>
+              <ul className="space-y-2 text-sm">
+                <li>
+                  <Link
+                    href="/about"
+                    className="text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    {tFooter('aboutUs')}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/contact"
+                    className="text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    {tFooter('contact')}
                   </Link>
                 </li>
                 <li>

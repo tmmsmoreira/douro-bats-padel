@@ -66,7 +66,7 @@ export function PageHeader({
             </div>
           )}
         </div>
-        {action && <div className="shrink-0">{action}</div>}
+        {action && <div className="w-full sm:w-auto shrink-0">{action}</div>}
       </motion.div>
     </div>
   );

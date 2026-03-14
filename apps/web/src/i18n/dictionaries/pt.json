@@ -465,10 +465,13 @@
     "invited": "Convidado",
     "invitedOn": "Convidado em",
     "expiresOn": "Expira em",
-    "allStatuses": "Todos",
+    "allStatuses": "Todos os Estados",
     "statusActive": "Ativos",
     "statusInactive": "Inativos",
-    "statusInvited": "Convidados"
+    "statusInvited": "Convidados",
+    "showingResults": "A mostrar {start}-{end} de {total}",
+    "previous": "Anterior",
+    "next": "Seguinte"
   },
   "playerStatus": {
     "ACTIVE": "Ativo",

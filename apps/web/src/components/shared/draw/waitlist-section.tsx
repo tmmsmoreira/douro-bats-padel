@@ -1,15 +1,28 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import type { WaitlistedPlayer } from './types';
 
-interface WaitlistSectionProps {
-  players: WaitlistedPlayer[];
-  showAvatar?: boolean;
-  title: string;
+interface WaitlistedPlayerBase {
+  id: string;
+  name: string;
+  rating: number;
+  position: number;
+  profilePhoto?: string | null;
 }
 
-export function WaitlistSection({ players, showAvatar = false, title }: WaitlistSectionProps) {
+interface WaitlistSectionProps {
+  players: WaitlistedPlayerBase[];
+  showAvatar?: boolean;
+  title: string;
+  avatarSize?: 'sm' | 'md';
+}
+
+export function WaitlistSection({
+  players,
+  showAvatar = false,
+  title,
+  avatarSize = 'sm',
+}: WaitlistSectionProps) {
   if (!players || players.length === 0) {
     return null;
   }
@@ -26,15 +39,17 @@ export function WaitlistSection({ players, showAvatar = false, title }: Waitlist
               key={player.id}
               className="flex items-center justify-between py-2 border-b last:border-0"
             >
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-1">
                 <Badge variant="secondary">#{player.position}</Badge>
                 {showAvatar && (
-                  <Avatar className="h-6 w-6">
+                  <Avatar className={avatarSize === 'md' ? 'h-8 w-8' : 'h-6 w-6'}>
                     <AvatarImage
                       src={player.profilePhoto || undefined}
                       alt={player.name || 'Player'}
                     />
-                    <AvatarFallback className="gradient-primary text-xs">
+                    <AvatarFallback
+                      className={`gradient-primary ${avatarSize === 'md' ? 'text-sm' : 'text-xs'}`}
+                    >
                       {player.name
                         ? player.name
                             .split(' ')

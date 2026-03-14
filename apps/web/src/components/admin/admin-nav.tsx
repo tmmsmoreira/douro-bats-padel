@@ -15,7 +15,14 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { signOut, useSession } from 'next-auth/react';
-import { UserIcon, LogoutIcon, LogoutIconHandle, UserIconHandle } from 'lucide-animated';
+import {
+  UserIcon,
+  LogoutIcon,
+  LogoutIconHandle,
+  UserIconHandle,
+  EyeIcon,
+  EyeIconHandle,
+} from 'lucide-animated';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { LOGO_BLUR_DATA_URL } from '@/lib/image-blur';
 import { LanguageMenuItems } from '@/components/shared/language-menu-items';
@@ -31,6 +38,7 @@ export function AdminNav() {
 
   const signOutIconRef = useRef<LogoutIconHandle>(null);
   const userIconRef = useRef<UserIconHandle>(null);
+  const eyeIconRef = useRef<EyeIconHandle>(null);
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {
@@ -130,17 +138,6 @@ export function AdminNav() {
                 </div>
 
                 <div className="flex items-center gap-4">
-                  <Link
-                    href="/"
-                    onClick={() => {
-                      sessionStorage.setItem('lastView', 'player');
-                      window.dispatchEvent(new Event('viewChanged'));
-                    }}
-                  >
-                    <Button variant="ghost" size="xs" className="uppercase dark:hover:bg-muted">
-                      {t('playerView')}
-                    </Button>
-                  </Link>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" className="relative h-10 w-10 rounded-full">
@@ -183,6 +180,23 @@ export function AdminNav() {
                         <Link href="/profile" className="flex gap-2">
                           <UserIcon size={16} ref={userIconRef} />
                           <span>{t('profile')}</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        asChild
+                        onMouseEnter={() => eyeIconRef.current?.startAnimation()}
+                      >
+                        <Link
+                          href="/"
+                          onClick={() => {
+                            sessionStorage.setItem('lastView', 'player');
+                            window.dispatchEvent(new Event('viewChanged'));
+                          }}
+                          className="flex gap-2"
+                        >
+                          <EyeIcon size={16} ref={eyeIconRef} />
+                          <span>{t('playerView')}</span>
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />

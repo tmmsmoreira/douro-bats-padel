@@ -4,12 +4,9 @@ import { useQuery, useMutation, useQueryClient, UseMutationResult } from '@tanst
 import { useSession } from 'next-auth/react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import Link from 'next/link';
-import { MoreVertical, Edit } from 'lucide-react';
+import { MoreVertical } from 'lucide-react';
 import { LockIcon, LockIconHandle, SquarePenIcon, SquarePenIconHandle } from 'lucide-animated';
 import {
   DropdownMenu,
@@ -23,11 +20,10 @@ import { toast } from 'sonner';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
 import { PageHeader } from '../shared/page-header';
 import { DeleteIcon, DeleteIconHandle } from 'lucide-animated';
-import { motion } from 'motion/react';
 import { DataStateWrapper } from '../shared';
-import { EventHeaderInfo } from '../shared/event';
+import { EventHeaderInfo, ConfirmedPlayersSection } from '../shared/event';
 import { Spinner } from '../ui/spinner';
-import { TierSection } from '@/components/shared/draw';
+import { TierSection, WaitlistSection } from '@/components/shared/draw';
 import type { Player, WaitlistedPlayer, Assignment } from '@/components/shared/draw';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -287,14 +283,7 @@ function EventDetailsContent({
   t: any;
 }) {
   return (
-    <motion.div
-      key="content"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
-      className="space-y-8"
-    >
+    <div className="space-y-8">
       <PageHeader
         title={event.title || t('untitledEvent')}
         description={<EventHeaderInfo event={event} locale={locale} />}
@@ -321,136 +310,32 @@ function EventDetailsContent({
 
             {/* Always show waitlist if there are waitlisted players */}
             {(event.waitlistCount > 0 || (event.waitlistedPlayers?.length ?? 0) > 0) && (
-              <Card className="glass-card">
-                <CardHeader>
-                  <CardTitle>
-                    {t('waitlist')} ({event.waitlistCount || event.waitlistedPlayers?.length || 0})
-                  </CardTitle>
-                  <CardDescription>{t('playersWaitingForSpot')}</CardDescription>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  {event.waitlistedPlayers && event.waitlistedPlayers.length > 0 ? (
-                    <div className="space-y-2">
-                      {event.waitlistedPlayers.map((player: WaitlistedPlayer) => (
-                        <div
-                          key={player.id}
-                          className="flex items-center justify-between py-2 border-b last:border-0"
-                        >
-                          <div className="flex items-center gap-2">
-                            <Badge variant="secondary">#{player.position}</Badge>
-                            <Avatar className="h-6 w-6">
-                              <AvatarImage
-                                src={player.profilePhoto || undefined}
-                                alt={player.name || 'Player'}
-                              />
-                              <AvatarFallback className="gradient-primary text-xs">
-                                {player.name
-                                  ? player.name
-                                      .split(' ')
-                                      .map((n) => n[0])
-                                      .join('')
-                                      .toUpperCase()
-                                      .slice(0, 2)
-                                  : '?'}
-                              </AvatarFallback>
-                            </Avatar>
-                            <span>{player.name}</span>
-                          </div>
-                          <span className="text-sm text-muted-foreground">{player.rating}</span>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">{t('noPlayersOnWaitlist')}</p>
-                  )}
-                </CardContent>
-              </Card>
+              <WaitlistSection
+                players={event.waitlistedPlayers || []}
+                showAvatar={true}
+                title={`${t('waitlist')} (${event.waitlistCount || event.waitlistedPlayers?.length || 0})`}
+              />
             )}
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2">
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle>
-                  {t('confirmedPlayers')} ({event.confirmedCount})
-                </CardTitle>
-                <CardDescription>
-                  {t('spotsRemaining', { count: event.capacity - event.confirmedCount })}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="space-y-2">
-                  {event.confirmedPlayers?.map((player: Player) => (
-                    <div
-                      key={player.id}
-                      className="flex items-center justify-between py-2 border-b last:border-0"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-6 w-6">
-                          <AvatarImage
-                            src={player.profilePhoto || undefined}
-                            alt={player.name || 'Player'}
-                          />
-                          <AvatarFallback className="gradient-primary text-xs">
-                            {player.name
-                              ? player.name
-                                  .split(' ')
-                                  .map((n) => n[0])
-                                  .join('')
-                                  .toUpperCase()
-                                  .slice(0, 2)
-                              : '?'}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span>{player.name}</span>
-                      </div>
-                      <span className="text-sm text-muted-foreground">{player.rating}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <ConfirmedPlayersSection
+              players={event.confirmedPlayers || []}
+              confirmedCount={event.confirmedCount}
+              capacity={event.capacity}
+              title={t('confirmedPlayers')}
+              spotsRemainingText={t('spotsRemaining', {
+                count: event.capacity - event.confirmedCount,
+              })}
+              showAvatar={true}
+              showIndex={false}
+            />
 
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle>
-                  {t('waitlist')} ({event.waitlistCount})
-                </CardTitle>
-                <CardDescription>{t('playersWaitingForSpot')}</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="space-y-2">
-                  {event.waitlistedPlayers?.map((player: WaitlistedPlayer) => (
-                    <div
-                      key={player.id}
-                      className="flex items-center justify-between py-2 border-b last:border-0"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Badge variant="secondary">#{player.position}</Badge>
-                        <Avatar className="h-6 w-6">
-                          <AvatarImage
-                            src={player.profilePhoto || undefined}
-                            alt={player.name || 'Player'}
-                          />
-                          <AvatarFallback className="gradient-primary text-xs">
-                            {player.name
-                              ? player.name
-                                  .split(' ')
-                                  .map((n) => n[0])
-                                  .join('')
-                                  .toUpperCase()
-                                  .slice(0, 2)
-                              : '?'}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span>{player.name}</span>
-                      </div>
-                      <span className="text-sm text-muted-foreground">{player.rating}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <WaitlistSection
+              players={event.waitlistedPlayers || []}
+              showAvatar={true}
+              title={`${t('waitlist')} (${event.waitlistCount})`}
+            />
           </div>
         )}
 
@@ -470,7 +355,7 @@ function EventDetailsContent({
           }}
         />
       </div>
-    </motion.div>
+    </div>
   );
 }
 

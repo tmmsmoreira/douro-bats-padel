@@ -5,7 +5,6 @@ import { useQuery } from '@tanstack/react-query';
 import { VenueForm } from '@/components/admin/venue-form';
 import { useTranslations } from 'next-intl';
 import { PageHeader } from '@/components/shared/page-header';
-import { motion, AnimatePresence } from 'motion/react';
 import { LoadingState } from '@/components/shared/loading-state';
 import { useMinimumLoading } from '@/hooks/use-minimum-loading';
 import { Card, CardContent } from '@/components/ui/card';
@@ -39,40 +38,27 @@ export default function EditVenuePage() {
   // Use minimum loading to prevent jarring flashes
   const showLoading = useMinimumLoading(isLoading, !!venue);
 
+  if (showLoading) {
+    return <LoadingState message={t('loadingVenue')} />;
+  }
+
+  if (!venue) {
+    return (
+      <div className="space-y-6">
+        <PageHeader title={t('editVenue')} />
+        <Card className="glass-card">
+          <CardContent className="py-8 text-center text-destructive">
+            {t('venueNotFound')}
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
-    <AnimatePresence mode="wait">
-      {showLoading ? (
-        <LoadingState message={t('loadingVenue')} />
-      ) : !venue ? (
-        <motion.div
-          key="not-found"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <div className="space-y-6">
-            <PageHeader title={t('editVenue')} />
-            <Card className="glass-card">
-              <CardContent className="py-8 text-center text-destructive">
-                {t('venueNotFound')}
-              </CardContent>
-            </Card>
-          </div>
-        </motion.div>
-      ) : (
-        <motion.div
-          key="content"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className="space-y-6"
-        >
-          <PageHeader title={t('editVenue')} description={t('updateVenueDescription')} />
-          <VenueForm venueId={venueId} initialData={venue} />
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <div className="space-y-6">
+      <PageHeader title={t('editVenue')} description={t('updateVenueDescription')} />
+      <VenueForm venueId={venueId} initialData={venue} />
+    </div>
   );
 }

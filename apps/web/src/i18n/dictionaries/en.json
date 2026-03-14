@@ -492,10 +492,13 @@
     "invited": "Invited",
     "invitedOn": "Invited on",
     "expiresOn": "Expires on",
-    "allStatuses": "All",
+    "allStatuses": "All Statuses",
     "statusActive": "Active",
     "statusInactive": "Inactive",
-    "statusInvited": "Invited"
+    "statusInvited": "Invited",
+    "showingResults": "Showing {start}-{end} of {total}",
+    "previous": "Previous",
+    "next": "Next"
   },
   "playerStatus": {
     "ACTIVE": "Active",

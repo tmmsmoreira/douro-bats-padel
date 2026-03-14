@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Mail, CheckCircle } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import {
   SearchIcon,
   SearchIconHandle,
@@ -24,6 +24,8 @@ import { StatusBadge } from '@/components/shared/status-badge';
 import type { PlayerProfileStatus } from '@/components/shared/status-badge';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+
+const PLAYERS_PER_PAGE = 10;
 
 type PlayerState = 'ALL' | 'ACTIVE' | 'INACTIVE' | 'INVITED';
 
@@ -61,6 +63,7 @@ export function PlayersList() {
   const locale = useLocale();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<PlayerState>('ALL');
+  const [currentPage, setCurrentPage] = useState(1);
   const searchIconRef = useRef<SearchIconHandle>(null);
   const xIconRef = useRef<XIconHandle>(null);
 
@@ -112,6 +115,17 @@ export function PlayersList() {
     });
   }, [players, searchQuery, statusFilter]);
 
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredPlayers.length / PLAYERS_PER_PAGE);
+  const startIndex = (currentPage - 1) * PLAYERS_PER_PAGE;
+  const endIndex = startIndex + PLAYERS_PER_PAGE;
+  const paginatedPlayers = filteredPlayers.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter]);
+
   return (
     <DataStateWrapper
       isLoading={isLoading}
@@ -121,11 +135,17 @@ export function PlayersList() {
     >
       {() => (
         <PlayersListContent
+          paginatedPlayers={paginatedPlayers}
           filteredPlayers={filteredPlayers}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           statusFilter={statusFilter}
           setStatusFilter={setStatusFilter}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          totalPages={totalPages}
+          startIndex={startIndex}
+          endIndex={endIndex}
           searchIconRef={searchIconRef}
           xIconRef={xIconRef}
           t={t}
@@ -138,21 +158,33 @@ export function PlayersList() {
 
 // Separate component for players list content
 function PlayersListContent({
+  paginatedPlayers,
   filteredPlayers,
   searchQuery,
   setSearchQuery,
   statusFilter,
   setStatusFilter,
+  currentPage,
+  setCurrentPage,
+  totalPages,
+  startIndex,
+  endIndex,
   searchIconRef,
   xIconRef,
   t,
   locale,
 }: {
+  paginatedPlayers: Player[];
   filteredPlayers: Player[];
   searchQuery: string;
   setSearchQuery: (value: string) => void;
   statusFilter: PlayerState;
   setStatusFilter: (value: PlayerState) => void;
+  currentPage: number;
+  setCurrentPage: (value: number | ((prev: number) => number)) => void;
+  totalPages: number;
+  startIndex: number;
+  endIndex: number;
   searchIconRef: React.RefObject<SearchIconHandle | null>;
   xIconRef: React.RefObject<XIconHandle | null>;
   t: any;
@@ -272,150 +304,216 @@ function PlayersListContent({
           </Card>
         </motion.div>
       ) : (
-        <motion.div
-          key={`${searchQuery}-${statusFilter}`}
-          initial="hidden"
-          animate="show"
-          variants={{
-            hidden: { opacity: 0 },
-            show: {
-              opacity: 1,
-              transition: {
-                staggerChildren: 0.05,
+        <>
+          <motion.div
+            key={`${searchQuery}-${statusFilter}-${currentPage}`}
+            initial="hidden"
+            animate="show"
+            variants={{
+              hidden: { opacity: 0 },
+              show: {
+                opacity: 1,
+                transition: {
+                  staggerChildren: 0.05,
+                },
               },
-            },
-          }}
-          className="space-y-4"
-        >
-          {filteredPlayers.map((player) => (
-            <motion.div
-              key={player.id}
-              variants={{
-                hidden: { opacity: 0, y: 20 },
-                show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
-              }}
-            >
-              <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
-                <Link
-                  href={`/players/${player.id}`}
-                  className="block"
-                  onMouseEnter={() => trendingUpIconRefs.current.get(player.id)?.startAnimation()}
-                >
-                  <Card className="glass-card group hover:shadow-xl transition-all duration-300 border-border/50">
-                    <CardContent className="p-6 space-y-4">
-                      {/* Top Section: Avatar, Name, Email, and Status Badge */}
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex items-start gap-3 flex-1 min-w-0">
-                          {/* Avatar with verified badge */}
-                          <div className="relative shrink-0">
-                            <Avatar className="h-14 w-14">
-                              <AvatarImage
-                                src={player.profilePhoto || undefined}
-                                alt={player.name || player.email}
-                              />
-                              <AvatarFallback className="gradient-primary text-lg font-semibold">
-                                {player.name
-                                  ? player.name
-                                      .split(' ')
-                                      .map((n) => n[0])
-                                      .join('')
-                                      .toUpperCase()
-                                      .slice(0, 2)
-                                  : player.email[0].toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            {player.emailVerified && (
-                              <div className="absolute -bottom-1 -right-1 bg-background rounded-full p-0.5">
-                                <CheckCircle className="h-4 w-4 text-success" />
+            }}
+            className="space-y-4"
+          >
+            {paginatedPlayers.map((player) => (
+              <motion.div
+                key={player.id}
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+                }}
+              >
+                <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
+                  <Link
+                    href={`/players/${player.id}`}
+                    className="block"
+                    onMouseEnter={() => trendingUpIconRefs.current.get(player.id)?.startAnimation()}
+                  >
+                    <Card className="glass-card group hover:shadow-xl transition-all duration-300 border-border/50">
+                      <CardContent className="p-6 space-y-4">
+                        {/* Top Section: Avatar, Name, Email, and Status Badge */}
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex items-start gap-3 flex-1 min-w-0">
+                            {/* Avatar with verified badge */}
+                            <div className="relative shrink-0">
+                              <Avatar className="h-14 w-14">
+                                <AvatarImage
+                                  src={player.profilePhoto || undefined}
+                                  alt={player.name || player.email}
+                                />
+                                <AvatarFallback className="gradient-primary text-lg font-semibold">
+                                  {player.name
+                                    ? player.name
+                                        .split(' ')
+                                        .map((n) => n[0])
+                                        .join('')
+                                        .toUpperCase()
+                                        .slice(0, 2)
+                                    : player.email[0].toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              {player.emailVerified && (
+                                <div className="absolute -bottom-1 -right-1 bg-background rounded-full p-0.5">
+                                  <CheckCircle className="h-4 w-4 text-success" />
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Name and Email */}
+                            <div className="flex-1 min-w-0 space-y-1.5">
+                              <h3 className="group-hover:text-primary transition-colors font-heading font-semibold text-lg">
+                                {player.name || t('noName')}
+                              </h3>
+                              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                                <Mail className="h-3.5 w-3.5 shrink-0" />
+                                <span className="truncate">{player.email}</span>
                               </div>
+                            </div>
+                          </div>
+
+                          {/* Status Badge - Top Right */}
+                          <div className="shrink-0">
+                            {player.invitation ? (
+                              <StatusBadge status="INVITED" />
+                            ) : (
+                              player.player && (
+                                <StatusBadge status={player.player.status as PlayerProfileStatus} />
+                              )
                             )}
                           </div>
-
-                          {/* Name and Email */}
-                          <div className="flex-1 min-w-0 space-y-1.5">
-                            <h3 className="group-hover:text-primary transition-colors font-heading font-semibold text-lg">
-                              {player.name || t('noName')}
-                            </h3>
-                            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                              <Mail className="h-3.5 w-3.5 shrink-0" />
-                              <span className="truncate">{player.email}</span>
-                            </div>
-                          </div>
                         </div>
 
-                        {/* Status Badge - Top Right */}
-                        <div className="shrink-0">
-                          {player.invitation ? (
-                            <StatusBadge status="INVITED" />
-                          ) : (
-                            player.player && (
-                              <StatusBadge status={player.player.status as PlayerProfileStatus} />
-                            )
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Bottom Section: Player Info and Rating */}
-                      {player.invitation ? (
-                        <div className="flex items-end justify-between text-sm text-muted-foreground pt-4 border-t border-border/50">
-                          <div className="space-y-1">
-                            <div>
-                              <span className="font-medium">{t('invitedOn')}:</span>{' '}
-                              <span className="font-semibold text-foreground">
-                                {new Date(player.createdAt).toLocaleDateString(locale)}
-                              </span>
-                            </div>
-                            <div>
-                              <span className="font-medium">{t('expiresOn')}:</span>{' '}
-                              <span className="font-semibold text-foreground">
-                                {new Date(player.invitation.expiresAt).toLocaleDateString(locale)}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex items-end justify-between text-sm text-muted-foreground pt-4 border-t border-border/50">
-                          <div className="space-y-1">
-                            {player.player && (
+                        {/* Bottom Section: Player Info and Rating */}
+                        {player.invitation ? (
+                          <div className="flex items-end justify-between text-sm text-muted-foreground pt-4 border-t border-border/50">
+                            <div className="space-y-1">
                               <div>
-                                <span className="font-medium">{t('playerSince')}:</span>{' '}
+                                <span className="font-medium">{t('invitedOn')}:</span>{' '}
                                 <span className="font-semibold text-foreground">
-                                  {new Date(player.player.createdAt).toLocaleDateString(locale)}
+                                  {new Date(player.createdAt).toLocaleDateString(locale)}
                                 </span>
                               </div>
-                            )}
-                            <div>
-                              <span className="font-medium">{t('accountCreated')}:</span>{' '}
-                              <span className="font-semibold text-foreground">
-                                {new Date(player.createdAt).toLocaleDateString(locale)}
-                              </span>
+                              <div>
+                                <span className="font-medium">{t('expiresOn')}:</span>{' '}
+                                <span className="font-semibold text-foreground">
+                                  {new Date(player.invitation.expiresAt).toLocaleDateString(locale)}
+                                </span>
+                              </div>
                             </div>
                           </div>
-                          {/* Rating - Bottom Right */}
-                          {player.player && (
-                            <div className="flex flex-col items-end gap-0.5 shrink-0">
-                              <div className="flex items-center gap-1.5 text-3xl font-bold text-primary font-heading">
-                                <TrendingUpIcon
-                                  ref={setTrendingUpIconRef(player.id)}
-                                  size={20}
-                                  className="text-primary"
-                                />
-                                <span className="gradient-text">{player.player.rating}</span>
-                              </div>
-                              <div className="text-xs text-muted-foreground font-medium">
-                                {t('rating')}
+                        ) : (
+                          <div className="flex items-end justify-between text-sm text-muted-foreground pt-4 border-t border-border/50">
+                            <div className="space-y-1">
+                              {player.player && (
+                                <div>
+                                  <span className="font-medium">{t('playerSince')}:</span>{' '}
+                                  <span className="font-semibold text-foreground">
+                                    {new Date(player.player.createdAt).toLocaleDateString(locale)}
+                                  </span>
+                                </div>
+                              )}
+                              <div>
+                                <span className="font-medium">{t('accountCreated')}:</span>{' '}
+                                <span className="font-semibold text-foreground">
+                                  {new Date(player.createdAt).toLocaleDateString(locale)}
+                                </span>
                               </div>
                             </div>
-                          )}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </Link>
+                            {/* Rating - Bottom Right */}
+                            {player.player && (
+                              <div className="flex flex-col items-end gap-0.5 shrink-0">
+                                <div className="flex items-center gap-1.5 text-3xl font-bold text-primary font-heading">
+                                  <TrendingUpIcon
+                                    ref={setTrendingUpIconRef(player.id)}
+                                    size={20}
+                                    className="text-primary"
+                                  />
+                                  <span className="gradient-text">{player.player.rating}</span>
+                                </div>
+                                <div className="text-xs text-muted-foreground font-medium">
+                                  {t('rating')}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </Link>
+                </motion.div>
               </motion.div>
-            </motion.div>
-          ))}
-        </motion.div>
+            ))}
+          </motion.div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between border-t pt-4">
+              <div className="text-sm text-muted-foreground">
+                {t('showingResults', {
+                  start: startIndex + 1,
+                  end: Math.min(endIndex, filteredPlayers.length),
+                  total: filteredPlayers.length,
+                })}
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((prev: number) => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                >
+                  {t('previous')}
+                </Button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                    // Show first page, last page, current page, and pages around current
+                    const showPage =
+                      page === 1 ||
+                      page === totalPages ||
+                      (page >= currentPage - 1 && page <= currentPage + 1);
+
+                    if (!showPage) {
+                      // Show ellipsis
+                      if (page === currentPage - 2 || page === currentPage + 2) {
+                        return (
+                          <span key={page} className="px-2 text-muted-foreground">
+                            ...
+                          </span>
+                        );
+                      }
+                      return null;
+                    }
+
+                    return (
+                      <Button
+                        key={page}
+                        variant={currentPage === page ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setCurrentPage(page)}
+                        className="min-w-10"
+                      >
+                        {page}
+                      </Button>
+                    );
+                  })}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((prev: number) => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  {t('next')}
+                </Button>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </motion.div>
   );

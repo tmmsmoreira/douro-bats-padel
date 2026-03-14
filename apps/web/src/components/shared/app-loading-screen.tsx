@@ -50,6 +50,34 @@ export function AppLoadingScreen({ minDuration = 1000, show = true }: AppLoading
     hideScreen();
   }, [minDuration]);
 
+  // Lock body scroll when splash screen is visible
+  useEffect(() => {
+    if (isVisible) {
+      // Get scrollbar width to prevent layout shift
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+
+      // Lock scroll on both html and body elements with !important
+      document.documentElement.style.setProperty('overflow', 'hidden', 'important');
+      document.body.style.setProperty('overflow', 'hidden', 'important');
+
+      // Add padding to prevent layout shift
+      if (scrollbarWidth > 0) {
+        document.documentElement.style.setProperty(
+          'padding-right',
+          `${scrollbarWidth}px`,
+          'important'
+        );
+      }
+
+      // Cleanup: restore original values when splash screen is hidden
+      return () => {
+        document.documentElement.style.removeProperty('overflow');
+        document.body.style.removeProperty('overflow');
+        document.documentElement.style.removeProperty('padding-right');
+      };
+    }
+  }, [isVisible]);
+
   // Don't render on server
   if (!isHydrated && !show) {
     return null;

@@ -9,13 +9,12 @@ import { Badge } from '@/components/ui/badge';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
 import { Lock } from 'lucide-react';
 import { LockIcon, LockIconHandle } from 'lucide-animated';
-import { useAuthFetch, useMinimumLoading } from '@/hooks';
+import { useAuthFetch } from '@/hooks';
 import { useTranslations, useLocale } from 'next-intl';
 import { PageHeader } from '../shared/page-header';
 import { EventHeaderInfo } from '../shared/event';
 import { MatchResultEntry } from '../shared/draw';
-import { motion, AnimatePresence } from 'motion/react';
-import { LoadingState } from '@/components/shared/loading-state';
+import { DataStateWrapper } from '@/components/shared';
 import type { Assignment as DrawAssignment } from '../shared/draw/types';
 
 interface Match {
@@ -179,92 +178,77 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
       });
   };
 
-  // Use minimum loading to prevent jarring flashes
-  const showLoading = useMinimumLoading(isLoading || isLoadingEvent, !!(event && matches));
+  const isLoadingData = isLoading || isLoadingEvent;
+
+  // Custom validation for results entry
+  const getValidationMessage = () => {
+    if (!event) return null;
+    if (event.state !== 'PUBLISHED') {
+      return (
+        <Card className="glass-card">
+          <CardContent className="py-8 text-center text-muted-foreground">
+            <p className="text-lg font-medium mb-2">{t('eventNotPublished')}</p>
+            <p>{t('eventNotPublishedDescription')}</p>
+          </CardContent>
+        </Card>
+      );
+    }
+    if (new Date(event.endsAt) > new Date()) {
+      return (
+        <Card className="glass-card">
+          <CardContent className="py-8 text-center text-muted-foreground">
+            <p className="text-lg font-medium mb-2">{t('eventNotCompleted')}</p>
+            <p>{t('eventNotCompletedDescription')}</p>
+            <p className="text-sm mt-2">
+              {t('eventEnds', { date: new Date(event.endsAt).toLocaleString() })}
+            </p>
+          </CardContent>
+        </Card>
+      );
+    }
+    if (!draw || !draw.assignments || draw.assignments.length === 0) {
+      return (
+        <Card className="glass-card">
+          <CardContent className="py-8 text-center text-muted-foreground">
+            {t('noDrawFound')}
+          </CardContent>
+        </Card>
+      );
+    }
+    return null;
+  };
+
+  const validationMessage = getValidationMessage();
 
   return (
-    <AnimatePresence mode="wait">
-      {showLoading ? (
-        <LoadingState message={t('loading')} />
-      ) : !event ? (
-        <motion.div
-          key="no-event"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <Card>
-            <CardContent className="py-8 text-center text-muted-foreground">
-              {t('eventNotFound')}
-            </CardContent>
-          </Card>
-        </motion.div>
-      ) : event.state !== 'PUBLISHED' ? (
-        <motion.div
-          key="not-published"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <Card>
-            <CardContent className="py-8 text-center text-muted-foreground">
-              <p className="text-lg font-medium mb-2">{t('eventNotPublished')}</p>
-              <p>{t('eventNotPublishedDescription')}</p>
-            </CardContent>
-          </Card>
-        </motion.div>
-      ) : new Date(event.endsAt) > new Date() ? (
-        <motion.div
-          key="not-completed"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <Card>
-            <CardContent className="py-8 text-center text-muted-foreground">
-              <p className="text-lg font-medium mb-2">{t('eventNotCompleted')}</p>
-              <p>{t('eventNotCompletedDescription')}</p>
-              <p className="text-sm mt-2">
-                {t('eventEnds', { date: new Date(event.endsAt).toLocaleString() })}
-              </p>
-            </CardContent>
-          </Card>
-        </motion.div>
-      ) : !draw || !draw.assignments || draw.assignments.length === 0 ? (
-        <motion.div
-          key="no-draw"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <Card>
-            <CardContent className="py-8 text-center text-muted-foreground">
-              {t('noDrawFound')}
-            </CardContent>
-          </Card>
-        </motion.div>
-      ) : (
-        <ResultsEntryContent
-          event={event}
-          draw={draw}
-          matches={matches}
-          matchResults={matchResults}
-          handleScoreChange={handleScoreChange}
-          handleSaveAllResults={handleSaveAllResults}
-          publishMutation={publishMutation}
-          showPublishDialog={showPublishDialog}
-          setShowPublishDialog={setShowPublishDialog}
-          lockIconRef={lockIconRef}
-          locale={locale}
-          t={t}
-          eventId={eventId}
-        />
-      )}
-    </AnimatePresence>
+    <DataStateWrapper
+      isLoading={isLoadingData}
+      data={event}
+      loadingMessage={t('loading')}
+      emptyMessage={t('eventNotFound')}
+    >
+      {(event) =>
+        validationMessage ? (
+          validationMessage
+        ) : draw ? (
+          <ResultsEntryContent
+            event={event}
+            draw={draw}
+            matches={matches}
+            matchResults={matchResults}
+            handleScoreChange={handleScoreChange}
+            handleSaveAllResults={handleSaveAllResults}
+            publishMutation={publishMutation}
+            showPublishDialog={showPublishDialog}
+            setShowPublishDialog={setShowPublishDialog}
+            lockIconRef={lockIconRef}
+            locale={locale}
+            t={t}
+            eventId={eventId}
+          />
+        ) : null
+      }
+    </DataStateWrapper>
   );
 }
 

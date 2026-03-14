@@ -5,16 +5,16 @@ import { useSession } from 'next-auth/react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Calendar, MapPin, Clock } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Spinner } from '@/components/ui/spinner';
 import { HomeAdaptiveNav } from '@/components/shared/home-adaptive-nav';
 import { formatTime } from '@/lib/utils';
 import { DataStateWrapper, PageLayout, PageHeader } from '@/components/shared';
+import { ConfirmedPlayersSection } from '@/components/shared/event';
+import { WaitlistSection } from '@/components/shared/draw';
 import { useRSVP } from '@/hooks';
-import { motion } from 'motion/react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -130,12 +130,7 @@ function EventDetailsContent({
   // Show message for published events
   if (event.state === 'PUBLISHED') {
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
-        className="space-y-6"
-      >
+      <div className="space-y-6">
         <PageHeader
           title={event.title || t('untitledEvent')}
           description={new Date(event.date).toLocaleDateString(locale, {
@@ -166,7 +161,7 @@ function EventDetailsContent({
             </div>
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
     );
   }
 
@@ -202,12 +197,7 @@ function EventDetailsContent({
   );
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
-      className="space-y-6"
-    >
+    <div className="space-y-6">
       <PageHeader
         title={event.title || t('untitledEvent')}
         description={eventDescription}
@@ -306,99 +296,30 @@ function EventDetailsContent({
         )}
 
       {/* Confirmed Players */}
-      <Card className="glass-card">
-        <CardHeader className="bg-green-50 dark:bg-green-950/30">
-          <div className="flex items-center justify-between">
-            <CardTitle>
-              {t('confirmedPlayers')} ({event.confirmedCount}/{event.capacity})
-            </CardTitle>
-            {spotsRemaining > 0 ? (
-              <Badge variant="secondary">{t('spotsRemaining', { count: spotsRemaining })}</Badge>
-            ) : (
-              <Badge variant="default">{t('fullCapacity')}</Badge>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent className="pt-6">
-          {event.confirmedPlayers && event.confirmedPlayers.length > 0 ? (
-            <div className="space-y-2">
-              {event.confirmedPlayers.map((player, index) => (
-                <div
-                  key={player.id}
-                  className="flex items-center justify-between py-2 border-b last:border-0"
-                >
-                  <span className="text-2xl font-bold text-muted-foreground w-8">#{index + 1}</span>
-                  <div className="flex items-center gap-2 flex-1">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage
-                        src={player.profilePhoto || undefined}
-                        alt={player.name || 'Player'}
-                      />
-                      <AvatarFallback className="gradient-primary text-sm">
-                        {player.name
-                          ? player.name
-                              .split(' ')
-                              .map((n) => n[0])
-                              .join('')
-                              .toUpperCase()
-                              .slice(0, 2)
-                          : '?'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span>{player.name}</span>
-                  </div>
-                  <span className="text-2xl font-bold text-muted-foreground">{player.rating}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-center text-muted-foreground py-4">{t('noConfirmedPlayers')}</p>
-          )}
-        </CardContent>
-      </Card>
+      <ConfirmedPlayersSection
+        players={event.confirmedPlayers || []}
+        confirmedCount={event.confirmedCount}
+        capacity={event.capacity}
+        title={t('confirmedPlayers')}
+        spotsRemainingText={t('spotsRemaining', { count: spotsRemaining })}
+        showAvatar={true}
+        showIndex={true}
+        headerClassName="bg-green-50 dark:bg-green-950/30"
+        showCapacityBadge={true}
+        capacityBadgeText={t('spotsRemaining', { count: spotsRemaining })}
+        fullCapacityText={t('fullCapacity')}
+        emptyMessage={t('noConfirmedPlayers')}
+      />
 
       {/* Waitlist */}
       {event.waitlistedPlayers && event.waitlistedPlayers.length > 0 && (
-        <Card className="glass-card">
-          <CardHeader className="bg-amber-50 dark:bg-amber-950/30">
-            <CardTitle>
-              {t('waitlist')} ({event.waitlistCount})
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <div className="space-y-2">
-              {event.waitlistedPlayers.map((player) => (
-                <div
-                  key={player.id}
-                  className="flex items-center justify-between py-2 border-b last:border-0"
-                >
-                  <div className="flex items-center gap-2 flex-1">
-                    <Badge variant="secondary">#{player.position}</Badge>
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage
-                        src={player.profilePhoto || undefined}
-                        alt={player.name || 'Player'}
-                      />
-                      <AvatarFallback className="gradient-primary text-sm">
-                        {player.name
-                          ? player.name
-                              .split(' ')
-                              .map((n) => n[0])
-                              .join('')
-                              .toUpperCase()
-                              .slice(0, 2)
-                          : '?'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span>{player.name}</span>
-                  </div>
-                  <span className="text-sm text-muted-foreground">{player.rating}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <WaitlistSection
+          players={event.waitlistedPlayers}
+          showAvatar={true}
+          avatarSize="md"
+          title={`${t('waitlist')} (${event.waitlistCount})`}
+        />
       )}
-    </motion.div>
+    </div>
   );
 }

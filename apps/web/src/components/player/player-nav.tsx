@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { signOut, useSession } from 'next-auth/react';
-import { UserIcon, LogoutIcon } from 'lucide-animated';
+import { UserIcon, LogoutIcon, EyeIcon, EyeIconHandle } from 'lucide-animated';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { LOGO_BLUR_DATA_URL } from '@/lib/image-blur';
 import { LanguageMenuItems } from '@/components/shared/language-menu-items';
@@ -31,6 +31,7 @@ export function PlayerNav() {
 
   const userIconRef = useRef<{ startAnimation: () => void; stopAnimation: () => void }>(null);
   const signOutIconRef = useRef<{ startAnimation: () => void; stopAnimation: () => void }>(null);
+  const eyeIconRef = useRef<EyeIconHandle>(null);
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {
@@ -131,20 +132,6 @@ export function PlayerNav() {
                 </div>
 
                 <div className="flex items-center gap-4">
-                  {isEditor && (
-                    <Link
-                      href="/admin"
-                      onClick={() => {
-                        sessionStorage.setItem('lastView', 'admin');
-                        // Don't dispatch viewChanged immediately - let the URL change first
-                        // The AdaptiveNav will detect the URL change and switch automatically
-                      }}
-                    >
-                      <Button variant="ghost" size="xs" className="uppercase dark:hover:bg-muted">
-                        {t('adminView')}
-                      </Button>
-                    </Link>
-                  )}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" className="relative h-10 w-10 rounded-full">
@@ -189,6 +176,28 @@ export function PlayerNav() {
                           <span>{t('profile')}</span>
                         </Link>
                       </DropdownMenuItem>
+                      {isEditor && (
+                        <>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            asChild
+                            onMouseEnter={() => eyeIconRef.current?.startAnimation()}
+                          >
+                            <Link
+                              href="/admin"
+                              onClick={() => {
+                                sessionStorage.setItem('lastView', 'admin');
+                                // Don't dispatch viewChanged immediately - let the URL change first
+                                // The AdaptiveNav will detect the URL change and switch automatically
+                              }}
+                              className="flex gap-2"
+                            >
+                              <EyeIcon size={16} ref={eyeIconRef} />
+                              <span>{t('adminView')}</span>
+                            </Link>
+                          </DropdownMenuItem>
+                        </>
+                      )}
                       <DropdownMenuSeparator />
                       <LanguageMenuItems />
                       <DropdownMenuSeparator />

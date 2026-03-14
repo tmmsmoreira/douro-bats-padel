@@ -341,13 +341,12 @@ function ProfileContent({
               <Button
                 onClick={handleEditProfile}
                 variant="outline"
-                size="sm"
+                size="icon"
                 onMouseEnter={() => squarePenIconRef.current?.startAnimation()}
                 onMouseLeave={() => squarePenIconRef.current?.stopAnimation()}
                 animate
               >
                 <SquarePenIcon ref={squarePenIconRef} size={16} className="h-4 w-4" />
-                {t('edit')}
               </Button>
             ) : (
               <div className="flex gap-2">

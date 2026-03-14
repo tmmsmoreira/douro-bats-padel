@@ -20,7 +20,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { motion } from 'motion/react';
 import { DataStateWrapper } from '@/components/shared';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
 import { DrawHeader, TierSection, WaitlistSection } from '@/components/shared/draw';
@@ -206,14 +205,7 @@ function AdminDrawContent({
   const hasEventPassed = eventEndTime < new Date();
 
   return (
-    <motion.div
-      key="content"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
-      className="space-y-6"
-    >
+    <div className="space-y-6">
       {/* Back Button */}
       <div>
         <Link
@@ -344,7 +336,7 @@ function AdminDrawContent({
           setShowDeleteDialog(false);
         }}
       />
-    </motion.div>
+    </div>
   );
 }
 

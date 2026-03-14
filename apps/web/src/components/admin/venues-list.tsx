@@ -143,10 +143,17 @@ function VenuesListContent({
   return (
     <motion.div
       key="content"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
+      initial="hidden"
+      animate="show"
+      variants={{
+        hidden: { opacity: 0 },
+        show: {
+          opacity: 1,
+          transition: {
+            staggerChildren: 0.1,
+          },
+        },
+      }}
       className="space-y-4"
     >
       {venues.map((venue) => (
@@ -156,6 +163,8 @@ function VenuesListContent({
             hidden: { opacity: 0, y: 20 },
             show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
           }}
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.99 }}
         >
           <Card className="glass-card group hover:shadow-xl transition-all duration-300 border-border/50">
             <CardContent className="p-6 space-y-4">

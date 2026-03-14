@@ -20,4 +20,9 @@ export declare enum RSVPStatus {
     DECLINED = "DECLINED",
     CANCELLED = "CANCELLED"
 }
+export declare enum PlayerStatus {
+    ACTIVE = "ACTIVE",
+    INACTIVE = "INACTIVE",
+    INVITED = "INVITED"
+}
 //# sourceMappingURL=common.d.ts.map

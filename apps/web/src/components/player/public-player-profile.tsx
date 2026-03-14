@@ -7,8 +7,8 @@ import { useRouter } from '@/i18n/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Mail, CheckCircle, XCircle, TrendingUp } from 'lucide-react';
-import { DeleteIcon, DeleteIconHandle } from 'lucide-animated';
+import { Mail, CheckCircle, XCircle, TrendingUp, Send } from 'lucide-react';
+import { DeleteIcon, DeleteIconHandle, CopyIcon } from 'lucide-animated';
 import { Button } from '@/components/ui/button';
 import { useRef, useState } from 'react';
 import { toast } from 'sonner';
@@ -44,6 +44,19 @@ interface PlayerData {
       rating: number;
       createdAt: string;
     }>;
+  } | null;
+  invitation?: {
+    id: string;
+    status: string;
+    expiresAt: string;
+    invitedBy: string;
+    invitedByUser?: {
+      id: string;
+      name: string | null;
+      email: string;
+    };
+    token: string;
+    usedAt: string | null;
   } | null;
 }
 
@@ -126,6 +139,88 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
     setShowDeleteDialog(true);
   };
 
+  // Revoke invitation mutation
+  const revokeMutation = useMutation({
+    mutationFn: async (invitationId: string) => {
+      const token = session?.accessToken;
+      const res = await fetch(`${API_URL}/invitations/${invitationId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to revoke invitation');
+      }
+    },
+    onSuccess: () => {
+      toast.success(t('invitationRevoked'));
+      queryClient.invalidateQueries({ queryKey: ['player', playerId] });
+      queryClient.invalidateQueries({ queryKey: ['players'] });
+      router.push('/admin/players');
+    },
+    onError: () => {
+      toast.error(t('revokeInvitationError'));
+    },
+  });
+
+  // Delete invitation mutation
+  const deleteInvitationMutation = useMutation({
+    mutationFn: async (invitationId: string) => {
+      const token = session?.accessToken;
+      const res = await fetch(`${API_URL}/invitations/${invitationId}/permanent`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to delete invitation');
+      }
+    },
+    onSuccess: () => {
+      toast.success(t('invitationDeleted'));
+      queryClient.invalidateQueries({ queryKey: ['player', playerId] });
+      queryClient.invalidateQueries({ queryKey: ['players'] });
+      router.push('/admin/players');
+    },
+    onError: () => {
+      toast.error(t('deleteInvitationError'));
+    },
+  });
+
+  // Resend invitation mutation
+  const resendMutation = useMutation({
+    mutationFn: async (invitationId: string) => {
+      const token = session?.accessToken;
+      const res = await fetch(`${API_URL}/invitations/${invitationId}/resend`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to resend invitation');
+      }
+    },
+    onSuccess: () => {
+      toast.success(t('invitationResent'));
+    },
+    onError: () => {
+      toast.error(t('resendInvitationError'));
+    },
+  });
+
+  const copyInvitationLink = (token: string) => {
+    const WEB_URL = process.env.NEXT_PUBLIC_WEB_URL || 'http://localhost:3000';
+    const link = `${WEB_URL}/register?invitation=${token}`;
+    navigator.clipboard.writeText(link);
+    toast.success(t('linkCopied'));
+  };
+
   // Custom empty component with PageHeader
   const emptyComponent = (
     <motion.div
@@ -172,6 +267,10 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
           setShowDeleteDialog={setShowDeleteDialog}
           setIsDeleting={setIsDeleting}
           deleteMutation={deleteMutation}
+          revokeMutation={revokeMutation}
+          deleteInvitationMutation={deleteInvitationMutation}
+          resendMutation={resendMutation}
+          copyInvitationLink={copyInvitationLink}
           t={t}
           tList={tList}
           tActions={tActions}
@@ -193,6 +292,10 @@ function PublicPlayerProfileContent({
   setShowDeleteDialog,
   setIsDeleting,
   deleteMutation,
+  revokeMutation,
+  deleteInvitationMutation,
+  resendMutation,
+  copyInvitationLink,
   t,
   tList,
   tActions,
@@ -207,6 +310,10 @@ function PublicPlayerProfileContent({
   setShowDeleteDialog: (value: boolean) => void;
   setIsDeleting: (value: boolean) => void;
   deleteMutation: any;
+  revokeMutation: any;
+  deleteInvitationMutation: any;
+  resendMutation: any;
+  copyInvitationLink: (token: string) => void;
   t: any;
   tList: any;
   tActions: any;
@@ -262,6 +369,90 @@ function PublicPlayerProfileContent({
           </div>
         </CardHeader>
       </Card>
+
+      {/* Invitation Section - Only visible for pending invitations */}
+      {player.invitation && (
+        <Card className="glass-card border-primary/50">
+          <CardHeader>
+            <CardTitle>{t('invitationDetails')}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <p className="text-sm text-muted-foreground">{t('invitationStatus')}</p>
+                <Badge variant="outline" className="mt-1 uppercase text-xs">
+                  {player.invitation.status}
+                </Badge>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">{t('expiresAt')}</p>
+                <p className="font-medium mt-1">
+                  {new Date(player.invitation.expiresAt).toLocaleDateString(locale)}
+                </p>
+              </div>
+              {player.invitation.invitedByUser && (
+                <div>
+                  <p className="text-sm text-muted-foreground">{t('invitedBy')}</p>
+                  <p className="font-medium mt-1">
+                    {player.invitation.invitedByUser.name || player.invitation.invitedByUser.email}
+                  </p>
+                </div>
+              )}
+              <div>
+                <p className="text-sm text-muted-foreground">{t('invitedOn')}</p>
+                <p className="font-medium mt-1">
+                  {new Date(player.createdAt).toLocaleDateString(locale)}
+                </p>
+              </div>
+            </div>
+
+            {isAdminOrEditor && player.invitation.status === 'PENDING' && (
+              <div className="flex flex-wrap gap-2 pt-4 border-t">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => copyInvitationLink(player.invitation!.token)}
+                >
+                  <CopyIcon size={16} className="h-4 w-4" />
+                  {t('copyLink')}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => resendMutation.mutate(player.invitation!.id)}
+                  disabled={resendMutation.isPending}
+                >
+                  <Send className="h-4 w-4" />
+                  {t('resendInvitation')}
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => revokeMutation.mutate(player.invitation!.id)}
+                  disabled={revokeMutation.isPending}
+                >
+                  <DeleteIcon size={16} className="h-4 w-4" />
+                  {t('revokeInvitation')}
+                </Button>
+              </div>
+            )}
+
+            {isAdminOrEditor && player.invitation.status === 'REVOKED' && (
+              <div className="flex flex-wrap gap-2 pt-4 border-t">
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => deleteInvitationMutation.mutate(player.invitation!.id)}
+                  disabled={deleteInvitationMutation.isPending}
+                >
+                  <DeleteIcon size={16} className="h-4 w-4" />
+                  {t('deleteInvitation')}
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Player Information */}
       {player.player && (

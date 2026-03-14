@@ -144,6 +144,33 @@ async function main() {
   );
   console.log('✅ Created courts:', courts.length);
 
+  // Create Invitations
+  const invitedPlayers = [
+    { name: 'Sofia Carvalho', email: 'sofia.carvalho@example.com' },
+    { name: 'Ricardo Tavares', email: 'ricardo.tavares@example.com' },
+    { name: 'Beatriz Monteiro', email: 'beatriz.monteiro@example.com' },
+    { name: 'André Correia', email: 'andre.correia@example.com' },
+    { name: 'Mariana Fonseca', email: 'mariana.fonseca@example.com' },
+  ];
+
+  const invitations = await Promise.all(
+    invitedPlayers.map((player) => {
+      const token = `invite-${player.email.split('@')[0]}-${Date.now()}`;
+      return prisma.invitation.upsert({
+        where: { token },
+        update: {},
+        create: {
+          email: player.email,
+          name: player.name,
+          token,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+          invitedBy: admin.id,
+        },
+      });
+    })
+  );
+  console.log('✅ Created invitations:', invitations.length);
+
   console.log('🎉 Seeding completed!');
   console.log('');
   console.log('💡 To create test events with different states, run:');

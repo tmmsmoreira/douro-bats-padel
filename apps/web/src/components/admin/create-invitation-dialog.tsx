@@ -29,6 +29,7 @@ export function CreateInvitationDialog() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
   const [expirationDays, setExpirationDays] = useState('7');
   const iconRef = useRef<SendIconHandle>(null);
 
@@ -50,9 +51,11 @@ export function CreateInvitationDialog() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invitations'] });
+      queryClient.invalidateQueries({ queryKey: ['players'] });
       toast.success(t('invitationSent'));
       setOpen(false);
       setEmail('');
+      setName('');
       setExpirationDays('7');
     },
     onError: (error: Error) => {
@@ -64,6 +67,7 @@ export function CreateInvitationDialog() {
     e.preventDefault();
     createMutation.mutate({
       email,
+      name,
       expiresInDays: parseInt(expirationDays, 10),
     });
   };
@@ -97,6 +101,17 @@ export function CreateInvitationDialog() {
                 placeholder={t('invitationEmailPlaceholder')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="name">{t('invitationName')}</Label>
+              <Input
+                id="name"
+                type="text"
+                placeholder={t('invitationNamePlaceholder')}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 required
               />
             </div>

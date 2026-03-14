@@ -23,3 +23,9 @@ export enum RSVPStatus {
   DECLINED = 'DECLINED',
   CANCELLED = 'CANCELLED',
 }
+
+export enum PlayerStatus {
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+  INVITED = 'INVITED',
+}

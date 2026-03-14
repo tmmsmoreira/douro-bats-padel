@@ -29,6 +29,7 @@ export declare enum InvitationStatus {
 export interface Invitation {
     id: string;
     email: string;
+    name?: string | null;
     token: string;
     status: InvitationStatus;
     invitedBy: string;
@@ -44,6 +45,7 @@ export interface Invitation {
 }
 export interface CreateInvitationDto {
     email: string;
+    name: string;
     expiresInDays?: number;
 }
 export interface ValidateInvitationDto {

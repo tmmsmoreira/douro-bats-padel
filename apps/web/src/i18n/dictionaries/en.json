@@ -279,7 +279,23 @@
     "bestRank": "Best Rank",
     "recentWeeklyScores": "Recent Weekly Scores",
     "week": "Week",
-    "status": "Status"
+    "status": "Status",
+    "invitationDetails": "Invitation Details",
+    "invitationStatus": "Status",
+    "expiresAt": "Expires At",
+    "invitedBy": "Invited By",
+    "invitedOn": "Invited On",
+    "copyLink": "Copy Link",
+    "resendInvitation": "Resend",
+    "revokeInvitation": "Revoke",
+    "deleteInvitation": "Delete",
+    "invitationRevoked": "Invitation revoked successfully",
+    "revokeInvitationError": "Failed to revoke invitation",
+    "invitationDeleted": "Invitation deleted successfully",
+    "deleteInvitationError": "Failed to delete invitation",
+    "invitationResent": "Invitation resent successfully",
+    "resendInvitationError": "Failed to resend invitation",
+    "linkCopied": "Link copied to clipboard"
   },
   "admin": {
     "loading": "Loading...",
@@ -302,6 +318,8 @@
     "createInvitation": "Send Invitation",
     "invitationEmail": "Email Address",
     "invitationEmailPlaceholder": "member@example.com",
+    "invitationName": "Name",
+    "invitationNamePlaceholder": "John Doe",
     "expirationDays": "Expiration Days",
     "expirationDaysPlaceholder": "7",
     "sendInvitation": "Send Invitation",
@@ -463,7 +481,15 @@
     "noPlayersMatchSearch": "No players match your search.",
     "backToPlayers": "Back to Players",
     "playerProfile": "Player Profile",
-    "playerProfileDescription": "View detailed player statistics, performance history, and account information"
+    "playerProfileDescription": "View detailed player statistics, performance history, and account information",
+    "invited": "Invited",
+    "invitedOn": "Invited on",
+    "expiresOn": "Expires on"
+  },
+  "playerStatus": {
+    "ACTIVE": "Active",
+    "INACTIVE": "Inactive",
+    "INVITED": "Invited"
   },
   "playerActions": {
     "actions": "Actions",

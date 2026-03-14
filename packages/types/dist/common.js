@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RSVPStatus = exports.EventState = exports.Tier = exports.Role = void 0;
+exports.PlayerStatus = exports.RSVPStatus = exports.EventState = exports.Tier = exports.Role = void 0;
 var Role;
 (function (Role) {
     Role["VIEWER"] = "VIEWER";
@@ -27,3 +27,9 @@ var RSVPStatus;
     RSVPStatus["DECLINED"] = "DECLINED";
     RSVPStatus["CANCELLED"] = "CANCELLED";
 })(RSVPStatus || (exports.RSVPStatus = RSVPStatus = {}));
+var PlayerStatus;
+(function (PlayerStatus) {
+    PlayerStatus["ACTIVE"] = "ACTIVE";
+    PlayerStatus["INACTIVE"] = "INACTIVE";
+    PlayerStatus["INVITED"] = "INVITED";
+})(PlayerStatus || (exports.PlayerStatus = PlayerStatus = {}));

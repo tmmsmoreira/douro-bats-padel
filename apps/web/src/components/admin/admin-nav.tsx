@@ -51,7 +51,6 @@ export function AdminNav() {
     { href: '/admin/players', label: t('players') },
     { href: '/leaderboard', label: t('ranking') },
     { href: '/admin/venues', label: t('venues') },
-    { href: '/admin/invitations', label: t('invitations') },
   ];
 
   // Show loading skeleton while session is loading

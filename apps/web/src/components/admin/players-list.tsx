@@ -30,6 +30,19 @@ interface Player {
     status: string;
     createdAt: string;
   } | null;
+  invitation?: {
+    id: string;
+    status: string;
+    expiresAt: string;
+    invitedBy: string;
+    invitedByUser?: {
+      id: string;
+      name: string | null;
+      email: string;
+    };
+    token: string;
+    usedAt: string | null;
+  } | null;
 }
 
 export function PlayersList() {
@@ -221,15 +234,21 @@ function PlayersListContent({
                               <h3 className="group-hover:text-primary transition-colors font-heading font-semibold text-lg">
                                 {player.name || t('noName')}
                               </h3>
-                              {player.player && (
-                                <Badge
-                                  variant={
-                                    player.player.status === 'ACTIVE' ? 'default' : 'secondary'
-                                  }
-                                  className="uppercase text-xs"
-                                >
-                                  {player.player.status}
+                              {player.invitation ? (
+                                <Badge variant="outline" className="uppercase text-xs">
+                                  {t('invited')}
                                 </Badge>
+                              ) : (
+                                player.player && (
+                                  <Badge
+                                    variant={
+                                      player.player.status === 'ACTIVE' ? 'default' : 'secondary'
+                                    }
+                                    className="uppercase text-xs"
+                                  >
+                                    {player.player.status}
+                                  </Badge>
+                                )
                               )}
                             </div>
                             <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -239,30 +258,49 @@ function PlayersListContent({
                           </div>
                         </div>
 
-                        {/* Rating */}
+                        {/* Rating - only show for registered players */}
                         {player.player && <RatingSection player={player} />}
                       </div>
 
                       {/* Bottom Section: Player Since and Account Created */}
-                      <div className="flex items-center flex-wrap justify-between text-sm text-muted-foreground pt-4 border-t border-border/50">
-                        <div className=" gap-x-6 gap-y-1">
-                          <div>
-                            <span className="font-medium">{t('playerSince')}:</span>{' '}
-                            <span className="font-semibold text-foreground">
-                              {player.player
-                                ? new Date(player.player.createdAt).toLocaleDateString(locale)
-                                : new Date(player.createdAt).toLocaleDateString(locale)}
-                            </span>
-                          </div>
-                          <div>
-                            <span className="font-medium">{t('accountCreated')}:</span>{' '}
-                            <span className="font-semibold text-foreground">
-                              {new Date(player.createdAt).toLocaleDateString(locale)}
-                            </span>
+                      {player.invitation ? (
+                        <div className="flex items-center flex-wrap justify-between text-sm text-muted-foreground pt-4 border-t border-border/50">
+                          <div className="gap-x-6 gap-y-1">
+                            <div>
+                              <span className="font-medium">{t('invitedOn')}:</span>{' '}
+                              <span className="font-semibold text-foreground">
+                                {new Date(player.createdAt).toLocaleDateString(locale)}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="font-medium">{t('expiresOn')}:</span>{' '}
+                              <span className="font-semibold text-foreground">
+                                {new Date(player.invitation.expiresAt).toLocaleDateString(locale)}
+                              </span>
+                            </div>
                           </div>
                         </div>
-                        {player.player && <RatingSection player={player} isMobile />}
-                      </div>
+                      ) : (
+                        <div className="flex items-center flex-wrap justify-between text-sm text-muted-foreground pt-4 border-t border-border/50">
+                          <div className=" gap-x-6 gap-y-1">
+                            {player.player && (
+                              <div>
+                                <span className="font-medium">{t('playerSince')}:</span>{' '}
+                                <span className="font-semibold text-foreground">
+                                  {new Date(player.player.createdAt).toLocaleDateString(locale)}
+                                </span>
+                              </div>
+                            )}
+                            <div>
+                              <span className="font-medium">{t('accountCreated')}:</span>{' '}
+                              <span className="font-semibold text-foreground">
+                                {new Date(player.createdAt).toLocaleDateString(locale)}
+                              </span>
+                            </div>
+                          </div>
+                          {player.player && <RatingSection player={player} isMobile />}
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 </Link>

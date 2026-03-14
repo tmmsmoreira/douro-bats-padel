@@ -7,6 +7,7 @@ export class PlayersService {
   constructor(private prisma: PrismaService) {}
 
   async findAll() {
+    // Get all registered players
     const users = await this.prisma.user.findMany({
       where: {
         player: {
@@ -23,7 +24,30 @@ export class PlayersService {
       },
     });
 
-    return users.map((user) => ({
+    // Get all pending invitations
+    const invitations = await this.prisma.invitation.findMany({
+      where: {
+        status: 'PENDING',
+        expiresAt: {
+          gt: new Date(),
+        },
+      },
+      include: {
+        invitedByUser: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    // Map registered players
+    const playersList = users.map((user) => ({
       id: user.id,
       email: user.email,
       name: user.name,
@@ -38,10 +62,35 @@ export class PlayersService {
             createdAt: user.player.createdAt,
           }
         : null,
+      invitation: null,
     }));
+
+    // Map pending invitations as "invited players"
+    const invitedPlayers = invitations.map((invitation) => ({
+      id: invitation.id,
+      email: invitation.email,
+      name: invitation.name,
+      profilePhoto: null,
+      emailVerified: false,
+      createdAt: invitation.createdAt,
+      player: null,
+      invitation: {
+        id: invitation.id,
+        status: invitation.status,
+        expiresAt: invitation.expiresAt,
+        invitedBy: invitation.invitedBy,
+        invitedByUser: invitation.invitedByUser,
+        token: invitation.token,
+        usedAt: invitation.usedAt,
+      },
+    }));
+
+    // Combine both lists
+    return [...playersList, ...invitedPlayers];
   }
 
   async findOne(id: string) {
+    // First try to find as a registered user
     const user = await this.prisma.user.findUnique({
       where: { id },
       include: {
@@ -64,20 +113,57 @@ export class PlayersService {
       },
     });
 
-    if (!user) {
-      return null;
+    if (user) {
+      return {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        profilePhoto: user.profilePhoto,
+        emailVerified: user.emailVerified,
+        createdAt: user.createdAt,
+        roles: user.roles,
+        player: user.player,
+        invitation: null,
+      };
     }
 
-    return {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      profilePhoto: user.profilePhoto,
-      emailVerified: user.emailVerified,
-      createdAt: user.createdAt,
-      roles: user.roles,
-      player: user.player,
-    };
+    // If not found as user, try to find as pending invitation
+    const invitation = await this.prisma.invitation.findUnique({
+      where: { id },
+      include: {
+        invitedByUser: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (invitation && invitation.status === 'PENDING') {
+      return {
+        id: invitation.id,
+        email: invitation.email,
+        name: invitation.name,
+        profilePhoto: null,
+        emailVerified: false,
+        createdAt: invitation.createdAt,
+        roles: [],
+        player: null,
+        invitation: {
+          id: invitation.id,
+          status: invitation.status,
+          expiresAt: invitation.expiresAt,
+          invitedBy: invitation.invitedBy,
+          invitedByUser: invitation.invitedByUser,
+          token: invitation.token,
+          usedAt: invitation.usedAt,
+        },
+      };
+    }
+
+    return null;
   }
 
   async remove(id: string) {

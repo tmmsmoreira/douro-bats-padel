@@ -53,6 +53,7 @@ export class InvitationsService {
     const invitation = await this.prisma.invitation.create({
       data: {
         email: dto.email,
+        name: dto.name,
         token,
         invitedBy,
         expiresAt,

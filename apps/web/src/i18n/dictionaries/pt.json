@@ -252,7 +252,23 @@
     "bestRank": "Melhor Posição",
     "recentWeeklyScores": "Pontuações Semanais Recentes",
     "week": "Semana",
-    "status": "Estado"
+    "status": "Estado",
+    "invitationDetails": "Detalhes do Convite",
+    "invitationStatus": "Estado",
+    "expiresAt": "Expira Em",
+    "invitedBy": "Convidado Por",
+    "invitedOn": "Convidado Em",
+    "copyLink": "Copiar Link",
+    "resendInvitation": "Reenviar",
+    "revokeInvitation": "Revogar",
+    "deleteInvitation": "Eliminar",
+    "invitationRevoked": "Convite revogado com sucesso",
+    "revokeInvitationError": "Falha ao revogar convite",
+    "invitationDeleted": "Convite eliminado com sucesso",
+    "deleteInvitationError": "Falha ao eliminar convite",
+    "invitationResent": "Convite reenviado com sucesso",
+    "resendInvitationError": "Falha ao reenviar convite",
+    "linkCopied": "Link copiado para a área de transferência"
   },
   "admin": {
     "loading": "A carregar...",
@@ -275,6 +291,8 @@
     "createInvitation": "Enviar Convite",
     "invitationEmail": "Endereço de Email",
     "invitationEmailPlaceholder": "membro@exemplo.com",
+    "invitationName": "Nome",
+    "invitationNamePlaceholder": "João Silva",
     "expirationDays": "Dias de Validade",
     "expirationDaysPlaceholder": "7",
     "sendInvitation": "Enviar Convite",
@@ -436,7 +454,15 @@
     "noPlayersMatchSearch": "Nenhum jogador corresponde à sua pesquisa.",
     "backToPlayers": "Voltar aos Jogadores",
     "playerProfile": "Perfil do Jogador",
-    "playerProfileDescription": "Ver estatísticas detalhadas do jogador, histórico de desempenho e informações da conta"
+    "playerProfileDescription": "Ver estatísticas detalhadas do jogador, histórico de desempenho e informações da conta",
+    "invited": "Convidado",
+    "invitedOn": "Convidado em",
+    "expiresOn": "Expira em"
+  },
+  "playerStatus": {
+    "ACTIVE": "Ativo",
+    "INACTIVE": "Inativo",
+    "INVITED": "Convidado"
   },
   "playerActions": {
     "actions": "Ações",

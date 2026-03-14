@@ -10,12 +10,22 @@ const PlayersList = dynamic(
   }
 );
 
+const CreateInvitationDialog = dynamic(() =>
+  import('@/components/admin/create-invitation-dialog').then((mod) => ({
+    default: mod.CreateInvitationDialog,
+  }))
+);
+
 export default async function PlayersPage() {
   const t = await getTranslations('admin');
 
   return (
     <div className="space-y-8">
-      <PageHeader title={t('playersManagement')} description={t('playersDescription')} />
+      <PageHeader
+        title={t('playersManagement')}
+        description={t('playersDescription')}
+        action={<CreateInvitationDialog />}
+      />
       <PlayersList />
     </div>
   );

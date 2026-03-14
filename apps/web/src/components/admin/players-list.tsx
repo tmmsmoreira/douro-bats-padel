@@ -3,18 +3,29 @@
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'motion/react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Mail, CheckCircle } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { useState, useMemo, useRef } from 'react';
-import { SearchIcon, SearchIconHandle, TrendingUpIcon, XIcon, XIconHandle } from 'lucide-animated';
+import {
+  SearchIcon,
+  SearchIconHandle,
+  TrendingUpIcon,
+  TrendingUpIconHandle,
+  XIcon,
+  XIconHandle,
+} from 'lucide-animated';
 import { Button } from '@/components/ui/button';
 import { DataStateWrapper } from '@/components/shared/data-state-wrapper';
+import { ScrollableFadeContainer } from '@/components/shared';
+import { StatusBadge } from '@/components/shared/status-badge';
+import type { PlayerProfileStatus } from '@/components/shared/status-badge';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+
+type PlayerState = 'ALL' | 'ACTIVE' | 'INACTIVE' | 'INVITED';
 
 interface Player {
   id: string;
@@ -49,6 +60,7 @@ export function PlayersList() {
   const t = useTranslations('playersList');
   const locale = useLocale();
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<PlayerState>('ALL');
   const searchIconRef = useRef<SearchIconHandle>(null);
   const xIconRef = useRef<XIconHandle>(null);
 
@@ -61,18 +73,44 @@ export function PlayersList() {
     },
   });
 
-  // Filter players based on search query
+  // Helper function to get player status
+  const getPlayerStatus = (player: Player): PlayerState => {
+    if (player.player) {
+      return player.player.status as PlayerState;
+    }
+    // If no player record, check if they have a pending invitation
+    if (player.invitation && player.invitation.status === 'PENDING') {
+      return 'INVITED';
+    }
+    return 'ACTIVE'; // Default fallback
+  };
+
+  // Filter players based on search query and status
   const filteredPlayers = useMemo(() => {
     if (!players) return [];
-    if (!searchQuery.trim()) return players;
 
-    const query = searchQuery.toLowerCase();
     return players.filter((player) => {
-      const name = player.name?.toLowerCase() || '';
-      const email = player.email.toLowerCase();
-      return name.includes(query) || email.includes(query);
+      // Filter by search query
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        const name = player.name?.toLowerCase() || '';
+        const email = player.email.toLowerCase();
+        if (!name.includes(query) && !email.includes(query)) {
+          return false;
+        }
+      }
+
+      // Filter by status
+      if (statusFilter !== 'ALL') {
+        const playerStatus = getPlayerStatus(player);
+        if (playerStatus !== statusFilter) {
+          return false;
+        }
+      }
+
+      return true;
     });
-  }, [players, searchQuery]);
+  }, [players, searchQuery, statusFilter]);
 
   return (
     <DataStateWrapper
@@ -86,6 +124,8 @@ export function PlayersList() {
           filteredPlayers={filteredPlayers}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
           searchIconRef={searchIconRef}
           xIconRef={xIconRef}
           t={t}
@@ -101,6 +141,8 @@ function PlayersListContent({
   filteredPlayers,
   searchQuery,
   setSearchQuery,
+  statusFilter,
+  setStatusFilter,
   searchIconRef,
   xIconRef,
   t,
@@ -109,11 +151,24 @@ function PlayersListContent({
   filteredPlayers: Player[];
   searchQuery: string;
   setSearchQuery: (value: string) => void;
+  statusFilter: PlayerState;
+  setStatusFilter: (value: PlayerState) => void;
   searchIconRef: React.RefObject<SearchIconHandle | null>;
   xIconRef: React.RefObject<XIconHandle | null>;
   t: any;
   locale: string;
 }) {
+  // Create refs for each player's trending icon
+  const trendingUpIconRefs = useRef<Map<string, TrendingUpIconHandle>>(new Map());
+
+  const setTrendingUpIconRef = (playerId: string) => (el: TrendingUpIconHandle | null) => {
+    if (el) {
+      trendingUpIconRefs.current.set(playerId, el);
+    } else {
+      trendingUpIconRefs.current.delete(playerId);
+    }
+  };
+
   return (
     <motion.div
       key="content"
@@ -123,41 +178,84 @@ function PlayersListContent({
       transition={{ duration: 0.3 }}
       className="space-y-4"
     >
-      {/* Search Bar */}
+      {/* Search and Filter Chips */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
+        className="-mx-4 sm:mx-0"
       >
-        <div className="relative">
-          <SearchIcon
-            ref={searchIconRef}
-            size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
-          />
-          <Input
-            type="text"
-            placeholder={t('searchPlayers')}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onMouseEnter={() => searchIconRef.current?.startAnimation()}
-            className="pl-9 pr-9"
-          />
-          {searchQuery && (
+        <ScrollableFadeContainer className="px-4 py-2 sm:mx-0 sm:px-1" fadeWidth={70}>
+          <div className="flex items-center gap-2 min-w-max">
+            {/* Search Input Chip */}
+            <div className="relative">
+              <SearchIcon
+                ref={searchIconRef}
+                size={16}
+                className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
+              />
+              <Input
+                type="text"
+                placeholder={t('searchPlayers')}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onMouseEnter={() => searchIconRef.current?.startAnimation()}
+                className="pl-9 pr-9 h-9 rounded-full min-w-[200px] sm:min-w-[250px]"
+              />
+              {searchQuery && (
+                <Button
+                  type="button"
+                  variant="link"
+                  size="icon"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                  onClick={() => setSearchQuery('')}
+                  aria-label="Clear search"
+                  onMouseEnter={() => xIconRef.current?.startAnimation()}
+                  onMouseLeave={() => xIconRef.current?.stopAnimation()}
+                >
+                  <XIcon ref={xIconRef} size={16} className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+
+            {/* Status Filter Chips */}
             <Button
-              type="button"
-              variant="link"
-              size="icon"
-              className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
-              onClick={() => setSearchQuery('')}
-              aria-label="Clear search"
-              onMouseEnter={() => xIconRef.current?.startAnimation()}
-              onMouseLeave={() => xIconRef.current?.stopAnimation()}
+              variant={statusFilter === 'ALL' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setStatusFilter('ALL')}
+              className="rounded-full h-9 px-4"
             >
-              <XIcon ref={xIconRef} size={16} className="h-4 w-4" />
+              {t('allStatuses')}
             </Button>
-          )}
-        </div>
+
+            <Button
+              variant={statusFilter === 'ACTIVE' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setStatusFilter('ACTIVE')}
+              className="rounded-full h-9 px-4"
+            >
+              {t('statusActive')}
+            </Button>
+
+            <Button
+              variant={statusFilter === 'INACTIVE' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setStatusFilter('INACTIVE')}
+              className="rounded-full h-9 px-4"
+            >
+              {t('statusInactive')}
+            </Button>
+
+            <Button
+              variant={statusFilter === 'INVITED' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setStatusFilter('INVITED')}
+              className="rounded-full h-9 px-4"
+            >
+              {t('statusInvited')}
+            </Button>
+          </div>
+        </ScrollableFadeContainer>
       </motion.div>
 
       {/* Players List */}
@@ -175,6 +273,7 @@ function PlayersListContent({
         </motion.div>
       ) : (
         <motion.div
+          key={`${searchQuery}-${statusFilter}`}
           initial="hidden"
           animate="show"
           variants={{
@@ -182,7 +281,7 @@ function PlayersListContent({
             show: {
               opacity: 1,
               transition: {
-                staggerChildren: 0.1,
+                staggerChildren: 0.05,
               },
             },
           }}
@@ -197,12 +296,16 @@ function PlayersListContent({
               }}
             >
               <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
-                <Link href={`/players/${player.id}`} className="block">
+                <Link
+                  href={`/players/${player.id}`}
+                  className="block"
+                  onMouseEnter={() => trendingUpIconRefs.current.get(player.id)?.startAnimation()}
+                >
                   <Card className="glass-card group hover:shadow-xl transition-all duration-300 border-border/50">
                     <CardContent className="p-6 space-y-4">
-                      {/* Top Section: Avatar, Name, Badge, and Rating */}
+                      {/* Top Section: Avatar, Name, Email, and Status Badge */}
                       <div className="flex items-start justify-between gap-4">
-                        <div className="flex items-start gap-3">
+                        <div className="flex items-start gap-3 flex-1 min-w-0">
                           {/* Avatar with verified badge */}
                           <div className="relative shrink-0">
                             <Avatar className="h-14 w-14">
@@ -228,29 +331,11 @@ function PlayersListContent({
                             )}
                           </div>
 
-                          {/* Name, Badge, and Email */}
+                          {/* Name and Email */}
                           <div className="flex-1 min-w-0 space-y-1.5">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <h3 className="group-hover:text-primary transition-colors font-heading font-semibold text-lg">
-                                {player.name || t('noName')}
-                              </h3>
-                              {player.invitation ? (
-                                <Badge variant="outline" className="uppercase text-xs">
-                                  {t('invited')}
-                                </Badge>
-                              ) : (
-                                player.player && (
-                                  <Badge
-                                    variant={
-                                      player.player.status === 'ACTIVE' ? 'default' : 'secondary'
-                                    }
-                                    className="uppercase text-xs"
-                                  >
-                                    {player.player.status}
-                                  </Badge>
-                                )
-                              )}
-                            </div>
+                            <h3 className="group-hover:text-primary transition-colors font-heading font-semibold text-lg">
+                              {player.name || t('noName')}
+                            </h3>
                             <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                               <Mail className="h-3.5 w-3.5 shrink-0" />
                               <span className="truncate">{player.email}</span>
@@ -258,14 +343,22 @@ function PlayersListContent({
                           </div>
                         </div>
 
-                        {/* Rating - only show for registered players */}
-                        {player.player && <RatingSection player={player} />}
+                        {/* Status Badge - Top Right */}
+                        <div className="shrink-0">
+                          {player.invitation ? (
+                            <StatusBadge status="INVITED" />
+                          ) : (
+                            player.player && (
+                              <StatusBadge status={player.player.status as PlayerProfileStatus} />
+                            )
+                          )}
+                        </div>
                       </div>
 
-                      {/* Bottom Section: Player Since and Account Created */}
+                      {/* Bottom Section: Player Info and Rating */}
                       {player.invitation ? (
-                        <div className="flex items-center flex-wrap justify-between text-sm text-muted-foreground pt-4 border-t border-border/50">
-                          <div className="gap-x-6 gap-y-1">
+                        <div className="flex items-end justify-between text-sm text-muted-foreground pt-4 border-t border-border/50">
+                          <div className="space-y-1">
                             <div>
                               <span className="font-medium">{t('invitedOn')}:</span>{' '}
                               <span className="font-semibold text-foreground">
@@ -281,8 +374,8 @@ function PlayersListContent({
                           </div>
                         </div>
                       ) : (
-                        <div className="flex items-center flex-wrap justify-between text-sm text-muted-foreground pt-4 border-t border-border/50">
-                          <div className=" gap-x-6 gap-y-1">
+                        <div className="flex items-end justify-between text-sm text-muted-foreground pt-4 border-t border-border/50">
+                          <div className="space-y-1">
                             {player.player && (
                               <div>
                                 <span className="font-medium">{t('playerSince')}:</span>{' '}
@@ -298,7 +391,22 @@ function PlayersListContent({
                               </span>
                             </div>
                           </div>
-                          {player.player && <RatingSection player={player} isMobile />}
+                          {/* Rating - Bottom Right */}
+                          {player.player && (
+                            <div className="flex flex-col items-end gap-0.5 shrink-0">
+                              <div className="flex items-center gap-1.5 text-3xl font-bold text-primary font-heading">
+                                <TrendingUpIcon
+                                  ref={setTrendingUpIconRef(player.id)}
+                                  size={20}
+                                  className="text-primary"
+                                />
+                                <span className="gradient-text">{player.player.rating}</span>
+                              </div>
+                              <div className="text-xs text-muted-foreground font-medium">
+                                {t('rating')}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
                     </CardContent>
@@ -310,25 +418,5 @@ function PlayersListContent({
         </motion.div>
       )}
     </motion.div>
-  );
-}
-
-function RatingSection({ player, isMobile = false }: { player: Player; isMobile?: boolean }) {
-  const t = useTranslations('playersList');
-
-  return (
-    <div
-      className={
-        isMobile
-          ? 'flex md:hidden flex-col items-end gap-0.5 shrink-0'
-          : 'hidden md:flex flex-col items-end gap-0.5 shrink-0'
-      }
-    >
-      <div className="flex items-center gap-1.5 text-3xl font-bold text-primary font-heading">
-        <TrendingUpIcon size={20} className="text-primary" />
-        <span className="gradient-text">{player.player?.rating}</span>
-      </div>
-      <div className="text-xs text-muted-foreground font-medium">{t('rating')}</div>
-    </div>
   );
 }

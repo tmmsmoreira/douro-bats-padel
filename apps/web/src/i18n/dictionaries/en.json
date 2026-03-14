@@ -26,7 +26,14 @@
     "published": "Published",
     "confirmed": "Confirmed",
     "waitlisted": "Waitlisted",
-    "participated": "Participated"
+    "participated": "Participated",
+    "active": "Active",
+    "inactive": "Inactive",
+    "invited": "Invited",
+    "pending": "Pending",
+    "accepted": "Accepted",
+    "revoked": "Revoked",
+    "expired": "Expired"
   },
   "nav": {
     "home": "Home",
@@ -484,12 +491,22 @@
     "playerProfileDescription": "View detailed player statistics, performance history, and account information",
     "invited": "Invited",
     "invitedOn": "Invited on",
-    "expiresOn": "Expires on"
+    "expiresOn": "Expires on",
+    "allStatuses": "All",
+    "statusActive": "Active",
+    "statusInactive": "Inactive",
+    "statusInvited": "Invited"
   },
   "playerStatus": {
     "ACTIVE": "Active",
     "INACTIVE": "Inactive",
     "INVITED": "Invited"
+  },
+  "invitationStatus": {
+    "PENDING": "Pending",
+    "ACCEPTED": "Accepted",
+    "REVOKED": "Revoked",
+    "EXPIRED": "Expired"
   },
   "playerActions": {
     "actions": "Actions",

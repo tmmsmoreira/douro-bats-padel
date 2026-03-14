@@ -26,7 +26,14 @@
     "published": "Publicado",
     "confirmed": "Confirmado",
     "waitlisted": "Em Lista de Espera",
-    "participated": "Participou"
+    "participated": "Participou",
+    "active": "Ativo",
+    "inactive": "Inativo",
+    "invited": "Convidado",
+    "pending": "Pendente",
+    "accepted": "Aceite",
+    "revoked": "Revogado",
+    "expired": "Expirado"
   },
   "nav": {
     "home": "Início",
@@ -457,12 +464,22 @@
     "playerProfileDescription": "Ver estatísticas detalhadas do jogador, histórico de desempenho e informações da conta",
     "invited": "Convidado",
     "invitedOn": "Convidado em",
-    "expiresOn": "Expira em"
+    "expiresOn": "Expira em",
+    "allStatuses": "Todos",
+    "statusActive": "Ativos",
+    "statusInactive": "Inativos",
+    "statusInvited": "Convidados"
   },
   "playerStatus": {
     "ACTIVE": "Ativo",
     "INACTIVE": "Inativo",
     "INVITED": "Convidado"
+  },
+  "invitationStatus": {
+    "PENDING": "Pendente",
+    "ACCEPTED": "Aceite",
+    "REVOKED": "Revogado",
+    "EXPIRED": "Expirado"
   },
   "playerActions": {
     "actions": "Ações",

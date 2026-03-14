@@ -1,7 +1,7 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import type { RSVPDto, RSVPResponse } from '@padel/types';
-import { RSVPStatus } from '@padel/types';
+import { RSVPStatus, PlayerStatus } from '@padel/types';
 import { NotificationService } from '../notifications/notification.service';
 
 @Injectable()
@@ -118,6 +118,14 @@ export class RSVPService {
             updatedAt: new Date(),
           },
         });
+
+        // Reactivate player if they were inactive
+        if (player.status === PlayerStatus.INACTIVE) {
+          await tx.playerProfile.update({
+            where: { id: player.id },
+            data: { status: PlayerStatus.ACTIVE },
+          });
+        }
 
         // Send confirmation email
         await this.notificationService.sendRSVPConfirmation(

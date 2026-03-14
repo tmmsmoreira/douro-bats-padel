@@ -5,7 +5,6 @@ import { useTranslations, useLocale } from 'next-intl';
 import { useSession } from 'next-auth/react';
 import { useRouter } from '@/i18n/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Mail, CheckCircle, XCircle, TrendingUp, Send } from 'lucide-react';
 import { DeleteIcon, DeleteIconHandle, CopyIcon } from 'lucide-animated';
@@ -16,6 +15,8 @@ import { ConfirmationDialog } from '../shared/confirmation-dialog';
 import { motion } from 'motion/react';
 import { DataStateWrapper } from '@/components/shared/data-state-wrapper';
 import { PageHeader } from '@/components/shared/page-header';
+import { StatusBadge } from '@/components/shared/status-badge';
+import type { PlayerProfileStatus, InvitationStatus } from '@/components/shared/status-badge';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -372,17 +373,17 @@ function PublicPlayerProfileContent({
 
       {/* Invitation Section - Only visible for pending invitations */}
       {player.invitation && (
-        <Card className="glass-card border-primary/50">
+        <Card className="glass-card">
           <CardHeader>
             <CardTitle>{t('invitationDetails')}</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
+          <CardContent className="space-y-4 pt-0">
+            <div className="grid gap-4 grid-cols-2">
               <div>
                 <p className="text-sm text-muted-foreground">{t('invitationStatus')}</p>
-                <Badge variant="outline" className="mt-1 uppercase text-xs">
-                  {player.invitation.status}
-                </Badge>
+                <div className="mt-1">
+                  <StatusBadge status={player.invitation.status as InvitationStatus} />
+                </div>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">{t('expiresAt')}</p>
@@ -461,16 +462,13 @@ function PublicPlayerProfileContent({
             <CardHeader>
               <CardTitle>{t('playerInformation')}</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 pt-0">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">{tList('status')}</p>
-                  <Badge
-                    variant={player.player.status === 'ACTIVE' ? 'default' : 'secondary'}
-                    className="mt-1 uppercase text-xs"
-                  >
-                    {player.player.status}
-                  </Badge>
+                  <div className="mt-1">
+                    <StatusBadge status={player.player.status as PlayerProfileStatus} />
+                  </div>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">{t('currentRating')}</p>
@@ -480,20 +478,18 @@ function PublicPlayerProfileContent({
                   </div>
                 </div>
               </div>
-              <div className="pt-4 border-t">
-                <div className="space-y-2">
-                  <div>
-                    <p className="text-sm text-muted-foreground">{tList('playerSince')}</p>
-                    <p className="font-medium">
-                      {new Date(player.player.createdAt).toLocaleDateString(locale)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">{tList('accountCreated')}</p>
-                    <p className="font-medium">
-                      {new Date(player.createdAt).toLocaleDateString(locale)}
-                    </p>
-                  </div>
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                <div>
+                  <p className="text-sm text-muted-foreground">{tList('playerSince')}</p>
+                  <p className="font-medium">
+                    {new Date(player.player.createdAt).toLocaleDateString(locale)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">{tList('accountCreated')}</p>
+                  <p className="font-medium">
+                    {new Date(player.createdAt).toLocaleDateString(locale)}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -504,21 +500,19 @@ function PublicPlayerProfileContent({
             <CardHeader>
               <CardTitle>{t('performanceStats')}</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('weeksPlayed')}</p>
-                  <p className="text-2xl font-bold">{player.player.weeklyScores.length}</p>
-                </div>
-                {player.player.rankingSnapshots.length > 0 && (
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t('bestRank')}</p>
-                    <p className="text-2xl font-bold">
-                      #{Math.min(...player.player.rankingSnapshots.map((s) => s.rank))}
-                    </p>
-                  </div>
-                )}
+            <CardContent className="space-y-4 pt-0">
+              <div>
+                <p className="text-sm text-muted-foreground">{t('weeksPlayed')}</p>
+                <p className="text-2xl font-bold">{player.player.weeklyScores.length}</p>
               </div>
+              {player.player.rankingSnapshots.length > 0 && (
+                <div>
+                  <p className="text-sm text-muted-foreground">{t('bestRank')}</p>
+                  <p className="text-2xl font-bold">
+                    #{Math.min(...player.player.rankingSnapshots.map((s) => s.rank))}
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

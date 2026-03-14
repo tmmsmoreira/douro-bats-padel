@@ -141,13 +141,17 @@ export function MobileMenu({
               <p className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 {t('settings') || 'Settings'}
               </p>
-              <div className="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-secondary">
+              <div className="flex items-center justify-between gap-4 px-4 py-3 rounded-lg hover:bg-secondary">
                 <span className="text-base font-medium">{t('language') || 'Language'}</span>
-                <LanguageToggleButton />
+                <div className="ml-auto">
+                  <LanguageToggleButton />
+                </div>
               </div>
-              <div className="flex items-center justify-between px-4 py-3 rounded-lg hover:bg-secondary">
+              <div className="flex items-center justify-between gap-4 px-4 py-3 rounded-lg hover:bg-secondary">
                 <span className="text-base font-medium">{t('theme') || 'Theme'}</span>
-                <ThemeToggleButton />
+                <div className="ml-auto">
+                  <ThemeToggleButton />
+                </div>
               </div>
             </div>
 

@@ -5,8 +5,10 @@ import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 
 export type EventStatus = 'DRAFT' | 'OPEN' | 'FROZEN' | 'DRAWN' | 'PUBLISHED';
-export type PlayerStatus = 'CONFIRMED' | 'WAITLISTED' | 'PARTICIPATED';
-export type Status = EventStatus | PlayerStatus;
+export type RSVPStatus = 'CONFIRMED' | 'WAITLISTED' | 'PARTICIPATED';
+export type PlayerProfileStatus = 'ACTIVE' | 'INACTIVE' | 'INVITED';
+export type InvitationStatus = 'PENDING' | 'ACCEPTED' | 'REVOKED' | 'EXPIRED';
+export type Status = EventStatus | RSVPStatus | PlayerProfileStatus | InvitationStatus;
 
 interface StatusBadgeProps {
   status: Status;
@@ -73,6 +75,50 @@ const statusConfig: Record<
       'bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800',
     dotColor: 'bg-green-600',
     translationKey: 'participated',
+  },
+  // Player profile statuses
+  ACTIVE: {
+    variant: 'default',
+    className: 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/30',
+    dotColor: 'bg-green-500',
+    translationKey: 'active',
+  },
+  INACTIVE: {
+    variant: 'secondary',
+    className: 'bg-muted text-muted-foreground border-border',
+    dotColor: 'bg-muted-foreground',
+    translationKey: 'inactive',
+  },
+  INVITED: {
+    variant: 'outline',
+    className: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30',
+    dotColor: 'bg-blue-500',
+    translationKey: 'invited',
+  },
+  // Invitation statuses
+  PENDING: {
+    variant: 'outline',
+    className: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30',
+    dotColor: 'bg-amber-500',
+    translationKey: 'pending',
+  },
+  ACCEPTED: {
+    variant: 'default',
+    className: 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/30',
+    dotColor: 'bg-green-500',
+    translationKey: 'accepted',
+  },
+  REVOKED: {
+    variant: 'destructive',
+    className: 'bg-destructive/10 text-destructive border-destructive/30',
+    dotColor: 'bg-destructive',
+    translationKey: 'revoked',
+  },
+  EXPIRED: {
+    variant: 'secondary',
+    className: 'bg-muted text-muted-foreground border-border',
+    dotColor: 'bg-muted-foreground',
+    translationKey: 'expired',
   },
 };
 

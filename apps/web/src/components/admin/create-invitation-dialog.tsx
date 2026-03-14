@@ -77,7 +77,7 @@ export function CreateInvitationDialog() {
       <DialogTrigger asChild>
         <Button
           variant="gradient"
-          className="gap-2 px-4 py-5 text-base font-medium"
+          className="gap-2 px-4 py-5 text-base font-medium w-full"
           onMouseEnter={() => iconRef.current?.startAnimation()}
           onMouseLeave={() => iconRef.current?.stopAnimation()}
           animate

@@ -19,6 +19,7 @@ import {
 } from 'lucide-animated';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
+import { getShimmerDataURL } from '@/lib/image-blur';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
 import { DataStateWrapper } from '@/components/shared/data-state-wrapper';
 
@@ -169,6 +170,8 @@ function VenuesListContent({
                           src={venue.logo}
                           alt={t('logo', { venueName: venue.name })}
                           fill
+                          placeholder="blur"
+                          blurDataURL={getShimmerDataURL(56, 56)}
                           className="object-contain p-1"
                           onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
                             e.currentTarget.style.display = 'none';

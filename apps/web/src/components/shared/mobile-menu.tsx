@@ -47,7 +47,9 @@ export function MobileMenu({
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.div
+        <motion.nav
+          id="mobile-menu"
+          aria-label="Mobile navigation"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
@@ -240,7 +242,7 @@ export function MobileMenu({
               </div>
             )}
           </div>
-        </motion.div>
+        </motion.nav>
       )}
     </AnimatePresence>
   );

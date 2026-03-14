@@ -860,5 +860,9 @@
     "message": "No internet connection",
     "backOnline": "Back online",
     "checkConnection": "Please check your network connection and try again"
+  },
+  "accessibility": {
+    "skipToMainContent": "Skip to main content",
+    "skipToNavigation": "Skip to navigation"
   }
 }

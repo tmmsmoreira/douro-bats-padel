@@ -259,6 +259,8 @@ export function RegisterForm() {
               onChange={(e) => setName(e.target.value)}
               className="h-11"
               required
+              aria-invalid={!!error}
+              aria-describedby={error ? 'register-error' : undefined}
             />
           </div>
           <div className="space-y-2">
@@ -273,8 +275,11 @@ export function RegisterForm() {
               required
               readOnly
               disabled
+              aria-describedby="email-help"
             />
-            <p className="text-xs text-muted-foreground">{t('emailPreFilled')}</p>
+            <p id="email-help" className="text-xs text-muted-foreground">
+              {t('emailPreFilled')}
+            </p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">{t('password')}</Label>
@@ -287,6 +292,8 @@ export function RegisterForm() {
               className="h-11"
               required
               minLength={6}
+              aria-invalid={!!error}
+              aria-describedby={error ? 'register-error' : undefined}
             />
           </div>
           <div className="space-y-2">
@@ -300,10 +307,17 @@ export function RegisterForm() {
               className="h-11"
               required
               minLength={6}
+              aria-invalid={!!error}
+              aria-describedby={error ? 'register-error' : undefined}
             />
           </div>
           {error && (
-            <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-md text-sm">
+            <div
+              id="register-error"
+              role="alert"
+              aria-live="assertive"
+              className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-md text-sm"
+            >
               {error}
             </div>
           )}

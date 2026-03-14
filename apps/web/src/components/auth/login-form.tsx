@@ -94,6 +94,8 @@ export function LoginForm() {
                 onChange={(e) => setEmail(e.target.value)}
                 className="h-11"
                 required
+                aria-invalid={!!error}
+                aria-describedby={error ? 'login-error' : undefined}
               />
             </div>
             <div className="space-y-2">
@@ -114,15 +116,26 @@ export function LoginForm() {
                 onChange={(e) => setPassword(e.target.value)}
                 className="h-11"
                 required
+                aria-invalid={!!error}
+                aria-describedby={error ? 'login-error' : undefined}
               />
             </div>
             {successMessage && (
-              <div className="bg-success/10 border border-success/20 text-success px-4 py-3 rounded-md text-sm">
+              <div
+                role="status"
+                aria-live="polite"
+                className="bg-success/10 border border-success/20 text-success px-4 py-3 rounded-md text-sm"
+              >
                 {successMessage}
               </div>
             )}
             {error && (
-              <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-md text-sm">
+              <div
+                id="login-error"
+                role="alert"
+                aria-live="assertive"
+                className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-md text-sm"
+              >
                 {error}
               </div>
             )}

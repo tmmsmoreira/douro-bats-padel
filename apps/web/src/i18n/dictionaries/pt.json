@@ -833,5 +833,9 @@
     "message": "Sem ligação à internet",
     "backOnline": "Ligação restabelecida",
     "checkConnection": "Por favor, verifique a sua ligação de rede e tente novamente"
+  },
+  "accessibility": {
+    "skipToMainContent": "Saltar para o conteúdo principal",
+    "skipToNavigation": "Saltar para a navegação"
   }
 }

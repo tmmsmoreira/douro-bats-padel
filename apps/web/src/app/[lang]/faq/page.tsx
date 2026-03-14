@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { HomeNavClient } from '@/components/shared/client-nav-wrapper';
-import { PageLayout, SectionHeader } from '@/components/shared';
+import { PageLayout, PageHeader } from '@/components/shared';
 import { staggerContainer, staggerItem } from '@/lib/animations';
 
 interface FAQItem {
@@ -127,10 +127,9 @@ export default function FAQPage() {
     <PageLayout nav={<HomeNavClient />}>
       <div className="space-y-6 sm:space-y-8">
         {/* Header */}
-        <SectionHeader
+        <PageHeader
           title="Frequently Asked Questions"
           description="Find answers to common questions about Douro Bats Padel"
-          align="center"
         />
 
         {/* FAQ by Category */}

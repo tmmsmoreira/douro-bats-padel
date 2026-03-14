@@ -17,6 +17,7 @@ import {
 import { signOut, useSession } from 'next-auth/react';
 import { UserIcon, LogoutIcon, LogoutIconHandle, UserIconHandle } from 'lucide-animated';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
+import { LOGO_BLUR_DATA_URL } from '@/lib/image-blur';
 import { LanguageMenuItems } from '@/components/shared/language-menu-items';
 import { MenuToggle } from '@/components/shared/menu-toggle';
 import { useTranslations } from 'next-intl';
@@ -86,7 +87,11 @@ export function AdminNav() {
   return (
     <>
       <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border/50">
-        <nav className="border-b bg-card sticky top-0 z-50">
+        <nav
+          id="navigation"
+          aria-label="Admin navigation"
+          className="border-b bg-card sticky top-0 z-50"
+        >
           <div className="container mx-auto px-4">
             <div className="flex h-16 items-center justify-between">
               {/* Logo */}
@@ -97,6 +102,8 @@ export function AdminNav() {
                   width={40}
                   height={40}
                   priority
+                  placeholder="blur"
+                  blurDataURL={LOGO_BLUR_DATA_URL}
                   className="object-contain"
                 />
                 <span className="font-heading gradient-text text-xl font-bold">
@@ -204,6 +211,8 @@ export function AdminNav() {
                 className="md:hidden h-9 w-9 p-0"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+                aria-expanded={mobileMenuOpen}
+                aria-controls="mobile-menu"
               >
                 <MenuToggle isOpen={mobileMenuOpen} />
               </Button>

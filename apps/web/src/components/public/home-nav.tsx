@@ -9,6 +9,7 @@ import { MenuToggle } from '@/components/shared/menu-toggle';
 import { useTranslations } from 'next-intl';
 import { MobileMenu } from '@/components/shared/mobile-menu';
 import Image from 'next/image';
+import { LOGO_BLUR_DATA_URL } from '@/lib/image-blur';
 
 /**
  * Navigation component for unauthenticated users only.
@@ -35,7 +36,11 @@ export function HomeNav() {
   return (
     <>
       <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border/50">
-        <nav className="border-b bg-card sticky top-0 z-50">
+        <nav
+          id="navigation"
+          aria-label="Main navigation"
+          className="border-b bg-card sticky top-0 z-50"
+        >
           <div className="container mx-auto px-4">
             <div className="flex h-16 items-center justify-between">
               {/* Logo */}
@@ -46,6 +51,8 @@ export function HomeNav() {
                   width={40}
                   height={40}
                   priority
+                  placeholder="blur"
+                  blurDataURL={LOGO_BLUR_DATA_URL}
                   className="object-contain"
                 />
                 <span className="font-heading gradient-text text-xl font-bold">
@@ -69,6 +76,8 @@ export function HomeNav() {
                 className="md:hidden h-9 w-9 p-0"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+                aria-expanded={mobileMenuOpen}
+                aria-controls="mobile-menu"
               >
                 <MenuToggle isOpen={mobileMenuOpen} />
               </Button>

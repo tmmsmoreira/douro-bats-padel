@@ -41,9 +41,9 @@ export function LoadingState({
   animate = true,
 }: LoadingStateProps) {
   const content = (
-    <div className={className}>
+    <div className={className} role="status" aria-live="polite">
       {showSpinner && <Spinner data-icon="inline-start" className="mr-2" />}
-      {message}
+      <span>{message}</span>
     </div>
   );
 

@@ -87,6 +87,8 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
               className="w-full px-3 py-2 border rounded-md"
               required
               minLength={6}
+              aria-invalid={!!error}
+              aria-describedby={error ? 'reset-password-error' : undefined}
             />
           </div>
           <div className="space-y-2">
@@ -102,9 +104,20 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
               className="w-full px-3 py-2 border rounded-md"
               required
               minLength={6}
+              aria-invalid={!!error}
+              aria-describedby={error ? 'reset-password-error' : undefined}
             />
           </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {error && (
+            <p
+              id="reset-password-error"
+              role="alert"
+              aria-live="assertive"
+              className="text-sm text-destructive"
+            >
+              {error}
+            </p>
+          )}
           <Button type="submit" className="gradient-primary w-full" disabled={isLoading}>
             {isLoading ? t('resetting') : t('resetPassword')}
           </Button>

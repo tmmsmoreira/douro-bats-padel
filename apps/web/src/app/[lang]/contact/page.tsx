@@ -16,7 +16,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Mail, Phone, MapPin, Clock } from 'lucide-react';
 import { HomeNavClient } from '@/components/shared/client-nav-wrapper';
 import { useTranslations } from 'next-intl';
-import { PageLayout, SectionHeader } from '@/components/shared';
+import { PageLayout, PageHeader } from '@/components/shared';
 
 export default function ContactPage() {
   const t = useTranslations('contactPage');
@@ -48,7 +48,7 @@ export default function ContactPage() {
     <PageLayout nav={<HomeNavClient />} maxWidth="6xl">
       <div className="space-y-6 sm:space-y-8">
         {/* Header */}
-        <SectionHeader title={t('title')} description={t('subtitle')} align="center" />
+        <PageHeader title={t('title')} description={t('subtitle')} />
 
         <div className="grid lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Contact Information */}

@@ -98,49 +98,53 @@ export function DataStateWrapper<T>({
   const showLoading = useMinimumLoading(isLoading, !!data, minLoadingDuration);
 
   return (
-    <AnimatePresence mode="wait">
-      {showLoading ? (
-        <LoadingState message={loadingMessage} />
-      ) : error ? (
-        errorComponent || (
+    <div aria-live="polite" aria-busy={showLoading}>
+      <AnimatePresence mode="wait">
+        {showLoading ? (
+          <LoadingState message={loadingMessage} />
+        ) : error ? (
+          errorComponent || (
+            <motion.div
+              key="error"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className={errorClassName}
+              role="alert"
+            >
+              {errorMessage}
+            </motion.div>
+          )
+        ) : isEmpty(data as T) ? (
+          emptyComponent || (
+            <motion.div
+              key="empty"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.3 }}
+              role="status"
+            >
+              <Card className={emptyClassName}>
+                <CardContent className="py-8 text-center text-muted-foreground">
+                  {emptyMessage}
+                </CardContent>
+              </Card>
+            </motion.div>
+          )
+        ) : (
           <motion.div
-            key="error"
+            key="content"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className={errorClassName}
           >
-            {errorMessage}
+            {children(data as T)}
           </motion.div>
-        )
-      ) : isEmpty(data as T) ? (
-        emptyComponent || (
-          <motion.div
-            key="empty"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.3 }}
-          >
-            <Card className={emptyClassName}>
-              <CardContent className="py-8 text-center text-muted-foreground">
-                {emptyMessage}
-              </CardContent>
-            </Card>
-          </motion.div>
-        )
-      ) : (
-        <motion.div
-          key="content"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          {children(data as T)}
-        </motion.div>
-      )}
-    </AnimatePresence>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }

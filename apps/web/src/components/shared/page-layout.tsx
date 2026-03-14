@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import { Footer } from '@/components/public/footer';
 import { pageTransition } from '@/lib/animations';
 import { cn } from '@/lib/utils';
+import { SkipLinks } from '@/components/shared/skip-links';
 
 interface PageLayoutProps {
   /**
@@ -90,6 +91,7 @@ export function PageLayout({
 }: PageLayoutProps) {
   const mainContent = (
     <main
+      id="main-content"
       className={cn(
         'container mx-auto flex-1 min-h-[500px]',
         padding || 'px-4 sm:px-6 py-6 sm:py-8',
@@ -103,6 +105,7 @@ export function PageLayout({
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <SkipLinks />
       {nav}
       {animate ? (
         <motion.div {...pageTransition} className="flex-1 flex flex-col">

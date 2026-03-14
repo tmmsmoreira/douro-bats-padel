@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { motion } from 'motion/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { HomeNavClient } from '@/components/shared/client-nav-wrapper';
-import { PageLayout, SectionHeader } from '@/components/shared';
+import { PageLayout, PageHeader } from '@/components/shared';
 import { staggerContainer, staggerItem } from '@/lib/animations';
 
 export default function PrivacyPage() {
@@ -12,11 +12,7 @@ export default function PrivacyPage() {
     <PageLayout nav={<HomeNavClient />}>
       <div className="space-y-6 sm:space-y-8">
         {/* Header */}
-        <SectionHeader
-          title="Privacy Policy"
-          description="Last updated: February 2026"
-          align="center"
-        />
+        <PageHeader title="Privacy Policy" description="Last updated: February 2026" />
 
         <motion.div
           variants={staggerContainer}

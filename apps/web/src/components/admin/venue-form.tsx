@@ -22,6 +22,7 @@ import { Spinner } from '@/components/ui/spinner';
 import type { CreateVenueDto, UpdateVenueDto } from '@padel/types';
 import { XIcon } from 'lucide-animated';
 import { useTranslations } from 'next-intl';
+import { getShimmerDataURL } from '@/lib/image-blur';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -212,6 +213,8 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
                     src={formData.logo}
                     alt={t('logoPreviewAlt')}
                     fill
+                    placeholder="blur"
+                    blurDataURL={getShimmerDataURL(64, 64)}
                     className="object-contain"
                     onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
                       e.currentTarget.style.display = 'none';

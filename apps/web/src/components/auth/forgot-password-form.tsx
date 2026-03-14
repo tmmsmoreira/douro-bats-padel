@@ -103,9 +103,20 @@ export function ForgotPasswordForm() {
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-3 py-2 border rounded-md"
               required
+              aria-invalid={!!error}
+              aria-describedby={error ? 'forgot-password-error' : undefined}
             />
           </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {error && (
+            <p
+              id="forgot-password-error"
+              role="alert"
+              aria-live="assertive"
+              className="text-sm text-destructive"
+            >
+              {error}
+            </p>
+          )}
           <Button type="submit" className="gradient-primary w-full" disabled={isLoading}>
             {isLoading ? t('sending') : t('sendResetLink')}
           </Button>

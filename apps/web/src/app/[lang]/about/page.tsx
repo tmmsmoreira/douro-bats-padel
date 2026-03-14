@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Trophy, Users, Calendar, TrendingUp } from 'lucide-react';
 import { HomeNavClient } from '@/components/shared/client-nav-wrapper';
 import { useTranslations } from 'next-intl';
-import { PageLayout, SectionHeader } from '@/components/shared';
+import { PageLayout, PageHeader } from '@/components/shared';
 import { staggerContainer, staggerItem } from '@/lib/animations';
 
 export default function AboutPage() {
@@ -14,7 +14,7 @@ export default function AboutPage() {
     <PageLayout nav={<HomeNavClient />}>
       <div className="space-y-6 sm:space-y-8">
         {/* Header */}
-        <SectionHeader title={t('title')} description={t('subtitle')} align="center" />
+        <PageHeader title={t('title')} description={t('subtitle')} />
 
         <motion.div
           variants={staggerContainer}

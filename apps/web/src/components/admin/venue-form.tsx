@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { toast } from 'sonner';
@@ -16,15 +14,14 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Spinner } from '@/components/ui/spinner';
+import { Field, FieldLabel, FieldDescription } from '@/components/ui/field';
+import { LoadingButton } from '@/components/ui/loading-button';
 import type { CreateVenueDto, UpdateVenueDto } from '@padel/types';
 import { XIcon } from 'lucide-animated';
 import { useTranslations } from 'next-intl';
 import { getShimmerDataURL } from '@/lib/image-blur';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+import { useFormMutation } from '@/hooks';
 
 interface VenueFormProps {
   venueId?: string;
@@ -37,9 +34,7 @@ interface VenueFormProps {
 }
 
 export function VenueForm({ venueId, initialData }: VenueFormProps) {
-  const { data: session } = useSession();
   const router = useRouter();
-  const queryClient = useQueryClient();
   const t = useTranslations('venueForm');
 
   const [formData, setFormData] = useState<{
@@ -68,46 +63,14 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
 
   const [courtInput, setCourtInput] = useState('');
 
-  const saveMutation = useMutation({
-    mutationFn: async (data: CreateVenueDto | UpdateVenueDto) => {
-      if (!session?.accessToken) {
-        throw new Error('Not authenticated');
-      }
-
-      const url = venueId ? `${API_URL}/venues/${venueId}` : `${API_URL}/venues`;
-      const method = venueId ? 'PATCH' : 'POST';
-
-      const res = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.accessToken}`,
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({ message: res.statusText }));
-        throw new Error(errorData.message || `API Error: ${res.statusText}`);
-      }
-
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['venues'] });
-      if (venueId) {
-        queryClient.invalidateQueries({ queryKey: ['venue', venueId] });
-      }
-      toast.success(venueId ? t('venueUpdatedSuccess') : t('venueCreatedSuccess'));
-      router.push('/admin/venues');
-    },
-    onError: (error: Error) => {
-      toast.error(
-        venueId
-          ? `${t('venueUpdateError')}: ${error.message}`
-          : `${t('venueCreateError')}: ${error.message}`
-      );
-    },
+  // Use the standardized form mutation hook
+  const saveMutation = useFormMutation<CreateVenueDto | UpdateVenueDto>({
+    endpoint: venueId ? `/venues/${venueId}` : '/venues',
+    method: venueId ? 'PATCH' : 'POST',
+    invalidateKeys: venueId ? [['venues'], ['venue', venueId]] : [['venues']],
+    successMessage: venueId ? t('venueUpdatedSuccess') : t('venueCreatedSuccess'),
+    errorMessage: venueId ? t('venueUpdateError') : t('venueCreateError'),
+    redirectPath: '/admin/venues',
   });
 
   const handleAddCourt = () => {
@@ -175,8 +138,8 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
           <CardDescription>{t('venueDetailsDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="name">{t('venueName')} *</Label>
+          <Field>
+            <FieldLabel htmlFor="name">{t('venueName')} *</FieldLabel>
             <Input
               id="name"
               value={formData.name}
@@ -184,20 +147,20 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
               placeholder={t('venueNamePlaceholder')}
               required
             />
-          </div>
+          </Field>
 
-          <div className="space-y-2">
-            <Label htmlFor="address">{t('address')}</Label>
+          <Field>
+            <FieldLabel htmlFor="address">{t('address')}</FieldLabel>
             <Input
               id="address"
               value={formData.address}
               onChange={(e) => setFormData((prev) => ({ ...prev, address: e.target.value }))}
               placeholder={t('addressPlaceholder')}
             />
-          </div>
+          </Field>
 
-          <div className="space-y-2">
-            <Label htmlFor="logo">{t('logoUrl')}</Label>
+          <Field>
+            <FieldLabel htmlFor="logo">{t('logoUrl')}</FieldLabel>
             <Input
               id="logo"
               value={formData.logo}
@@ -206,8 +169,8 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
               type="url"
             />
             {formData.logo && (
-              <div className="mt-2">
-                <p className="text-sm text-muted-foreground mb-2">{t('logoPreview')}</p>
+              <FieldDescription>
+                <span className="block mb-2">{t('logoPreview')}</span>
                 <div className="relative h-16 w-16 border rounded overflow-hidden">
                   <Image
                     src={formData.logo}
@@ -221,12 +184,12 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
                     }}
                   />
                 </div>
-              </div>
+              </FieldDescription>
             )}
-          </div>
+          </Field>
 
-          <div className="space-y-2">
-            <Label htmlFor="court">{t('courtsLabel')} *</Label>
+          <Field>
+            <FieldLabel htmlFor="court">{t('courtsLabel')} *</FieldLabel>
             <div className="flex gap-2">
               <Input
                 id="court"
@@ -260,7 +223,7 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
                 ))}
               </div>
             )}
-          </div>
+          </Field>
         </CardContent>
         <CardFooter className="flex justify-end gap-2">
           <Button
@@ -271,20 +234,14 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
           >
             {t('cancel')}
           </Button>
-          <Button type="submit" disabled={saveMutation.isPending} animate>
-            {saveMutation.isPending && (
-              <div aria-hidden="true">
-                <Spinner />
-              </div>
-            )}
-            {saveMutation.isPending
-              ? venueId
-                ? t('updating')
-                : t('creating')
-              : venueId
-                ? t('updateVenue')
-                : t('createVenue')}
-          </Button>
+          <LoadingButton
+            type="submit"
+            isLoading={saveMutation.isPending}
+            loadingText={venueId ? t('updating') : t('creating')}
+            animate
+          >
+            {venueId ? t('updateVenue') : t('createVenue')}
+          </LoadingButton>
         </CardFooter>
       </Card>
     </form>

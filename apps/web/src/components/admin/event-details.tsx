@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { Button } from '@/components/ui/button';
+import { LoadingButton } from '@/components/ui/loading-button';
 import Link from 'next/link';
 import { MoreVertical } from 'lucide-react';
 import { LockIcon, LockIconHandle, SquarePenIcon, SquarePenIconHandle } from 'lucide-animated';
@@ -463,14 +464,14 @@ function EventDetailsHeaderActionButtons({
           );
         case 'OPEN':
           return (
-            <Button
+            <LoadingButton
               onClick={() => freezeMutation.mutate()}
-              disabled={freezeMutation.isPending}
+              isLoading={freezeMutation.isPending}
+              loadingText={t('freezing')}
               className="w-full gap-2"
             >
-              {freezeMutation.isPending && <Spinner data-icon="inline-start" className="h-4 w-4" />}
-              {freezeMutation.isPending ? t('freezing') : t('freezeRsvps')}
-            </Button>
+              {t('freezeRsvps')}
+            </LoadingButton>
           );
         case 'FROZEN':
           if (!draw) {

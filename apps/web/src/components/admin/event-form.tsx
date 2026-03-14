@@ -1,18 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useSession } from 'next-auth/react';
+import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { LoadingButton } from '@/components/ui/loading-button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Spinner } from '@/components/ui/spinner';
 import {
   Select,
   SelectContent,
@@ -20,10 +18,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Field, FieldLabel, FieldDescription } from '@/components/ui/field';
 import { DatePicker } from '@/components/shared/date-picker';
 import { TimePicker } from '@/components/shared/time-picker';
 import { DateTimePicker } from '@/components/shared/datetime-picker';
 import type { CreateEventDto, TierRules } from '@padel/types';
+import { useFormMutation } from '@/hooks';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -72,9 +72,7 @@ interface EventFormProps {
 }
 
 export function EventForm({ eventId, initialData }: EventFormProps = {}) {
-  const { data: session } = useSession();
   const router = useRouter();
-  const queryClient = useQueryClient();
   const t = useTranslations('eventForm');
   const isEditMode = !!eventId;
 
@@ -191,61 +189,24 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
     }));
   }, [formData.mastersCourtIds, formData.explorersCourtIds]);
 
-  const createMutation = useMutation({
-    mutationFn: async (data: CreateEventDto) => {
-      if (!session?.accessToken) {
-        throw new Error('Not authenticated');
-      }
-
-      const res = await fetch(`${API_URL}/events`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.accessToken}`,
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({ message: res.statusText }));
-        throw new Error(errorData.message || `API Error: ${res.statusText}`);
-      }
-
-      return res.json();
-    },
+  // Use the standardized form mutation hook for create
+  const createMutation = useFormMutation<CreateEventDto, { id: string }>({
+    endpoint: '/events',
+    method: 'POST',
+    invalidateKeys: [['admin-events']],
+    showToast: false, // We handle toast manually for create (redirect happens)
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['admin-events'] });
       router.push(`/admin/events/${data.id}`);
     },
   });
 
-  const updateMutation = useMutation({
-    mutationFn: async (data: Partial<CreateEventDto>) => {
-      if (!session?.accessToken) {
-        throw new Error('Not authenticated');
-      }
-
-      const res = await fetch(`${API_URL}/events/${eventId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.accessToken}`,
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({ message: res.statusText }));
-        throw new Error(errorData.message || `API Error: ${res.statusText}`);
-      }
-
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-events'] });
-      queryClient.invalidateQueries({ queryKey: ['event', eventId] });
-      router.push(`/admin/events/${eventId}`);
-    },
+  // Use the standardized form mutation hook for update
+  const updateMutation = useFormMutation<Partial<CreateEventDto>>({
+    endpoint: `/events/${eventId}`,
+    method: 'PATCH',
+    invalidateKeys: [['admin-events'], ['event', eventId || '']],
+    showToast: false, // We handle toast manually for update
+    redirectPath: `/admin/events/${eventId}`,
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -422,29 +383,29 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
     <Card className="glass-card">
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="title">{t('eventTitle')}</Label>
+          <Field>
+            <FieldLabel htmlFor="title">{t('eventTitle')}</FieldLabel>
             <Input
               id="title"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               placeholder={t('eventTitlePlaceholder')}
             />
-          </div>
+          </Field>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="date">{t('eventDate')}</Label>
+            <Field>
+              <FieldLabel htmlFor="date">{t('eventDate')}</FieldLabel>
               <DatePicker
                 id="date"
                 value={formData.date}
                 onChange={(date) => setFormData({ ...formData, date })}
                 placeholder={t('selectEventDate')}
               />
-            </div>
+            </Field>
 
-            <div className="space-y-2">
-              <Label htmlFor="capacity">{t('capacity')}</Label>
+            <Field>
+              <FieldLabel htmlFor="capacity">{t('capacity')}</FieldLabel>
               <Input
                 id="capacity"
                 type="number"
@@ -453,12 +414,12 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
                 className="bg-muted cursor-not-allowed"
                 required
               />
-              <p className="text-xs text-muted-foreground">{t('autoCalculated')}</p>
-            </div>
+              <FieldDescription>{t('autoCalculated')}</FieldDescription>
+            </Field>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="venue">{t('venue')}</Label>
+          <Field>
+            <FieldLabel htmlFor="venue">{t('venue')}</FieldLabel>
             {venuesLoading ? (
               <div className="text-sm text-muted-foreground">{t('loadingVenues')}</div>
             ) : (
@@ -485,35 +446,35 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
                 </SelectContent>
               </Select>
             )}
-          </div>
+          </Field>
 
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="rsvpOpensAt">{t('rsvpOpensAt')}</Label>
+            <Field>
+              <FieldLabel htmlFor="rsvpOpensAt">{t('rsvpOpensAt')}</FieldLabel>
               <DateTimePicker
                 id="rsvpOpensAt"
                 value={formData.rsvpOpensAt}
                 onChange={(datetime) => setFormData({ ...formData, rsvpOpensAt: datetime })}
                 placeholder={t('rsvpOpensAtPlaceholder')}
               />
-            </div>
+            </Field>
 
-            <div className="space-y-2">
-              <Label htmlFor="rsvpClosesAt">{t('rsvpClosesAt')}</Label>
+            <Field>
+              <FieldLabel htmlFor="rsvpClosesAt">{t('rsvpClosesAt')}</FieldLabel>
               <DateTimePicker
                 id="rsvpClosesAt"
                 value={formData.rsvpClosesAt}
                 onChange={(datetime) => setFormData({ ...formData, rsvpClosesAt: datetime })}
                 placeholder={t('rsvpClosesAtPlaceholder')}
               />
-            </div>
+            </Field>
           </div>
 
           <div className="space-y-4 rounded-lg border p-4 bg-muted/50">
-            <div className="space-y-2">
-              <Label>{t('tierAssignmentRules')}</Label>
-              <p className="text-sm text-muted-foreground">{t('tierAssignmentDescription')}</p>
-            </div>
+            <Field>
+              <FieldLabel>{t('tierAssignmentRules')}</FieldLabel>
+              <FieldDescription>{t('tierAssignmentDescription')}</FieldDescription>
+            </Field>
 
             <RadioGroup
               value={formData.tierRuleType}
@@ -523,29 +484,29 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="auto" id="tier-auto" />
-                <Label htmlFor="tier-auto" className="font-normal cursor-pointer">
+                <FieldLabel htmlFor="tier-auto" className="font-normal cursor-pointer">
                   {t('tierAuto')}
-                </Label>
+                </FieldLabel>
               </div>
 
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="count" id="tier-count" />
-                <Label htmlFor="tier-count" className="font-normal cursor-pointer">
+                <FieldLabel htmlFor="tier-count" className="font-normal cursor-pointer">
                   {t('tierCount')}
-                </Label>
+                </FieldLabel>
               </div>
 
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="percentage" id="tier-percentage" />
-                <Label htmlFor="tier-percentage" className="font-normal cursor-pointer">
+                <FieldLabel htmlFor="tier-percentage" className="font-normal cursor-pointer">
                   {t('tierPercentage')}
-                </Label>
+                </FieldLabel>
               </div>
             </RadioGroup>
 
             {formData.tierRuleType === 'count' && (
-              <div className="space-y-2 ml-6">
-                <Label htmlFor="masterCount">{t('numberOfMastersPlayers')}</Label>
+              <Field className="ml-6">
+                <FieldLabel htmlFor="masterCount">{t('numberOfMastersPlayers')}</FieldLabel>
                 <Input
                   id="masterCount"
                   type="number"
@@ -555,15 +516,15 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
                   onChange={(e) => setFormData({ ...formData, masterCount: e.target.value })}
                   placeholder={t('numberOfMastersPlaceholder')}
                 />
-                <p className="text-xs text-muted-foreground">
+                <FieldDescription>
                   {t('topRatedPlayers', { count: formData.masterCount || 'X' })}
-                </p>
-              </div>
+                </FieldDescription>
+              </Field>
             )}
 
             {formData.tierRuleType === 'percentage' && (
-              <div className="space-y-2 ml-6">
-                <Label htmlFor="masterPercentage">{t('mastersPercentage')}</Label>
+              <Field className="ml-6">
+                <FieldLabel htmlFor="masterPercentage">{t('mastersPercentage')}</FieldLabel>
                 <Input
                   id="masterPercentage"
                   type="number"
@@ -574,48 +535,53 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
                   onChange={(e) => setFormData({ ...formData, masterPercentage: e.target.value })}
                   placeholder={t('mastersPercentagePlaceholder')}
                 />
-                <p className="text-xs text-muted-foreground">
+                <FieldDescription>
                   {t('topPercentagePlayers', { percentage: formData.masterPercentage || 'X' })}
-                </p>
-              </div>
+                </FieldDescription>
+              </Field>
             )}
 
             <div className="space-y-4 pt-4 border-t">
-              <div className="space-y-2">
-                <Label>{t('timeSlotsAndCourts')}</Label>
-                <p className="text-sm text-muted-foreground">{t('timeSlotsDescription')}</p>
-              </div>
+              <Field>
+                <FieldLabel>{t('timeSlotsAndCourts')}</FieldLabel>
+                <FieldDescription>{t('timeSlotsDescription')}</FieldDescription>
+              </Field>
 
               <div className="space-y-3 p-3 rounded-lg border bg-card">
-                <Label className="text-sm font-medium">{t('mastersTimeSlot')}</Label>
+                <FieldLabel className="text-sm font-medium">{t('mastersTimeSlot')}</FieldLabel>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="mastersStartTime" className="text-xs text-muted-foreground">
+                  <Field>
+                    <FieldLabel
+                      htmlFor="mastersStartTime"
+                      className="text-xs text-muted-foreground"
+                    >
                       {t('startTime')}
-                    </Label>
+                    </FieldLabel>
                     <TimePicker
                       id="mastersStartTime"
                       value={formData.mastersStartTime}
                       onChange={(time) => setFormData({ ...formData, mastersStartTime: time })}
                       placeholder={t('startTimePlaceholder')}
                     />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="mastersEndTime" className="text-xs text-muted-foreground">
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor="mastersEndTime" className="text-xs text-muted-foreground">
                       {t('endTime')}
-                    </Label>
+                    </FieldLabel>
                     <TimePicker
                       id="mastersEndTime"
                       value={formData.mastersEndTime}
                       onChange={(time) => setFormData({ ...formData, mastersEndTime: time })}
                       placeholder={t('endTimePlaceholder')}
                     />
-                  </div>
+                  </Field>
                 </div>
 
                 {selectedVenue && selectedVenue.courts.length > 0 && (
                   <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">{t('courtsAvailable')}</Label>
+                    <FieldLabel className="text-xs text-muted-foreground">
+                      {t('courtsAvailable')}
+                    </FieldLabel>
                     <div className="grid grid-cols-2 gap-2">
                       {selectedVenue.courts.map((court) => (
                         <div key={court.id} className="flex items-center space-x-2">
@@ -640,43 +606,51 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
                         </div>
                       ))}
                     </div>
-                    <p className="text-xs text-muted-foreground">
+                    <FieldDescription>
                       {t('courtsSelected', { count: formData.mastersCourtIds.length })}
-                    </p>
+                    </FieldDescription>
                   </div>
                 )}
               </div>
 
               <div className="space-y-3 p-3 rounded-lg border bg-card">
-                <Label className="text-sm font-medium">{t('explorersTimeSlot')}</Label>
+                <FieldLabel className="text-sm font-medium">{t('explorersTimeSlot')}</FieldLabel>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="explorersStartTime" className="text-xs text-muted-foreground">
+                  <Field>
+                    <FieldLabel
+                      htmlFor="explorersStartTime"
+                      className="text-xs text-muted-foreground"
+                    >
                       {t('startTime')}
-                    </Label>
+                    </FieldLabel>
                     <TimePicker
                       id="explorersStartTime"
                       value={formData.explorersStartTime}
                       onChange={(time) => setFormData({ ...formData, explorersStartTime: time })}
                       placeholder={t('explorersStartTimePlaceholder')}
                     />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="explorersEndTime" className="text-xs text-muted-foreground">
+                  </Field>
+                  <Field>
+                    <FieldLabel
+                      htmlFor="explorersEndTime"
+                      className="text-xs text-muted-foreground"
+                    >
                       {t('endTime')}
-                    </Label>
+                    </FieldLabel>
                     <TimePicker
                       id="explorersEndTime"
                       value={formData.explorersEndTime}
                       onChange={(time) => setFormData({ ...formData, explorersEndTime: time })}
                       placeholder={t('explorersEndTimePlaceholder')}
                     />
-                  </div>
+                  </Field>
                 </div>
 
                 {selectedVenue && selectedVenue.courts.length > 0 && (
                   <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">{t('courtsAvailable')}</Label>
+                    <FieldLabel className="text-xs text-muted-foreground">
+                      {t('courtsAvailable')}
+                    </FieldLabel>
                     <div className="grid grid-cols-2 gap-2">
                       {selectedVenue.courts.map((court) => (
                         <div key={court.id} className="flex items-center space-x-2">
@@ -725,24 +699,14 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
           >
             {t('cancel')}
           </Button>
-          <Button
+          <LoadingButton
             type="submit"
-            disabled={createMutation.isPending || updateMutation.isPending}
+            isLoading={createMutation.isPending || updateMutation.isPending}
+            loadingText={isEditMode ? t('updating') : t('creating')}
             animate
           >
-            {(createMutation.isPending || updateMutation.isPending) && (
-              <div aria-hidden="true">
-                <Spinner />
-              </div>
-            )}
-            {isEditMode
-              ? updateMutation.isPending
-                ? t('updating')
-                : t('updateEvent')
-              : createMutation.isPending
-                ? t('creating')
-                : t('createEvent')}
-          </Button>
+            {isEditMode ? t('updateEvent') : t('createEvent')}
+          </LoadingButton>
         </CardFooter>
       </form>
     </Card>

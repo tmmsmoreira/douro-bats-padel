@@ -35,7 +35,7 @@ export function HomeNav() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border/50">
+      <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border/50 safe-top">
         <nav
           id="navigation"
           aria-label="Main navigation"

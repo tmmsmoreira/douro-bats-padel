@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useHaptic } from './use-haptic';
 
 interface UsePullToRefreshOptions {
   /**
@@ -52,14 +53,18 @@ export function usePullToRefresh(options: UsePullToRefreshOptions = {}): PullToR
   const { threshold = 80, maxPullDistance = 150, onRefresh, enabled = true } = options;
 
   const router = useRouter();
+  const haptic = useHaptic();
   const [isPulling, setIsPulling] = useState(false);
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const touchStartY = useRef(0);
   const scrollY = useRef(0);
+  const hasTriggeredThresholdHaptic = useRef(false);
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
+    // Haptic feedback when refresh starts
+    haptic.medium();
 
     try {
       if (onRefresh) {
@@ -70,12 +75,19 @@ export function usePullToRefresh(options: UsePullToRefreshOptions = {}): PullToR
         // Add a small delay to show the refresh animation
         await new Promise((resolve) => setTimeout(resolve, 500));
       }
+      // Success haptic when refresh completes
+      haptic.success();
+    } catch (error) {
+      // Error haptic if refresh fails
+      haptic.error();
+      throw error;
     } finally {
       setIsRefreshing(false);
       setPullDistance(0);
       setIsPulling(false);
+      hasTriggeredThresholdHaptic.current = false;
     }
-  }, [onRefresh, router]);
+  }, [onRefresh, router, haptic]);
 
   useEffect(() => {
     if (!enabled || typeof window === 'undefined') return;
@@ -107,6 +119,12 @@ export function usePullToRefresh(options: UsePullToRefreshOptions = {}): PullToR
         const resistanceFactor = 0.5;
         const adjustedDistance = Math.min(distance * resistanceFactor, maxPullDistance);
         setPullDistance(adjustedDistance);
+
+        // Trigger haptic feedback when threshold is reached (only once)
+        if (adjustedDistance >= threshold && !hasTriggeredThresholdHaptic.current) {
+          haptic.light();
+          hasTriggeredThresholdHaptic.current = true;
+        }
       }
     };
 
@@ -118,6 +136,7 @@ export function usePullToRefresh(options: UsePullToRefreshOptions = {}): PullToR
           // Reset if threshold not met
           setIsPulling(false);
           setPullDistance(0);
+          hasTriggeredThresholdHaptic.current = false;
         }
       }
     };

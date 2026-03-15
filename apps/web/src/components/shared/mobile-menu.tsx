@@ -58,17 +58,6 @@ export function MobileMenu({
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop with blur */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="md:hidden fixed inset-0 bg-background/80 backdrop-blur-sm z-90"
-            onClick={onClose}
-            aria-hidden="true"
-          />
-
           {/* Menu content */}
           <motion.nav
             id="mobile-menu"
@@ -79,7 +68,9 @@ export function MobileMenu({
             transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
             className="md:hidden fixed inset-0 top-16 bg-card z-100 overflow-y-auto safe-bottom"
             style={{
+              top: 'calc(4rem + max(1rem, env(safe-area-inset-top)))',
               WebkitOverflowScrolling: 'touch',
+              paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))',
             }}
           >
             <div className="container mx-auto px-4 py-6 space-y-2 pb-safe">

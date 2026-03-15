@@ -93,7 +93,7 @@ export function AdminNav() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border/50">
+      <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border/50 safe-top">
         <nav
           id="navigation"
           aria-label="Admin navigation"

@@ -15,6 +15,7 @@ import {
   EventStats,
   DataStateWrapper,
   ScrollableFadeContainer,
+  Pagination,
 } from '@/components/shared';
 import { StatusBadge, type EventStatus } from '@/components/shared/status-badge';
 import { Calendar } from '@/components/ui/calendar';
@@ -355,68 +356,18 @@ function EventsListContent({
           </motion.div>
 
           {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between border-t pt-4">
-              <div className="text-sm text-muted-foreground">
-                {t('showingResults', {
-                  start: startIndex + 1,
-                  end: Math.min(endIndex, filteredEvents.length),
-                  total: filteredEvents.length,
-                })}
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage((prev: number) => Math.max(1, prev - 1))}
-                  disabled={currentPage === 1}
-                >
-                  {t('previous')}
-                </Button>
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                    // Show first page, last page, current page, and pages around current
-                    const showPage =
-                      page === 1 ||
-                      page === totalPages ||
-                      (page >= currentPage - 1 && page <= currentPage + 1);
-
-                    if (!showPage) {
-                      // Show ellipsis
-                      if (page === currentPage - 2 || page === currentPage + 2) {
-                        return (
-                          <span key={page} className="px-2 text-muted-foreground">
-                            ...
-                          </span>
-                        );
-                      }
-                      return null;
-                    }
-
-                    return (
-                      <Button
-                        key={page}
-                        variant={currentPage === page ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setCurrentPage(page)}
-                        className="min-w-10"
-                      >
-                        {page}
-                      </Button>
-                    );
-                  })}
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage((prev: number) => Math.min(totalPages, prev + 1))}
-                  disabled={currentPage === totalPages}
-                >
-                  {t('next')}
-                </Button>
-              </div>
-            </div>
-          )}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            showResultsText={t('showingResults', {
+              start: startIndex + 1,
+              end: Math.min(endIndex, filteredEvents.length),
+              total: filteredEvents.length,
+            })}
+            previousLabel={t('previous')}
+            nextLabel={t('next')}
+          />
         </>
       )}
     </motion.div>

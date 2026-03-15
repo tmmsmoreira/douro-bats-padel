@@ -43,6 +43,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  viewportFit: 'cover', // Enable safe area insets for notched devices
 };
 
 export async function generateStaticParams() {

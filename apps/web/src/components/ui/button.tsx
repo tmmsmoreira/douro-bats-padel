@@ -6,6 +6,7 @@ import { Slot } from 'radix-ui';
 import { motion } from 'motion/react';
 
 import { cn } from '@/lib/utils';
+import { useHaptic } from '@/hooks/use-haptic';
 
 const buttonVariants = cva(
   "inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
@@ -46,6 +47,7 @@ function Button({
   size = 'default',
   asChild = false,
   animate = false,
+  haptic = false,
   ...props
 }: React.ComponentProps<'button'> &
   VariantProps<typeof buttonVariants> & {
@@ -55,8 +57,30 @@ function Button({
      * @default false
      */
     animate?: boolean;
+    /**
+     * Whether to enable haptic feedback on button press
+     * @default false
+     */
+    haptic?: boolean;
   }) {
   const Comp = asChild ? Slot.Root : 'button';
+  const hapticFeedback = useHaptic();
+
+  // Handle click with haptic feedback
+  const handleClick = React.useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      if (haptic && !props.disabled) {
+        // Use different haptic patterns based on variant
+        if (variant === 'destructive') {
+          hapticFeedback.warning();
+        } else {
+          hapticFeedback.medium();
+        }
+      }
+      props.onClick?.(e);
+    },
+    [haptic, props, variant, hapticFeedback]
+  );
 
   const button = (
     <Comp
@@ -65,6 +89,7 @@ function Button({
       data-size={size}
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
+      onClick={handleClick}
     />
   );
 
@@ -72,7 +97,12 @@ function Button({
     return (
       <motion.div
         whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
+        whileTap={{ scale: 0.95 }}
+        transition={{
+          type: 'spring',
+          stiffness: 400,
+          damping: 17,
+        }}
         className="flex-1 sm:flex-none"
       >
         {button}

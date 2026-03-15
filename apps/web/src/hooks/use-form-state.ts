@@ -99,7 +99,7 @@ export function useFormState<T extends Record<string, any>>(config: FormConfig<T
   /**
    * Update multiple field values at once
    */
-  const setValues = useCallback((newValues: Partial<T>) => {
+  const updateValues = useCallback((newValues: Partial<T>) => {
     setValues((prev) => ({ ...prev, ...newValues }));
   }, []);
 
@@ -151,7 +151,7 @@ export function useFormState<T extends Record<string, any>>(config: FormConfig<T
     errors,
     touched,
     setValue,
-    setValues,
+    updateValues,
     setFieldTouched,
     validateField,
     validateAll,

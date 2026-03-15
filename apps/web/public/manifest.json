@@ -3,10 +3,13 @@
   "short_name": "Douro Bats",
   "description": "Manage padel game nights, RSVPs, draws, and rankings for Douro Bats Padel Club",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",
   "orientation": "portrait-primary",
+  "prefer_related_applications": false,
+  "display_override": ["window-controls-overlay", "standalone"],
   "icons": [
     {
       "src": "/icons/icon-72x72.png",

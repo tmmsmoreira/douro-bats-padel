@@ -94,7 +94,7 @@ export function PageLayout({
       id="main-content"
       className={cn(
         'container mx-auto flex-1 min-h-[500px]',
-        padding || 'px-4 sm:px-6 py-6 sm:py-8',
+        padding || 'px-4 sm:px-6 pt-6 pb-6 sm:pb-8',
         maxWidthClasses[maxWidth],
         className
       )}
@@ -107,8 +107,8 @@ export function PageLayout({
     <div className="min-h-screen bg-background flex flex-col">
       <SkipLinks />
       {nav}
-      {/* Add padding-top to account for fixed navbar */}
-      <div className="pt-16" style={{ paddingTop: 'calc(4rem + env(safe-area-inset-top))' }}>
+      {/* Add padding-top to account for fixed navbar (4rem height + safe-area-inset + 1px border) */}
+      <div style={{ paddingTop: 'calc(4rem + env(safe-area-inset-top, 0px) + 1px)' }}>
         {animate ? (
           <motion.div {...pageTransition} className="flex-1 flex flex-col">
             {mainContent}

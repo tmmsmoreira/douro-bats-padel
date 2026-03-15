@@ -40,11 +40,11 @@ export function HomeNav() {
     <>
       <header
         className={cn(
-          'fixed top-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border/50 safe-top transition-transform duration-300',
+          'fixed top-0 left-0 right-0 z-50 bg-card backdrop-blur-xl border-b border-border/50 safe-top transition-transform duration-300',
           isNavVisible ? 'translate-y-0' : '-translate-y-full'
         )}
       >
-        <nav id="navigation" aria-label="Main navigation" className="border-b bg-card">
+        <nav id="navigation" aria-label="Main navigation">
           <div className="container mx-auto px-4">
             <div className="flex h-16 items-center justify-between">
               {/* Logo */}

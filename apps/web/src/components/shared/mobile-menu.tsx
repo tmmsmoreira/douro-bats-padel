@@ -68,7 +68,7 @@ export function MobileMenu({
             transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
             className="md:hidden fixed inset-0 top-16 bg-card z-100 overflow-y-auto safe-bottom"
             style={{
-              top: 'calc(4rem + max(1rem, env(safe-area-inset-top)))',
+              top: 'calc(4rem + env(safe-area-inset-top, 0px) + 1px)',
               WebkitOverflowScrolling: 'touch',
               paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))',
             }}

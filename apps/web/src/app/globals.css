@@ -274,7 +274,7 @@
 
   /* Safe area utilities */
   .safe-top {
-    padding-top: env(safe-area-inset-top);
+    padding-top: env(safe-area-inset-top, 0);
   }
 
   .safe-bottom {

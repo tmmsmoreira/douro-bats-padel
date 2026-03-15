@@ -523,7 +523,7 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
             )}
 
             {formData.tierRuleType === 'percentage' && (
-              <Field className="ml-6">
+              <Field className="pl-6">
                 <FieldLabel htmlFor="masterPercentage">{t('mastersPercentage')}</FieldLabel>
                 <Input
                   id="masterPercentage"
@@ -690,8 +690,9 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
             </div>
           )}
         </CardContent>
-        <CardFooter className="flex justify-end gap-2">
+        <CardFooter className="flex pt-0 justify-end gap-2">
           <Button
+            className="w-full"
             type="button"
             variant="outline"
             onClick={() => router.push(isEditMode ? `/admin/events/${eventId}` : '/admin')}
@@ -700,6 +701,7 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
             {t('cancel')}
           </Button>
           <LoadingButton
+            className="w-full"
             type="submit"
             isLoading={createMutation.isPending || updateMutation.isPending}
             loadingText={isEditMode ? t('updating') : t('creating')}

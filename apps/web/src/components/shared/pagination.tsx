@@ -104,14 +104,19 @@ export function Pagination({
   };
 
   return (
-    <div className={cn('flex items-center justify-between border-t pt-4', className)}>
+    <div
+      className={cn(
+        'flex flex-col sm:flex-row items-center justify-between border-t pt-4 gap-4',
+        className
+      )}
+    >
       {/* Results text - hidden on mobile */}
       {showResultsText && (
         <div className="text-sm text-muted-foreground hidden sm:block">{showResultsText}</div>
       )}
 
-      {/* Pagination controls */}
-      <div className={cn('flex items-center gap-2', !showResultsText && 'mx-auto')}>
+      {/* Pagination controls - centered on mobile, right-aligned on desktop */}
+      <div className={cn('flex items-center gap-2', showResultsText ? 'sm:ml-auto' : 'mx-auto')}>
         {/* Previous button */}
         <Button
           variant="outline"

@@ -107,13 +107,16 @@ export function PageLayout({
     <div className="min-h-screen bg-background flex flex-col">
       <SkipLinks />
       {nav}
-      {animate ? (
-        <motion.div {...pageTransition} className="flex-1 flex flex-col">
-          {mainContent}
-        </motion.div>
-      ) : (
-        mainContent
-      )}
+      {/* Add padding-top to account for fixed navbar */}
+      <div className="pt-16" style={{ paddingTop: 'calc(4rem + env(safe-area-inset-top))' }}>
+        {animate ? (
+          <motion.div {...pageTransition} className="flex-1 flex flex-col">
+            {mainContent}
+          </motion.div>
+        ) : (
+          mainContent
+        )}
+      </div>
       {showFooter && <Footer />}
     </div>
   );

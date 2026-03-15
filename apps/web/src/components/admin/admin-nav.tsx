@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from '@/i18n/navigation';
 import { useActivePathname } from '@/hooks/use-active-pathname';
+import { useScrollDirection } from '@/hooks/use-scroll-direction';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -35,6 +36,7 @@ export function AdminNav() {
   const { data: session, status } = useSession();
   const t = useTranslations('nav');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const isNavVisible = useScrollDirection();
 
   const signOutIconRef = useRef<LogoutIconHandle>(null);
   const userIconRef = useRef<UserIconHandle>(null);
@@ -93,12 +95,13 @@ export function AdminNav() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border/50 safe-top">
-        <nav
-          id="navigation"
-          aria-label="Admin navigation"
-          className="border-b bg-card sticky top-0 z-50"
-        >
+      <header
+        className={cn(
+          'fixed top-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border/50 safe-top transition-transform duration-300',
+          isNavVisible ? 'translate-y-0' : '-translate-y-full'
+        )}
+      >
+        <nav id="navigation" aria-label="Admin navigation" className="border-b bg-card">
           <div className="container mx-auto px-4">
             <div className="flex h-16 items-center justify-between">
               {/* Logo */}

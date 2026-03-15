@@ -279,6 +279,7 @@
   },
   "admin": {
     "loading": "A carregar...",
+    "loadingVenue": "A carregar clube...",
     "eventsManagement": "Gestão de Eventos",
     "eventsDescription": "Gerir noites de jogo, confirmações e sorteios",
     "createEvent": "Criar Evento",
@@ -367,7 +368,9 @@
     "failedToUpdate": "Falha ao atualizar o clube",
     "failedToCreate": "Falha ao criar o clube",
     "pleaseEnterVenueName": "Por favor insira um nome para o clube",
-    "pleaseAddAtLeastOneCourt": "Por favor adicione pelo menos um campo"
+    "pleaseAddAtLeastOneCourt": "Por favor adicione pelo menos um campo",
+    "venueUpdatedSuccess": "Clube atualizado com sucesso",
+    "venueUpdateError": "Erro ao atualizar clube"
   },
   "eventForm": {
     "eventTitle": "Título do Evento",

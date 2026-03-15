@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { toast } from 'sonner';
@@ -18,7 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import { Field, FieldLabel, FieldDescription } from '@/components/ui/field';
 import { LoadingButton } from '@/components/ui/loading-button';
 import type { CreateVenueDto, UpdateVenueDto } from '@padel/types';
-import { XIcon } from 'lucide-animated';
+import { PlusIcon, PlusIconHandle, XIcon } from 'lucide-animated';
 import { useTranslations } from 'next-intl';
 import { getShimmerDataURL } from '@/lib/image-blur';
 import { useFormMutation } from '@/hooks';
@@ -36,6 +36,7 @@ interface VenueFormProps {
 export function VenueForm({ venueId, initialData }: VenueFormProps) {
   const router = useRouter();
   const t = useTranslations('venueForm');
+  const plusIconRef = useRef<PlusIconHandle>(null);
 
   const [formData, setFormData] = useState<{
     name: string;
@@ -203,8 +204,15 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
                 }}
                 placeholder={t('courtLabelPlaceholder')}
               />
-              <Button type="button" onClick={handleAddCourt}>
-                {t('addCourt')}
+              <Button
+                type="button"
+                size="icon"
+                variant="outline"
+                onClick={handleAddCourt}
+                onMouseEnter={() => plusIconRef.current?.startAnimation()}
+                onMouseLeave={() => plusIconRef.current?.stopAnimation()}
+              >
+                <PlusIcon ref={plusIconRef} size={16} />
               </Button>
             </div>
             {formData.courts.length > 0 && (
@@ -227,6 +235,7 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
         </CardContent>
         <CardFooter className="flex justify-end gap-2">
           <Button
+            className="w-full"
             type="button"
             variant="outline"
             onClick={() => router.push('/admin/venues')}
@@ -235,6 +244,7 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
             {t('cancel')}
           </Button>
           <LoadingButton
+            className="w-full"
             type="submit"
             isLoading={saveMutation.isPending}
             loadingText={venueId ? t('updating') : t('creating')}

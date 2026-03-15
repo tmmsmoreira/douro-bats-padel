@@ -66,7 +66,6 @@ export function PlayerProfile() {
       }
 
       const data = await res.json();
-      console.log('Profile data received:', data);
       return data;
     },
     enabled: !!session?.accessToken,
@@ -337,33 +336,35 @@ function ProfileContent({
         <Card className="glass-card">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>{t('playerInformation')}</CardTitle>
-            {!isEditingProfile ? (
-              <Button
-                onClick={handleEditProfile}
-                variant="outline"
-                size="icon"
-                onMouseEnter={() => squarePenIconRef.current?.startAnimation()}
-                onMouseLeave={() => squarePenIconRef.current?.stopAnimation()}
-                animate
-              >
-                <SquarePenIcon ref={squarePenIconRef} size={16} className="h-4 w-4" />
-              </Button>
-            ) : (
-              <div className="flex gap-2">
+            <div className="flex gap-2">
+              {!isEditingProfile ? (
                 <Button
-                  onClick={handleSaveProfile}
-                  disabled={updateProfileMutation.isPending}
-                  size="sm"
+                  onClick={handleEditProfile}
+                  variant="outline"
+                  size="icon"
+                  onMouseEnter={() => squarePenIconRef.current?.startAnimation()}
+                  onMouseLeave={() => squarePenIconRef.current?.stopAnimation()}
                   animate
                 >
-                  {updateProfileMutation.isPending ? t('saving') : t('save')}
+                  <SquarePenIcon ref={squarePenIconRef} size={16} className="h-4 w-4" />
                 </Button>
+              ) : (
+                <>
+                  <Button
+                    onClick={handleSaveProfile}
+                    disabled={updateProfileMutation.isPending}
+                    size="sm"
+                    animate
+                  >
+                    {updateProfileMutation.isPending ? t('saving') : t('save')}
+                  </Button>
 
-                <Button onClick={handleCancelProfileEdit} variant="outline" size="sm" animate>
-                  {t('cancel')}
-                </Button>
-              </div>
-            )}
+                  <Button onClick={handleCancelProfileEdit} variant="outline" size="sm" animate>
+                    {t('cancel')}
+                  </Button>
+                </>
+              )}
+            </div>
           </CardHeader>
           <CardContent className="space-y-4 pt-0">
             <div className="flex items-center gap-4">
@@ -472,17 +473,19 @@ function ProfileContent({
               )}
             </div>
 
-            {/* Role Field (Read-only) */}
-            <div>
-              <p className="text-sm text-muted-foreground">{t('role')}</p>
-              <div className="flex gap-2 mt-1">
-                {profile.roles?.map((role: string) => (
-                  <Badge key={role} variant="outline">
-                    {role}
-                  </Badge>
-                ))}
+            {/* Role Field (Read-only) - Hidden for PLAYER role */}
+            {profile.roles?.length > 1 || !profile.roles?.includes('PLAYER') ? (
+              <div>
+                <p className="text-sm text-muted-foreground">{t('role')}</p>
+                <div className="flex gap-2 mt-1">
+                  {profile.roles?.map((role: string) => (
+                    <Badge key={role} variant="outline">
+                      {role}
+                    </Badge>
+                  ))}
+                </div>
               </div>
-            </div>
+            ) : null}
           </CardContent>
         </Card>
 

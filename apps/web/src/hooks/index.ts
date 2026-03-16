@@ -1,6 +1,7 @@
 export * from './use-active-pathname';
 export * from './use-alert-native';
 export * from './use-api';
+export * from './use-bfcache';
 export * from './use-events';
 export * from './use-form-mutation';
 export * from './use-form-state';

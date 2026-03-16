@@ -3,11 +3,12 @@
 import { useTranslations } from 'next-intl';
 import { motion } from 'motion/react';
 import { Link } from '@/i18n/navigation';
-import { useUpcomingEvents } from '@/hooks';
+import { useUpcomingEvents, useIsFromBfcache } from '@/hooks';
 import { EventCard, EventStats, RSVPBadges, DataStateWrapper } from '@/components/shared';
 
 export function EventsList() {
   const t = useTranslations('home');
+  const isFromBfcache = useIsFromBfcache();
 
   const { data: events, isLoading } = useUpcomingEvents();
 
@@ -21,15 +22,15 @@ export function EventsList() {
       {(events) => (
         <div className="space-y-4">
           <motion.div
-            initial="hidden"
+            initial={isFromBfcache ? false : 'hidden'}
             animate="show"
             variants={{
               hidden: { opacity: 0 },
               show: {
                 opacity: 1,
                 transition: {
-                  delay: 0.2,
-                  staggerChildren: 0.1,
+                  delay: isFromBfcache ? 0 : 0.2,
+                  staggerChildren: isFromBfcache ? 0 : 0.1,
                 },
               },
             }}

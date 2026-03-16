@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 /**
  * Hook to handle browser back-forward cache (bfcache) properly.
@@ -40,4 +40,56 @@ export function useBfcache(onRestore?: () => void) {
       window.removeEventListener('pageshow', handlePageShow);
     };
   }, [onRestore]);
+}
+
+/**
+ * Hook to detect if the current page load is from bfcache restoration.
+ * Returns true if the page was just restored from bfcache, false otherwise.
+ * The flag is automatically reset after a short delay.
+ *
+ * @returns boolean indicating if page was restored from bfcache
+ *
+ * @example
+ * ```tsx
+ * function MyComponent() {
+ *   const isFromBfcache = useIsFromBfcache();
+ *
+ *   return (
+ *     <motion.div
+ *       initial={isFromBfcache ? false : "hidden"}
+ *       animate="show"
+ *     >
+ *       Content
+ *     </motion.div>
+ *   );
+ * }
+ * ```
+ */
+export function useIsFromBfcache(): boolean {
+  const [isFromBfcache, setIsFromBfcache] = useState(false);
+  const hasChecked = useRef(false);
+
+  useEffect(() => {
+    // Only check once on mount
+    if (hasChecked.current) return;
+    hasChecked.current = true;
+
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        setIsFromBfcache(true);
+        // Reset after a short delay to allow animations to be skipped
+        setTimeout(() => {
+          setIsFromBfcache(false);
+        }, 100);
+      }
+    };
+
+    window.addEventListener('pageshow', handlePageShow);
+
+    return () => {
+      window.removeEventListener('pageshow', handlePageShow);
+    };
+  }, []);
+
+  return isFromBfcache;
 }

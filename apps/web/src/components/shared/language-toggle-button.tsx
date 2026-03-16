@@ -29,7 +29,9 @@ export function LanguageToggleButton() {
     segments[1] = newLocale;
     const newPath = segments.join('/');
 
-    router.push(newPath);
+    // Use replace instead of push to avoid adding to history
+    // This makes the transition feel more like a state change than navigation
+    router.replace(newPath);
   };
 
   // Show the same flag during SSR and after hydration to prevent flash

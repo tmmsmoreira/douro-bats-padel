@@ -4,13 +4,15 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Link } from '@/i18n/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { Session } from 'next-auth';
 import { LogoutIcon, UserIcon } from 'lucide-animated';
 import { signOut } from 'next-auth/react';
 import { ThemeToggleButton } from '@/components/shared/theme-toggle-button';
 import { LanguageToggleButton } from '@/components/shared/language-toggle-button';
 import { useHaptic } from '@/hooks/use-haptic';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface NavItem {
   href: string;
@@ -43,6 +45,14 @@ export function MobileMenu({
   showSignInButton = false,
 }: MobileMenuProps) {
   const haptic = useHaptic();
+  const router = useRouter();
+
+  // Determine current view mode from the href
+  // If roleSwitchHref is '/', we're currently in admin view (switching to player)
+  // If roleSwitchHref is '/admin', we're currently in player view (switching to admin)
+  const isCurrentlyAdminView =
+    roleSwitchHref?.startsWith('/') && !roleSwitchHref.startsWith('/admin');
+  const [viewMode, setViewMode] = useState(isCurrentlyAdminView);
 
   // Trigger haptic feedback when menu opens
   useEffect(() => {
@@ -50,6 +60,28 @@ export function MobileMenu({
       haptic.light();
     }
   }, [isOpen, haptic]);
+
+  // Handle view mode toggle
+  const handleViewModeChange = (checked: boolean) => {
+    const newView = checked ? 'admin' : 'player';
+    const newHref = checked ? '/admin' : '/';
+
+    // Update state
+    setViewMode(checked);
+
+    // Set the view in sessionStorage
+    sessionStorage.setItem('lastView', newView);
+    window.dispatchEvent(new Event('viewChanged'));
+
+    // Haptic feedback
+    haptic.medium();
+
+    // Navigate to the new view
+    router.push(newHref);
+
+    // Close menu
+    onClose();
+  };
 
   return (
     <AnimatePresence>
@@ -139,6 +171,20 @@ export function MobileMenu({
                 <p className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   {t('settings') || 'Settings'}
                 </p>
+
+                {/* View Mode Toggle - Only show for editors/admins */}
+                {showRoleSwitch && (
+                  <div className="flex items-center justify-between gap-4 px-4 py-3 rounded-lg hover:bg-secondary">
+                    <div className="flex flex-col">
+                      <span className="text-base font-medium">View Mode</span>
+                      <span className="text-xs text-muted-foreground">
+                        {viewMode ? 'Admin' : 'Player'}
+                      </span>
+                    </div>
+                    <Switch checked={viewMode} onCheckedChange={handleViewModeChange} />
+                  </div>
+                )}
+
                 <div className="flex items-center justify-between gap-4 px-4 py-3 rounded-lg hover:bg-secondary">
                   <span className="text-base font-medium">{t('language') || 'Language'}</span>
                   <div className="ml-auto">
@@ -241,26 +287,6 @@ export function MobileMenu({
                     <LogoutIcon size={20} />
                     {t('signOut')}
                   </button>
-                </div>
-              )}
-
-              {/* Role Switching Section */}
-              {showRoleSwitch && roleSwitchHref && roleSwitchLabel && (
-                <div className="pt-2 border-t">
-                  <Link
-                    href={roleSwitchHref}
-                    onClick={() => {
-                      // Set the view in sessionStorage when switching
-                      const targetView = roleSwitchHref.startsWith('/admin') ? 'admin' : 'player';
-                      sessionStorage.setItem('lastView', targetView);
-                      window.dispatchEvent(new Event('viewChanged'));
-                      haptic.medium();
-                      onClose();
-                    }}
-                    className="flex items-center uppercase justify-center w-full px-4 py-3 text-base font-medium transition-colors bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-lg touch-target"
-                  >
-                    {roleSwitchLabel}
-                  </Link>
                 </div>
               )}
             </div>

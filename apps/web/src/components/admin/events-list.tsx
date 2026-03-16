@@ -9,7 +9,7 @@ import { X } from 'lucide-react';
 import { CalendarDaysIcon, CalendarDaysIconHandle } from 'lucide-animated';
 import Link from 'next/link';
 import { useState, useMemo } from 'react';
-import { useAdminEvents } from '@/hooks';
+import { useAdminEvents, useIsFromBfcache } from '@/hooks';
 import {
   EventCard,
   EventStats,
@@ -34,6 +34,7 @@ export function EventsList() {
   const [statusFilter, setStatusFilter] = useState<EventState>('ALL');
   const [currentPage, setCurrentPage] = useState(1);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const isFromBfcache = useIsFromBfcache();
 
   const { data: events, isLoading } = useAdminEvents();
 
@@ -96,6 +97,7 @@ export function EventsList() {
           setShowDatePicker={setShowDatePicker}
           locale={locale}
           t={t}
+          isFromBfcache={isFromBfcache}
         />
       )}
     </DataStateWrapper>
@@ -117,6 +119,7 @@ function EventsListContent({
   setShowDatePicker,
   locale,
   t,
+  isFromBfcache,
 }: any) {
   // Calculate pagination indices
   const EVENTS_PER_PAGE = 10;
@@ -313,14 +316,14 @@ function EventsListContent({
         <>
           <motion.div
             key={`${statusFilter}-${selectedDate?.toISOString() || 'all'}-${currentPage}`}
-            initial="hidden"
+            initial={isFromBfcache ? false : 'hidden'}
             animate="show"
             variants={{
               hidden: { opacity: 0 },
               show: {
                 opacity: 1,
                 transition: {
-                  staggerChildren: 0.1,
+                  staggerChildren: isFromBfcache ? 0 : 0.1,
                 },
               },
             }}
@@ -332,7 +335,7 @@ function EventsListContent({
                   key={event.id}
                   variants={{
                     hidden: { opacity: 0, y: 20 },
-                    show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+                    show: { opacity: 1, y: 0, transition: { duration: isFromBfcache ? 0 : 0.4 } },
                   }}
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.99 }}

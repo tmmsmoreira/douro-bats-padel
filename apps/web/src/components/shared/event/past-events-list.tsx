@@ -55,7 +55,7 @@ export function PastEventsList() {
                   key={event.id}
                   variants={{
                     hidden: { opacity: 0, y: 20 },
-                    show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+                    show: { opacity: 1, y: 0, transition: { duration: isFromBfcache ? 0 : 0.4 } },
                   }}
                   className="opacity-90"
                   whileHover={{ scale: 1.01 }}

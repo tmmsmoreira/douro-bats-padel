@@ -4,9 +4,11 @@ import * as React from 'react';
 import { MoonIcon, SunIcon } from 'lucide-animated';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
+import { useHaptic } from '@/hooks/use-haptic';
 
 export function ThemeToggleButton() {
   const { theme, setTheme } = useTheme();
+  const haptic = useHaptic();
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
@@ -25,6 +27,7 @@ export function ThemeToggleButton() {
   const isDark = theme === 'dark';
 
   const toggleTheme = () => {
+    haptic.selection();
     setTheme(isDark ? 'light' : 'dark');
   };
 

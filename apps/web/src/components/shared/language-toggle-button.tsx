@@ -4,11 +4,12 @@ import * as React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { i18n, localeFlags, type Locale } from '@/i18n';
-import { motion } from 'motion/react';
+import { useHaptic } from '@/hooks/use-haptic';
 
 export function LanguageToggleButton() {
   const pathname = usePathname();
   const router = useRouter();
+  const haptic = useHaptic();
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
@@ -19,6 +20,8 @@ export function LanguageToggleButton() {
   const displayFlag = localeFlags[currentLocale];
 
   const toggleLanguage = () => {
+    haptic.selection();
+
     const newLocale: Locale = currentLocale === 'en' ? 'pt' : 'en';
 
     // Set cookie for locale preference

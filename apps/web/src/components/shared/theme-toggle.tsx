@@ -5,9 +5,11 @@ import { MoonIcon, SunIcon } from 'lucide-animated';
 import { useTheme } from 'next-themes';
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Switch } from '@/components/ui/switch';
+import { useHaptic } from '@/hooks/use-haptic';
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
+  const haptic = useHaptic();
   const [mounted, setMounted] = React.useState(false);
   const iconRef = React.useRef<{ startAnimation: () => void; stopAnimation: () => void }>(null);
 
@@ -30,6 +32,7 @@ export function ThemeToggle() {
   const isDark = theme === 'dark';
 
   const handleToggle = () => {
+    haptic.selection();
     const newTheme = isDark ? 'light' : 'dark';
     setTheme(newTheme);
   };

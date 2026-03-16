@@ -402,6 +402,7 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
                 onChange={(date) => setFormData({ ...formData, date })}
                 placeholder={t('selectEventDate')}
               />
+              <FieldDescription>Format: DD/MM/YYYY</FieldDescription>
             </Field>
 
             <Field>
@@ -457,6 +458,7 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
                 onChange={(datetime) => setFormData({ ...formData, rsvpOpensAt: datetime })}
                 placeholder={t('rsvpOpensAtPlaceholder')}
               />
+              <FieldDescription>Format: DD/MM/YYYY HH:MM (24h)</FieldDescription>
             </Field>
 
             <Field>
@@ -467,6 +469,7 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
                 onChange={(datetime) => setFormData({ ...formData, rsvpClosesAt: datetime })}
                 placeholder={t('rsvpClosesAtPlaceholder')}
               />
+              <FieldDescription>Format: DD/MM/YYYY HH:MM (24h)</FieldDescription>
             </Field>
           </div>
 
@@ -563,6 +566,7 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
                       onChange={(time) => setFormData({ ...formData, mastersStartTime: time })}
                       placeholder={t('startTimePlaceholder')}
                     />
+                    <FieldDescription>Format: HH:MM (24h)</FieldDescription>
                   </Field>
                   <Field>
                     <FieldLabel htmlFor="mastersEndTime" className="text-xs text-muted-foreground">
@@ -574,6 +578,7 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
                       onChange={(time) => setFormData({ ...formData, mastersEndTime: time })}
                       placeholder={t('endTimePlaceholder')}
                     />
+                    <FieldDescription>Format: HH:MM (24h)</FieldDescription>
                   </Field>
                 </div>
 
@@ -629,6 +634,7 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
                       onChange={(time) => setFormData({ ...formData, explorersStartTime: time })}
                       placeholder={t('explorersStartTimePlaceholder')}
                     />
+                    <FieldDescription>Format: HH:MM (24h)</FieldDescription>
                   </Field>
                   <Field>
                     <FieldLabel
@@ -643,6 +649,7 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
                       onChange={(time) => setFormData({ ...formData, explorersEndTime: time })}
                       placeholder={t('explorersEndTimePlaceholder')}
                     />
+                    <FieldDescription>Format: HH:MM (24h)</FieldDescription>
                   </Field>
                 </div>
 

@@ -50,8 +50,6 @@ interface DatePickerProps {
   placeholder?: string;
   disabled?: boolean;
   id?: string;
-  showHint?: boolean;
-  hint?: string;
 }
 
 export function DatePicker({
@@ -60,8 +58,6 @@ export function DatePicker({
   placeholder = 'DD/MM/YYYY',
   disabled,
   id,
-  showHint = true,
-  hint = 'Format: DD/MM/YYYY',
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
   const [date, setDate] = React.useState<Date | undefined>(value);
@@ -130,65 +126,62 @@ export function DatePicker({
   );
 
   return (
-    <div className="space-y-1.5">
-      <InputGroup>
-        <InputGroupInput
-          id={id}
-          value={inputValue}
-          placeholder={placeholder}
-          disabled={disabled}
-          onChange={handleInputChange}
-          onKeyDown={(e) => {
-            if (e.key === 'ArrowDown') {
-              e.preventDefault();
-              setOpen(true);
-            }
-          }}
-          maxLength={10}
-        />
-        <InputGroupAddon align="inline-end">
-          {isMobile ? (
-            <>
+    <InputGroup>
+      <InputGroupInput
+        id={id}
+        value={inputValue}
+        placeholder={placeholder}
+        disabled={disabled}
+        onChange={handleInputChange}
+        onKeyDown={(e) => {
+          if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            setOpen(true);
+          }
+        }}
+        maxLength={10}
+      />
+      <InputGroupAddon align="inline-end">
+        {isMobile ? (
+          <>
+            <InputGroupButton
+              variant="ghost"
+              size="icon-xs"
+              aria-label="Select date"
+              disabled={disabled}
+              onClick={() => setOpen(true)}
+            >
+              <CalendarDaysIcon size={16} />
+              <span className="sr-only">Select date</span>
+            </InputGroupButton>
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogContent className="sm:max-w-[425px]" aria-describedby={undefined}>
+                <DialogHeader>
+                  <DialogTitle>Select date</DialogTitle>
+                </DialogHeader>
+                <div className="flex justify-center">{calendarComponent}</div>
+              </DialogContent>
+            </Dialog>
+          </>
+        ) : (
+          <Popover open={open} onOpenChange={setOpen} modal={false}>
+            <PopoverTrigger asChild>
               <InputGroupButton
                 variant="ghost"
                 size="icon-xs"
                 aria-label="Select date"
                 disabled={disabled}
-                onClick={() => setOpen(true)}
               >
                 <CalendarDaysIcon size={16} />
                 <span className="sr-only">Select date</span>
               </InputGroupButton>
-              <Dialog open={open} onOpenChange={setOpen}>
-                <DialogContent className="sm:max-w-[425px]" aria-describedby={undefined}>
-                  <DialogHeader>
-                    <DialogTitle>Select date</DialogTitle>
-                  </DialogHeader>
-                  <div className="flex justify-center">{calendarComponent}</div>
-                </DialogContent>
-              </Dialog>
-            </>
-          ) : (
-            <Popover open={open} onOpenChange={setOpen} modal={false}>
-              <PopoverTrigger asChild>
-                <InputGroupButton
-                  variant="ghost"
-                  size="icon-xs"
-                  aria-label="Select date"
-                  disabled={disabled}
-                >
-                  <CalendarDaysIcon size={16} />
-                  <span className="sr-only">Select date</span>
-                </InputGroupButton>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end" alignOffset={-8} sideOffset={10}>
-                {calendarComponent}
-              </PopoverContent>
-            </Popover>
-          )}
-        </InputGroupAddon>
-      </InputGroup>
-      {showHint && <p className="text-xs text-muted-foreground">{hint}</p>}
-    </div>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end" alignOffset={-8} sideOffset={10}>
+              {calendarComponent}
+            </PopoverContent>
+          </Popover>
+        )}
+      </InputGroupAddon>
+    </InputGroup>
   );
 }

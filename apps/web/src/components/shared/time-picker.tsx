@@ -42,8 +42,6 @@ interface TimePickerProps {
   placeholder?: string;
   disabled?: boolean;
   id?: string;
-  showHint?: boolean;
-  hint?: string;
 }
 
 export function TimePicker({
@@ -52,8 +50,6 @@ export function TimePicker({
   placeholder = 'HH:MM',
   disabled,
   id,
-  showHint = true,
-  hint = 'Format: HH:MM (24h)',
 }: TimePickerProps) {
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState(formatTime(value));
@@ -148,72 +144,69 @@ export function TimePicker({
   );
 
   return (
-    <div className="space-y-1.5">
-      <InputGroup>
-        <InputGroupInput
-          id={id}
-          type="time"
-          value={inputValue}
-          placeholder={placeholder}
-          disabled={disabled}
-          className="appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
-          onChange={handleInputChange}
-          onKeyDown={(e) => {
-            if (e.key === 'ArrowDown') {
-              e.preventDefault();
-              setOpen(true);
-            }
-          }}
-          maxLength={5}
-        />
-        <InputGroupAddon align="inline-end">
-          {isMobile ? (
-            <>
+    <InputGroup>
+      <InputGroupInput
+        id={id}
+        type="time"
+        value={inputValue}
+        placeholder={placeholder}
+        disabled={disabled}
+        className="appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+        onChange={handleInputChange}
+        onKeyDown={(e) => {
+          if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            setOpen(true);
+          }
+        }}
+        maxLength={5}
+      />
+      <InputGroupAddon align="inline-end">
+        {isMobile ? (
+          <>
+            <InputGroupButton
+              variant="ghost"
+              size="icon-xs"
+              aria-label="Select time"
+              disabled={disabled}
+              onClick={() => setOpen(true)}
+            >
+              <ClockIcon size={16} />
+              <span className="sr-only">Select time</span>
+            </InputGroupButton>
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogContent className="sm:max-w-[425px]" aria-describedby={undefined}>
+                <DialogHeader>
+                  <DialogTitle>Select time</DialogTitle>
+                </DialogHeader>
+                {timeListComponent}
+              </DialogContent>
+            </Dialog>
+          </>
+        ) : (
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
               <InputGroupButton
                 variant="ghost"
                 size="icon-xs"
                 aria-label="Select time"
                 disabled={disabled}
-                onClick={() => setOpen(true)}
               >
                 <ClockIcon size={16} />
                 <span className="sr-only">Select time</span>
               </InputGroupButton>
-              <Dialog open={open} onOpenChange={setOpen}>
-                <DialogContent className="sm:max-w-[425px]" aria-describedby={undefined}>
-                  <DialogHeader>
-                    <DialogTitle>Select time</DialogTitle>
-                  </DialogHeader>
-                  {timeListComponent}
-                </DialogContent>
-              </Dialog>
-            </>
-          ) : (
-            <Popover open={open} onOpenChange={setOpen}>
-              <PopoverTrigger asChild>
-                <InputGroupButton
-                  variant="ghost"
-                  size="icon-xs"
-                  aria-label="Select time"
-                  disabled={disabled}
-                >
-                  <ClockIcon size={16} />
-                  <span className="sr-only">Select time</span>
-                </InputGroupButton>
-              </PopoverTrigger>
-              <PopoverContent
-                className="w-auto overflow-hidden p-0"
-                align="end"
-                alignOffset={-8}
-                sideOffset={10}
-              >
-                {timeListComponent}
-              </PopoverContent>
-            </Popover>
-          )}
-        </InputGroupAddon>
-      </InputGroup>
-      {showHint && <p className="text-xs text-muted-foreground">{hint}</p>}
-    </div>
+            </PopoverTrigger>
+            <PopoverContent
+              className="w-auto overflow-hidden p-0"
+              align="end"
+              alignOffset={-8}
+              sideOffset={10}
+            >
+              {timeListComponent}
+            </PopoverContent>
+          </Popover>
+        )}
+      </InputGroupAddon>
+    </InputGroup>
   );
 }

@@ -7,9 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Field, FieldLabel, FieldDescription, FieldError } from '@/components/ui/field';
 import { DatePicker } from '@/components/shared/date-picker';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Edit2, X, Check } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { toast } from 'sonner';
@@ -366,7 +366,8 @@ function ProfileContent({
               )}
             </div>
           </CardHeader>
-          <CardContent className="space-y-4 pt-0">
+          <CardContent className="space-y-6 pt-0">
+            {/* Profile Photo Field */}
             <div className="flex items-center gap-4">
               <Avatar className="h-20 w-20">
                 <AvatarImage
@@ -382,96 +383,119 @@ function ProfileContent({
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1">
-                <p className="text-sm text-muted-foreground">{t('profilePhoto')}</p>
                 {isEditingProfile ? (
-                  <input
-                    type="text"
-                    value={editedProfilePhoto}
-                    onChange={(e) => setEditedProfilePhoto(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border rounded-md bg-background mt-1"
-                    placeholder={t('enterImageUrl')}
-                  />
+                  <Field>
+                    <FieldLabel htmlFor="profilePhoto">{t('profilePhoto')}</FieldLabel>
+                    <Input
+                      id="profilePhoto"
+                      type="text"
+                      value={editedProfilePhoto}
+                      onChange={(e) => setEditedProfilePhoto(e.target.value)}
+                      placeholder={t('enterImageUrl')}
+                    />
+                    {validationErrors.profilePhoto && (
+                      <FieldError>{validationErrors.profilePhoto}</FieldError>
+                    )}
+                  </Field>
                 ) : (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {profile.profilePhoto ? t('profilePhoto') : t('notSet')}
-                  </p>
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t('profilePhoto')}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {profile.profilePhoto ? t('profilePhoto') : t('notSet')}
+                    </p>
+                  </div>
                 )}
               </div>
             </div>
 
             {/* Name Field */}
-            <div>
-              <p className="text-sm text-muted-foreground">{t('name')}</p>
-              {isEditingProfile ? (
-                <input
+            {isEditingProfile ? (
+              <Field>
+                <FieldLabel htmlFor="name">{t('name')}</FieldLabel>
+                <Input
+                  id="name"
                   type="text"
                   value={editedName}
                   onChange={(e) => setEditedName(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border rounded-md bg-background mt-1"
                   placeholder={t('name')}
+                  required
                 />
-              ) : (
+                {validationErrors.name && <FieldError>{validationErrors.name}</FieldError>}
+              </Field>
+            ) : (
+              <div>
+                <p className="text-sm text-muted-foreground">{t('name')}</p>
                 <p className="text-lg font-medium">{profile.name || t('notSet')}</p>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Email Field (Read-only) */}
-            <div>
-              <p className="text-sm text-muted-foreground">{t('email')}</p>
-              {isEditingProfile ? (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <input
-                        type="email"
-                        value={profile.email}
-                        disabled
-                        className="w-full px-3 py-2 text-sm border rounded-md bg-muted text-muted-foreground mt-1 cursor-not-allowed"
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{t('emailCannotBeChanged')}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              ) : (
+            {isEditingProfile ? (
+              <Field>
+                <FieldLabel htmlFor="email">{t('email')}</FieldLabel>
+                <Input
+                  id="email"
+                  type="email"
+                  value={profile.email}
+                  disabled
+                  className="bg-muted cursor-not-allowed"
+                />
+                <FieldDescription>{t('emailCannotBeChanged')}</FieldDescription>
+              </Field>
+            ) : (
+              <div>
+                <p className="text-sm text-muted-foreground">{t('email')}</p>
                 <p className="text-lg font-medium">{profile.email}</p>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Date of Birth Field */}
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">{t('dateOfBirth')}</p>
-              {isEditingProfile ? (
+            {isEditingProfile ? (
+              <Field>
+                <FieldLabel htmlFor="dateOfBirth">{t('dateOfBirth')}</FieldLabel>
                 <DatePicker
+                  id="dateOfBirth"
                   value={editedDateOfBirth}
                   onChange={setEditedDateOfBirth}
                   placeholder={t('dateOfBirth')}
                 />
-              ) : (
+                <FieldDescription>Format: DD/MM/YYYY</FieldDescription>
+                {validationErrors.dateOfBirth && (
+                  <FieldError>{validationErrors.dateOfBirth}</FieldError>
+                )}
+              </Field>
+            ) : (
+              <div>
+                <p className="text-sm text-muted-foreground">{t('dateOfBirth')}</p>
                 <p className="text-lg font-medium">
                   {profile.dateOfBirth
                     ? new Date(profile.dateOfBirth).toLocaleDateString(locale)
                     : t('notSet')}
                 </p>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Phone Number Field */}
-            <div>
-              <p className="text-sm text-muted-foreground">{t('phoneNumber')}</p>
-              {isEditingProfile ? (
-                <input
+            {isEditingProfile ? (
+              <Field>
+                <FieldLabel htmlFor="phoneNumber">{t('phoneNumber')}</FieldLabel>
+                <Input
+                  id="phoneNumber"
                   type="tel"
                   value={editedPhoneNumber}
                   onChange={(e) => setEditedPhoneNumber(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border rounded-md bg-background mt-1"
                   placeholder={t('phoneNumber')}
                 />
-              ) : (
+                {validationErrors.phoneNumber && (
+                  <FieldError>{validationErrors.phoneNumber}</FieldError>
+                )}
+              </Field>
+            ) : (
+              <div>
+                <p className="text-sm text-muted-foreground">{t('phoneNumber')}</p>
                 <p className="text-lg font-medium">{profile.phoneNumber || t('notSet')}</p>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Role Field (Read-only) - Hidden for PLAYER role */}
             {profile.roles?.length > 1 || !profile.roles?.includes('PLAYER') ? (

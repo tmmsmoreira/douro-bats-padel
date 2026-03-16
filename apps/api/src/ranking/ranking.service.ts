@@ -209,6 +209,7 @@ export class RankingService {
       return {
         playerId: player.id,
         playerName: player.user.name || 'Unknown',
+        profilePhoto: player.user.profilePhoto,
         rating: player.rating,
         // Calculate display tier based on rating (for leaderboard display only)
         // Actual tier assignment happens per event in draw generation

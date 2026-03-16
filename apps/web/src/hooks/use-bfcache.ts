@@ -71,8 +71,10 @@ export function useIsFromBfcache(): boolean {
 
   useEffect(() => {
     const handlePageShow = (event: PageTransitionEvent) => {
+      console.log('🔍 pageshow event:', { persisted: event.persisted, timestamp: Date.now() });
+
       if (event.persisted) {
-        console.log('✅ BFCache restoration detected - suppressing animations');
+        console.log('✅ BFCache restoration detected - setting isFromBfcache to TRUE');
         setIsFromBfcache(true);
 
         // Clear any existing timeout
@@ -82,16 +84,18 @@ export function useIsFromBfcache(): boolean {
 
         // Reset after a short delay to allow animations to be skipped
         timeoutRef.current = setTimeout(() => {
-          console.log('🔄 Resetting BFCache flag');
+          console.log('🔄 Resetting BFCache flag to FALSE');
           setIsFromBfcache(false);
         }, 150);
       }
     };
 
     // Add listener immediately
+    console.log('📡 Adding pageshow listener');
     window.addEventListener('pageshow', handlePageShow);
 
     return () => {
+      console.log('🗑️ Removing pageshow listener');
       window.removeEventListener('pageshow', handlePageShow);
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);

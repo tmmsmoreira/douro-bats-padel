@@ -67,27 +67,35 @@ export function useBfcache(onRestore?: () => void) {
  */
 export function useIsFromBfcache(): boolean {
   const [isFromBfcache, setIsFromBfcache] = useState(false);
-  const hasChecked = useRef(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // Only check once on mount
-    if (hasChecked.current) return;
-    hasChecked.current = true;
-
     const handlePageShow = (event: PageTransitionEvent) => {
       if (event.persisted) {
+        console.log('✅ BFCache restoration detected - suppressing animations');
         setIsFromBfcache(true);
+
+        // Clear any existing timeout
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+        }
+
         // Reset after a short delay to allow animations to be skipped
-        setTimeout(() => {
+        timeoutRef.current = setTimeout(() => {
+          console.log('🔄 Resetting BFCache flag');
           setIsFromBfcache(false);
-        }, 100);
+        }, 150);
       }
     };
 
+    // Add listener immediately
     window.addEventListener('pageshow', handlePageShow);
 
     return () => {
       window.removeEventListener('pageshow', handlePageShow);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
     };
   }, []);
 

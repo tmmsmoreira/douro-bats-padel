@@ -356,15 +356,18 @@
 }
 
 /* View Transitions for smoother page transitions */
-@view-transition {
+/* DISABLED: View Transitions prevent BFCache from working properly */
+/* When enabled, browser uses client-side transitions instead of full page navigation */
+/* This prevents the pageshow event from firing on back navigation */
+/* @view-transition {
   navigation: auto;
-}
+} */
 
 /* Customize the view transition animation */
-::view-transition-old(root),
+/* ::view-transition-old(root),
 ::view-transition-new(root) {
   animation-duration: 0.3s;
-}
+} */
 
 /* Reduce motion for accessibility */
 @media (prefers-reduced-motion: reduce) {

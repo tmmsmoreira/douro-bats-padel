@@ -22,6 +22,7 @@ export declare const toTier: (rating: number) => Tier;
 export interface LeaderboardEntry {
     playerId: string;
     playerName: string;
+    profilePhoto?: string | null;
     rating: number;
     tier: Tier;
     delta: number;

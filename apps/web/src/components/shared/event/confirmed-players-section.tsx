@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { PlayerListItem } from '@/components/shared/player-list-item';
 
 interface Player {
   id: string;
@@ -66,48 +66,40 @@ export function ConfirmedPlayersSection({
       <CardContent className="pt-6">
         {players && players.length > 0 ? (
           <div className="space-y-2">
-            {players.map((player, index) => (
-              <div
-                key={player.id}
-                className="flex items-center justify-between py-2 border-b last:border-0"
-              >
-                {showIndex && (
-                  <span className="text-2xl font-bold text-muted-foreground w-8">#{index + 1}</span>
-                )}
-                <div className="flex items-center gap-2 flex-1">
-                  {showAvatar && (
-                    <Avatar className={showIndex ? 'h-8 w-8' : 'h-6 w-6'}>
-                      <AvatarImage
-                        src={player.profilePhoto || undefined}
-                        alt={player.name || 'Player'}
-                      />
-                      <AvatarFallback
-                        className={`gradient-primary ${showIndex ? 'text-sm' : 'text-xs'}`}
-                      >
-                        {player.name
-                          ? player.name
-                              .split(' ')
-                              .map((n) => n[0])
-                              .join('')
-                              .toUpperCase()
-                              .slice(0, 2)
-                          : '?'}
-                      </AvatarFallback>
-                    </Avatar>
-                  )}
-                  <span>{player.name}</span>
-                </div>
-                <span
-                  className={
-                    showIndex
-                      ? 'text-2xl font-bold text-muted-foreground'
-                      : 'text-sm text-muted-foreground'
-                  }
+            {players.map((player, index) =>
+              showAvatar ? (
+                <PlayerListItem
+                  key={player.id}
+                  id={player.id}
+                  name={player.name}
+                  rating={player.rating}
+                  profilePhoto={player.profilePhoto}
+                  rank={showIndex ? index + 1 : undefined}
+                  variant="leaderboard"
+                />
+              ) : (
+                <div
+                  key={player.id}
+                  className="flex items-center justify-between py-2 border-b last:border-0"
                 >
-                  {player.rating}
-                </span>
-              </div>
-            ))}
+                  {showIndex && (
+                    <span className="text-2xl font-bold text-muted-foreground w-8">
+                      #{index + 1}
+                    </span>
+                  )}
+                  <span className="flex-1">{player.name}</span>
+                  <span
+                    className={
+                      showIndex
+                        ? 'text-2xl font-bold text-muted-foreground'
+                        : 'text-sm text-muted-foreground'
+                    }
+                  >
+                    {player.rating}
+                  </span>
+                </div>
+              )
+            )}
           </div>
         ) : (
           <p className="text-center text-muted-foreground py-4">{emptyMessage}</p>

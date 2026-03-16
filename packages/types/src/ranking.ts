@@ -93,6 +93,7 @@ export const toTier = (rating: number): Tier => (rating >= 300 ? Tier.MASTERS : 
 export interface LeaderboardEntry {
   playerId: string;
   playerName: string;
+  profilePhoto?: string | null;
   rating: number;
   tier: Tier;
   delta: number;

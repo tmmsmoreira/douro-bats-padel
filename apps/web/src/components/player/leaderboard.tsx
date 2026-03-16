@@ -3,13 +3,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import type { LeaderboardEntry } from '@padel/types';
-import { ArrowUp, ArrowDown, Minus, Trophy } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { DataStateWrapper } from '@/components/shared';
 import { useAuthFetch } from '@/hooks/use-api';
+import { PlayerListItem } from '@/components/shared/player-list-item';
+import { useIsMobile } from '@/hooks/use-media-query';
 
 export function Leaderboard() {
   const t = useTranslations('leaderboard');
@@ -38,6 +39,7 @@ export function Leaderboard() {
 function LeaderboardContent({ leaderboard, t }: { leaderboard: LeaderboardEntry[]; t: any }) {
   const topThree = leaderboard.slice(0, 3);
   const fullLeaderboard = leaderboard;
+  const isMobile = useIsMobile();
 
   // Podium colors for top 3
   const podiumColors = {
@@ -65,16 +67,6 @@ function LeaderboardContent({ leaderboard, t }: { leaderboard: LeaderboardEntry[
       badgeBg: 'bg-orange-500',
       badgeText: 'text-white',
     },
-  };
-
-  // Helper to get avatar initials
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
   };
 
   return (
@@ -198,58 +190,21 @@ function LeaderboardContent({ leaderboard, t }: { leaderboard: LeaderboardEntry[
                           : 'text-muted-foreground';
 
                   return (
-                    <motion.div
+                    <PlayerListItem
                       key={entry.playerId}
-                      variants={{
-                        hidden: { opacity: 0, y: 10 },
-                        show: { opacity: 1, y: 0, transition: { duration: 0.3 } },
-                      }}
-                      className="flex items-center justify-between py-3 px-4 rounded-lg border border-border/50 hover:bg-accent/50 hover:border-primary/30 transition-all duration-300"
-                    >
-                      <div className="flex items-center gap-4">
-                        <span className={cn('text-lg font-heading font-bold w-8', rankColor)}>
-                          #{rank}
-                        </span>
-                        <Avatar className="h-10 w-10">
-                          <AvatarFallback className="gradient-primary text-sm font-semibold">
-                            {getInitials(entry.playerName)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-semibold">{entry.playerName}</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            {t('weeksPlayed', { count: entry.weeklyScores.length })}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-6">
-                        {/* Delta */}
-                        <div className="flex items-center gap-1 text-sm min-w-[60px] justify-end">
-                          {entry.delta > 0 && (
-                            <>
-                              <ArrowUp className="h-3.5 w-3.5 text-green-600" />
-                              <span className="text-green-600 font-semibold">+{entry.delta}</span>
-                            </>
-                          )}
-                          {entry.delta < 0 && (
-                            <>
-                              <ArrowDown className="h-3.5 w-3.5 text-red-600" />
-                              <span className="text-red-600 font-semibold">{entry.delta}</span>
-                            </>
-                          )}
-                          {entry.delta === 0 && (
-                            <>
-                              <Minus className="h-3.5 w-3.5 text-muted-foreground" />
-                              <span className="text-muted-foreground font-semibold">0</span>
-                            </>
-                          )}
-                        </div>
-                        {/* Rating */}
-                        <div className="text-right min-w-[60px]">
-                          <p className="text-2xl font-heading font-bold">{entry.rating}</p>
-                        </div>
-                      </div>
-                    </motion.div>
+                      id={entry.playerId}
+                      name={entry.playerName}
+                      rating={entry.rating}
+                      profilePhoto={entry.profilePhoto}
+                      rank={rank}
+                      rankColor={rankColor}
+                      subtitle={t('weeksPlayed', { count: entry.weeklyScores.length })}
+                      delta={entry.delta}
+                      animate={true}
+                      variant="leaderboard"
+                      avatarSize="lg"
+                      largeRank={!isMobile}
+                    />
                   );
                 })}
               </motion.div>

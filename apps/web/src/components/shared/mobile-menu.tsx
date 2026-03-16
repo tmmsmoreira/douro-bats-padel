@@ -2,10 +2,8 @@
 
 import { motion, AnimatePresence } from 'motion/react';
 import { Link } from '@/i18n/navigation';
-import { useActivePathname } from '@/hooks/use-active-pathname';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import { Session } from 'next-auth';
 import { LogoutIcon, UserIcon } from 'lucide-animated';
 import { signOut } from 'next-auth/react';
@@ -23,7 +21,7 @@ interface MobileMenuProps {
   isOpen: boolean;
   onClose: () => void;
   session: Session | null;
-  navItems: NavItem[];
+  navItems: NavItem[]; // Kept for backward compatibility but not used (navigation moved to TabBar)
   t: (key: string) => string;
   showRoleSwitch?: boolean;
   roleSwitchHref?: string;
@@ -36,7 +34,7 @@ export function MobileMenu({
   isOpen,
   onClose,
   session,
-  navItems,
+  navItems: _navItems, // Renamed to indicate it's intentionally unused
   t,
   showRoleSwitch = false,
   roleSwitchHref,
@@ -44,7 +42,6 @@ export function MobileMenu({
   showAccountSection = true,
   showSignInButton = false,
 }: MobileMenuProps) {
-  const pathname = useActivePathname();
   const haptic = useHaptic();
 
   // Trigger haptic feedback when menu opens
@@ -87,7 +84,7 @@ export function MobileMenu({
 
               {/* User Profile Section */}
               {session && (
-                <div className="flex items-center gap-4 pb-6 border-b">
+                <div className="flex items-center gap-4 pb-6">
                   <Avatar className="h-16 w-16">
                     <AvatarImage
                       src={session?.user?.profilePhoto || undefined}
@@ -115,33 +112,11 @@ export function MobileMenu({
                 </div>
               )}
 
-              {/* Navigation Section */}
-              {navItems.length > 0 && (
-                <div className="space-y-1">
-                  {navItems.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => {
-                        haptic.selection();
-                        onClose();
-                      }}
-                      className={cn(
-                        'flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-colors touch-target no-tap-highlight',
-                        pathname === item.href
-                          ? 'bg-primary text-primary-foreground'
-                          : 'text-foreground hover:bg-secondary active:bg-secondary/80'
-                      )}
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
+              {/* Navigation items moved to TabBar at the bottom of the screen */}
 
               {/* Account Section */}
               {session && showAccountSection && (
-                <div className="space-y-1 pt-2 border-t">
+                <div className="space-y-1 pt-2">
                   <p className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     {t('account') || 'Account'}
                   </p>

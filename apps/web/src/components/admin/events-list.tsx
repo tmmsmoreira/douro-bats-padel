@@ -21,7 +21,7 @@ import { StatusBadge, type EventStatus } from '@/components/shared/status-badge'
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useMediaQuery } from '@/hooks/use-media-query';
+import { useIsMobile } from '@/hooks/use-media-query';
 
 type EventState = 'ALL' | EventStatus;
 
@@ -124,7 +124,7 @@ function EventsListContent({
   const endIndex = startIndex + EVENTS_PER_PAGE;
 
   // Check if we're on mobile
-  const isMobile = useMediaQuery('(max-width: 640px)');
+  const isMobile = useIsMobile();
 
   const iconRef = useRef<CalendarDaysIconHandle>(null);
 

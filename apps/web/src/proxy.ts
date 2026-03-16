@@ -29,6 +29,11 @@ export default async function proxy(req: NextRequest) {
     return intlResponse;
   }
 
+  // Step 2.5: Enable back-forward cache (bfcache) by changing Cache-Control header
+  // Next.js sends 'private, no-cache, no-store, max-age=0, must-revalidate' by default
+  // which prevents bfcache. We change it to allow bfcache while still preventing stale content.
+  intlResponse.headers.set('Cache-Control', 'public, no-cache, max-age=0, must-revalidate');
+
   // Step 3: Get the session for auth checks
   const session = await auth();
 

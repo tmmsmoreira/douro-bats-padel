@@ -25,11 +25,13 @@ export function useOnlineStatus() {
     // Set initial state
     setIsOnline(navigator.onLine);
 
+    let timeoutId: NodeJS.Timeout | null = null;
+
     const handleOnline = () => {
       setIsOnline(true);
       setWasOffline(true);
       // Reset wasOffline after 3 seconds
-      setTimeout(() => setWasOffline(false), 3000);
+      timeoutId = setTimeout(() => setWasOffline(false), 3000);
     };
 
     const handleOffline = () => {
@@ -42,6 +44,10 @@ export function useOnlineStatus() {
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
+      // Clear timeout on cleanup to prevent memory leaks and allow bfcache
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
     };
   }, []);
 

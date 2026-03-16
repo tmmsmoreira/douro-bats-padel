@@ -94,7 +94,8 @@ export function PageLayout({
       id="main-content"
       className={cn(
         'container mx-auto flex-1 min-h-[500px]',
-        padding || 'px-4 sm:px-6 pt-6 pb-6 sm:pb-8',
+        // Add bottom padding on mobile to account for TabBar (20 = 5rem = 80px)
+        padding || 'px-4 sm:px-6 pt-6 pb-24 md:pb-6 sm:md:pb-8',
         maxWidthClasses[maxWidth],
         className
       )}

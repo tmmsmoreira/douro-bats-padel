@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import { Link } from '@/i18n/navigation';
 import { Button } from '@/components/ui/button';
 import { ArrowLeftIcon, ArrowLeftIconHandle } from 'lucide-animated';
+import { useIsMobile } from '@/hooks';
 
 interface PageHeaderProps {
   title: string;
@@ -24,6 +25,7 @@ export function PageHeader({
   backButtonLabel = 'Back',
 }: PageHeaderProps) {
   const arrowLeftIconRef = useRef<ArrowLeftIconHandle>(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -32,7 +34,7 @@ export function PageHeader({
   return (
     <div className="space-y-4">
       {/* Back Button */}
-      {showBackButton && (
+      {showBackButton && !isMobile && (
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}

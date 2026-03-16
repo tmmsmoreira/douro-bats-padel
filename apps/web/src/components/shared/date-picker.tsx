@@ -11,7 +11,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { CalendarDaysIcon } from 'lucide-animated';
-import { useMediaQuery } from '@/hooks/use-media-query';
+import { useIsMobile } from '@/hooks/use-media-query';
 
 function formatDateInput(date: Date | undefined): string {
   if (!date) {
@@ -67,7 +67,7 @@ export function DatePicker({
   const [date, setDate] = React.useState<Date | undefined>(value);
   const [month, setMonth] = React.useState<Date | undefined>(value);
   const [inputValue, setInputValue] = React.useState(formatDateInput(value));
-  const isMobile = useMediaQuery('(max-width: 768px)');
+  const isMobile = useIsMobile();
 
   // Sync with external value changes
   React.useEffect(() => {

@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Link } from '@/i18n/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
 import { useActivePathname } from '@/hooks/use-active-pathname';
 import { useScrollDirection } from '@/hooks/use-scroll-direction';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { TabBar } from '@/components/ui/tab-bar';
 import Image from 'next/image';
 import {
   DropdownMenu,
@@ -24,6 +25,7 @@ import {
   EyeIcon,
   EyeIconHandle,
 } from 'lucide-animated';
+import { Calendar, Users, Trophy, MapPin } from 'lucide-react';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { LOGO_BLUR_DATA_URL } from '@/lib/image-blur';
 import { LanguageMenuItems } from '@/components/shared/language-menu-items';
@@ -33,6 +35,7 @@ import { MobileMenu } from '@/components/shared/mobile-menu';
 
 export function AdminNav() {
   const pathname = useActivePathname();
+  const router = useRouter();
   const { data: session, status } = useSession();
   const t = useTranslations('nav');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -61,6 +64,34 @@ export function AdminNav() {
     { href: '/admin/players', label: t('players') },
     { href: '/leaderboard', label: t('ranking') },
     { href: '/admin/venues', label: t('venues') },
+  ];
+
+  // Tab bar items for mobile navigation
+  const tabBarItems = [
+    {
+      id: '/admin',
+      label: t('events'),
+      icon: <Calendar className="w-6 h-6" />,
+      onClick: () => router.push('/admin'),
+    },
+    {
+      id: '/admin/players',
+      label: t('players'),
+      icon: <Users className="w-6 h-6" />,
+      onClick: () => router.push('/admin/players'),
+    },
+    {
+      id: '/leaderboard',
+      label: t('ranking'),
+      icon: <Trophy className="w-6 h-6" />,
+      onClick: () => router.push('/leaderboard'),
+    },
+    {
+      id: '/admin/venues',
+      label: t('venues'),
+      icon: <MapPin className="w-6 h-6" />,
+      onClick: () => router.push('/admin/venues'),
+    },
   ];
 
   // Show loading skeleton while session is loading
@@ -121,8 +152,8 @@ export function AdminNav() {
                 </span>
               </Link>
 
-              {/* Desktop Navigation */}
-              <div className="hidden flex-1 md:flex items-center justify-between">
+              {/* Desktop Navigation - Only shown on desktop (md and up) */}
+              <div className="hidden md:flex flex-1 items-center justify-between">
                 <div className="flex flex-1 gap-2 justify-center px-6">
                   {navItems.map((item) => (
                     <Link
@@ -249,6 +280,9 @@ export function AdminNav() {
         roleSwitchLabel={t('playerView')}
         showAccountSection={true}
       />
+
+      {/* Mobile Tab Bar - Only visible on mobile */}
+      <TabBar items={tabBarItems} activeTab={pathname} className="md:hidden" variant="ios" />
     </>
   );
 }

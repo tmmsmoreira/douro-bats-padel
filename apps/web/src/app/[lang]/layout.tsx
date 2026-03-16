@@ -96,7 +96,7 @@ export default async function LangLayout({
       <body className={inter.className} suppressHydrationWarning>
         <Providers session={session}>
           <NextIntlClientProvider locale={lang} messages={messages}>
-            <AppLoadingScreen minDuration={800} />
+            <AppLoadingScreen minDuration={1000} />
             <OfflineIndicator />
             <PullToRefresh />
             {children}

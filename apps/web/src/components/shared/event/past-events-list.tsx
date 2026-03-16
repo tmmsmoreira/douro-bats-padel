@@ -1,18 +1,16 @@
 'use client';
 
-import { Card, CardContent } from '@/components/ui/card';
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
-import { usePastEvents, useMinimumLoading } from '@/hooks';
-import { EventCard, EventStats, StatusBadge, LoadingState } from '@/components/shared';
+import { usePastEvents } from '@/hooks';
+import { EventCard, EventStats, StatusBadge, DataStateWrapper } from '@/components/shared';
 import { useMemo } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 
 export function PastEventsList() {
-  const t = useTranslations();
+  const t = useTranslations('home');
 
   const { data: allEvents, isLoading } = usePastEvents();
-  const showLoading = useMinimumLoading(isLoading, !!allEvents);
 
   // Sort by date descending (most recent first) and take only the last 10
   const events = useMemo(() => {
@@ -23,32 +21,14 @@ export function PastEventsList() {
   }, [allEvents]);
 
   return (
-    <AnimatePresence mode="wait">
-      {showLoading ? (
-        <LoadingState message={t('common.loading')} />
-      ) : !events || events.length === 0 ? (
-        <motion.div
-          key="no-past-events"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          transition={{ duration: 0.3 }}
-        >
-          <Card className="glass-card">
-            <CardContent className="py-8 text-center text-muted-foreground">
-              {t('home.noPastEvents')}
-            </CardContent>
-          </Card>
-        </motion.div>
-      ) : (
-        <motion.div
-          key="past-events-list"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className="space-y-4"
-        >
+    <DataStateWrapper
+      isLoading={isLoading}
+      data={events}
+      loadingMessage={t('loadingEvents')}
+      emptyMessage={t('noPastEvents')}
+    >
+      {(events) => (
+        <div className="space-y-4">
           <motion.div
             initial="hidden"
             animate="show"
@@ -88,18 +68,18 @@ export function PastEventsList() {
                       headerActions={
                         <>
                           {isConfirmed && (
-                            <StatusBadge status="PARTICIPATED" label={t('home.participated')} />
+                            <StatusBadge status="PARTICIPATED" label={t('participated')} />
                           )}
                           {isWaitlisted && (
-                            <StatusBadge status="WAITLISTED" label={t('home.waitlisted')} />
+                            <StatusBadge status="WAITLISTED" label={t('waitlisted')} />
                           )}
                         </>
                       }
                     >
                       <EventStats
                         event={event}
-                        confirmedLabel={t('home.confirmed')}
-                        waitlistedLabel={t('home.waitlisted')}
+                        confirmedLabel={t('confirmed')}
+                        waitlistedLabel={t('waitlisted')}
                       />
                     </EventCard>
                   </Link>
@@ -107,8 +87,8 @@ export function PastEventsList() {
               );
             })}
           </motion.div>
-        </motion.div>
+        </div>
       )}
-    </AnimatePresence>
+    </DataStateWrapper>
   );
 }

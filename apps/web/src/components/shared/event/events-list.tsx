@@ -12,6 +12,8 @@ export function EventsList() {
 
   const { data: events, isLoading } = useUpcomingEvents();
 
+  console.log('🎬 EventsList render:', { isFromBfcache, isLoading, hasEvents: !!events });
+
   return (
     <DataStateWrapper
       isLoading={isLoading}

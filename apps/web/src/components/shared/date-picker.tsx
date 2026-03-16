@@ -65,14 +65,12 @@ export function DatePicker({
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
   const [date, setDate] = React.useState<Date | undefined>(value);
-  const [month, setMonth] = React.useState<Date | undefined>(value);
   const [inputValue, setInputValue] = React.useState(formatDateInput(value));
   const isMobile = useIsMobile();
 
   // Sync with external value changes
   React.useEffect(() => {
     setDate(value);
-    setMonth(value);
     setInputValue(formatDateInput(value));
   }, [value]);
 
@@ -109,13 +107,11 @@ export function DatePicker({
     const parsedDate = parseDateInput(newValue);
     if (parsedDate) {
       setDate(parsedDate);
-      setMonth(parsedDate);
       if (onChange) {
         onChange(parsedDate);
       }
     } else if (newValue === '') {
       setDate(undefined);
-      setMonth(undefined);
       if (onChange) {
         onChange(undefined);
       }
@@ -125,10 +121,11 @@ export function DatePicker({
   const calendarComponent = (
     <Calendar
       mode="single"
+      captionLayout="dropdown"
       selected={date}
-      month={month}
-      onMonthChange={setMonth}
       onSelect={handleSelect}
+      startMonth={new Date(1900, 0)}
+      endMonth={new Date(2100, 11)}
     />
   );
 
@@ -172,7 +169,7 @@ export function DatePicker({
               </Dialog>
             </>
           ) : (
-            <Popover open={open} onOpenChange={setOpen}>
+            <Popover open={open} onOpenChange={setOpen} modal={false}>
               <PopoverTrigger asChild>
                 <InputGroupButton
                   variant="ghost"

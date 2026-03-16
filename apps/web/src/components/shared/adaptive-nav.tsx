@@ -5,18 +5,20 @@ import { useSession } from 'next-auth/react';
 import { usePathname } from '@/i18n/navigation';
 import { AdminNav } from '@/components/admin/admin-nav';
 import { PlayerNav } from '@/components/player/player-nav';
+import { HomeNav } from '@/components/public/home-nav';
 
 /**
- * Adaptive navigation component that shows Admin or Player nav based on:
- * 1. Current URL pathname (primary - if on /admin, show AdminNav)
- * 2. User's previous navigation context (stored in sessionStorage)
- * 3. User's role (fallback to Player nav if not an editor)
+ * Adaptive navigation component that shows the appropriate nav based on:
+ * 1. Authentication status (if not authenticated, show HomeNav)
+ * 2. Current URL pathname (primary - if on /admin, show AdminNav)
+ * 3. User's previous navigation context (stored in sessionStorage)
+ * 4. User's role (fallback to Player nav if not an editor)
  *
  * This component animates ONLY when switching between Admin and Player views,
  * not when navigating between pages within the same view.
  */
 export function AdaptiveNav() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const pathname = usePathname();
   const [isReady, setIsReady] = useState(false);
 
@@ -42,6 +44,11 @@ export function AdaptiveNav() {
 
   // Use layoutEffect to update BEFORE paint to avoid flicker
   useLayoutEffect(() => {
+    // If session is still loading, don't update state yet
+    if (status === 'loading') {
+      return;
+    }
+
     const isEditor =
       session?.user?.roles?.includes('EDITOR') || session?.user?.roles?.includes('ADMIN');
 
@@ -53,8 +60,8 @@ export function AdaptiveNav() {
       return;
     }
 
-    // If on home page (/), always show player nav
-    if (pathname === '/') {
+    // If on home page (/), always show player nav (if authenticated)
+    if (pathname === '/' && session) {
       setShowAdminNav(false);
       sessionStorage.setItem('lastView', 'player');
       setIsReady(true);
@@ -73,7 +80,7 @@ export function AdaptiveNav() {
     if (!lastView || isOnAdminRoute) {
       sessionStorage.setItem('lastView', shouldShowAdmin || isOnAdminRoute ? 'admin' : 'player');
     }
-  }, [session, pathname, isOnAdminRoute]);
+  }, [session, status, pathname, isOnAdminRoute]);
 
   // Listen for storage changes to detect view switches
   useEffect(() => {
@@ -101,10 +108,15 @@ export function AdaptiveNav() {
   }, [session, isOnAdminRoute]);
 
   // Don't render until we've determined the correct nav to avoid flicker
-  if (!isReady) {
+  if (!isReady || status === 'loading') {
     return <div className="h-16 bg-card border-b border-border/50" />;
   }
 
-  // Render the appropriate nav
+  // If not authenticated, show HomeNav (for unauthenticated users)
+  if (!session) {
+    return <HomeNav />;
+  }
+
+  // Render the appropriate nav for authenticated users
   return showAdminNav ? <AdminNav /> : <PlayerNav />;
 }

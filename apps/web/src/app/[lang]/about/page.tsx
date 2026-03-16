@@ -3,7 +3,7 @@
 import { motion } from 'motion/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Trophy, Users, Calendar, TrendingUp } from 'lucide-react';
-import { HomeNavClient } from '@/components/shared/client-nav-wrapper';
+import { AdaptiveNav } from '@/components/shared/adaptive-nav';
 import { useTranslations } from 'next-intl';
 import { PageLayout, PageHeader } from '@/components/shared';
 import { staggerContainer, staggerItem } from '@/lib/animations';
@@ -11,7 +11,7 @@ import { staggerContainer, staggerItem } from '@/lib/animations';
 export default function AboutPage() {
   const t = useTranslations('aboutPage');
   return (
-    <PageLayout nav={<HomeNavClient />}>
+    <PageLayout nav={<AdaptiveNav />}>
       <div className="space-y-6 sm:space-y-8">
         {/* Header */}
         <PageHeader title={t('title')} description={t('subtitle')} />

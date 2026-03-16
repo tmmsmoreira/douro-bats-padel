@@ -190,6 +190,9 @@ function EventsListContent({
                           setSelectedDate(date);
                           setShowDatePicker(false);
                         }}
+                        captionLayout="dropdown"
+                        startMonth={new Date(1900, 0)}
+                        endMonth={new Date(2100, 11)}
                       />
                     </div>
                   </DialogContent>
@@ -234,6 +237,9 @@ function EventsListContent({
                       setSelectedDate(date);
                       setShowDatePicker(false);
                     }}
+                    captionLayout="dropdown"
+                    startMonth={new Date(1900, 0)}
+                    endMonth={new Date(2100, 11)}
                   />
                 </PopoverContent>
               </Popover>

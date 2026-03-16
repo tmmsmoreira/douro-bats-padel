@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Mail, Phone, MapPin, Clock } from 'lucide-react';
-import { HomeNavClient } from '@/components/shared/client-nav-wrapper';
+import { AdaptiveNav } from '@/components/shared/adaptive-nav';
 import { useTranslations } from 'next-intl';
 import { PageLayout, PageHeader } from '@/components/shared';
 
@@ -45,7 +45,7 @@ export default function ContactPage() {
   };
 
   return (
-    <PageLayout nav={<HomeNavClient />} maxWidth="6xl">
+    <PageLayout nav={<AdaptiveNav />} maxWidth="6xl">
       <div className="space-y-6 sm:space-y-8">
         {/* Header */}
         <PageHeader title={t('title')} description={t('subtitle')} />

@@ -1,11 +1,18 @@
 'use client';
 
 import * as React from 'react';
-import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-animated';
-import { DayPicker } from 'react-day-picker';
+import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-animated';
+import { DayPicker, type DropdownProps } from 'react-day-picker';
 
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
@@ -17,17 +24,9 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
       classNames={{
         months: 'flex flex-col sm:flex-row space-y-4 sm:space-y-0',
         month: 'space-y-4',
-        month_caption: 'flex justify-center pt-1 relative items-center',
-        caption_label: 'text-sm font-medium relative z-0',
-        nav: 'space-x-1 flex items-center px-3 absolute left-1 right-1 justify-between z-10',
-        button_previous: cn(
-          buttonVariants({ variant: 'outline' }),
-          'h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 relative z-10'
-        ),
-        button_next: cn(
-          buttonVariants({ variant: 'outline' }),
-          'h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 relative z-10'
-        ),
+        month_caption: 'justify-center pt-1 relative items-center',
+        caption_label: 'text-sm font-medium',
+        nav: 'hidden',
         month_grid: 'w-full border-collapse space-y-1',
         weekdays: 'flex',
         weekday: 'text-muted-foreground rounded-md w-9 font-normal text-[0.8rem] text-center',
@@ -46,9 +45,40 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
         disabled: 'text-muted-foreground opacity-50',
         range_middle: 'aria-selected:bg-accent aria-selected:text-accent-foreground',
         hidden: 'invisible',
+        dropdown_root: 'relative inline-flex items-center',
+        dropdown:
+          'absolute inset-0 w-full appearance-none opacity-0 cursor-pointer z-10 m-0 p-0 text-left',
+        dropdowns: 'flex gap-2 items-center justify-center',
+        dropdown_month: 'relative inline-flex items-center',
+        dropdown_year: 'relative inline-flex items-center',
+        chevron: 'fill-current',
         ...classNames,
       }}
       components={{
+        Dropdown: (props: DropdownProps) => {
+          const { value, onChange, options } = props;
+          const selected = options?.find((option) => option.value === value);
+          const handleChange = (value: string) => {
+            const changeEvent = {
+              target: { value },
+            } as React.ChangeEvent<HTMLSelectElement>;
+            onChange?.(changeEvent);
+          };
+          return (
+            <Select value={value?.toString()} onValueChange={handleChange}>
+              <SelectTrigger className="h-8 pr-1.5 focus:ring-0">
+                <SelectValue>{selected?.label}</SelectValue>
+              </SelectTrigger>
+              <SelectContent position="popper" className="max-h-80">
+                {options?.map((option, id: number) => (
+                  <SelectItem key={`${option.value}-${id}`} value={option.value?.toString() ?? ''}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          );
+        },
         Chevron: ({ orientation }) => {
           if (orientation === 'left') {
             return <ChevronLeftIcon size={16} className="h-4 w-4" />;
@@ -56,7 +86,18 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
           if (orientation === 'right') {
             return <ChevronRightIcon size={16} className="h-4 w-4" />;
           }
+          if (orientation === 'down') {
+            return <ChevronDownIcon size={16} className="h-4 w-4" />;
+          }
           return <ChevronRightIcon size={16} className="h-4 w-4" />;
+        },
+        CaptionLabel: ({ children }) => {
+          return (
+            <span className="inline-flex items-center gap-1 text-sm font-medium">
+              {children}
+              <ChevronDownIcon size={16} className="h-3 w-3 opacity-50" />
+            </span>
+          );
         },
       }}
       {...props}

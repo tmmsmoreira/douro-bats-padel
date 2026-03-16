@@ -2,13 +2,13 @@
 
 import { motion } from 'motion/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { HomeNavClient } from '@/components/shared/client-nav-wrapper';
+import { AdaptiveNav } from '@/components/shared/adaptive-nav';
 import { PageLayout, PageHeader } from '@/components/shared';
 import { staggerContainer, staggerItem } from '@/lib/animations';
 
 export default function TermsPage() {
   return (
-    <PageLayout nav={<HomeNavClient />}>
+    <PageLayout nav={<AdaptiveNav />}>
       <div className="space-y-6 sm:space-y-8">
         {/* Header */}
         <PageHeader title="Terms and Conditions" description="Last updated: February 2026" />

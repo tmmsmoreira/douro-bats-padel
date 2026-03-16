@@ -24,8 +24,11 @@ import {
   UserIconHandle,
   EyeIcon,
   EyeIconHandle,
+  CalendarDaysIcon,
+  UsersIcon,
+  TrendingUpIcon,
+  MapPinIcon,
 } from 'lucide-animated';
-import { Calendar, Users, Trophy, MapPin } from 'lucide-react';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { LOGO_BLUR_DATA_URL } from '@/lib/image-blur';
 import { LanguageMenuItems } from '@/components/shared/language-menu-items';
@@ -71,25 +74,25 @@ export function AdminNav() {
     {
       id: '/admin',
       label: t('events'),
-      icon: <Calendar className="w-6 h-6" />,
+      icon: <CalendarDaysIcon className="w-6 h-6" />,
       onClick: () => router.push('/admin'),
     },
     {
       id: '/admin/players',
       label: t('players'),
-      icon: <Users className="w-6 h-6" />,
+      icon: <UsersIcon className="w-6 h-6" />,
       onClick: () => router.push('/admin/players'),
     },
     {
       id: '/leaderboard',
       label: t('ranking'),
-      icon: <Trophy className="w-6 h-6" />,
+      icon: <TrendingUpIcon className="w-6 h-6" />,
       onClick: () => router.push('/leaderboard'),
     },
     {
       id: '/admin/venues',
       label: t('venues'),
-      icon: <MapPin className="w-6 h-6" />,
+      icon: <MapPinIcon className="w-6 h-6" />,
       onClick: () => router.push('/admin/venues'),
     },
   ];

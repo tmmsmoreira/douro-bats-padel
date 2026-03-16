@@ -17,8 +17,14 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { signOut, useSession } from 'next-auth/react';
-import { UserIcon, LogoutIcon, EyeIcon, EyeIconHandle } from 'lucide-animated';
-import { Home, Trophy } from 'lucide-react';
+import {
+  UserIcon,
+  LogoutIcon,
+  EyeIcon,
+  EyeIconHandle,
+  CalendarDaysIcon,
+  TrendingUpIcon,
+} from 'lucide-animated';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { LOGO_BLUR_DATA_URL } from '@/lib/image-blur';
 import { LanguageMenuItems } from '@/components/shared/language-menu-items';
@@ -65,13 +71,13 @@ export function PlayerNav() {
     {
       id: '/',
       label: t('events'),
-      icon: <Home className="w-6 h-6" />,
+      icon: <CalendarDaysIcon className="w-6 h-6" />,
       onClick: () => router.push('/'),
     },
     {
       id: '/leaderboard',
       label: t('ranking'),
-      icon: <Trophy className="w-6 h-6" />,
+      icon: <TrendingUpIcon className="w-6 h-6" />,
       onClick: () => router.push('/leaderboard'),
     },
     {

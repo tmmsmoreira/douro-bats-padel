@@ -348,6 +348,13 @@
   }
 }
 
+/* Page bottom padding for mobile navigation */
+@media (max-width: 767px) {
+  .page-bottom-padding {
+    padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
 /* Reduce motion for accessibility */
 @media (prefers-reduced-motion: reduce) {
   *,

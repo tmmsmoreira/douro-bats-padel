@@ -4,7 +4,7 @@ import type React from 'react';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SessionProvider, useSession, signOut } from 'next-auth/react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { ThemeProvider } from './theme-provider';
 import { Toaster } from 'sonner';
@@ -42,6 +42,8 @@ export function Providers({
   children: React.ReactNode;
   session?: Session | null;
 }) {
+  const isRestoredFromBfcache = useRef(false);
+
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -49,6 +51,14 @@ export function Providers({
           queries: {
             staleTime: 60 * 1000,
             refetchOnWindowFocus: false,
+            refetchOnMount: (query) => {
+              // Don't refetch on mount if page was restored from bfcache
+              if (isRestoredFromBfcache.current) {
+                return false;
+              }
+              // Default behavior: refetch if data is stale
+              return query.state.dataUpdatedAt === 0;
+            },
             retry: (failureCount, error) => {
               // Don't retry on 401 Unauthorized errors
               if (error instanceof Error && error.message.includes('Unauthorized')) {
@@ -69,6 +79,23 @@ export function Providers({
         },
       })
   );
+
+  // Detect bfcache restoration
+  useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        // Page was restored from bfcache
+        isRestoredFromBfcache.current = true;
+        // Reset the flag after a short delay
+        setTimeout(() => {
+          isRestoredFromBfcache.current = false;
+        }, 100);
+      }
+    };
+
+    window.addEventListener('pageshow', handlePageShow);
+    return () => window.removeEventListener('pageshow', handlePageShow);
+  }, []);
 
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>

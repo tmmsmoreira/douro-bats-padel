@@ -513,7 +513,7 @@ function EventDetailsHeaderActionButtons({
       {/* More Actions Dropdown */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="icon" className="shrink-0">
+          <Button variant="outline" size="icon" className="shrink-0" animate={false}>
             <MoreVertical className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>

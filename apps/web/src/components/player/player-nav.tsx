@@ -168,7 +168,11 @@ export function PlayerNav() {
                 <div className="flex items-center gap-4">
                   <DropdownMenu modal={false}>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                      <Button
+                        variant="ghost"
+                        className="relative h-10 w-10 rounded-full"
+                        animate={false}
+                      >
                         <Avatar className="h-10 w-10">
                           <AvatarImage
                             src={session?.user?.profilePhoto || undefined}

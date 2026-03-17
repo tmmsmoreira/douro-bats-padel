@@ -207,6 +207,7 @@ function EventsListContent({
                     className="rounded-full gap-2 h-9 px-4"
                     onMouseEnter={() => iconRef.current?.startAnimation()}
                     onMouseLeave={() => iconRef.current?.stopAnimation()}
+                    animate={false}
                   >
                     <CalendarDaysIcon ref={iconRef} size={16} className="h-4 w-4" />
                     {selectedDate

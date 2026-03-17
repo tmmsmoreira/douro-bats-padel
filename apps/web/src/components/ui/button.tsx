@@ -45,14 +45,14 @@ function Button({
   variant = 'default',
   size = 'default',
   asChild = false,
-  animate = false,
+  animate = true,
   ...props
 }: React.ComponentProps<'button'> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
     /**
      * Whether to wrap the button with motion animations (hover scale and tap scale)
-     * @default false
+     * @default true
      */
     animate?: boolean;
   }) {
@@ -69,6 +69,15 @@ function Button({
   );
 
   if (animate) {
+    // Determine wrapper classes based on button className
+    // If button has width/flex classes, apply them to wrapper too
+    const hasWidthClass =
+      className &&
+      (className.includes('w-full') ||
+        className.includes('w-') ||
+        className.includes('flex-1') ||
+        className.includes('flex-auto'));
+
     return (
       <motion.div
         whileHover={{ scale: 1.02 }}
@@ -78,7 +87,7 @@ function Button({
           stiffness: 400,
           damping: 17,
         }}
-        className="flex-1 sm:flex-none"
+        className={hasWidthClass ? 'flex' : 'inline-flex'}
       >
         {button}
       </motion.div>

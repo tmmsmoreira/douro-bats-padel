@@ -191,6 +191,7 @@ export function TimePicker({
                 size="icon-xs"
                 aria-label="Select time"
                 disabled={disabled}
+                animate={false}
               >
                 <ClockIcon size={16} />
                 <span className="sr-only">Select time</span>

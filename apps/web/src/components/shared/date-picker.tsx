@@ -171,6 +171,7 @@ export function DatePicker({
                 size="icon-xs"
                 aria-label="Select date"
                 disabled={disabled}
+                animate={false}
               >
                 <CalendarDaysIcon size={16} />
                 <span className="sr-only">Select date</span>

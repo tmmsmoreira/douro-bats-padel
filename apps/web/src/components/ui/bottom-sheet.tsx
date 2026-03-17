@@ -1,9 +1,8 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { motion, AnimatePresence, PanInfo, useMotionValue, useTransform } from 'motion/react';
 import { cn } from '@/lib/utils';
-import { useHaptic } from '@/hooks/use-haptic';
 
 interface BottomSheetProps {
   /**
@@ -78,24 +77,13 @@ export function BottomSheet({
   className,
   snapPoints = [0.9],
 }: BottomSheetProps) {
-  const haptic = useHaptic();
   const y = useMotionValue(0);
   const opacity = useTransform(y, [0, 300], [1, 0]);
-  const hasTriggeredHaptic = useRef(false);
-
-  // Reset haptic trigger when sheet opens
-  useEffect(() => {
-    if (isOpen) {
-      hasTriggeredHaptic.current = false;
-      haptic.light();
-    }
-  }, [isOpen, haptic]);
 
   const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const shouldClose = info.velocity.y > 500 || info.offset.y > 150;
 
     if (shouldClose && dismissible) {
-      haptic.medium();
       onClose();
     } else {
       // Snap back
@@ -108,12 +96,6 @@ export function BottomSheet({
     if (info.offset.y < 0) {
       y.set(0);
       return;
-    }
-
-    // Trigger haptic when user has dragged enough to dismiss
-    if (info.offset.y > 150 && !hasTriggeredHaptic.current && dismissible) {
-      haptic.light();
-      hasTriggeredHaptic.current = true;
     }
   };
 

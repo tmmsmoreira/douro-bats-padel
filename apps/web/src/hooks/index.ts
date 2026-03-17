@@ -5,7 +5,6 @@ export * from './use-bfcache';
 export * from './use-events';
 export * from './use-form-mutation';
 export * from './use-form-state';
-export * from './use-haptic';
 export * from './use-long-press';
 export * from './use-media-query';
 export * from './use-minimum-loading';

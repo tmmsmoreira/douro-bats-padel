@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useHaptic } from './use-haptic';
 
 interface UseSwipeBackOptions {
   /**
@@ -57,13 +56,11 @@ export function useSwipeBack(options: UseSwipeBackOptions = {}): SwipeBackState 
   const { enabled = true, edgeThreshold = 20, swipeThreshold = 100, onBack } = options;
 
   const router = useRouter();
-  const haptic = useHaptic();
   const [isSwiping, setIsSwiping] = useState(false);
   const [progress, setProgress] = useState(0);
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
   const isEdgeSwipe = useRef(false);
-  const hasTriggeredHaptic = useRef(false);
 
   useEffect(() => {
     if (!enabled || typeof window === 'undefined') return;
@@ -76,7 +73,6 @@ export function useSwipeBack(options: UseSwipeBackOptions = {}): SwipeBackState 
       // Check if touch started near left edge
       if (touch.clientX <= edgeThreshold) {
         isEdgeSwipe.current = true;
-        hasTriggeredHaptic.current = false;
       }
     };
 
@@ -97,12 +93,6 @@ export function useSwipeBack(options: UseSwipeBackOptions = {}): SwipeBackState 
         setIsSwiping(true);
         const swipeProgress = Math.min(deltaX / swipeThreshold, 1);
         setProgress(swipeProgress);
-
-        // Trigger haptic when threshold is reached
-        if (swipeProgress >= 1 && !hasTriggeredHaptic.current) {
-          haptic.light();
-          hasTriggeredHaptic.current = true;
-        }
       } else if (Math.abs(deltaY) > Math.abs(deltaX)) {
         // If user is scrolling vertically, cancel the edge swipe
         isEdgeSwipe.current = false;
@@ -114,7 +104,6 @@ export function useSwipeBack(options: UseSwipeBackOptions = {}): SwipeBackState 
     const handleTouchEnd = () => {
       if (isSwiping && progress >= 1) {
         // Trigger navigation
-        haptic.medium();
         if (onBack) {
           onBack();
         } else {
@@ -126,7 +115,6 @@ export function useSwipeBack(options: UseSwipeBackOptions = {}): SwipeBackState 
       isEdgeSwipe.current = false;
       setIsSwiping(false);
       setProgress(0);
-      hasTriggeredHaptic.current = false;
     };
 
     // Add event listeners
@@ -141,7 +129,7 @@ export function useSwipeBack(options: UseSwipeBackOptions = {}): SwipeBackState 
       document.removeEventListener('touchend', handleTouchEnd);
       document.removeEventListener('touchcancel', handleTouchEnd);
     };
-  }, [enabled, edgeThreshold, swipeThreshold, isSwiping, progress, onBack, router, haptic]);
+  }, [enabled, edgeThreshold, swipeThreshold, isSwiping, progress, onBack, router]);
 
   return {
     isSwiping,

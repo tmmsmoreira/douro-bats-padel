@@ -26,6 +26,7 @@ import { EventHeaderInfo, ConfirmedPlayersSection } from '../shared/event';
 import { Spinner } from '../ui/spinner';
 import { TierSection, WaitlistSection } from '@/components/shared/draw';
 import type { Player, WaitlistedPlayer, Assignment } from '@/components/shared/draw';
+import { cn } from '@/lib/utils';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -319,7 +320,9 @@ function EventDetailsContent({
             )}
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2">
+          <div
+            className={cn('grid gap-6', `md:grid-cols-${event.waitlistedPlayers?.length ? 2 : 1}`)}
+          >
             <ConfirmedPlayersSection
               players={event.confirmedPlayers || []}
               confirmedCount={event.confirmedCount}
@@ -329,7 +332,7 @@ function EventDetailsContent({
                 count: event.capacity - event.confirmedCount,
               })}
               showAvatar={true}
-              showIndex={false}
+              showIndex={true}
             />
 
             <WaitlistSection

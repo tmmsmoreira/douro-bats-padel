@@ -22,6 +22,7 @@ interface ConfirmedPlayersSectionProps {
   capacityBadgeText?: string;
   fullCapacityText?: string;
   emptyMessage?: string;
+  canRegister?: boolean;
 }
 
 export function ConfirmedPlayersSection({
@@ -37,6 +38,7 @@ export function ConfirmedPlayersSection({
   capacityBadgeText,
   fullCapacityText,
   emptyMessage = 'No confirmed players yet',
+  canRegister = false,
 }: ConfirmedPlayersSectionProps) {
   const spotsRemaining = capacity - confirmedCount;
 
@@ -48,10 +50,15 @@ export function ConfirmedPlayersSection({
             <CardTitle>
               {title} ({confirmedCount}/{capacity})
             </CardTitle>
-            {spotsRemaining > 0 ? (
-              <Badge variant="secondary">{capacityBadgeText}</Badge>
-            ) : (
-              <Badge variant="default">{fullCapacityText}</Badge>
+
+            {canRegister && (
+              <>
+                {spotsRemaining > 0 ? (
+                  <Badge variant="secondary">{capacityBadgeText}</Badge>
+                ) : (
+                  <Badge variant="default">{fullCapacityText}</Badge>
+                )}
+              </>
             )}
           </div>
         ) : (
@@ -63,7 +70,7 @@ export function ConfirmedPlayersSection({
           </>
         )}
       </CardHeader>
-      <CardContent className="pt-6">
+      <CardContent className="pt-0">
         {players && players.length > 0 ? (
           <div className="space-y-2">
             {players.map((player, index) =>

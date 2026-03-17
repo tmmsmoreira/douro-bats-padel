@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useRef, useState } from 'react';
-import { useHaptic } from './use-haptic';
 
 interface UseLongPressOptions {
   /**
@@ -18,11 +17,6 @@ interface UseLongPressOptions {
    */
   onClick?: (event: React.TouchEvent | React.MouseEvent) => void;
   /**
-   * Whether to trigger haptic feedback on long press
-   * @default true
-   */
-  haptic?: boolean;
-  /**
    * Whether to prevent default behavior
    * @default true
    */
@@ -37,7 +31,7 @@ interface LongPressState {
 }
 
 /**
- * Hook for implementing long-press gestures with haptic feedback
+ * Hook for implementing long-press gestures
  * Useful for contextual menus and alternative actions
  *
  * @example
@@ -57,15 +51,8 @@ interface LongPressState {
  * ```
  */
 export function useLongPress(options: UseLongPressOptions) {
-  const {
-    threshold = 500,
-    onLongPress,
-    onClick,
-    haptic: enableHaptic = true,
-    preventDefault = true,
-  } = options;
+  const { threshold = 500, onLongPress, onClick, preventDefault = true } = options;
 
-  const haptic = useHaptic();
   const [isLongPressing, setIsLongPressing] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const isLongPressRef = useRef(false);
@@ -87,13 +74,10 @@ export function useLongPress(options: UseLongPressOptions) {
 
       timerRef.current = setTimeout(() => {
         isLongPressRef.current = true;
-        if (enableHaptic) {
-          haptic.medium();
-        }
         onLongPress(event);
       }, threshold);
     },
-    [threshold, onLongPress, preventDefault, enableHaptic, haptic]
+    [threshold, onLongPress, preventDefault]
   );
 
   const clear = useCallback(

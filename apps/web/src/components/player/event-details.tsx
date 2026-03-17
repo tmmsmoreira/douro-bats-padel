@@ -3,16 +3,15 @@
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useTranslations, useLocale } from 'next-intl';
-import { Calendar, MapPin, Clock } from 'lucide-react';
+import { Calendar, Clock } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Spinner } from '@/components/ui/spinner';
 import { HomeAdaptiveNav } from '@/components/shared/home-adaptive-nav';
-import { formatTime } from '@/lib/utils';
-import { DataStateWrapper, PageLayout, PageHeader } from '@/components/shared';
-import { ConfirmedPlayersSection } from '@/components/shared/event';
+import { DataStateWrapper, PageLayout, PageHeader, StatusBadge } from '@/components/shared';
+import { ConfirmedPlayersSection, EventHeaderInfo } from '@/components/shared/event';
 import { WaitlistSection } from '@/components/shared/draw';
 import { useRSVP } from '@/hooks';
 
@@ -51,7 +50,7 @@ interface EventDetails {
   rsvpOpensAt: string;
   rsvpClosesAt: string;
   capacity: number;
-  state: string;
+  state: 'DRAFT' | 'OPEN' | 'FROZEN' | 'DRAWN' | 'PUBLISHED';
   venue?: {
     id: string;
     name: string;
@@ -121,7 +120,7 @@ function EventDetailsContent({
   const now = new Date();
   const rsvpOpens = new Date(event.rsvpOpensAt);
   const rsvpCloses = new Date(event.rsvpClosesAt);
-  const canRegister = session && now >= rsvpOpens && now <= rsvpCloses;
+  const canRegister = !!(session && now >= rsvpOpens && now <= rsvpCloses);
 
   const handleRSVP = (status: 'IN' | 'OUT') => {
     rsvpMutation.mutate({ eventId: event.id, status });
@@ -167,133 +166,115 @@ function EventDetailsContent({
 
   const spotsRemaining = event.capacity - event.confirmedCount;
 
-  // Build description with event details
-  const eventDescription = (
-    <div className="flex gap-4 text-sm flex-wrap">
-      <div className="flex items-center gap-1">
-        <Calendar className="h-4 w-4" />
-        <span>
-          {new Date(event.date).toLocaleDateString(locale, {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
-        </span>
-      </div>
-      <div className="flex items-center gap-1">
-        <Clock className="h-4 w-4" />
-        <span>
-          {formatTime(event.startsAt, locale)} - {formatTime(event.endsAt, locale)}
-        </span>
-      </div>
-      {event.venue && (
-        <div className="flex items-center gap-1">
-          <MapPin className="h-4 w-4" />
-          <span>{event.venue.name}</span>
-        </div>
-      )}
-    </div>
-  );
-
   return (
     <div className="space-y-6">
       <PageHeader
         title={event.title || t('untitledEvent')}
-        description={eventDescription}
+        description={<EventHeaderInfo event={event} locale={locale} showStatus={false} />}
         showBackButton
         backButtonHref="/"
         backButtonLabel={t('backToEvents')}
       />
 
-      {/* RSVP Buttons */}
-      {session && event.state !== 'PUBLISHED' && (
-        <Card className="glass-card">
-          <CardContent className="pt-6 pb-6">
-            <div className="flex flex-col gap-3">
-              {canRegister && !isConfirmed && !isWaitlisted && (
-                <Button
-                  onClick={() => handleRSVP('IN')}
-                  disabled={rsvpMutation.isPending}
-                  className="w-full gap-2"
-                  animate
-                >
-                  {rsvpMutation.isPending && (
-                    <Spinner data-icon="inline-start" className="h-4 w-4" />
-                  )}
-                  {isFull ? t('registerToWaitlist') : t('register')}
-                </Button>
-              )}
-              {(isConfirmed || isWaitlisted) && (
-                <div className="flex flex-col sm:flex-row gap-3 items-center justify-center">
-                  <div className="flex items-center gap-2">
-                    {isConfirmed && (
-                      <Badge variant="default" className="text-sm">
-                        {t('confirmedBadge')}
-                      </Badge>
-                    )}
-                    {isWaitlisted && (
-                      <Badge variant="secondary" className="text-sm">
-                        {t('waitlistedPosition', { position: event.userRSVP?.position || 0 })}
-                      </Badge>
-                    )}
-                  </div>
-                  <Button
-                    variant="outline"
-                    onClick={() => handleRSVP('OUT')}
-                    disabled={rsvpMutation.isPending}
-                    className="w-full sm:w-auto gap-2"
-                    animate
-                  >
-                    {rsvpMutation.isPending && (
-                      <Spinner data-icon="inline-start" className="h-4 w-4" />
-                    )}
-                    {t('unregister')}
-                  </Button>
+      <div className="space-y-8">
+        {/* RSVP Buttons */}
+        {session && (
+          <Card className="glass-card">
+            <CardHeader>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <CardTitle>{t('registrationTitle')}</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {t('registrationDescription')}
+                  </p>
                 </div>
+                <div className="flex flex-wrap gap-4">
+                  {canRegister && !isConfirmed && !isWaitlisted && (
+                    <Button
+                      onClick={() => handleRSVP('IN')}
+                      disabled={rsvpMutation.isPending}
+                      className="w-full gap-2"
+                      animate
+                    >
+                      {rsvpMutation.isPending && (
+                        <Spinner data-icon="inline-start" className="h-4 w-4" />
+                      )}
+                      {isFull ? t('registerToWaitlist') : t('register')}
+                    </Button>
+                  )}
+                  {(isConfirmed || isWaitlisted) && (
+                    <>
+                      <div className="flex items-center gap-2">
+                        {isConfirmed && (
+                          <StatusBadge status="CONFIRMED" label={t('confirmedBadge')} />
+                        )}
+                        {isWaitlisted && (
+                          <StatusBadge
+                            status="WAITLISTED"
+                            label={t('waitlistedPosition', {
+                              position: event.userRSVP?.position || 0,
+                            })}
+                          />
+                        )}
+                      </div>
+                      <Button
+                        variant="outline"
+                        onClick={() => handleRSVP('OUT')}
+                        disabled={rsvpMutation.isPending}
+                        className="w-full sm:w-auto gap-2"
+                        animate
+                      >
+                        {rsvpMutation.isPending && (
+                          <Spinner data-icon="inline-start" className="h-4 w-4" />
+                        )}
+                        {t('unregister')}
+                      </Button>
+                    </>
+                  )}
+                  {!canRegister && !isConfirmed && !isWaitlisted && (
+                    <p className="text-sm text-muted-foreground text-center">
+                      {now < rsvpOpens ? t('rsvpNotOpenYet') : t('rsvpClosed')}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </CardHeader>
+          </Card>
+        )}
+
+        {/* Tier Time Slots */}
+        {event.tierRules &&
+          (event.tierRules.mastersTimeSlot || event.tierRules.explorersTimeSlot) && (
+            <div className="flex items-center justify-center gap-3 flex-wrap">
+              {event.tierRules.mastersTimeSlot && (
+                <Badge
+                  variant="outline"
+                  className="text-sm px-3 py-1 bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800"
+                >
+                  <Clock className="mr-2 h-3 w-3" />
+                  <span className="font-semibold">{t('masters')}</span>
+                  <span className="ml-1">
+                    {event.tierRules.mastersTimeSlot.startsAt} -{' '}
+                    {event.tierRules.mastersTimeSlot.endsAt}
+                  </span>
+                </Badge>
               )}
-              {!canRegister && !isConfirmed && !isWaitlisted && (
-                <p className="text-sm text-muted-foreground text-center">
-                  {now < rsvpOpens ? t('rsvpNotOpenYet') : t('rsvpClosed')}
-                </p>
+              {event.tierRules.explorersTimeSlot && (
+                <Badge
+                  variant="outline"
+                  className="text-sm px-3 py-1 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800"
+                >
+                  <Clock className="mr-2 h-3 w-3" />
+                  <span className="font-semibold">{t('explorers')}</span>
+                  <span className="ml-1">
+                    {event.tierRules.explorersTimeSlot.startsAt} -{' '}
+                    {event.tierRules.explorersTimeSlot.endsAt}
+                  </span>
+                </Badge>
               )}
             </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Tier Time Slots */}
-      {event.tierRules &&
-        (event.tierRules.mastersTimeSlot || event.tierRules.explorersTimeSlot) && (
-          <div className="flex items-center justify-center gap-3 flex-wrap">
-            {event.tierRules.mastersTimeSlot && (
-              <Badge
-                variant="outline"
-                className="text-sm px-3 py-1 bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800"
-              >
-                <Clock className="mr-2 h-3 w-3" />
-                <span className="font-semibold">{t('masters')}</span>
-                <span className="ml-1">
-                  {event.tierRules.mastersTimeSlot.startsAt} -{' '}
-                  {event.tierRules.mastersTimeSlot.endsAt}
-                </span>
-              </Badge>
-            )}
-            {event.tierRules.explorersTimeSlot && (
-              <Badge
-                variant="outline"
-                className="text-sm px-3 py-1 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800"
-              >
-                <Clock className="mr-2 h-3 w-3" />
-                <span className="font-semibold">{t('explorers')}</span>
-                <span className="ml-1">
-                  {event.tierRules.explorersTimeSlot.startsAt} -{' '}
-                  {event.tierRules.explorersTimeSlot.endsAt}
-                </span>
-              </Badge>
-            )}
-          </div>
-        )}
+          )}
+      </div>
 
       {/* Confirmed Players */}
       <ConfirmedPlayersSection
@@ -304,11 +285,11 @@ function EventDetailsContent({
         spotsRemainingText={t('spotsRemaining', { count: spotsRemaining })}
         showAvatar={true}
         showIndex={true}
-        headerClassName="bg-green-50 dark:bg-green-950/30"
         showCapacityBadge={true}
         capacityBadgeText={t('spotsRemaining', { count: spotsRemaining })}
         fullCapacityText={t('fullCapacity')}
         emptyMessage={t('noConfirmedPlayers')}
+        canRegister={canRegister}
       />
 
       {/* Waitlist */}

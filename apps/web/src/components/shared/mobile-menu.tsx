@@ -10,8 +10,7 @@ import { LogoutIcon, UserIcon } from 'lucide-animated';
 import { signOut } from 'next-auth/react';
 import { ThemeToggleButton } from '@/components/shared/theme-toggle-button';
 import { LanguageToggleButton } from '@/components/shared/language-toggle-button';
-import { useHaptic } from '@/hooks/use-haptic';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface NavItem {
@@ -44,7 +43,6 @@ export function MobileMenu({
   showAccountSection = true,
   showSignInButton = false,
 }: MobileMenuProps) {
-  const haptic = useHaptic();
   const router = useRouter();
 
   // Determine current view mode from the href
@@ -53,13 +51,6 @@ export function MobileMenu({
   const isCurrentlyAdminView =
     roleSwitchHref?.startsWith('/') && !roleSwitchHref.startsWith('/admin');
   const [viewMode, setViewMode] = useState(isCurrentlyAdminView);
-
-  // Trigger haptic feedback when menu opens
-  useEffect(() => {
-    if (isOpen) {
-      haptic.light();
-    }
-  }, [isOpen, haptic]);
 
   // Handle view mode toggle
   const handleViewModeChange = (checked: boolean) => {
@@ -72,9 +63,6 @@ export function MobileMenu({
     // Set the view in sessionStorage
     sessionStorage.setItem('lastView', newView);
     window.dispatchEvent(new Event('viewChanged'));
-
-    // Haptic feedback
-    haptic.medium();
 
     // Navigate to the new view
     router.push(newHref);
@@ -155,7 +143,6 @@ export function MobileMenu({
                   <Link
                     href="/profile"
                     onClick={() => {
-                      haptic.selection();
                       onClose();
                     }}
                     className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-colors text-foreground hover:bg-secondary active:bg-secondary/80 touch-target no-tap-highlight"
@@ -207,7 +194,6 @@ export function MobileMenu({
                 <Link
                   href="/terms"
                   onClick={() => {
-                    haptic.selection();
                     onClose();
                   }}
                   className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-colors text-foreground hover:bg-secondary active:bg-secondary/80 touch-target no-tap-highlight"
@@ -217,7 +203,6 @@ export function MobileMenu({
                 <Link
                   href="/privacy"
                   onClick={() => {
-                    haptic.selection();
                     onClose();
                   }}
                   className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-colors text-foreground hover:bg-secondary active:bg-secondary/80 touch-target no-tap-highlight"
@@ -227,7 +212,6 @@ export function MobileMenu({
                 <Link
                   href="/cookies"
                   onClick={() => {
-                    haptic.selection();
                     onClose();
                   }}
                   className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-colors text-foreground hover:bg-secondary active:bg-secondary/80 touch-target no-tap-highlight"
@@ -244,7 +228,6 @@ export function MobileMenu({
                 <Link
                   href="/about"
                   onClick={() => {
-                    haptic.selection();
                     onClose();
                   }}
                   className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-colors text-foreground hover:bg-secondary active:bg-secondary/80 touch-target no-tap-highlight"
@@ -254,7 +237,6 @@ export function MobileMenu({
                 <Link
                   href="/contact"
                   onClick={() => {
-                    haptic.selection();
                     onClose();
                   }}
                   className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-colors text-foreground hover:bg-secondary active:bg-secondary/80 touch-target no-tap-highlight"
@@ -264,7 +246,6 @@ export function MobileMenu({
                 <Link
                   href="/faq"
                   onClick={() => {
-                    haptic.selection();
                     onClose();
                   }}
                   className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-colors text-foreground hover:bg-secondary active:bg-secondary/80 touch-target no-tap-highlight"
@@ -278,7 +259,6 @@ export function MobileMenu({
                 <div className="pt-2 border-t">
                   <button
                     onClick={() => {
-                      haptic.warning();
                       onClose();
                       signOut();
                     }}

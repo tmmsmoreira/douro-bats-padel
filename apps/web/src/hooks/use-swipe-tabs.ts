@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useRef, useState } from 'react';
-import { useHaptic } from './use-haptic';
 
 export interface UseSwipeTabsOptions {
   /**
@@ -21,11 +20,6 @@ export interface UseSwipeTabsOptions {
    * @default 50
    */
   threshold?: number;
-  /**
-   * Whether to enable haptic feedback
-   * @default true
-   */
-  haptic?: boolean;
   /**
    * Whether swiping is enabled
    * @default true
@@ -80,17 +74,14 @@ export function useSwipeTabs({
   tabCount,
   onTabChange,
   threshold = 50,
-  haptic = true,
   enabled = true,
 }: UseSwipeTabsOptions): UseSwipeTabsReturn {
-  const hapticFeedback = useHaptic();
   const [isSwiping, setIsSwiping] = useState(false);
   const [progress, setProgress] = useState(0);
   const [direction, setDirection] = useState<'left' | 'right' | null>(null);
 
   const touchStartX = useRef(0);
   const touchCurrentX = useRef(0);
-  const hasTriggeredHaptic = useRef(false);
 
   const handleTouchStart = useCallback(
     (e: React.TouchEvent) => {
@@ -98,7 +89,6 @@ export function useSwipeTabs({
 
       touchStartX.current = e.touches[0].clientX;
       touchCurrentX.current = e.touches[0].clientX;
-      hasTriggeredHaptic.current = false;
       setIsSwiping(true);
     },
     [enabled]
@@ -119,20 +109,8 @@ export function useSwipeTabs({
       // Calculate progress (0 to 1)
       const calculatedProgress = Math.min(absDeltaX / 200, 1);
       setProgress(calculatedProgress);
-
-      // Trigger haptic when threshold is reached
-      if (absDeltaX > threshold && !hasTriggeredHaptic.current && haptic) {
-        // Check if we can actually swipe in this direction
-        const canSwipeLeft = swipeDirection === 'left' && currentIndex < tabCount - 1;
-        const canSwipeRight = swipeDirection === 'right' && currentIndex > 0;
-
-        if (canSwipeLeft || canSwipeRight) {
-          hapticFeedback.selection();
-          hasTriggeredHaptic.current = true;
-        }
-      }
     },
-    [enabled, isSwiping, threshold, haptic, hapticFeedback, currentIndex, tabCount]
+    [enabled, isSwiping]
   );
 
   const handleTouchEnd = useCallback(() => {
@@ -145,15 +123,9 @@ export function useSwipeTabs({
     if (absDeltaX > threshold) {
       if (deltaX > 0 && currentIndex > 0) {
         // Swipe right - go to previous tab
-        if (haptic) {
-          hapticFeedback.light();
-        }
         onTabChange(currentIndex - 1);
       } else if (deltaX < 0 && currentIndex < tabCount - 1) {
         // Swipe left - go to next tab
-        if (haptic) {
-          hapticFeedback.light();
-        }
         onTabChange(currentIndex + 1);
       }
     }
@@ -164,8 +136,7 @@ export function useSwipeTabs({
     setDirection(null);
     touchStartX.current = 0;
     touchCurrentX.current = 0;
-    hasTriggeredHaptic.current = false;
-  }, [enabled, isSwiping, threshold, currentIndex, tabCount, haptic, hapticFeedback, onTabChange]);
+  }, [enabled, isSwiping, threshold, currentIndex, tabCount, onTabChange]);
 
   return {
     isSwiping,

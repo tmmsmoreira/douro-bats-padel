@@ -31,7 +31,7 @@ export function WaitlistSection({
       <CardHeader className="bg-amber-50 dark:bg-amber-950/30">
         <CardTitle>{title}</CardTitle>
       </CardHeader>
-      <CardContent className="pt-6">
+      <CardContent className="pt-0">
         <div className="space-y-2">
           {players.map((player) =>
             showAvatar ? (

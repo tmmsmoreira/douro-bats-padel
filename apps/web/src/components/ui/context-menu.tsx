@@ -3,7 +3,6 @@
 import * as React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
-import { useHaptic } from '@/hooks/use-haptic';
 
 export interface ContextMenuItem {
   /**
@@ -61,11 +60,6 @@ export interface ContextMenuProps {
    * Additional className
    */
   className?: string;
-  /**
-   * Whether to enable haptic feedback
-   * @default true
-   */
-  haptic?: boolean;
 }
 
 /**
@@ -105,9 +99,7 @@ export function ContextMenu({
   position,
   title,
   className,
-  haptic = true,
 }: ContextMenuProps) {
-  const hapticFeedback = useHaptic();
   const menuRef = React.useRef<HTMLDivElement>(null);
 
   // Close menu when clicking outside
@@ -133,18 +125,10 @@ export function ContextMenu({
     (item: ContextMenuItem) => {
       if (item.disabled) return;
 
-      if (haptic) {
-        if (item.destructive) {
-          hapticFeedback.warning();
-        } else {
-          hapticFeedback.selection();
-        }
-      }
-
       item.onClick();
       onClose();
     },
-    [haptic, hapticFeedback, onClose]
+    [onClose]
   );
 
   // Calculate menu position to keep it on screen

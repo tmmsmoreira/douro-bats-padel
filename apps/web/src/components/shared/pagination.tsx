@@ -93,7 +93,6 @@ export function Pagination({
           size="sm"
           onClick={() => onPageChange(i)}
           className="min-w-10"
-          haptic
         >
           {i}
         </Button>
@@ -124,7 +123,6 @@ export function Pagination({
           onClick={() => onPageChange(Math.max(1, currentPage - 1))}
           disabled={currentPage === 1}
           aria-label={previousLabel}
-          haptic
         >
           <ChevronLeft className="h-4 w-4" />
           {!isMobile && <span className="ml-1">{previousLabel}</span>}
@@ -140,7 +138,6 @@ export function Pagination({
           onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
           disabled={currentPage === totalPages}
           aria-label={nextLabel}
-          haptic
         >
           {!isMobile && <span className="mr-1">{nextLabel}</span>}
           <ChevronRight className="h-4 w-4" />

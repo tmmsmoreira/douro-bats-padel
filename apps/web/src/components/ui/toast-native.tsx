@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
-import { useHaptic } from '@/hooks/use-haptic';
 import { CheckCircle2, XCircle, AlertCircle, Info, X } from 'lucide-react';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
@@ -58,7 +57,7 @@ const toastStyles = {
 };
 
 /**
- * Native-style toast notification with haptic feedback
+ * Native-style toast notification
  * Appears at the bottom of the screen on mobile
  *
  * @example
@@ -82,26 +81,10 @@ export function ToastNative({
   showCloseButton = true,
   position = 'bottom',
 }: ToastNativeProps) {
-  const haptic = useHaptic();
   const Icon = toastIcons[type];
 
   useEffect(() => {
     if (isOpen) {
-      // Trigger haptic based on toast type
-      switch (type) {
-        case 'success':
-          haptic.success();
-          break;
-        case 'error':
-          haptic.error();
-          break;
-        case 'warning':
-          haptic.warning();
-          break;
-        default:
-          haptic.light();
-      }
-
       // Auto-close after duration
       if (duration > 0) {
         const timer = setTimeout(() => {
@@ -111,7 +94,7 @@ export function ToastNative({
         return () => clearTimeout(timer);
       }
     }
-  }, [isOpen, type, duration, onClose, haptic]);
+  }, [isOpen, duration, onClose]);
 
   const positionClasses = position === 'top' ? 'top-4 safe-top' : 'bottom-4 safe-bottom';
 
@@ -140,10 +123,7 @@ export function ToastNative({
             <p className="flex-1 text-sm font-medium">{message}</p>
             {showCloseButton && (
               <button
-                onClick={() => {
-                  haptic.selection();
-                  onClose();
-                }}
+                onClick={onClose}
                 className="shrink-0 p-1 rounded-full hover:bg-white/20 transition-colors touch-target"
                 aria-label="Close"
               >

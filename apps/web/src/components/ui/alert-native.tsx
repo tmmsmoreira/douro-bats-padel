@@ -3,7 +3,6 @@
 import * as React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
-import { useHaptic } from '@/hooks/use-haptic';
 
 export interface AlertAction {
   /**
@@ -51,11 +50,6 @@ export interface AlertNativeProps {
    */
   variant?: 'ios' | 'android';
   /**
-   * Whether to enable haptic feedback
-   * @default true
-   */
-  haptic?: boolean;
-  /**
    * Whether clicking backdrop closes the alert
    * @default false
    */
@@ -64,7 +58,7 @@ export interface AlertNativeProps {
 
 /**
  * Native-style Alert Dialog component
- * iOS/Android style alert dialogs with haptic feedback
+ * iOS/Android style alert dialogs
  *
  * @example
  * ```tsx
@@ -87,32 +81,11 @@ export function AlertNative({
   message,
   actions,
   variant = 'ios',
-  haptic = true,
   closeOnBackdropClick = false,
 }: AlertNativeProps) {
-  const hapticFeedback = useHaptic();
-
-  // Trigger haptic when alert opens
-  React.useEffect(() => {
-    if (isOpen && haptic) {
-      hapticFeedback.light();
-    }
-  }, [isOpen, haptic, hapticFeedback]);
-
-  const handleActionClick = React.useCallback(
-    (action: AlertAction) => {
-      if (haptic) {
-        if (action.destructive) {
-          hapticFeedback.warning();
-        } else {
-          hapticFeedback.selection();
-        }
-      }
-
-      action.onClick();
-    },
-    [haptic, hapticFeedback]
-  );
+  const handleActionClick = React.useCallback((action: AlertAction) => {
+    action.onClick();
+  }, []);
 
   const isIOS = variant === 'ios';
 

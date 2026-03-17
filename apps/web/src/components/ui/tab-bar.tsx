@@ -3,7 +3,6 @@
 import * as React from 'react';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
-import { useHaptic } from '@/hooks/use-haptic';
 
 export interface TabBarItem {
   /**
@@ -46,11 +45,6 @@ export interface TabBarProps {
    */
   onTabChange?: (tabId: string) => void;
   /**
-   * Whether to enable haptic feedback
-   * @default true
-   */
-  haptic?: boolean;
-  /**
    * Additional className
    */
   className?: string;
@@ -80,28 +74,15 @@ export interface TabBarProps {
  * />
  * ```
  */
-export function TabBar({
-  items,
-  activeTab,
-  onTabChange,
-  haptic = true,
-  className,
-  variant = 'ios',
-}: TabBarProps) {
-  const hapticFeedback = useHaptic();
-
+export function TabBar({ items, activeTab, onTabChange, className, variant = 'ios' }: TabBarProps) {
   const handleTabClick = React.useCallback(
     (item: TabBarItem) => {
       if (item.disabled) return;
 
-      if (haptic) {
-        hapticFeedback.selection();
-      }
-
       item.onClick?.();
       onTabChange?.(item.id);
     },
-    [haptic, hapticFeedback, onTabChange]
+    [onTabChange]
   );
 
   const isIOS = variant === 'ios';

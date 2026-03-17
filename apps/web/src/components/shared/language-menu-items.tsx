@@ -4,17 +4,13 @@ import { usePathname, useRouter } from '@/i18n/navigation';
 import { DropdownMenuRadioGroup, DropdownMenuRadioItem } from '@/components/ui/dropdown-menu';
 import { locales, localeNames, localeFlags, type Locale } from '@/i18n/config';
 import { useLocale } from 'next-intl';
-import { useHaptic } from '@/hooks/use-haptic';
 
 export function LanguageMenuItems() {
   const pathname = usePathname();
   const router = useRouter();
   const currentLocale = useLocale();
-  const haptic = useHaptic();
 
   const switchLocale = (newLocale: string) => {
-    haptic.selection();
-
     // Set cookie for locale preference
     document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=31536000`;
 

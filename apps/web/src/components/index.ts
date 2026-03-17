@@ -16,7 +16,6 @@ export { ThemeToggle } from './shared/theme-toggle';
 export { Switch } from './ui/switch';
 
 // Native Mobile Components
-export { FloatingActionButton } from './ui/floating-action-button';
 export { TabBar } from './ui/tab-bar';
 export { ContextMenu } from './ui/context-menu';
 export { AlertNative } from './ui/alert-native';

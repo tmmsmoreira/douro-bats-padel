@@ -2,7 +2,6 @@
  * Example demonstrating all advanced mobile features (Phase 2)
  *
  * Features shown:
- * - Pull-to-refresh with haptic feedback
  * - Bottom sheet with swipe-to-dismiss
  * - Swipe-to-go-back
  * - Skeleton loading states
@@ -105,12 +104,11 @@ export function AdvancedMobileFeaturesDemo() {
 
         {/* Action buttons */}
         <div className="grid grid-cols-2 gap-3">
-          <Button haptic animate onClick={handleLoadData} className="touch-target">
+          <Button animate onClick={handleLoadData} className="touch-target">
             Load Data
           </Button>
 
           <Button
-            haptic
             animate
             variant="secondary"
             onClick={() => setShowBottomSheet(true)}
@@ -120,7 +118,6 @@ export function AdvancedMobileFeaturesDemo() {
           </Button>
 
           <Button
-            haptic
             animate
             variant="outline"
             onClick={() => toast.success('Success toast!')}
@@ -130,7 +127,6 @@ export function AdvancedMobileFeaturesDemo() {
           </Button>
 
           <Button
-            haptic
             animate
             variant="destructive"
             onClick={() => toast.error('Error toast!')}
@@ -189,7 +185,6 @@ export function AdvancedMobileFeaturesDemo() {
 
           <div className="space-y-2 pt-4">
             <Button
-              haptic
               animate
               onClick={() => {
                 toast.info('Button clicked in bottom sheet!');
@@ -200,7 +195,6 @@ export function AdvancedMobileFeaturesDemo() {
             </Button>
 
             <Button
-              haptic
               animate
               variant="outline"
               onClick={() => setShowBottomSheet(false)}

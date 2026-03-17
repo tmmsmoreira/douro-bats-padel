@@ -5,7 +5,14 @@ import { useRouter } from '@/i18n/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
@@ -14,6 +21,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useTranslations } from 'next-intl';
 import { AlertTriangle } from 'lucide-react';
 import { useAuthFetch } from '@/hooks/use-api';
+import { StatusBadge } from '../shared';
 
 interface Court {
   id: string;
@@ -480,21 +488,22 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
       </Card>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <Card>
+        <Card className="glass-card">
           <CardHeader>
             <CardTitle>{t('eventSummary')}</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
-            <div>
+          <CardContent className="space-y-2 pt-0">
+            <div className="flex items-center">
               <span className="font-medium">{t('title_field')}:</span>{' '}
-              {event.title || t('untitledEvent')}
+              <span className="ml-2">{event.title || t('untitledEvent')}</span>
             </div>
-            <div>
-              <span className="font-medium">{t('confirmedPlayers')}:</span> {confirmedCount}
+            <div className="flex items-center">
+              <span className="font-medium">{t('confirmedPlayers')}:</span>
+              <span className="ml-2">{confirmedCount}</span>
             </div>
-            <div>
-              <span className="font-medium">{t('playersInDraw')}:</span>{' '}
-              <Badge variant={hasExcessPlayers ? 'destructive' : 'default'}>{playersInDraw}</Badge>
+            <div className="flex items-center">
+              <span className="font-medium mr-2">{t('playersInDraw')}:</span>
+              <span className={hasExcessPlayers ? 'text-destructive' : ''}>{playersInDraw}</span>
             </div>
             {waitlistedPlayers > 0 && (
               <div>
@@ -502,34 +511,34 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
                 <Badge variant="secondary">{waitlistedPlayers}</Badge>
               </div>
             )}
-            <div>
-              <span className="font-medium">{t('status')}:</span>{' '}
-              <Badge variant={event.state === 'FROZEN' ? 'default' : 'secondary'}>
-                {event.state}
-              </Badge>
+            <div className="flex items-center">
+              <span className="font-medium mr-2">{t('status')}:</span>{' '}
+              <StatusBadge status={event.state} />
             </div>
+          </CardContent>
+          <CardFooter className="pt-0 text-sm text-destructive flex items-center gap-1">
             {event.state !== 'FROZEN' && event.state !== 'DRAWN' && event.state !== 'PUBLISHED' && (
-              <div className="text-sm text-destructive mt-2 flex items-center gap-1">
+              <>
                 <AlertTriangle className="h-4 w-4" />
                 {t('eventNotFrozen')}
-              </div>
+              </>
             )}
             {playersInDraw < 4 && confirmedCount >= 4 && (
-              <div className="text-sm text-destructive mt-2 flex items-center gap-1">
+              <>
                 <AlertTriangle className="h-4 w-4" />
                 {t('excessPlayersWarning')}
-              </div>
+              </>
             )}
             {confirmedCount < 4 && (
-              <div className="text-sm text-destructive mt-2 flex items-center gap-1">
+              <>
                 <AlertTriangle className="h-4 w-4" />
                 {t('insufficientPlayersWarning')}
-              </div>
+              </>
             )}
-          </CardContent>
+          </CardFooter>
         </Card>
 
-        <Card>
+        <Card className="glass-card">
           <CardHeader>
             <CardTitle>{t('courtSelection')}</CardTitle>
             <CardDescription>
@@ -623,12 +632,12 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="glass-card">
           <CardHeader>
             <CardTitle>{t('drawOptions')}</CardTitle>
             <CardDescription>{t('drawOptionsDescription')}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pt-0">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label htmlFor="balance-strength">{t('balanceTeamStrength')}</Label>
@@ -663,7 +672,7 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
       </div>
 
       {/* Players in Draw */}
-      <Card>
+      <Card className="glass-card">
         <CardHeader>
           <CardTitle>
             {t('confirmedPlayersList')} ({playersInDraw})

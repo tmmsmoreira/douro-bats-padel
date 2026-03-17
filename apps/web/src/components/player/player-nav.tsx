@@ -166,7 +166,7 @@ export function PlayerNav() {
                 </div>
 
                 <div className="flex items-center gap-4">
-                  <DropdownMenu>
+                  <DropdownMenu modal={false}>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                         <Avatar className="h-10 w-10">

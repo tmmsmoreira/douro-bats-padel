@@ -22,7 +22,7 @@ interface EventHeaderInfoProps {
 
 export function EventHeaderInfo({ event, locale, showStatus = true }: EventHeaderInfoProps) {
   return (
-    <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
+    <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap justify-between sm:justify-start">
       <div className="flex items-center gap-1">
         <Calendar className="h-4 w-4" />
         <span>

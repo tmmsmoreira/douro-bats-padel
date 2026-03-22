@@ -126,6 +126,7 @@ export class InvitationsService {
     return {
       valid: true,
       email: invitation.email,
+      name: invitation.name || undefined,
     };
   }
 

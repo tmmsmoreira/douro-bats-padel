@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface UsePullToRefreshOptions {
   /**
@@ -52,6 +53,7 @@ export function usePullToRefresh(options: UsePullToRefreshOptions = {}): PullToR
   const { threshold = 80, maxPullDistance = 150, onRefresh, enabled = true } = options;
 
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [isPulling, setIsPulling] = useState(false);
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -65,19 +67,21 @@ export function usePullToRefresh(options: UsePullToRefreshOptions = {}): PullToR
       if (onRefresh) {
         await onRefresh();
       } else {
-        // Default: refresh the current page
+        // Default: invalidate all queries and refresh the current page
+        await queryClient.invalidateQueries();
         router.refresh();
         // Add a small delay to show the refresh animation
         await new Promise((resolve) => setTimeout(resolve, 500));
       }
     } catch (error) {
-      throw error;
+      // Log error but don't throw to prevent breaking the UI
+      console.error('Pull to refresh error:', error);
     } finally {
       setIsRefreshing(false);
       setPullDistance(0);
       setIsPulling(false);
     }
-  }, [onRefresh, router]);
+  }, [onRefresh, router, queryClient]);
 
   useEffect(() => {
     if (!enabled || typeof window === 'undefined') return;

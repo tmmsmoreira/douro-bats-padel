@@ -51,7 +51,7 @@ function Button({
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
     /**
-     * Whether to wrap the button with motion animations (hover scale and tap scale)
+     * Whether to apply motion animations (hover scale and tap scale)
      * @default true
      */
     animate?: boolean;
@@ -68,33 +68,32 @@ function Button({
     />
   );
 
-  if (animate) {
-    // Determine wrapper classes based on button className
-    // If button has width/flex classes, apply them to wrapper too
-    const hasWidthClass =
-      className &&
-      (className.includes('w-full') ||
-        className.includes('w-') ||
-        className.includes('flex-1') ||
-        className.includes('flex-auto'));
-
-    return (
-      <motion.div
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.95 }}
-        transition={{
-          type: 'spring',
-          stiffness: 400,
-          damping: 17,
-        }}
-        className={hasWidthClass ? 'flex' : 'inline-flex'}
-      >
-        {button}
-      </motion.div>
-    );
+  if (!animate) {
+    return button;
   }
 
-  return button;
+  // Check if className contains width/flex classes that should apply to wrapper
+  const hasWidthClass =
+    className &&
+    (className.includes('w-full') ||
+      className.includes('w-') ||
+      className.includes('flex-1') ||
+      className.includes('flex-auto'));
+
+  return (
+    <motion.span
+      style={{ display: hasWidthClass ? 'flex' : 'inline-flex' }}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.95 }}
+      transition={{
+        type: 'spring',
+        stiffness: 400,
+        damping: 17,
+      }}
+    >
+      {button}
+    </motion.span>
+  );
 }
 
 export { Button, buttonVariants };

@@ -52,6 +52,9 @@ export function RegisterForm() {
           setInvitationValid(true);
           setInvitationEmail(data.email);
           setEmail(data.email); // Pre-fill email
+          if (data.name) {
+            setName(data.name); // Pre-fill name if provided
+          }
         } else {
           setInvitationValid(false);
           setError(data.message || t('invalidInvitation'));

@@ -216,8 +216,8 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
   });
 
   const copyInvitationLink = (token: string) => {
-    const WEB_URL = process.env.NEXT_PUBLIC_WEB_URL || 'http://localhost:3000';
-    const link = `${WEB_URL}/register?invitation=${token}`;
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+    const link = `${baseUrl}/register?invitation=${token}`;
     navigator.clipboard.writeText(link);
     toast.success(t('linkCopied'));
   };

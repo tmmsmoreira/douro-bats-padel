@@ -60,9 +60,10 @@ export function PullToRefresh({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -60 }}
           transition={{ duration: 0.2 }}
-          className="fixed top-0 left-0 right-0 z-40 flex items-center justify-center pointer-events-none"
+          className="fixed top-0 left-0 right-0 z-60 flex items-center justify-center pointer-events-none"
           style={{
             transform: `translateY(${Math.min(pullDistance, maxPullDistance)}px)`,
+            paddingTop: 'env(safe-area-inset-top, 0px)',
           }}
         >
           <div className="bg-background/95 backdrop-blur-sm border border-border rounded-full px-4 py-2 shadow-lg flex items-center gap-2">

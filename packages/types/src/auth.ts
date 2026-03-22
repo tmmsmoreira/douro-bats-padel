@@ -64,6 +64,7 @@ export interface ValidateInvitationDto {
 export interface InvitationValidationResponse {
   valid: boolean;
   email?: string;
+  name?: string;
   message?: string;
 }
 

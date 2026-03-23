@@ -3,9 +3,58 @@
 import * as React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { i18n, localeFlags, type Locale } from '@/i18n';
 
-export function LanguageToggleButton() {
+export const LanguageToggleButton = React.forwardRef<HTMLButtonElement>(
+  function LanguageToggleButton(_props, ref) {
+    const pathname = usePathname();
+    const router = useRouter();
+    const [mounted, setMounted] = React.useState(false);
+
+    React.useEffect(() => {
+      setMounted(true);
+    }, []);
+
+    const currentLocale = (pathname.split('/')[1] as Locale) || i18n.defaultLocale;
+    const displayFlag = localeFlags[currentLocale];
+
+    const toggleLanguage = () => {
+      const newLocale: Locale = currentLocale === 'en' ? 'pt' : 'en';
+
+      // Set cookie for locale preference
+      document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=31536000`;
+
+      // Replace the locale in the current path
+      const segments = pathname.split('/');
+      segments[1] = newLocale;
+      const newPath = segments.join('/');
+
+      // Use replace instead of push to avoid adding to history
+      // This makes the transition feel more like a state change than navigation
+      router.replace(newPath);
+    };
+
+    // Show the same flag during SSR and after hydration to prevent flash
+    return (
+      <Button
+        ref={ref}
+        variant="ghost"
+        size="icon"
+        onClick={toggleLanguage}
+        disabled={!mounted}
+        className="text-xl"
+        aria-label={`Switch to ${currentLocale === 'en' ? 'Portuguese' : 'English'}`}
+        animate
+      >
+        {displayFlag}
+      </Button>
+    );
+  }
+);
+
+// Toggle group version for mobile menu
+export function LanguageToggleGroup() {
   const pathname = usePathname();
   const router = useRouter();
   const [mounted, setMounted] = React.useState(false);
@@ -15,10 +64,11 @@ export function LanguageToggleButton() {
   }, []);
 
   const currentLocale = (pathname.split('/')[1] as Locale) || i18n.defaultLocale;
-  const displayFlag = localeFlags[currentLocale];
 
-  const toggleLanguage = () => {
-    const newLocale: Locale = currentLocale === 'en' ? 'pt' : 'en';
+  const handleLanguageChange = (value: string) => {
+    if (!value || value === currentLocale) return;
+
+    const newLocale = value as Locale;
 
     // Set cookie for locale preference
     document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=31536000`;
@@ -29,22 +79,24 @@ export function LanguageToggleButton() {
     const newPath = segments.join('/');
 
     // Use replace instead of push to avoid adding to history
-    // This makes the transition feel more like a state change than navigation
     router.replace(newPath);
   };
 
-  // Show the same flag during SSR and after hydration to prevent flash
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={toggleLanguage}
+    <ToggleGroup
+      type="single"
+      variant="outline"
+      size="sm"
+      value={currentLocale}
+      onValueChange={handleLanguageChange}
       disabled={!mounted}
-      className="text-xl"
-      aria-label={`Switch to ${currentLocale === 'en' ? 'Portuguese' : 'English'}`}
-      animate
     >
-      {displayFlag}
-    </Button>
+      <ToggleGroupItem value="en" aria-label="English">
+        <span className="text-base leading-none">🇬🇧</span>
+      </ToggleGroupItem>
+      <ToggleGroupItem value="pt" aria-label="Portuguese">
+        <span className="text-base leading-none">🇵🇹</span>
+      </ToggleGroupItem>
+    </ToggleGroup>
   );
 }

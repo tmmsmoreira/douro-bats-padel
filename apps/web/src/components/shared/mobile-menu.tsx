@@ -8,8 +8,8 @@ import { Switch } from '@/components/ui/switch';
 import { Session } from 'next-auth';
 import { LogoutIcon, UserIcon } from 'lucide-animated';
 import { signOut } from 'next-auth/react';
-import { ThemeToggleButton } from '@/components/shared/theme-toggle-button';
-import { LanguageToggleButton } from '@/components/shared/language-toggle-button';
+import { ThemeToggleGroup } from '@/components/shared/theme-toggle-button';
+import { LanguageToggleGroup } from '@/components/shared/language-toggle-button';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -39,7 +39,6 @@ export function MobileMenu({
   t,
   showRoleSwitch = false,
   roleSwitchHref,
-  roleSwitchLabel,
   showAccountSection = true,
   showSignInButton = false,
 }: MobileMenuProps) {
@@ -88,6 +87,8 @@ export function MobileMenu({
               top: 'calc(4rem + env(safe-area-inset-top, 0px) + 1px)',
               WebkitOverflowScrolling: 'touch',
               paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))',
+              touchAction: 'pan-y',
+              overscrollBehavior: 'contain',
             }}
           >
             <div className="container mx-auto px-4 py-6 space-y-2 pb-safe">
@@ -159,29 +160,31 @@ export function MobileMenu({
                   {t('settings') || 'Settings'}
                 </p>
 
-                {/* View Mode Toggle - Only show for editors/admins */}
+                {/* Admin Mode Toggle - Only show for editors/admins */}
                 {showRoleSwitch && (
-                  <div className="flex items-center justify-between gap-4 px-4 py-3 rounded-lg hover:bg-secondary">
-                    <div className="flex flex-col">
-                      <span className="text-base font-medium">View Mode</span>
-                      <span className="text-xs text-muted-foreground">
-                        {viewMode ? 'Admin' : 'Player'}
-                      </span>
-                    </div>
-                    <Switch checked={viewMode} onCheckedChange={handleViewModeChange} />
+                  <div
+                    onClick={() => handleViewModeChange(!viewMode)}
+                    className="flex items-center justify-between gap-4 px-4 py-3 rounded-lg w-full cursor-pointer touch-target no-tap-highlight"
+                  >
+                    <span className="text-base font-medium">Admin Mode</span>
+                    <Switch
+                      checked={viewMode}
+                      onCheckedChange={handleViewModeChange}
+                      onClick={(e) => e.stopPropagation()}
+                    />
                   </div>
                 )}
 
-                <div className="flex items-center justify-between gap-4 px-4 py-3 rounded-lg hover:bg-secondary">
+                <div className="flex items-center justify-between gap-4 px-4 py-3 rounded-lg">
                   <span className="text-base font-medium">{t('language') || 'Language'}</span>
                   <div className="ml-auto">
-                    <LanguageToggleButton />
+                    <LanguageToggleGroup />
                   </div>
                 </div>
-                <div className="flex items-center justify-between gap-4 px-4 py-3 rounded-lg hover:bg-secondary">
+                <div className="flex items-center justify-between gap-4 px-4 py-3 rounded-lg">
                   <span className="text-base font-medium">{t('theme') || 'Theme'}</span>
                   <div className="ml-auto">
-                    <ThemeToggleButton />
+                    <ThemeToggleGroup />
                   </div>
                 </div>
               </div>

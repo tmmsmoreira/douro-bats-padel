@@ -6,9 +6,15 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from '@/i18n/navigation';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Mail, CheckCircle, XCircle, TrendingUp, Send } from 'lucide-react';
+import { Mail, CheckCircle, XCircle, TrendingUp, Send, MoreVertical } from 'lucide-react';
 import { DeleteIcon, DeleteIconHandle, CopyIcon, CopyIconHandle } from 'lucide-animated';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { ConfirmationDialog } from '../shared/confirmation-dialog';
@@ -20,6 +26,7 @@ import type { PlayerProfileStatus, InvitationStatus } from '@/components/shared/
 import { SendIcon, SendIconHandle } from '../icons/send-icon';
 import { Spinner } from '../ui/spinner';
 import { Invitation } from '@padel/types';
+import { useIsMobile } from '@/hooks/use-media-query';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -381,51 +388,17 @@ function PublicPlayerProfileContent({
           </CardContent>
           <CardFooter className="border-t gap-2 ">
             {isAdminOrEditor && player.invitation.status === 'PENDING' && (
-              <>
-                <Button
-                  variant="outline"
-                  onClick={() => copyInvitationLink(player.invitation!.token)}
-                  onMouseEnter={() => copyIconRef.current?.startAnimation()}
-                  onMouseLeave={() => copyIconRef.current?.stopAnimation()}
-                >
-                  <CopyIcon ref={copyIconRef} size={16} className="h-4 w-4" />
-                  {t('copyLink')}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => resendMutation.mutate(player.invitation!.id)}
-                  disabled={resendMutation.isPending}
-                  animate={!resendMutation.isPending}
-                  onMouseEnter={() =>
-                    !resendMutation.isPending && resendIconRef.current?.startAnimation()
-                  }
-                  onMouseLeave={() =>
-                    !resendMutation.isPending && resendIconRef.current?.stopAnimation()
-                  }
-                >
-                  {resendMutation.isPending ? (
-                    <Spinner data-icon="inline-start" className="h-4 w-4" />
-                  ) : (
-                    <SendIcon ref={resendIconRef} size={16} className="h-4 w-4" />
-                  )}
-                  {resendMutation.isPending ? t('sending') : t('resendInvitation')}
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={() => setShowRevokeDialog(true)}
-                  disabled={revokeMutation.isPending}
-                  animate={!revokeMutation.isPending}
-                  onMouseEnter={() =>
-                    !revokeMutation.isPending && revokeIconRef.current?.startAnimation()
-                  }
-                  onMouseLeave={() =>
-                    !revokeMutation.isPending && revokeIconRef.current?.stopAnimation()
-                  }
-                >
-                  <DeleteIcon ref={revokeIconRef} size={16} className="h-4 w-4" />
-                  {t('revokeInvitation')}
-                </Button>
-              </>
+              <InvitationActions
+                player={player}
+                copyInvitationLink={copyInvitationLink}
+                resendMutation={resendMutation}
+                setShowRevokeDialog={setShowRevokeDialog}
+                revokeMutation={revokeMutation}
+                copyIconRef={copyIconRef}
+                resendIconRef={resendIconRef}
+                revokeIconRef={revokeIconRef}
+                t={t}
+              />
             )}
           </CardFooter>
         </Card>
@@ -584,5 +557,124 @@ function PublicPlayerProfileContent({
         }}
       />
     </motion.div>
+  );
+}
+
+// Separate component for invitation actions with responsive layout
+function InvitationActions({
+  player,
+  copyInvitationLink,
+  resendMutation,
+  setShowRevokeDialog,
+  revokeMutation,
+  copyIconRef,
+  resendIconRef,
+  revokeIconRef,
+  t,
+}: {
+  player: PlayerData;
+  copyInvitationLink: (token: string) => void;
+  resendMutation: any;
+  setShowRevokeDialog: (value: boolean) => void;
+  revokeMutation: any;
+  copyIconRef: React.RefObject<CopyIconHandle | null>;
+  resendIconRef: React.RefObject<SendIconHandle | null>;
+  revokeIconRef: React.RefObject<DeleteIconHandle | null>;
+  t: any;
+}) {
+  const isMobile = useIsMobile();
+
+  // On mobile: show Copy and Resend buttons, with Revoke in dropdown
+  // On desktop: show all three buttons
+  if (isMobile) {
+    return (
+      <>
+        <Button
+          variant="outline"
+          onClick={() => copyInvitationLink(player.invitation!.token)}
+          onMouseEnter={() => copyIconRef.current?.startAnimation()}
+          onMouseLeave={() => copyIconRef.current?.stopAnimation()}
+          className="flex-1"
+        >
+          <CopyIcon ref={copyIconRef} size={16} className="h-4 w-4" />
+          {t('copyLink')}
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => resendMutation.mutate(player.invitation!.id)}
+          disabled={resendMutation.isPending}
+          animate={!resendMutation.isPending}
+          onMouseEnter={() => !resendMutation.isPending && resendIconRef.current?.startAnimation()}
+          onMouseLeave={() => !resendMutation.isPending && resendIconRef.current?.stopAnimation()}
+          className="flex-1"
+        >
+          {resendMutation.isPending ? (
+            <Spinner data-icon="inline-start" className="h-4 w-4" />
+          ) : (
+            <SendIcon ref={resendIconRef} size={16} className="h-4 w-4" />
+          )}
+          {resendMutation.isPending ? t('sending') : t('resendInvitation')}
+        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="icon" className="shrink-0">
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() => setShowRevokeDialog(true)}
+              disabled={revokeMutation.isPending}
+              className="gap-2"
+            >
+              <DeleteIcon ref={revokeIconRef} size={16} className="h-4 w-4" />
+              {t('revokeInvitation')}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </>
+    );
+  }
+
+  // Desktop: show all three buttons
+  return (
+    <>
+      <Button
+        variant="outline"
+        onClick={() => copyInvitationLink(player.invitation!.token)}
+        onMouseEnter={() => copyIconRef.current?.startAnimation()}
+        onMouseLeave={() => copyIconRef.current?.stopAnimation()}
+      >
+        <CopyIcon ref={copyIconRef} size={16} className="h-4 w-4" />
+        {t('copyLink')}
+      </Button>
+      <Button
+        variant="outline"
+        onClick={() => resendMutation.mutate(player.invitation!.id)}
+        disabled={resendMutation.isPending}
+        animate={!resendMutation.isPending}
+        onMouseEnter={() => !resendMutation.isPending && resendIconRef.current?.startAnimation()}
+        onMouseLeave={() => !resendMutation.isPending && resendIconRef.current?.stopAnimation()}
+      >
+        {resendMutation.isPending ? (
+          <Spinner data-icon="inline-start" className="h-4 w-4" />
+        ) : (
+          <SendIcon ref={resendIconRef} size={16} className="h-4 w-4" />
+        )}
+        {resendMutation.isPending ? t('sending') : t('resendInvitation')}
+      </Button>
+      <Button
+        variant="destructive"
+        onClick={() => setShowRevokeDialog(true)}
+        disabled={revokeMutation.isPending}
+        animate={!revokeMutation.isPending}
+        onMouseEnter={() => !revokeMutation.isPending && revokeIconRef.current?.startAnimation()}
+        onMouseLeave={() => !revokeMutation.isPending && revokeIconRef.current?.stopAnimation()}
+      >
+        <DeleteIcon ref={revokeIconRef} size={16} className="h-4 w-4" />
+        {t('revokeInvitation')}
+      </Button>
+    </>
   );
 }

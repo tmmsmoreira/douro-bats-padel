@@ -9,46 +9,40 @@ import { Switch } from '@/components/ui/switch';
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
-  const iconRef = React.useRef<{ startAnimation: () => void; stopAnimation: () => void }>(null);
+  const iconRef = React.useRef<{ startAnimation: () => void; stopAnimation: () => void } | null>(
+    null
+  );
 
   React.useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!mounted) {
-    return (
-      <DropdownMenuItem disabled className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <SunIcon size={16} />
-          <span>Theme</span>
-        </div>
-        <Switch disabled checked={false} />
-      </DropdownMenuItem>
-    );
-  }
-
   const isDark = theme === 'dark';
 
   const handleToggle = () => {
-    const newTheme = isDark ? 'light' : 'dark';
-    setTheme(newTheme);
+    setTheme(isDark ? 'light' : 'dark');
   };
 
   return (
     <DropdownMenuItem
+      disabled={!mounted}
       onMouseEnter={() => iconRef.current?.startAnimation()}
       onSelect={(e) => e.preventDefault()}
-      onClick={handleToggle}
       className="flex items-center justify-between"
     >
-      <div className="flex items-center gap-2">
-        {isDark ? <MoonIcon size={16} ref={iconRef} /> : <SunIcon size={16} ref={iconRef} />}
-        <span>{isDark ? 'Dark mode' : 'Light mode'}</span>
+      <div className="flex items-center gap-2 pointer-events-none">
+        {mounted && isDark ? (
+          <MoonIcon size={16} ref={iconRef} />
+        ) : (
+          <SunIcon size={16} ref={mounted ? iconRef : undefined} />
+        )}
+        <span>{mounted ? (isDark ? 'Dark mode' : 'Light mode') : 'Theme'}</span>
       </div>
       <Switch
-        checked={isDark}
+        checked={mounted ? isDark : false}
         onCheckedChange={handleToggle}
         onClick={(e) => e.stopPropagation()}
+        disabled={!mounted}
       />
     </DropdownMenuItem>
   );

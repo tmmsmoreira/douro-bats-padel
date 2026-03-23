@@ -120,7 +120,9 @@ function EventDetailsContent({
   const now = new Date();
   const rsvpOpens = new Date(event.rsvpOpensAt);
   const rsvpCloses = new Date(event.rsvpClosesAt);
-  const canRegister = !!(session && now >= rsvpOpens && now <= rsvpCloses);
+  const eventDate = new Date(event.date);
+  const isPastEvent = eventDate < now;
+  const canRegister = !!(session && now >= rsvpOpens && now <= rsvpCloses && !isPastEvent);
 
   const handleRSVP = (status: 'IN' | 'OUT') => {
     rsvpMutation.mutate({ eventId: event.id, status });
@@ -177,8 +179,8 @@ function EventDetailsContent({
       />
 
       <div className="space-y-8">
-        {/* RSVP Buttons */}
-        {session && (
+        {/* RSVP Buttons - Only show for non-past events */}
+        {session && !isPastEvent && (
           <Card className="glass-card">
             <CardHeader>
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

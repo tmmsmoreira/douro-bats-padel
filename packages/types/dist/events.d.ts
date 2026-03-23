@@ -1,4 +1,5 @@
 import type { EventState, RSVPStatus } from './common';
+import type { Player } from './users';
 /**
  * Time slot for a tier with court assignments
  */
@@ -111,7 +112,7 @@ export interface Assignment {
         id: string;
         label: string;
     };
-    teamA: any[];
-    teamB: any[];
+    teamA: Player[];
+    teamB: Player[];
 }
 //# sourceMappingURL=events.d.ts.map

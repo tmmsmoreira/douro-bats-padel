@@ -1,4 +1,5 @@
 import type { EventState, RSVPStatus } from './common';
+import type { Player } from './users';
 
 /**
  * Time slot for a tier with court assignments
@@ -120,6 +121,6 @@ export interface Assignment {
     id: string;
     label: string;
   };
-  teamA: any[]; // Will be typed with Player
-  teamB: any[]; // Will be typed with Player
+  teamA: Player[];
+  teamB: Player[];
 }

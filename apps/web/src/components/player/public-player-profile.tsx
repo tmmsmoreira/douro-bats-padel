@@ -145,10 +145,13 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
         throw new Error('Failed to revoke invitation');
       }
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success(t('invitationRevoked'));
-      queryClient.invalidateQueries({ queryKey: ['player', playerId] });
-      queryClient.invalidateQueries({ queryKey: ['players'] });
+      // Wait for both queries to be invalidated before navigating
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['player', playerId] }),
+        queryClient.invalidateQueries({ queryKey: ['players'] }),
+      ]);
       router.push('/admin/players');
     },
     onError: () => {

@@ -4,10 +4,18 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 
-export type EventStatus = 'DRAFT' | 'OPEN' | 'FROZEN' | 'DRAWN' | 'PUBLISHED';
-export type RSVPStatus = 'CONFIRMED' | 'WAITLISTED' | 'PARTICIPATED';
-export type PlayerProfileStatus = 'ACTIVE' | 'INACTIVE' | 'INVITED';
-export type InvitationStatus = 'PENDING' | 'ACCEPTED' | 'REVOKED' | 'EXPIRED';
+import {
+  EventState,
+  RSVPStatus as RSVPStatusEnum,
+  PlayerStatus,
+  InvitationStatus as InvitationStatusEnum,
+} from '@padel/types';
+
+// Accept both enum values and string literals for backward compatibility
+export type EventStatus = EventState | `${EventState}`;
+export type RSVPStatus = RSVPStatusEnum | `${RSVPStatusEnum}` | 'PARTICIPATED';
+export type PlayerProfileStatus = PlayerStatus | `${PlayerStatus}`;
+export type InvitationStatus = InvitationStatusEnum | `${InvitationStatusEnum}`;
 export type Status = EventStatus | RSVPStatus | PlayerProfileStatus | InvitationStatus;
 
 interface StatusBadgeProps {
@@ -17,7 +25,7 @@ interface StatusBadgeProps {
 }
 
 const statusConfig: Record<
-  Status,
+  string,
   {
     variant: 'default' | 'secondary' | 'outline' | 'destructive';
     className: string;
@@ -76,6 +84,18 @@ const statusConfig: Record<
     dotColor: 'bg-green-600',
     translationKey: 'participated',
   },
+  DECLINED: {
+    variant: 'destructive',
+    className: 'bg-destructive/10 text-destructive border-destructive/30',
+    dotColor: 'bg-destructive',
+    translationKey: 'declined',
+  },
+  CANCELLED: {
+    variant: 'secondary',
+    className: 'bg-muted text-muted-foreground border-border',
+    dotColor: 'bg-muted-foreground',
+    translationKey: 'cancelled',
+  },
   // Player profile statuses
   ACTIVE: {
     variant: 'default',
@@ -125,6 +145,11 @@ const statusConfig: Record<
 export function StatusBadge({ status, className, label }: StatusBadgeProps) {
   const t = useTranslations('status');
   const config = statusConfig[status];
+
+  if (!config) {
+    console.warn(`No config found for status: ${status}`);
+    return null;
+  }
 
   return (
     <Badge

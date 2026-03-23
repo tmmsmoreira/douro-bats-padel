@@ -1,40 +1,7 @@
-export interface Player {
-  id: string;
-  name: string;
-  rating: number;
-  tier: string;
-  profilePhoto?: string | null;
-}
+// Import and re-export types from shared package
+import type { Player, WaitlistedPlayer, Assignment, TierTimeSlot, TierRules } from '@padel/types';
 
-export interface WaitlistedPlayer extends Player {
-  position: number;
-}
-
-export interface Assignment {
-  id: string;
-  round: number;
-  courtId: string;
-  tier: string;
-  court?: {
-    id: string;
-    label: string;
-  };
-  teamA: Player[];
-  teamB: Player[];
-}
-
-export interface TierTimeSlot {
-  startsAt: string;
-  endsAt: string;
-  courtIds?: string[];
-}
-
-export interface TierRules {
-  masterCount?: number;
-  masterPercentage?: number;
-  mastersTimeSlot?: TierTimeSlot;
-  explorersTimeSlot?: TierTimeSlot;
-}
+export type { Player, WaitlistedPlayer, Assignment, TierTimeSlot, TierRules };
 
 export interface Draw {
   id: string;

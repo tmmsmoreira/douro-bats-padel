@@ -4,10 +4,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations, useLocale } from 'next-intl';
 import { useSession } from 'next-auth/react';
 import { useRouter } from '@/i18n/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Mail, CheckCircle, XCircle, TrendingUp, Send } from 'lucide-react';
-import { DeleteIcon, DeleteIconHandle, CopyIcon } from 'lucide-animated';
+import { DeleteIcon, DeleteIconHandle, CopyIcon, CopyIconHandle } from 'lucide-animated';
 import { Button } from '@/components/ui/button';
 import { useRef, useState } from 'react';
 import { toast } from 'sonner';
@@ -17,6 +17,9 @@ import { DataStateWrapper } from '@/components/shared/data-state-wrapper';
 import { PageHeader } from '@/components/shared/page-header';
 import { StatusBadge } from '@/components/shared/status-badge';
 import type { PlayerProfileStatus, InvitationStatus } from '@/components/shared/status-badge';
+import { SendIcon, SendIconHandle } from '../icons/send-icon';
+import { Spinner } from '../ui/spinner';
+import { Invitation } from '@padel/types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -46,19 +49,7 @@ interface PlayerData {
       createdAt: string;
     }>;
   } | null;
-  invitation?: {
-    id: string;
-    status: string;
-    expiresAt: string;
-    invitedBy: string;
-    invitedByUser?: {
-      id: string;
-      name: string | null;
-      email: string;
-    };
-    token: string;
-    usedAt: string | null;
-  } | null;
+  invitation?: Invitation | null;
 }
 
 function getUserInitials(name: string | null, email: string): string {
@@ -83,8 +74,7 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
   const { data: session } = useSession();
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-
-  const deleteIconRef = useRef<DeleteIconHandle>(null);
+  const [showRevokeDialog, setShowRevokeDialog] = useState(false);
 
   // Check if user is admin or editor
   const userRoles = session?.user?.roles || [];
@@ -166,32 +156,6 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
     },
   });
 
-  // Delete invitation mutation
-  const deleteInvitationMutation = useMutation({
-    mutationFn: async (invitationId: string) => {
-      const token = session?.accessToken;
-      const res = await fetch(`${API_URL}/invitations/${invitationId}/permanent`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!res.ok) {
-        throw new Error('Failed to delete invitation');
-      }
-    },
-    onSuccess: () => {
-      toast.success(t('invitationDeleted'));
-      queryClient.invalidateQueries({ queryKey: ['player', playerId] });
-      queryClient.invalidateQueries({ queryKey: ['players'] });
-      router.push('/admin/players');
-    },
-    onError: () => {
-      toast.error(t('deleteInvitationError'));
-    },
-  });
-
   // Resend invitation mutation
   const resendMutation = useMutation({
     mutationFn: async (invitationId: string) => {
@@ -262,14 +226,14 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
           player={player}
           isAdminOrEditor={isAdminOrEditor}
           handleDeleteUser={handleDeleteUser}
-          deleteIconRef={deleteIconRef}
           isDeleting={isDeleting}
           showDeleteDialog={showDeleteDialog}
           setShowDeleteDialog={setShowDeleteDialog}
+          showRevokeDialog={showRevokeDialog}
+          setShowRevokeDialog={setShowRevokeDialog}
           setIsDeleting={setIsDeleting}
           deleteMutation={deleteMutation}
           revokeMutation={revokeMutation}
-          deleteInvitationMutation={deleteInvitationMutation}
           resendMutation={resendMutation}
           copyInvitationLink={copyInvitationLink}
           t={t}
@@ -287,14 +251,14 @@ function PublicPlayerProfileContent({
   player,
   isAdminOrEditor,
   handleDeleteUser,
-  deleteIconRef,
   isDeleting,
   showDeleteDialog,
   setShowDeleteDialog,
+  showRevokeDialog,
+  setShowRevokeDialog,
   setIsDeleting,
   deleteMutation,
   revokeMutation,
-  deleteInvitationMutation,
   resendMutation,
   copyInvitationLink,
   t,
@@ -305,14 +269,14 @@ function PublicPlayerProfileContent({
   player: PlayerData;
   isAdminOrEditor: boolean;
   handleDeleteUser: () => void;
-  deleteIconRef: React.RefObject<DeleteIconHandle | null>;
   isDeleting: boolean;
   showDeleteDialog: boolean;
   setShowDeleteDialog: (value: boolean) => void;
+  showRevokeDialog: boolean;
+  setShowRevokeDialog: (value: boolean) => void;
   setIsDeleting: (value: boolean) => void;
   deleteMutation: any;
   revokeMutation: any;
-  deleteInvitationMutation: any;
   resendMutation: any;
   copyInvitationLink: (token: string) => void;
   t: any;
@@ -320,6 +284,11 @@ function PublicPlayerProfileContent({
   tActions: any;
   locale: string;
 }) {
+  const deleteIconRef = useRef<DeleteIconHandle>(null);
+  const revokeIconRef = useRef<DeleteIconHandle>(null);
+  const copyIconRef = useRef<CopyIconHandle>(null);
+  const resendIconRef = useRef<SendIconHandle>(null);
+
   return (
     <motion.div
       key="content"
@@ -406,52 +375,56 @@ function PublicPlayerProfileContent({
                 </p>
               </div>
             </div>
-
+          </CardContent>
+          <CardFooter className="border-t gap-2 ">
             {isAdminOrEditor && player.invitation.status === 'PENDING' && (
-              <div className="flex flex-wrap gap-2 pt-4 border-t">
+              <>
                 <Button
                   variant="outline"
-                  size="sm"
                   onClick={() => copyInvitationLink(player.invitation!.token)}
+                  onMouseEnter={() => copyIconRef.current?.startAnimation()}
+                  onMouseLeave={() => copyIconRef.current?.stopAnimation()}
                 >
-                  <CopyIcon size={16} className="h-4 w-4" />
+                  <CopyIcon ref={copyIconRef} size={16} className="h-4 w-4" />
                   {t('copyLink')}
                 </Button>
                 <Button
                   variant="outline"
-                  size="sm"
                   onClick={() => resendMutation.mutate(player.invitation!.id)}
                   disabled={resendMutation.isPending}
+                  animate={!resendMutation.isPending}
+                  onMouseEnter={() =>
+                    !resendMutation.isPending && resendIconRef.current?.startAnimation()
+                  }
+                  onMouseLeave={() =>
+                    !resendMutation.isPending && resendIconRef.current?.stopAnimation()
+                  }
                 >
-                  <Send className="h-4 w-4" />
-                  {t('resendInvitation')}
+                  {resendMutation.isPending ? (
+                    <Spinner data-icon="inline-start" className="h-4 w-4" />
+                  ) : (
+                    <SendIcon ref={resendIconRef} size={16} className="h-4 w-4" />
+                  )}
+                  {resendMutation.isPending ? t('sending') : t('resendInvitation')}
                 </Button>
                 <Button
                   variant="destructive"
-                  size="sm"
-                  onClick={() => revokeMutation.mutate(player.invitation!.id)}
+                  onClick={() => setShowRevokeDialog(true)}
                   disabled={revokeMutation.isPending}
+                  animate={!revokeMutation.isPending}
+                  onMouseEnter={() =>
+                    !revokeMutation.isPending && revokeIconRef.current?.startAnimation()
+                  }
+                  onMouseLeave={() =>
+                    !revokeMutation.isPending && revokeIconRef.current?.stopAnimation()
+                  }
                 >
-                  <DeleteIcon size={16} className="h-4 w-4" />
+                  <DeleteIcon ref={revokeIconRef} size={16} className="h-4 w-4" />
                   {t('revokeInvitation')}
                 </Button>
-              </div>
+              </>
             )}
-
-            {isAdminOrEditor && player.invitation.status === 'REVOKED' && (
-              <div className="flex flex-wrap gap-2 pt-4 border-t">
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => deleteInvitationMutation.mutate(player.invitation!.id)}
-                  disabled={deleteInvitationMutation.isPending}
-                >
-                  <DeleteIcon size={16} className="h-4 w-4" />
-                  {t('deleteInvitation')}
-                </Button>
-              </div>
-            )}
-          </CardContent>
+          </CardFooter>
         </Card>
       )}
 
@@ -547,33 +520,33 @@ function PublicPlayerProfileContent({
         </Card>
       )}
 
-      {/* Admin Actions */}
-      {isAdminOrEditor && (
+      {/* Admin Actions - Only for registered users */}
+      {isAdminOrEditor && player.player && (
         <Card className="glass-card border-destructive/50">
           <CardHeader>
             <CardTitle className="text-destructive">{tActions('actions')}</CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">{tActions('actionsDescription')}</p>
-              {player.roles?.includes('ADMIN') && (
-                <div className="text-sm text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950/20 p-3 rounded-md border border-yellow-200 dark:border-yellow-800">
-                  {tActions('adminCannotBeDeleted')}
-                </div>
-              )}
-              <Button
-                variant="destructive"
-                onClick={handleDeleteUser}
-                disabled={isDeleting || player.roles?.includes('ADMIN')}
-                className="w-full sm:w-auto"
-                onMouseEnter={() => deleteIconRef.current?.startAnimation()}
-                onMouseLeave={() => deleteIconRef.current?.stopAnimation()}
-              >
-                <DeleteIcon ref={deleteIconRef} size={16} />
-                {isDeleting ? tActions('deleting') : tActions('deleteUser')}
-              </Button>
-            </div>
+            <p className="text-sm text-muted-foreground">{tActions('actionsDescription')}</p>
+            {player.roles?.includes('ADMIN') && (
+              <div className="text-sm text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950/20 p-3 rounded-md border border-yellow-200 dark:border-yellow-800">
+                {tActions('adminCannotBeDeleted')}
+              </div>
+            )}
           </CardContent>
+          <CardFooter className="border-t">
+            <Button
+              variant="destructive"
+              onClick={handleDeleteUser}
+              disabled={isDeleting || player.roles?.includes('ADMIN')}
+              className="w-full sm:w-auto"
+              onMouseEnter={() => deleteIconRef.current?.startAnimation()}
+              onMouseLeave={() => deleteIconRef.current?.stopAnimation()}
+            >
+              <DeleteIcon ref={deleteIconRef} size={16} />
+              {isDeleting ? tActions('deleting') : tActions('deleteUser')}
+            </Button>
+          </CardFooter>
         </Card>
       )}
 
@@ -590,6 +563,21 @@ function PublicPlayerProfileContent({
           setIsDeleting(true);
           deleteMutation.mutate();
           setShowDeleteDialog(false);
+        }}
+      />
+
+      {/* Revoke Invitation Confirmation Dialog */}
+      <ConfirmationDialog
+        open={showRevokeDialog}
+        onOpenChange={setShowRevokeDialog}
+        title={t('revokeConfirmation')}
+        description={t('revokeConfirmationDescription')}
+        confirmText={t('revokeInvitation')}
+        cancelText={tActions('cancel')}
+        variant="destructive"
+        onConfirm={() => {
+          revokeMutation.mutate(player.invitation!.id);
+          setShowRevokeDialog(false);
         }}
       />
     </motion.div>

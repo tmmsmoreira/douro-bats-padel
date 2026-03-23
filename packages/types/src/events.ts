@@ -8,8 +8,8 @@ export interface TierTimeSlot {
   startsAt: string;
   /** End time for this tier (e.g., "21:30" for 9:30PM) */
   endsAt: string;
-  /** Court IDs available for this time slot */
-  courtIds: string[];
+  /** Court IDs available for this time slot (optional for backward compatibility) */
+  courtIds?: string[];
 }
 
 /**
@@ -50,6 +50,42 @@ export interface RSVPResponse {
   message: string;
 }
 
+/**
+ * Base Event entity
+ */
+export interface Event {
+  id: string;
+  title: string | null;
+  date: Date;
+  startsAt: Date;
+  endsAt: Date;
+  venueId?: string | null;
+  capacity: number;
+  seed?: string | null;
+  rsvpOpensAt: Date;
+  rsvpClosesAt: Date;
+  state: EventState;
+  tierRules?: TierRules | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * RSVP entity
+ */
+export interface RSVP {
+  id: string;
+  eventId: string;
+  playerId: string;
+  status: RSVPStatus;
+  position: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * Event with RSVP information
+ */
 export interface EventWithRSVP {
   id: string;
   title: string | null;
@@ -70,4 +106,20 @@ export interface EventWithRSVP {
     status: RSVPStatus;
     position: number;
   };
+}
+
+/**
+ * Assignment for draw/matches
+ */
+export interface Assignment {
+  id: string;
+  round: number;
+  courtId: string;
+  tier: string;
+  court?: {
+    id: string;
+    label: string;
+  };
+  teamA: any[]; // Will be typed with Player
+  teamB: any[]; // Will be typed with Player
 }

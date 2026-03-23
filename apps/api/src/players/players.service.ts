@@ -127,7 +127,7 @@ export class PlayersService {
       };
     }
 
-    // If not found as user, try to find as pending invitation
+    // If not found as user, try to find as invitation (including revoked ones for admin view)
     const invitation = await this.prisma.invitation.findUnique({
       where: { id },
       include: {
@@ -141,7 +141,7 @@ export class PlayersService {
       },
     });
 
-    if (invitation && invitation.status === 'PENDING') {
+    if (invitation) {
       return {
         id: invitation.id,
         email: invitation.email,
@@ -163,7 +163,8 @@ export class PlayersService {
       };
     }
 
-    return null;
+    // If neither user nor invitation found, throw NotFoundException
+    throw new NotFoundException('Player not found');
   }
 
   async remove(id: string) {

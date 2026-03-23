@@ -23,21 +23,9 @@ import { getShimmerDataURL } from '@/lib/image-blur';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
 import { DataStateWrapper } from '@/components/shared/data-state-wrapper';
 
+import type { Venue, Court } from '@padel/types';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-
-interface Venue {
-  id: string;
-  name: string;
-  address?: string;
-  logo?: string;
-  courts: Court[];
-}
-
-interface Court {
-  id: string;
-  label: string;
-  venueId: string;
-}
 
 export function VenuesList() {
   const { data: session } = useSession();
@@ -241,7 +229,7 @@ function VenuesListContent({
               {/* Bottom Section: Courts */}
               <div>
                 <p className="text-sm font-medium text-muted-foreground mb-2">{t('courts')}</p>
-                {venue.courts.length > 0 ? (
+                {venue.courts && venue.courts.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {venue.courts.map((court) => (
                       <Badge key={court.id} variant="outline">

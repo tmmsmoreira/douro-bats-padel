@@ -46,7 +46,7 @@ export class InvitationsController {
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.EDITOR)
-  async revoke(@Param('id') id: string, @Req() req: any): Promise<Invitation> {
+  async revoke(@Param('id') id: string, @Req() req: any): Promise<void> {
     return this.invitationsService.revoke(id, req.user.sub);
   }
 
@@ -55,12 +55,5 @@ export class InvitationsController {
   @Roles(Role.ADMIN, Role.EDITOR)
   async resend(@Param('id') id: string, @Req() req: any): Promise<Invitation> {
     return this.invitationsService.resend(id, req.user.sub);
-  }
-
-  @Delete(':id/permanent')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.EDITOR)
-  async deletePermanently(@Param('id') id: string, @Req() req: any): Promise<void> {
-    return this.invitationsService.deletePermanently(id, req.user.sub);
   }
 }

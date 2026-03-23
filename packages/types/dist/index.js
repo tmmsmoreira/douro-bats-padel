@@ -19,3 +19,4 @@ __exportStar(require("./events"), exports);
 __exportStar(require("./ranking"), exports);
 __exportStar(require("./common"), exports);
 __exportStar(require("./venues"), exports);
+__exportStar(require("./users"), exports);

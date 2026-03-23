@@ -16,7 +16,10 @@ export class InvitationsService {
     private emailService: EmailService
   ) {}
 
-  async create(dto: CreateInvitationDto, invitedBy: string): Promise<Invitation> {
+  async create(
+    dto: CreateInvitationDto,
+    invitedBy: string
+  ): Promise<Invitation & { emailSent?: boolean }> {
     // Check if user already exists
     const existingUser = await this.prisma.user.findUnique({
       where: { email: dto.email },
@@ -70,6 +73,7 @@ export class InvitationsService {
     });
 
     // Send invitation email
+    let emailSent = true;
     try {
       await this.emailService.sendInvitationEmail(
         dto.email,
@@ -78,10 +82,11 @@ export class InvitationsService {
       );
     } catch (error) {
       console.error('Failed to send invitation email:', error);
+      emailSent = false;
       // Don't fail the invitation creation if email fails
     }
 
-    return invitation as Invitation;
+    return { ...(invitation as Invitation), emailSent };
   }
 
   async validate(token: string): Promise<InvitationValidationResponse> {
@@ -170,7 +175,7 @@ export class InvitationsService {
     return invitations as Invitation[];
   }
 
-  async revoke(id: string, userId: string): Promise<Invitation> {
+  async revoke(id: string, userId: string): Promise<void> {
     const invitation = await this.prisma.invitation.findUnique({
       where: { id },
     });
@@ -192,21 +197,10 @@ export class InvitationsService {
       throw new BadRequestException('Cannot revoke an invitation that has already been accepted');
     }
 
-    const updated = await this.prisma.invitation.update({
+    // Delete the invitation instead of marking it as REVOKED
+    await this.prisma.invitation.delete({
       where: { id },
-      data: { status: 'REVOKED' },
-      include: {
-        invitedByUser: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
     });
-
-    return updated as Invitation;
   }
 
   async getById(id: string): Promise<Invitation> {
@@ -284,35 +278,5 @@ export class InvitationsService {
     }
 
     return invitation as Invitation;
-  }
-
-  async deletePermanently(id: string, userId: string): Promise<void> {
-    const invitation = await this.prisma.invitation.findUnique({
-      where: { id },
-    });
-
-    if (!invitation) {
-      throw new NotFoundException('Invitation not found');
-    }
-
-    // Only the user who created the invitation or an admin can delete it
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (invitation.invitedBy !== userId && !user?.roles.includes('ADMIN')) {
-      throw new BadRequestException('You do not have permission to delete this invitation');
-    }
-
-    // Only allow deletion of REVOKED or EXPIRED invitations
-    if (invitation.status !== 'REVOKED' && invitation.status !== 'EXPIRED') {
-      throw new BadRequestException(
-        `Cannot delete invitation with status ${invitation.status}. Only REVOKED or EXPIRED invitations can be deleted.`
-      );
-    }
-
-    await this.prisma.invitation.delete({
-      where: { id },
-    });
   }
 }

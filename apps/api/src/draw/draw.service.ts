@@ -5,6 +5,7 @@ import seedrandom from 'seedrandom';
 import { EventState, Tier } from '@padel/types';
 import { NotificationService } from '../notifications/notification.service';
 
+// Internal player type for draw algorithm (extends shared Player type with tier)
 interface Player {
   id: string;
   name: string;

@@ -3,6 +3,8 @@
 @import 'tailwindcss';
 @import 'shadcn/tailwind.css';
 
+@plugin 'tailwindcss-animate';
+
 @custom-variant dark (&:is(.dark *));
 
 @layer base {

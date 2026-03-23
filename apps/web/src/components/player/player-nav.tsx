@@ -125,6 +125,7 @@ export function PlayerNav() {
           'fixed top-0 left-0 right-0 z-50 md:bg-card backdrop-blur-xl md:border-b border-border/50 safe-top transition-transform duration-300',
           isNavVisible ? 'translate-y-0' : '-translate-y-full'
         )}
+        style={{ marginRight: 'var(--removed-body-scroll-bar-size, 0px)' }}
       >
         <nav id="navigation" aria-label="Player navigation">
           <div className="container mx-auto px-4">

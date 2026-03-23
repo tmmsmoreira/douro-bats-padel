@@ -49,10 +49,16 @@ export function CreateInvitationDialog() {
       }
       return res.json();
     },
-    onSuccess: () => {
+    onSuccess: (data: { emailSent?: boolean }) => {
       queryClient.invalidateQueries({ queryKey: ['invitations'] });
       queryClient.invalidateQueries({ queryKey: ['players'] });
-      toast.success(t('invitationSent'));
+
+      if (data.emailSent === false) {
+        toast.warning(t('invitationCreatedEmailFailed'));
+      } else {
+        toast.success(t('invitationSent'));
+      }
+
       setOpen(false);
       setEmail('');
       setName('');
@@ -83,13 +89,13 @@ export function CreateInvitationDialog() {
           animate
         >
           <SendIcon size={18} ref={iconRef} />
-          {t('createInvitation')}
+          {t('sendInvitation')}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>{t('createInvitation')}</DialogTitle>
+            <DialogTitle>{t('sendInvitation')}</DialogTitle>
             <DialogDescription>{t('invitationsDescription')}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -139,7 +145,7 @@ export function CreateInvitationDialog() {
               {t('cancel')}
             </Button>
             <Button type="submit" disabled={createMutation.isPending} className="w-full">
-              {createMutation.isPending ? t('sending') : t('sendInvitation')}
+              {createMutation.isPending ? t('sending') : t('send')}
             </Button>
           </DialogFooter>
         </form>

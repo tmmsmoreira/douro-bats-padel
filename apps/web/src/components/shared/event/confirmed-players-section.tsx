@@ -87,20 +87,21 @@ export function ConfirmedPlayersSection({
               ) : (
                 <div
                   key={player.id}
-                  className="flex items-center justify-between py-2 border-b last:border-0"
+                  className="flex items-center justify-between gap-2 py-2 border-b last:border-0"
                 >
                   {showIndex && (
-                    <span className="text-2xl font-bold text-muted-foreground w-8">
+                    <span className="text-2xl font-bold text-muted-foreground w-8 shrink-0">
                       #{index + 1}
                     </span>
                   )}
-                  <span className="flex-1">{player.name}</span>
+                  <span className="flex-1 truncate">{player.name}</span>
                   <span
-                    className={
+                    className={cn(
+                      'shrink-0',
                       showIndex
                         ? 'text-2xl font-bold text-muted-foreground'
                         : 'text-sm text-muted-foreground'
-                    }
+                    )}
                   >
                     {player.rating}
                   </span>

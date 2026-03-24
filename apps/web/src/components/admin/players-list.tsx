@@ -366,7 +366,7 @@ function PlayersListContent({
 
                             {/* Name and Email */}
                             <div className="flex-1 min-w-0 space-y-1.5">
-                              <h3 className="group-hover:text-primary transition-colors font-heading font-semibold text-lg">
+                              <h3 className="group-hover:text-primary transition-colors font-heading font-semibold text-lg truncate">
                                 {player.name || t('noName')}
                               </h3>
                               <div className="flex items-center gap-1.5 text-sm text-muted-foreground">

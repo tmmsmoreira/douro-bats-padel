@@ -7,8 +7,38 @@ import { EventForm } from '@/components/admin/event-form';
 import { use, useEffect } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { PageHeader } from '@/components/shared/page-header';
+import type { TierRules } from '@padel/types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+
+interface EventCourt {
+  id: string;
+  courtId: string;
+  court: {
+    id: string;
+    label: string;
+  };
+}
+
+// Extended type for API response that includes eventCourts
+interface EventApiResponse {
+  id: string;
+  title: string | null;
+  date: Date;
+  startsAt: Date;
+  endsAt: Date;
+  venueId?: string | null;
+  capacity: number;
+  state: string;
+  rsvpOpensAt: Date;
+  rsvpClosesAt: Date;
+  tierRules?: TierRules | null;
+  eventCourts?: EventCourt[];
+  venue?: {
+    id: string;
+    name: string;
+  };
+}
 
 export default function EditEventPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: eventId } = use(params);
@@ -17,7 +47,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
   const locale = useLocale();
   const t = useTranslations('editEventPage');
 
-  const { data: event, isLoading } = useQuery({
+  const { data: event, isLoading } = useQuery<EventApiResponse>({
     queryKey: ['event', eventId, session?.accessToken],
     queryFn: async () => {
       const headers: HeadersInit = {
@@ -86,6 +116,41 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     );
   }
 
+  // Transform event data to match EventFormData interface
+  const formData = event
+    ? {
+        title: event.title ?? undefined,
+        date: event.date,
+        startsAt: event.startsAt,
+        endsAt: event.endsAt,
+        venueId: event.venueId || event.venue?.id || '',
+        courtIds: event.eventCourts?.map((ec) => ec.courtId) || [],
+        capacity: event.capacity,
+        rsvpOpensAt: event.rsvpOpensAt,
+        rsvpClosesAt: event.rsvpClosesAt,
+        tierRules: event.tierRules
+          ? {
+              masterCount: event.tierRules.masterCount,
+              masterPercentage: event.tierRules.masterPercentage,
+              mastersTimeSlot: event.tierRules.mastersTimeSlot
+                ? {
+                    startsAt: event.tierRules.mastersTimeSlot.startsAt,
+                    endsAt: event.tierRules.mastersTimeSlot.endsAt,
+                    courtIds: event.tierRules.mastersTimeSlot.courtIds || [],
+                  }
+                : undefined,
+              explorersTimeSlot: event.tierRules.explorersTimeSlot
+                ? {
+                    startsAt: event.tierRules.explorersTimeSlot.startsAt,
+                    endsAt: event.tierRules.explorersTimeSlot.endsAt,
+                    courtIds: event.tierRules.explorersTimeSlot.courtIds || [],
+                  }
+                : undefined,
+            }
+          : undefined,
+      }
+    : undefined;
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -95,7 +160,7 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         backButtonHref={`/admin/events/${eventId}`}
         backButtonLabel={t('backToEvent')}
       />
-      <EventForm eventId={eventId} initialData={event} />
+      <EventForm eventId={eventId} initialData={formData} />
     </div>
   );
 }

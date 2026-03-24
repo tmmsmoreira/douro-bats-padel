@@ -74,7 +74,7 @@ export function ResultsView({ eventId }: { eventId: string }) {
     enabled: !!session,
   });
 
-  const { data: matches, isLoading: isLoadingMatches } = useQuery({
+  const { data: matches, isLoading: isLoadingMatches } = useQuery<Match[]>({
     queryKey: ['matches', eventId],
     queryFn: async () => {
       const headers: HeadersInit = { 'Content-Type': 'application/json' };
@@ -129,8 +129,8 @@ function NoResultsContent({
   locale,
 }: {
   event: Event;
-  t: any;
-  arrowLeftIconRef: any;
+  t: ReturnType<typeof useTranslations>;
+  arrowLeftIconRef: React.RefObject<ArrowLeftIconHandle | null>;
   locale: string;
 }) {
   return (
@@ -198,8 +198,8 @@ function ResultsContent({
 }: {
   event: Event;
   matches: Match[];
-  t: any;
-  arrowLeftIconRef: any;
+  t: ReturnType<typeof useTranslations>;
+  arrowLeftIconRef: React.RefObject<ArrowLeftIconHandle | null>;
   locale: string;
 }) {
   // Group by round

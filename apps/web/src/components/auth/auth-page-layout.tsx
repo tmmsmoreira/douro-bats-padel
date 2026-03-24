@@ -5,7 +5,7 @@ import { LanguageToggleButton } from '@/components/shared/language-toggle-button
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'motion/react';
-import { fadeIn, slideUp } from '@/lib/animations';
+import { slideUp } from '@/lib/animations';
 import { useLocale } from 'next-intl';
 
 interface AuthPageLayoutProps {

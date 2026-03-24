@@ -11,22 +11,22 @@ export type FieldConfig<T> = {
   validators?: Validator<T>[];
 };
 
-export type FormConfig<T extends Record<string, any>> = {
+export type FormConfig<T extends Record<string, unknown>> = {
   [K in keyof T]: FieldConfig<T[K]>;
 };
 
-export type FormErrors<T extends Record<string, any>> = {
+export type FormErrors<T extends Record<string, unknown>> = {
   [K in keyof T]?: string;
 };
 
-export type FormTouched<T extends Record<string, any>> = {
+export type FormTouched<T extends Record<string, unknown>> = {
   [K in keyof T]?: boolean;
 };
 
-export function useFormState<T extends Record<string, any>>(config: FormConfig<T>) {
+export function useFormState<T extends Record<string, unknown>>(config: FormConfig<T>) {
   // Extract initial values from config
   const initialValues = Object.entries(config).reduce((acc, [key, fieldConfig]) => {
-    acc[key as keyof T] = (fieldConfig as FieldConfig<any>).initialValue;
+    acc[key as keyof T] = (fieldConfig as FieldConfig<T[keyof T]>).initialValue;
     return acc;
   }, {} as T);
 
@@ -38,8 +38,8 @@ export function useFormState<T extends Record<string, any>>(config: FormConfig<T
    * Validate a single field
    */
   const validateField = useCallback(
-    (name: keyof T, value: any): ValidationResult => {
-      const fieldConfig = config[name] as FieldConfig<any>;
+    (name: keyof T, value: T[keyof T]): ValidationResult => {
+      const fieldConfig = config[name] as FieldConfig<T[keyof T]>;
       if (!fieldConfig.validators || fieldConfig.validators.length === 0) {
         return { isValid: true };
       }
@@ -81,7 +81,7 @@ export function useFormState<T extends Record<string, any>>(config: FormConfig<T
    * Update a single field value
    */
   const setValue = useCallback(
-    (name: keyof T, value: any) => {
+    (name: keyof T, value: T[keyof T]) => {
       setValues((prev) => ({ ...prev, [name]: value }));
 
       // Validate on change if field has been touched
@@ -138,7 +138,7 @@ export function useFormState<T extends Record<string, any>>(config: FormConfig<T
     (name: keyof T) => ({
       value: values[name],
       onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        setValue(name, e.target.value);
+        setValue(name, e.target.value as T[keyof T]);
       },
       onBlur: () => setFieldTouched(name, true),
       error: touched[name] ? errors[name] : undefined,

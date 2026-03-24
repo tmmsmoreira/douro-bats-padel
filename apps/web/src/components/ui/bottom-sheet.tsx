@@ -1,6 +1,5 @@
 'use client';
 
-import { useRef } from 'react';
 import { motion, AnimatePresence, PanInfo, useMotionValue, useTransform } from 'motion/react';
 import { cn } from '@/lib/utils';
 

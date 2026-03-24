@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, UseMutationResult } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -266,7 +266,7 @@ function ResultsTierSection({
   matchResults: Record<string, { setsA: number; setsB: number }>;
   matches: Match[] | undefined;
   handleScoreChange: (courtId: string, round: number, team: 'A' | 'B', value: string) => void;
-  t: any;
+  t: ReturnType<typeof useTranslations>;
 }) {
   const tierIndicatorClass =
     tier === 'MASTERS' ? 'w-2 h-6 bg-yellow-500 rounded-full' : 'w-2 h-6 bg-blue-500 rounded-full';
@@ -353,12 +353,12 @@ function ResultsEntryContent({
   matchResults: Record<string, { setsA: number; setsB: number }>;
   handleScoreChange: (courtId: string, round: number, team: 'A' | 'B', value: string) => void;
   handleSaveAllResults: () => void;
-  publishMutation: any;
+  publishMutation: UseMutationResult<unknown, Error, void, unknown>;
   showPublishDialog: boolean;
   setShowPublishDialog: (show: boolean) => void;
   lockIconRef: React.RefObject<LockIconHandle | null>;
   locale: string;
-  t: any;
+  t: ReturnType<typeof useTranslations>;
   eventId: string;
 }) {
   // Group assignments by tier and round (same as draw page)

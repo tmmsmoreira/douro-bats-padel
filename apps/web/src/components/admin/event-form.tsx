@@ -50,20 +50,7 @@ interface EventFormData {
   capacity: number;
   rsvpOpensAt: Date;
   rsvpClosesAt: Date;
-  tierRules?: {
-    masterCount?: number;
-    masterPercentage?: number;
-    mastersTimeSlot?: {
-      startsAt: string;
-      endsAt: string;
-      courtIds: string[];
-    };
-    explorersTimeSlot?: {
-      startsAt: string;
-      endsAt: string;
-      courtIds: string[];
-    };
-  };
+  tierRules?: TierRules;
 }
 
 interface EventFormProps {

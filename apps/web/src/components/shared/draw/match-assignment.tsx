@@ -18,8 +18,8 @@ export function MatchAssignment({
   onEdit,
   canEdit,
   courtLabel,
-  tierLabel,
-  tierBadgeClass,
+  tierLabel: _tierLabel,
+  tierBadgeClass: _tierBadgeClass,
 }: MatchAssignmentProps) {
   const getPlayerInitials = (name: string) => {
     return name

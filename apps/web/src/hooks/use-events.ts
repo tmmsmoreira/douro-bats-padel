@@ -19,7 +19,7 @@ export function useEvents(options: UseEventsOptions = {}) {
   const authFetch = useAuthFetch();
   const { from, to, includeUnpublished = false, queryKey = ['events'] } = options;
 
-  return useQuery({
+  return useQuery<EventWithRSVP[]>({
     queryKey: [...queryKey, session?.accessToken, from, to, includeUnpublished],
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -69,7 +69,7 @@ export function useEventDetails(eventId: string, includeUnpublished = false) {
   const { data: session } = useSession();
   const authFetch = useAuthFetch();
 
-  return useQuery({
+  return useQuery<EventWithRSVP>({
     queryKey: ['event', eventId, session?.accessToken, includeUnpublished],
     queryFn: async () => {
       const params = includeUnpublished ? '?includeUnpublished=true' : '';

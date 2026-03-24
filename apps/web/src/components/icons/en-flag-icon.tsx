@@ -10,9 +10,10 @@ const EnFlagIcon = forwardRef<SVGSVGElement, EnFlagIconProps>(
   ({ className, size = 32, ...props }, ref) => {
     return (
       <svg
+        ref={ref}
         xmlns="http://www.w3.org/2000/svg"
-        width="32px"
-        height="32px"
+        width={size}
+        height={size}
         viewBox="0 0 32 32"
         className={cn(className)}
         {...props}

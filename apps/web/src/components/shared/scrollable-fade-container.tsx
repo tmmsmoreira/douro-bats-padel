@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useEffect, ReactNode } from 'react';
+import { useRef, useState, useEffect, useCallback, ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
 interface ScrollableFadeContainerProps {
@@ -49,7 +49,7 @@ export function ScrollableFadeContainer({
   const [leftFadeProgress, setLeftFadeProgress] = useState(0);
   const [rightFadeProgress, setRightFadeProgress] = useState(1);
 
-  const updateShadows = () => {
+  const updateShadows = useCallback(() => {
     const element = scrollRef.current;
     if (!element) return;
 
@@ -90,7 +90,7 @@ export function ScrollableFadeContainer({
     // Update progress states
     setLeftFadeProgress(leftProgress);
     setRightFadeProgress(rightProgress);
-  };
+  }, [fadeWidth]);
 
   useEffect(() => {
     const element = scrollRef.current;
@@ -139,12 +139,12 @@ export function ScrollableFadeContainer({
       element.removeEventListener('wheel', handleWheel);
       resizeObserver.disconnect();
     };
-  }, []);
+  }, [updateShadows]);
 
   // Re-check when children change
   useEffect(() => {
     updateShadows();
-  }, [children]);
+  }, [children, updateShadows]);
 
   return (
     <div className="relative overflow-hidden">

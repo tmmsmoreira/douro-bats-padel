@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, UseMutationResult } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useRouter } from '@/i18n/navigation';
 import { toast } from 'sonner';
@@ -24,6 +24,7 @@ import { DataStateWrapper } from '@/components/shared';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
 import { DrawHeader, TierSection, WaitlistSection } from '@/components/shared/draw';
 import type { Draw, Assignment } from '@/components/shared/draw';
+import type { EventWithRSVP } from '@padel/types';
 import { useAuthFetch } from '@/hooks/use-api';
 
 export function AdminDrawView({ eventId }: { eventId: string }) {
@@ -35,14 +36,14 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
   const authFetch = useAuthFetch();
   const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const arrowLeftIconRef = useRef<ArrowLeftIconHandle>(null);
+  const arrowLeftIconRef = useRef<ArrowLeftIconHandle | null>(null);
 
   const { data: draw, isLoading } = useQuery<Draw>({
     queryKey: ['draw', eventId, session?.accessToken],
     queryFn: async () => {
       try {
         return await authFetch.get<Draw>(`/draws/events/${eventId}`);
-      } catch (error) {
+      } catch {
         throw new Error(t('errorFetchingDraw'));
       }
     },
@@ -50,7 +51,7 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
   });
 
   // Fetch event data to get waitlist
-  const { data: event } = useQuery({
+  const { data: event } = useQuery<EventWithRSVP | null>({
     queryKey: ['event', eventId, session?.accessToken],
     queryFn: async () => {
       try {
@@ -162,6 +163,29 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
   );
 }
 
+interface AdminDrawContentProps {
+  draw: Draw;
+  event: EventWithRSVP | null | undefined;
+  eventId: string;
+  editingAssignment: Assignment | null;
+  setEditingAssignment: (assignment: Assignment | null) => void;
+  showDeleteDialog: boolean;
+  setShowDeleteDialog: (show: boolean) => void;
+  publishDrawMutation: UseMutationResult<unknown, Error, void, unknown>;
+  unpublishDrawMutation: UseMutationResult<unknown, Error, void, unknown>;
+  deleteDrawMutation: UseMutationResult<unknown, Error, void, unknown>;
+  updateAssignmentMutation: UseMutationResult<
+    unknown,
+    Error,
+    { assignmentId: string; teamA: string[]; teamB: string[] },
+    unknown
+  >;
+  arrowLeftIconRef: React.RefObject<ArrowLeftIconHandle | null>;
+  router: ReturnType<typeof useRouter>;
+  t: ReturnType<typeof useTranslations>;
+  locale: string;
+}
+
 // Separate component for admin draw content
 function AdminDrawContent({
   draw,
@@ -179,7 +203,7 @@ function AdminDrawContent({
   router,
   t,
   locale,
-}: any) {
+}: AdminDrawContentProps) {
   // Group assignments by tier and round
   const masterAssignments = draw.assignments.filter((a: Assignment) => a.tier === 'MASTERS');
   const explorerAssignments = draw.assignments.filter((a: Assignment) => a.tier === 'EXPLORERS');
@@ -237,7 +261,7 @@ function AdminDrawContent({
                     {t('generateNew')}
                   </Button>
                   <Button
-                    onClick={() => publishDrawMutation.mutate()}
+                    onClick={() => publishDrawMutation.mutate(undefined)}
                     disabled={publishDrawMutation.isPending}
                   >
                     <Send className="h-4 w-4" />
@@ -248,7 +272,7 @@ function AdminDrawContent({
               {draw.event.state === 'PUBLISHED' && (
                 <Button
                   variant="outline"
-                  onClick={() => unpublishDrawMutation.mutate()}
+                  onClick={() => unpublishDrawMutation.mutate(undefined)}
                   disabled={unpublishDrawMutation.isPending}
                 >
                   <ArchiveRestore className="h-4 w-4" />
@@ -278,7 +302,10 @@ function AdminDrawContent({
           round: (round) => t('round', { number: round }),
           courtLabel: (courtId) => t('court', { id: courtId }),
         }}
-        onEditAssignment={(assignment) => setEditingAssignment(assignment)}
+        onEditAssignment={(assignmentId) => {
+          const assignment = draw.assignments.find((a) => a.id === assignmentId);
+          if (assignment) setEditingAssignment(assignment);
+        }}
         canEdit={!hasEventPassed}
       />
 
@@ -292,15 +319,18 @@ function AdminDrawContent({
           round: (round) => t('round', { number: round }),
           courtLabel: (courtId) => t('court', { id: courtId }),
         }}
-        onEditAssignment={(assignment) => setEditingAssignment(assignment)}
+        onEditAssignment={(assignmentId) => {
+          const assignment = draw.assignments.find((a) => a.id === assignmentId);
+          if (assignment) setEditingAssignment(assignment);
+        }}
         canEdit={!hasEventPassed}
       />
 
       {/* Waitlist Section */}
       <WaitlistSection
-        players={event?.waitlistedPlayers || []}
+        players={[]}
         title={t('waitlist', {
-          count: event?.waitlistCount || event?.waitlistedPlayers?.length || 0,
+          count: event?.waitlistCount || 0,
         })}
         showAvatar={true}
       />
@@ -332,7 +362,7 @@ function AdminDrawContent({
         variant="destructive"
         isLoading={deleteDrawMutation.isPending}
         onConfirm={() => {
-          deleteDrawMutation.mutate();
+          deleteDrawMutation.mutate(undefined);
           setShowDeleteDialog(false);
         }}
       />

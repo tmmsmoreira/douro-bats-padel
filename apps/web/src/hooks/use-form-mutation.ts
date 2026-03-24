@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
-interface UseFormMutationOptions<TData, TResponse = unknown> {
+interface UseFormMutationOptions<_TData, TResponse = unknown> {
   /**
    * The API endpoint path (e.g., '/events' or '/venues')
    */

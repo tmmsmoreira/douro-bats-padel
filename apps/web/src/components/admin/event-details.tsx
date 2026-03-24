@@ -97,7 +97,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
   });
 
   // Fetch draw if event has one
-  const { data: draw } = useQuery({
+  const { data: draw } = useQuery<Draw | null>({
     queryKey: ['draw', eventId, session?.accessToken],
     queryFn: async () => {
       try {
@@ -245,7 +245,7 @@ export function EventDetails({ eventId }: { eventId: string }) {
       {(event) => (
         <EventDetailsContent
           event={event}
-          draw={draw}
+          draw={draw ?? null}
           freezeMutation={freezeMutation}
           unfreezeMutation={unfreezeMutation}
           publishMutation={publishMutation}
@@ -275,14 +275,14 @@ function EventDetailsContent({
 }: {
   event: EventDetails;
   draw: Draw | null;
-  freezeMutation: any;
-  unfreezeMutation: any;
-  publishMutation: any;
-  deleteMutation: any;
+  freezeMutation: UseMutationResult<unknown, Error, void, unknown>;
+  unfreezeMutation: UseMutationResult<unknown, Error, void, unknown>;
+  publishMutation: UseMutationResult<unknown, Error, void, unknown>;
+  deleteMutation: UseMutationResult<unknown, Error, void, unknown>;
   showDeleteDialog: boolean;
   setShowDeleteDialog: (show: boolean) => void;
   locale: string;
-  t: any;
+  t: ReturnType<typeof useTranslations>;
 }) {
   return (
     <div className="space-y-8">
@@ -425,9 +425,9 @@ function EventDetailsHeaderActionButtons({
   onDeleteClick,
 }: {
   event: EventDetails;
-  freezeMutation: UseMutationResult<any, Error, void, unknown>;
-  unfreezeMutation: UseMutationResult<any, Error, void, unknown>;
-  publishMutation: UseMutationResult<any, Error, void, unknown>;
+  freezeMutation: UseMutationResult<unknown, Error, void, unknown>;
+  unfreezeMutation: UseMutationResult<unknown, Error, void, unknown>;
+  publishMutation: UseMutationResult<unknown, Error, void, unknown>;
   draw: Draw | null;
   onDeleteClick: () => void;
 }) {

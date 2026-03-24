@@ -23,7 +23,7 @@ interface UseLongPressOptions {
   preventDefault?: boolean;
 }
 
-interface LongPressState {
+interface _LongPressState {
   /**
    * Whether long press is currently active
    */

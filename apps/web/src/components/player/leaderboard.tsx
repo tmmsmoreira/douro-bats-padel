@@ -16,7 +16,7 @@ export function Leaderboard() {
   const t = useTranslations('leaderboard');
   const authFetch = useAuthFetch();
 
-  const { data: leaderboard, isLoading } = useQuery({
+  const { data: leaderboard, isLoading } = useQuery<LeaderboardEntry[]>({
     queryKey: ['leaderboard'],
     queryFn: async () => {
       return authFetch.get<LeaderboardEntry[]>('/rankings/leaderboard');
@@ -36,7 +36,13 @@ export function Leaderboard() {
 }
 
 // Separate component for leaderboard content
-function LeaderboardContent({ leaderboard, t }: { leaderboard: LeaderboardEntry[]; t: any }) {
+function LeaderboardContent({
+  leaderboard,
+  t,
+}: {
+  leaderboard: LeaderboardEntry[];
+  t: ReturnType<typeof useTranslations>;
+}) {
   const topThree = leaderboard.slice(0, 3);
   const fullLeaderboard = leaderboard;
   const isMobile = useIsMobile();

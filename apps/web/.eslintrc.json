@@ -1,4 +1,0 @@
-{
-  "extends": ["../../packages/config/eslint-preset.js"],
-  "ignorePatterns": ["dist", "build"]
-}

@@ -187,7 +187,7 @@ function PlayersListContent({
   endIndex: number;
   searchIconRef: React.RefObject<SearchIconHandle | null>;
   xIconRef: React.RefObject<XIconHandle | null>;
-  t: any;
+  t: ReturnType<typeof useTranslations>;
   locale: string;
 }) {
   // Create refs for each player's trending icon

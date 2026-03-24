@@ -1,15 +1,20 @@
 {
   "name": "@padel/config",
   "version": "0.1.0",
+  "type": "module",
   "files": [
     "eslint-preset.js",
+    "eslint-preset.mjs",
     "tsconfig.json"
   ],
   "exports": {
     "./tsconfig.json": "./tsconfig.json",
-    "./eslint-preset.js": "./eslint-preset.js"
+    "./eslint-preset.js": "./eslint-preset.js",
+    "./eslint-preset.mjs": "./eslint-preset.mjs"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.5",
+    "@eslint/js": "^9.39.4",
     "@typescript-eslint/eslint-plugin": "^8.18.1",
     "@typescript-eslint/parser": "^8.18.1",
     "eslint": "^9.17.0",

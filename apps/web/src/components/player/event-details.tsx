@@ -108,7 +108,7 @@ function EventDetailsContent({
 }: {
   event: EventDetails;
   locale: string;
-  t: any;
+  t: ReturnType<typeof useTranslations>;
 }) {
   const { data: session } = useSession();
   const rsvpMutation = useRSVP([['event', event.id]]);

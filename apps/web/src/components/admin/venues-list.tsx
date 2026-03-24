@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, UseMutationResult } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -129,12 +129,12 @@ function VenuesListContent({
   venues: Venue[];
   handleEdit: (venueId: string) => void;
   handleDelete: (venueId: string, venueName: string) => void;
-  deleteMutation: any;
+  deleteMutation: UseMutationResult<unknown, Error, string, unknown>;
   deleteVenue: { id: string; name: string } | null;
   setDeleteVenue: (value: { id: string; name: string } | null) => void;
   deleteIconRef: React.RefObject<DeleteIconHandle | null>;
   squarePenIconRef: React.RefObject<SquarePenIconHandle | null>;
-  t: any;
+  t: ReturnType<typeof useTranslations>;
 }) {
   return (
     <motion.div

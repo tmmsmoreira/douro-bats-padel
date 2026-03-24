@@ -19,7 +19,6 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import type { CreateInvitationDto } from '@padel/types';
 import { SendIcon, SendIconHandle } from '@/components/icons/send-icon';
-import { motion } from 'motion/react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 

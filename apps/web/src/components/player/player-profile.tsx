@@ -3,7 +3,7 @@
 import { useSession, signOut } from 'next-auth/react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations, useLocale } from 'next-intl';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,7 @@ import { PageHeader } from '@/components/shared/page-header';
 import { Mail, CheckCircle, XCircle, TrendingUp } from 'lucide-react';
 import { StatusBadge } from '@/components/shared/status-badge';
 import type { PlayerProfileStatus } from '@/components/shared/status-badge';
+import type { UserWithPlayer } from '@padel/types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -46,7 +47,7 @@ export function PlayerProfile() {
     data: profile,
     isLoading,
     error,
-  } = useQuery({
+  } = useQuery<UserWithPlayer>({
     queryKey: ['profile', session?.accessToken],
     queryFn: async () => {
       if (!session?.accessToken) {
@@ -68,7 +69,7 @@ export function PlayerProfile() {
         throw new Error(`API Error: ${res.statusText}`);
       }
 
-      const data = await res.json();
+      const data: UserWithPlayer = await res.json();
       return data;
     },
     enabled: !!session?.accessToken,
@@ -316,7 +317,28 @@ function ProfileContent({
   getUserInitials,
   t,
   locale,
-}: any) {
+}: {
+  profile: UserWithPlayer;
+  isEditingProfile: boolean;
+  editedName: string;
+  setEditedName: (value: string) => void;
+  editedDateOfBirth: Date | undefined;
+  setEditedDateOfBirth: (value: Date | undefined) => void;
+  editedPhoneNumber: string;
+  setEditedPhoneNumber: (value: string) => void;
+  editedProfilePhoto: string;
+  setEditedProfilePhoto: (value: string) => void;
+  validationErrors: Record<string, string>;
+  handleEditProfile: () => void;
+  handleSaveProfile: () => void;
+  handleCancelProfileEdit: () => void;
+  updateProfileMutation: {
+    isPending: boolean;
+  };
+  getUserInitials: (name?: string | null, email?: string) => string;
+  t: (key: string) => string;
+  locale: string;
+}) {
   const squarePenIconRef = useRef<SquarePenIconHandle>(null);
 
   return (

@@ -45,4 +45,25 @@ export interface Player {
 export interface WaitlistedPlayer extends Player {
     position: number;
 }
+/**
+ * User with player profile (returned from /auth/me endpoint)
+ * Note: Dates are serialized as strings when returned from API
+ */
+export interface UserWithPlayer {
+    id: string;
+    email: string;
+    name: string | null;
+    dateOfBirth?: string | null;
+    phoneNumber?: string | null;
+    profilePhoto?: string | null;
+    roles: string[];
+    emailVerified: boolean;
+    createdAt: string;
+    player: {
+        id: string;
+        rating: number;
+        status: string;
+        createdAt: string;
+    } | null;
+}
 //# sourceMappingURL=users.d.ts.map

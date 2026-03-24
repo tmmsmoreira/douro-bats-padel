@@ -1,12 +1,12 @@
 'use client';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, UseMutationResult } from '@tanstack/react-query';
 import { useTranslations, useLocale } from 'next-intl';
 import { useSession } from 'next-auth/react';
 import { useRouter } from '@/i18n/navigation';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Mail, CheckCircle, XCircle, TrendingUp, Send, MoreVertical } from 'lucide-react';
+import { Mail, CheckCircle, XCircle, TrendingUp, MoreVertical } from 'lucide-react';
 import { DeleteIcon, DeleteIconHandle, CopyIcon, CopyIconHandle } from 'lucide-animated';
 import { Button } from '@/components/ui/button';
 import {
@@ -285,13 +285,13 @@ function PublicPlayerProfileContent({
   showRevokeDialog: boolean;
   setShowRevokeDialog: (value: boolean) => void;
   setIsDeleting: (value: boolean) => void;
-  deleteMutation: any;
-  revokeMutation: any;
-  resendMutation: any;
+  deleteMutation: UseMutationResult<unknown, Error, void, unknown>;
+  revokeMutation: UseMutationResult<void, Error, string, unknown>;
+  resendMutation: UseMutationResult<void, Error, string, unknown>;
   copyInvitationLink: (token: string) => void;
-  t: any;
-  tList: any;
-  tActions: any;
+  t: ReturnType<typeof useTranslations>;
+  tList: ReturnType<typeof useTranslations>;
+  tActions: ReturnType<typeof useTranslations>;
   locale: string;
 }) {
   const deleteIconRef = useRef<DeleteIconHandle>(null);
@@ -574,13 +574,13 @@ function InvitationActions({
 }: {
   player: PlayerData;
   copyInvitationLink: (token: string) => void;
-  resendMutation: any;
+  resendMutation: UseMutationResult<void, Error, string, unknown>;
   setShowRevokeDialog: (value: boolean) => void;
-  revokeMutation: any;
+  revokeMutation: UseMutationResult<void, Error, string, unknown>;
   copyIconRef: React.RefObject<CopyIconHandle | null>;
   resendIconRef: React.RefObject<SendIconHandle | null>;
   revokeIconRef: React.RefObject<DeleteIconHandle | null>;
-  t: any;
+  t: ReturnType<typeof useTranslations>;
 }) {
   const isMobile = useIsMobile();
 

@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { DataStateWrapper, PageLayout } from '@/components/shared';
 import { DrawHeader, TierSection, WaitlistSection } from '@/components/shared/draw';
 import type { Draw, Assignment } from '@/components/shared/draw';
+import type { EventWithRSVP } from '@padel/types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -38,7 +39,7 @@ export function DrawView({ eventId }: { eventId: string }) {
   });
 
   // Fetch event data to get waitlist
-  const { data: event } = useQuery({
+  const { data: event } = useQuery<EventWithRSVP | null>({
     queryKey: ['event', eventId],
     queryFn: async () => {
       const headers: HeadersInit = {
@@ -92,8 +93,8 @@ function DrawContent({
   locale,
 }: {
   draw: Draw;
-  event: any;
-  t: any;
+  event: EventWithRSVP | null | undefined;
+  t: ReturnType<typeof useTranslations>;
   locale: string;
 }) {
   // Group assignments by tier and round
@@ -149,10 +150,7 @@ function DrawContent({
       />
 
       {/* Waitlist Section */}
-      <WaitlistSection
-        players={event?.waitlistedPlayers || []}
-        title={t('waitlist', { count: event?.waitlistedPlayers?.length || 0 })}
-      />
+      <WaitlistSection players={[]} title={t('waitlist', { count: event?.waitlistCount || 0 })} />
     </div>
   );
 }

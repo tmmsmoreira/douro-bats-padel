@@ -8,7 +8,10 @@ export type ValidationResult = {
   error?: string;
 };
 
-export type Validator<T = string> = (value: T, options?: any) => ValidationResult;
+export type Validator<T = string> = (
+  value: T,
+  options?: Record<string, unknown>
+) => ValidationResult;
 
 /**
  * Validation helpers

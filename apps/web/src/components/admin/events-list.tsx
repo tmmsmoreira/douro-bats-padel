@@ -22,6 +22,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useIsMobile } from '@/hooks/use-media-query';
+import type { EventWithRSVP } from '@padel/types';
 
 type EventState = 'ALL' | EventStatus;
 
@@ -104,6 +105,23 @@ export function EventsList() {
   );
 }
 
+interface EventsListContentProps {
+  paginatedEvents: EventWithRSVP[];
+  filteredEvents: EventWithRSVP[];
+  selectedDate: Date | undefined;
+  setSelectedDate: (date: Date | undefined) => void;
+  statusFilter: EventState;
+  setStatusFilter: (status: EventState) => void;
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+  totalPages: number;
+  showDatePicker: boolean;
+  setShowDatePicker: (show: boolean) => void;
+  locale: string;
+  t: ReturnType<typeof useTranslations>;
+  isFromBfcache: boolean;
+}
+
 // Separate component for events list content
 function EventsListContent({
   paginatedEvents,
@@ -120,7 +138,7 @@ function EventsListContent({
   locale,
   t,
   isFromBfcache,
-}: any) {
+}: EventsListContentProps) {
   // Calculate pagination indices
   const EVENTS_PER_PAGE = 10;
   const startIndex = (currentPage - 1) * EVENTS_PER_PAGE;
@@ -336,7 +354,7 @@ function EventsListContent({
             }}
             className="space-y-6"
           >
-            {paginatedEvents.map((event: any) => {
+            {paginatedEvents.map((event) => {
               return (
                 <motion.div
                   key={event.id}

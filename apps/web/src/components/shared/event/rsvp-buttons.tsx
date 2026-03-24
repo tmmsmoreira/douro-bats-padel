@@ -30,7 +30,7 @@ export function RSVPButtons({
   registerText = 'Register',
   registerToWaitlistText = 'Register to Waitlist',
   unregisterText = 'Unregister',
-  signInToRegisterText = 'Sign in to Register',
+  signInToRegisterText: _signInToRegisterText = 'Sign in to Register',
   viewDetailsText = 'View Details',
   viewDrawText = 'View Draw',
   showViewDetails = true,

@@ -17,10 +17,11 @@ import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { AlertTriangle } from 'lucide-react';
 import { useAuthFetch, useGenerateDraw } from '@/hooks';
 import { StatusBadge } from '../shared';
+import { formatTime } from '@/lib/utils';
 
 interface Court {
   id: string;
@@ -74,6 +75,7 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
   const { data: session } = useSession();
   const router = useRouter();
   const t = useTranslations('generateDraw');
+  const locale = useLocale();
   const authFetch = useAuthFetch();
 
   const [constraints, setConstraints] = useState({
@@ -438,7 +440,8 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
                   {t('masters')} Time Slot
                 </div>
                 <div className="text-sm">
-                  {tierRules.mastersTimeSlot.startsAt} - {tierRules.mastersTimeSlot.endsAt}
+                  {formatTime(tierRules.mastersTimeSlot.startsAt, locale)} -{' '}
+                  {formatTime(tierRules.mastersTimeSlot.endsAt, locale)}
                 </div>
                 <div className="text-xs text-muted-foreground mt-1">
                   {mastersCourts.length} {t('courtPlural', { count: mastersCourts.length })} (
@@ -452,7 +455,8 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
                   {t('explorers')} Time Slot
                 </div>
                 <div className="text-sm">
-                  {tierRules.explorersTimeSlot.startsAt} - {tierRules.explorersTimeSlot.endsAt}
+                  {formatTime(tierRules.explorersTimeSlot.startsAt, locale)} -{' '}
+                  {formatTime(tierRules.explorersTimeSlot.endsAt, locale)}
                 </div>
                 <div className="text-xs text-muted-foreground mt-1">
                   {explorersCourts.length} {t('courtPlural', { count: explorersCourts.length })} (

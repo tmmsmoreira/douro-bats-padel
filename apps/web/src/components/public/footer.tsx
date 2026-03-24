@@ -4,6 +4,7 @@ import { Link } from '@/i18n/navigation';
 import { FacebookIcon, InstagramIcon, TwitterIcon } from 'lucide-animated';
 import { MapPin, Mail, Phone } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { PWAInstallButton } from '@/components/shared/pwa-install-button';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -155,7 +156,12 @@ export function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t">
+        <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t space-y-4">
+          {/* PWA Install Button */}
+          <div className="flex justify-center">
+            <PWAInstallButton />
+          </div>
+
           <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
             <p>
               © {currentYear} Douro Bats Padel. {tFooter('allRightsReserved')}

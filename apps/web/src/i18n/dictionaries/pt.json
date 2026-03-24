@@ -837,7 +837,9 @@
     "address": "Porto, Portugal",
     "phone": "+351 123 456 789",
     "madeWith": "Feito com ❤️ no Porto",
-    "allRightsReserved": "Todos os direitos reservados"
+    "allRightsReserved": "Todos os direitos reservados",
+    "installApp": "Instalar App",
+    "installAppDescription": "Instale a nossa app para uma melhor experiência"
   },
   "about": {
     "title": "Sobre Douro Bats Padel",

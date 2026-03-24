@@ -1,8 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Clock } from 'lucide-react';
+import { useLocale } from 'next-intl';
 import { MatchAssignment } from './match-assignment';
 import type { Assignment, TierTimeSlot } from './types';
+import { formatTime } from '@/lib/utils';
 
 interface TierSectionProps {
   tier: 'MASTERS' | 'EXPLORERS';
@@ -25,6 +27,7 @@ export function TierSection({
   canEdit,
   translations,
 }: TierSectionProps) {
+  const locale = useLocale();
   const tierBadgeClass =
     tier === 'MASTERS' ? 'bg-yellow-50 dark:bg-yellow-950/30' : 'bg-blue-50 dark:bg-blue-950/30';
 
@@ -42,7 +45,8 @@ export function TierSection({
         <h2 className="text-2xl font-bold">{translations.tierName}</h2>
         {timeSlot && (
           <Badge variant="secondary" className="text-sm">
-            <Clock className="mr-2 h-4 w-4" /> {timeSlot.startsAt} - {timeSlot.endsAt}
+            <Clock className="mr-2 h-4 w-4" /> {formatTime(timeSlot.startsAt, locale)} -{' '}
+            {formatTime(timeSlot.endsAt, locale)}
           </Badge>
         )}
       </div>

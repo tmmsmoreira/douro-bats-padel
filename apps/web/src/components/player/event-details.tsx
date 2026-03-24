@@ -14,6 +14,7 @@ import { DataStateWrapper, PageLayout, PageHeader, StatusBadge } from '@/compone
 import { ConfirmedPlayersSection, EventHeaderInfo } from '@/components/shared/event';
 import { WaitlistSection } from '@/components/shared/draw';
 import { useRSVP } from '@/hooks';
+import { formatTime } from '@/lib/utils';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -256,8 +257,8 @@ function EventDetailsContent({
                   <Clock className="mr-2 h-3 w-3" />
                   <span className="font-semibold">{t('masters')}</span>
                   <span className="ml-1">
-                    {event.tierRules.mastersTimeSlot.startsAt} -{' '}
-                    {event.tierRules.mastersTimeSlot.endsAt}
+                    {formatTime(event.tierRules.mastersTimeSlot.startsAt, locale)} -{' '}
+                    {formatTime(event.tierRules.mastersTimeSlot.endsAt, locale)}
                   </span>
                 </Badge>
               )}
@@ -269,8 +270,8 @@ function EventDetailsContent({
                   <Clock className="mr-2 h-3 w-3" />
                   <span className="font-semibold">{t('explorers')}</span>
                   <span className="ml-1">
-                    {event.tierRules.explorersTimeSlot.startsAt} -{' '}
-                    {event.tierRules.explorersTimeSlot.endsAt}
+                    {formatTime(event.tierRules.explorersTimeSlot.startsAt, locale)} -{' '}
+                    {formatTime(event.tierRules.explorersTimeSlot.endsAt, locale)}
                   </span>
                 </Badge>
               )}

@@ -11,7 +11,7 @@ import { LogoutIcon, UserIcon } from 'lucide-animated';
 import { signOut } from 'next-auth/react';
 import { ThemeToggleGroup } from '@/components/shared/theme-toggle-button';
 import { LanguageToggleGroup } from '@/components/shared/language-toggle-button';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface NavItem {
@@ -52,6 +52,18 @@ export function MobileMenu({
     roleSwitchHref?.startsWith('/') && !roleSwitchHref.startsWith('/admin');
   const [viewMode, setViewMode] = useState(isCurrentlyAdminView);
 
+  // Prevent pull-to-refresh when menu is open
+  useEffect(() => {
+    if (isOpen) {
+      // Disable pull-to-refresh on iOS
+      document.body.style.overscrollBehavior = 'none';
+
+      return () => {
+        document.body.style.overscrollBehavior = '';
+      };
+    }
+  }, [isOpen]);
+
   // Handle view mode toggle
   const handleViewModeChange = (checked: boolean) => {
     const newView = checked ? 'admin' : 'player';
@@ -84,9 +96,18 @@ export function MobileMenu({
             className="md:hidden fixed inset-0 top-16 z-100"
             style={{
               top: 'calc(4rem + env(safe-area-inset-top, 0px) + 1px)',
+              overscrollBehavior: 'contain',
             }}
           >
-            <nav id="mobile-menu" aria-label="Mobile navigation" className="h-full w-full bg-card">
+            <nav
+              id="mobile-menu"
+              aria-label="Mobile navigation"
+              className="h-full w-full bg-card"
+              style={{
+                overscrollBehavior: 'contain',
+                touchAction: 'pan-y',
+              }}
+            >
               <ScrollArea className="h-full w-full">
                 <div
                   className="container mx-auto px-4 py-6 space-y-2"

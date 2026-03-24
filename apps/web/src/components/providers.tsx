@@ -8,6 +8,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { ThemeProvider } from './theme-provider';
 import { Toaster } from 'sonner';
+import { TooltipProvider } from './ui/tooltip';
 import type { Session } from 'next-auth';
 
 /**
@@ -102,8 +103,10 @@ export function Providers({
       <SessionProvider session={session}>
         <SessionErrorHandler>
           <QueryClientProvider client={queryClient}>
-            {children}
-            <Toaster richColors position="top-right" />
+            <TooltipProvider>
+              {children}
+              <Toaster richColors position="top-right" />
+            </TooltipProvider>
           </QueryClientProvider>
         </SessionErrorHandler>
       </SessionProvider>

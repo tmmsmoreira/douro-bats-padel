@@ -194,8 +194,9 @@ export class AuthService {
         // Don't fail registration if this fails
       }
     } else {
-      // Update profile photo and mark email as verified if provided
-      const updateData: any = { emailVerified: true };
+      // For existing users, only update profile photo
+      // Do NOT auto-verify email if they signed up with credentials
+      const updateData: any = {};
       if (dto.profilePhoto && dto.profilePhoto !== user.profilePhoto) {
         updateData.profilePhoto = dto.profilePhoto;
       }
@@ -204,6 +205,13 @@ export class AuthService {
         where: { id: user.id },
         data: updateData,
       });
+
+      // Check if email is verified for existing users
+      if (!user.emailVerified) {
+        throw new UnauthorizedException(
+          'Please verify your email before logging in. Check your inbox for the verification link.'
+        );
+      }
     }
 
     return this.generateTokens(user.id, user.email, user.roles as Role[]);

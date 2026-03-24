@@ -346,7 +346,9 @@
     "deleteVenueDescription": "Isto eliminará permanentemente este clube e todos os seus campos. Esta ação não pode ser revertida.",
     "deleteVenueButton": "Eliminar Clube",
     "cancel": "Cancelar",
-    "logo": "Logótipo de {venueName}"
+    "logo": "Logótipo de {venueName}",
+    "edit": "Editar",
+    "delete": "Eliminar"
   },
   "venueForm": {
     "venueDetails": "Detalhes do Clube",

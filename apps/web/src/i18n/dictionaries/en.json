@@ -372,7 +372,9 @@
     "deleteVenueDescription": "This will permanently delete this venue and all its courts. This action cannot be undone.",
     "deleteVenueButton": "Delete Venue",
     "cancel": "Cancel",
-    "logo": "{venueName} logo"
+    "logo": "{venueName} logo",
+    "edit": "Edit",
+    "delete": "Delete"
   },
   "venueForm": {
     "venueDetails": "Venue Details",

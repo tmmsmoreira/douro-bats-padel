@@ -2,8 +2,14 @@
 
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { DropdownMenuRadioGroup, DropdownMenuRadioItem } from '@/components/ui/dropdown-menu';
-import { locales, localeNames, localeFlags, type Locale } from '@/i18n/config';
+import { locales, localeNames, type Locale } from '@/i18n/config';
 import { useLocale } from 'next-intl';
+import { EnFlagIcon, PtFlagIcon } from '@/components/icons';
+
+const localeFlagComponents: Record<Locale, React.ComponentType<{ size?: number }>> = {
+  en: EnFlagIcon,
+  pt: PtFlagIcon,
+};
 
 export function LanguageMenuItems() {
   const pathname = usePathname();
@@ -20,14 +26,17 @@ export function LanguageMenuItems() {
 
   return (
     <DropdownMenuRadioGroup value={currentLocale} onValueChange={switchLocale}>
-      {locales.map((locale) => (
-        <DropdownMenuRadioItem key={locale} value={locale}>
-          <div className="flex items-center gap-2">
-            <span className="text-lg">{localeFlags[locale]}</span>
-            <span>{localeNames[locale]}</span>
-          </div>
-        </DropdownMenuRadioItem>
-      ))}
+      {locales.map((locale) => {
+        const FlagIcon = localeFlagComponents[locale];
+        return (
+          <DropdownMenuRadioItem key={locale} value={locale}>
+            <div className="flex items-center gap-2">
+              <FlagIcon size={18} />
+              <span>{localeNames[locale]}</span>
+            </div>
+          </DropdownMenuRadioItem>
+        );
+      })}
     </DropdownMenuRadioGroup>
   );
 }

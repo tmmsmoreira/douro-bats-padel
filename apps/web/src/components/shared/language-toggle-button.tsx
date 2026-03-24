@@ -4,7 +4,13 @@ import * as React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { i18n, localeFlags, type Locale } from '@/i18n';
+import { i18n, type Locale } from '@/i18n';
+import { EnFlagIcon, PtFlagIcon } from '@/components/icons';
+
+const localeFlagComponents: Record<Locale, React.ComponentType<{ size?: number }>> = {
+  en: EnFlagIcon,
+  pt: PtFlagIcon,
+};
 
 export const LanguageToggleButton = React.forwardRef<HTMLButtonElement>(
   function LanguageToggleButton(_props, ref) {
@@ -17,7 +23,7 @@ export const LanguageToggleButton = React.forwardRef<HTMLButtonElement>(
     }, []);
 
     const currentLocale = (pathname.split('/')[1] as Locale) || i18n.defaultLocale;
-    const displayFlag = localeFlags[currentLocale];
+    const FlagIcon = localeFlagComponents[currentLocale];
 
     const toggleLanguage = () => {
       const newLocale: Locale = currentLocale === 'en' ? 'pt' : 'en';
@@ -43,11 +49,10 @@ export const LanguageToggleButton = React.forwardRef<HTMLButtonElement>(
         size="icon"
         onClick={toggleLanguage}
         disabled={!mounted}
-        className="text-xl"
         aria-label={`Switch to ${currentLocale === 'en' ? 'Portuguese' : 'English'}`}
         animate
       >
-        {displayFlag}
+        <FlagIcon size={20} />
       </Button>
     );
   }
@@ -92,10 +97,10 @@ export function LanguageToggleGroup() {
       disabled={!mounted}
     >
       <ToggleGroupItem value="en" aria-label="English">
-        <span className="text-base leading-none">🇬🇧</span>
+        <EnFlagIcon size={16} />
       </ToggleGroupItem>
       <ToggleGroupItem value="pt" aria-label="Portuguese">
-        <span className="text-base leading-none">🇵🇹</span>
+        <PtFlagIcon size={16} />
       </ToggleGroupItem>
     </ToggleGroup>
   );

@@ -11,19 +11,27 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
   SquarePenIcon,
   DeleteIcon,
   DeleteIconHandle,
   SquarePenIconHandle,
   MapPinIcon,
 } from 'lucide-animated';
+import { MoreVertical } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { getShimmerDataURL } from '@/lib/image-blur';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
 import { DataStateWrapper } from '@/components/shared/data-state-wrapper';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
-import type { Venue, Court } from '@padel/types';
+import type { Venue } from '@padel/types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -152,7 +160,6 @@ function VenuesListContent({
             show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
           }}
           whileHover={{ scale: 1.01 }}
-          whileTap={{ scale: 0.99 }}
         >
           <Card className="glass-card group hover:shadow-xl transition-all duration-300 border-border/50">
             <CardContent className="p-6 space-y-4">
@@ -199,27 +206,62 @@ function VenuesListContent({
                   </div>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex gap-2 shrink-0">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleEdit(venue.id)}
-                    onMouseEnter={() => squarePenIconRef.current?.startAnimation()}
-                    onMouseLeave={() => squarePenIconRef.current?.stopAnimation()}
-                  >
-                    <SquarePenIcon ref={squarePenIconRef} size={16} />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDelete(venue.id, venue.name)}
-                    disabled={deleteMutation.isPending}
-                    onMouseEnter={() => deleteIconRef.current?.startAnimation()}
-                    onMouseLeave={() => deleteIconRef.current?.stopAnimation()}
-                  >
-                    <DeleteIcon ref={deleteIconRef} size={16} className="text-destructive" />
-                  </Button>
+                {/* Action Buttons - Desktop */}
+                <div className="hidden sm:flex gap-2 shrink-0">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEdit(venue.id)}
+                        onMouseEnter={() => squarePenIconRef.current?.startAnimation()}
+                        onMouseLeave={() => squarePenIconRef.current?.stopAnimation()}
+                      >
+                        <SquarePenIcon ref={squarePenIconRef} size={16} />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>{t('edit')}</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(venue.id, venue.name)}
+                        disabled={deleteMutation.isPending}
+                        onMouseEnter={() => deleteIconRef.current?.startAnimation()}
+                        onMouseLeave={() => deleteIconRef.current?.stopAnimation()}
+                      >
+                        <DeleteIcon ref={deleteIconRef} size={16} className="text-destructive" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>{t('delete')}</TooltipContent>
+                  </Tooltip>
+                </div>
+
+                {/* Action Dropdown - Mobile */}
+                <div className="sm:hidden shrink-0">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="icon" animate={false}>
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => handleEdit(venue.id)}>
+                        <SquarePenIcon size={16} className="mr-2" />
+                        {t('edit')}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleDelete(venue.id, venue.name)}
+                        disabled={deleteMutation.isPending}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <DeleteIcon size={16} className="mr-2" />
+                        {t('delete')}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
 

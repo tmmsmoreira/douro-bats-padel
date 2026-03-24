@@ -17,6 +17,9 @@ import { motion } from 'motion/react';
 import { DataStateWrapper } from '@/components/shared/data-state-wrapper';
 import { SquarePenIcon, SquarePenIconHandle } from 'lucide-animated';
 import { PageHeader } from '@/components/shared/page-header';
+import { Mail, CheckCircle, XCircle, TrendingUp } from 'lucide-react';
+import { StatusBadge } from '@/components/shared/status-badge';
+import type { PlayerProfileStatus } from '@/components/shared/status-badge';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -327,10 +330,81 @@ function ProfileContent({
     >
       <PageHeader title={t('title')} description={t('description')} />
 
+      {/* Player Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+      >
+        <Card className="glass-card">
+          <CardHeader>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <Avatar className="h-24 w-24">
+                <AvatarImage
+                  src={
+                    isEditingProfile
+                      ? editedProfilePhoto || undefined
+                      : profile.profilePhoto || undefined
+                  }
+                  alt={profile.name || t('userAltText')}
+                />
+                <AvatarFallback className="gradient-primary text-3xl">
+                  {getUserInitials(profile.name, profile.email)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <CardTitle className="text-2xl sm:text-3xl flex items-center gap-2 flex-wrap">
+                  {profile.name || t('noName')}
+                  {profile.emailVerified ? (
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                  ) : (
+                    <XCircle className="h-5 w-5 text-muted-foreground" />
+                  )}
+                </CardTitle>
+                <div className="flex items-center gap-1 text-sm text-muted-foreground mt-2">
+                  <Mail className="h-4 w-4" />
+                  {profile.email}
+                </div>
+              </div>
+              {profile.player && (
+                <div className="flex flex-col items-center sm:items-end gap-1 bg-primary/10 px-6 py-4 rounded-lg">
+                  <div className="flex items-center gap-1.5 text-3xl font-bold text-primary font-heading">
+                    <TrendingUp size={20} className="text-primary" />
+                    <span className="gradient-text">{profile.player.rating}</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground font-medium">
+                    {t('currentRating')}
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardHeader>
+          {isEditingProfile && (
+            <CardContent className="border-t pt-6">
+              <Field>
+                <FieldLabel htmlFor="profilePhoto">{t('profilePhoto')}</FieldLabel>
+                <Input
+                  id="profilePhoto"
+                  type="text"
+                  value={editedProfilePhoto}
+                  onChange={(e) => setEditedProfilePhoto(e.target.value)}
+                  placeholder={t('enterImageUrl')}
+                />
+                <FieldDescription>{t('profilePhotoDescription')}</FieldDescription>
+                {validationErrors.profilePhoto && (
+                  <FieldError>{validationErrors.profilePhoto}</FieldError>
+                )}
+              </Field>
+            </CardContent>
+          )}
+        </Card>
+      </motion.div>
+
+      {/* Player Information and Edit Form */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
         className="grid gap-6 md:grid-cols-2"
       >
         <Card className="glass-card">
@@ -367,47 +441,6 @@ function ProfileContent({
             </div>
           </CardHeader>
           <CardContent className="space-y-6 pt-0">
-            {/* Profile Photo Field */}
-            <div className="flex items-center gap-4">
-              <Avatar className="h-20 w-20">
-                <AvatarImage
-                  src={
-                    isEditingProfile
-                      ? editedProfilePhoto || undefined
-                      : profile.profilePhoto || undefined
-                  }
-                  alt={profile.name || 'User'}
-                />
-                <AvatarFallback className="gradient-primary text-2xl">
-                  {getUserInitials(profile.name, profile.email)}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                {isEditingProfile ? (
-                  <Field>
-                    <FieldLabel htmlFor="profilePhoto">{t('profilePhoto')}</FieldLabel>
-                    <Input
-                      id="profilePhoto"
-                      type="text"
-                      value={editedProfilePhoto}
-                      onChange={(e) => setEditedProfilePhoto(e.target.value)}
-                      placeholder={t('enterImageUrl')}
-                    />
-                    {validationErrors.profilePhoto && (
-                      <FieldError>{validationErrors.profilePhoto}</FieldError>
-                    )}
-                  </Field>
-                ) : (
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t('profilePhoto')}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {profile.profilePhoto ? t('profilePhoto') : t('notSet')}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-
             {/* Name Field */}
             {isEditingProfile ? (
               <Field>
@@ -516,17 +549,37 @@ function ProfileContent({
         <Card className="glass-card">
           <CardHeader>
             <CardTitle>{t('performanceStats')}</CardTitle>
-            <CardDescription>{t('basedOnLastWeeks')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 pt-0">
-            <div>
-              <p className="text-sm text-muted-foreground">{t('currentRating')}</p>
-              <p className="text-3xl font-bold">{profile.player?.rating || 0}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">{t('status')}</p>
-              <Badge variant="outline">{profile.player?.status || 'ACTIVE'}</Badge>
-            </div>
+            {profile.player && (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t('status')}</p>
+                    <div className="mt-1">
+                      <StatusBadge status={profile.player.status as PlayerProfileStatus} />
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t('currentRating')}</p>
+                    <div className="flex items-center gap-1.5 text-2xl font-bold text-primary font-heading mt-1">
+                      <TrendingUp size={16} className="text-primary" />
+                      <span className="gradient-text">{profile.player.rating}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="pt-4 border-t">
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t('playerSince')}</p>
+                    <p className="font-medium">
+                      {profile.player.createdAt
+                        ? new Date(profile.player.createdAt).toLocaleDateString(locale)
+                        : t('notSet')}
+                    </p>
+                  </div>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
       </motion.div>

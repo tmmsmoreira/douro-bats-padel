@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useQuery, useMutation, useQueryClient, UseMutationResult } from '@tanstack/react-query';
+import { useQuery, useQueryClient, UseMutationResult } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
 import { Lock } from 'lucide-react';
 import { LockIcon, LockIconHandle } from 'lucide-animated';
-import { useAuthFetch } from '@/hooks';
+import { useAuthFetch, usePublishMatches } from '@/hooks';
 import { useTranslations, useLocale } from 'next-intl';
 import { PageHeader } from '../shared/page-header';
 import { EventHeaderInfo } from '../shared/event';
@@ -57,8 +57,8 @@ interface ResultsEntryProps {
 export function ResultsEntry({ eventId }: ResultsEntryProps) {
   const t = useTranslations('resultsEntry');
   const locale = useLocale();
-  const queryClient = useQueryClient();
   const authFetch = useAuthFetch();
+  const queryClient = useQueryClient();
   const [showPublishDialog, setShowPublishDialog] = useState(false);
   const [matchResults, setMatchResults] = useState<
     Record<string, { setsA: number; setsB: number }>
@@ -95,20 +95,9 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
     }
   }, [matches]);
 
-  // Publish matches mutation
-  const publishMutation = useMutation({
-    mutationFn: async () => {
-      return authFetch.post(`/matches/events/${eventId}/publish`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['matches', eventId] });
-      queryClient.invalidateQueries({ queryKey: ['admin-events'] });
-      toast.success(t('resultsPublished'));
-      setShowPublishDialog(false);
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to publish results: ${error.message}`);
-    },
+  // Use custom hook for publishing matches
+  const publishMutation = usePublishMatches(eventId, () => {
+    setShowPublishDialog(false);
   });
 
   const handleScoreChange = (courtId: string, round: number, team: 'A' | 'B', value: string) => {

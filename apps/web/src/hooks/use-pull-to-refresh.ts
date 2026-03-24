@@ -87,6 +87,9 @@ export function usePullToRefresh(options: UsePullToRefreshOptions = {}): PullToR
     if (!enabled || typeof window === 'undefined') return;
 
     const handleTouchStart = (e: TouchEvent) => {
+      // Don't start if overscroll is disabled (e.g., when mobile menu is open)
+      if (document.body.style.overscrollBehavior === 'none') return;
+
       // Only start if we're at the top of the page
       scrollY.current = window.scrollY;
       if (scrollY.current === 0) {
@@ -95,6 +98,9 @@ export function usePullToRefresh(options: UsePullToRefreshOptions = {}): PullToR
     };
 
     const handleTouchMove = (e: TouchEvent) => {
+      // Don't pull if overscroll is disabled (e.g., when mobile menu is open)
+      if (document.body.style.overscrollBehavior === 'none') return;
+
       // Only pull if we're at the top of the page
       if (scrollY.current !== 0 || isRefreshing) return;
 

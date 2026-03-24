@@ -96,7 +96,7 @@ export function PageLayout({
         'container mx-auto flex-1 min-h-[500px]',
         // Add horizontal and top padding
         // Bottom padding is handled by page-bottom-padding class (mobile) and md:pb-6/sm:md:pb-8 (desktop)
-        padding || 'px-4 sm:px-6 pt-6 page-bottom-padding md:pb-6 sm:md:pb-8',
+        padding || 'p-4 sm:p-6 page-bottom-padding md:pb-6 sm:md:pb-8',
         maxWidthClasses[maxWidth],
         className
       )}

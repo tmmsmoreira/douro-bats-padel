@@ -88,6 +88,20 @@ export function PlayerNav() {
     },
   ];
 
+  // Determine active tab based on current pathname
+  // This ensures child routes also highlight their parent tab
+  const getActiveTab = () => {
+    // Check for exact matches first
+    if (pathname === '/') return '/';
+    if (pathname === '/leaderboard') return '/leaderboard';
+    if (pathname === '/profile') return '/profile';
+
+    // Check for child routes
+    if (pathname.startsWith('/events/')) return '/';
+
+    return pathname;
+  };
+
   // Show loading skeleton while session is loading
   if (status === 'loading') {
     return (
@@ -286,7 +300,7 @@ export function PlayerNav() {
       />
 
       {/* Mobile Tab Bar - Only visible on mobile */}
-      <TabBar items={tabBarItems} activeTab={pathname} className="md:hidden" variant="ios" />
+      <TabBar items={tabBarItems} activeTab={getActiveTab()} className="md:hidden" variant="ios" />
     </>
   );
 }

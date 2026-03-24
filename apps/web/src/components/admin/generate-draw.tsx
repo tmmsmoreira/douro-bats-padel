@@ -2,9 +2,8 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from '@/i18n/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
-import { toast } from 'sonner';
 import {
   Card,
   CardContent,
@@ -20,7 +19,7 @@ import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useTranslations } from 'next-intl';
 import { AlertTriangle } from 'lucide-react';
-import { useAuthFetch } from '@/hooks/use-api';
+import { useAuthFetch, useGenerateDraw } from '@/hooks';
 import { StatusBadge } from '../shared';
 
 interface Court {
@@ -74,7 +73,6 @@ interface GenerateDrawProps {
 export function GenerateDraw({ eventId }: GenerateDrawProps) {
   const { data: session } = useSession();
   const router = useRouter();
-  const queryClient = useQueryClient();
   const t = useTranslations('generateDraw');
   const authFetch = useAuthFetch();
 
@@ -140,29 +138,8 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
     selectedExplorersCourts.length,
   ]);
 
-  const generateDrawMutation = useMutation({
-    mutationFn: async () => {
-      if (!session?.accessToken) {
-        throw new Error(t('notAuthenticated'));
-      }
-
-      return await authFetch.post(`/draws/events/${eventId}`, {
-        constraints,
-        selectedCourts: {
-          masters: selectedMastersCourts,
-          explorers: selectedExplorersCourts,
-        },
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['draw', eventId] });
-      queryClient.invalidateQueries({ queryKey: ['event', eventId] });
-      toast.success(t('drawGeneratedSuccess'));
-      router.push(`/admin/events/${eventId}/draw/view`);
-    },
-    onError: (error: Error) => {
-      toast.error(`${t('drawGenerationError')}: ${error.message}`);
-    },
+  const generateDrawMutation = useGenerateDraw(eventId, () => {
+    router.push(`/admin/events/${eventId}/draw/view`);
   });
 
   if (eventLoading) {
@@ -748,7 +725,15 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
           {t('cancel')}
         </Button>
         <Button
-          onClick={() => generateDrawMutation.mutate()}
+          onClick={() =>
+            generateDrawMutation.mutate({
+              constraints,
+              selectedCourts: {
+                masters: selectedMastersCourts,
+                explorers: selectedExplorersCourts,
+              },
+            })
+          }
           disabled={generateDrawMutation.isPending || playersInDraw < 4 || event.state !== 'FROZEN'}
         >
           {generateDrawMutation.isPending

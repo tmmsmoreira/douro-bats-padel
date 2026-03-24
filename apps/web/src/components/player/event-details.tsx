@@ -247,7 +247,7 @@ function EventDetailsContent({
         {/* Tier Time Slots */}
         {event.tierRules &&
           (event.tierRules.mastersTimeSlot || event.tierRules.explorersTimeSlot) && (
-            <div className="flex items-center justify-center gap-3 flex-wrap">
+            <div className="flex items-center justify-center gap-2 flex-wrap">
               {event.tierRules.mastersTimeSlot && (
                 <Badge
                   variant="outline"

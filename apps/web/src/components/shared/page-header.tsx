@@ -63,7 +63,7 @@ export function PageHeader({
         <div className="flex-1">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{title}</h1>
           {description && (
-            <div className="text-base text-muted-foreground md:mt-2">
+            <div className="text-base text-muted-foreground mt-1 md:mt-2">
               {typeof description === 'string' ? <p>{description}</p> : description}
             </div>
           )}

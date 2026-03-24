@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { useQuery, useMutation, useQueryClient, UseMutationResult } from '@tanstack/react-query';
+import { useQuery, UseMutationResult } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useRouter } from '@/i18n/navigation';
 import { toast } from 'sonner';
@@ -25,14 +25,19 @@ import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
 import { DrawHeader, TierSection, WaitlistSection } from '@/components/shared/draw';
 import type { Draw, Assignment } from '@/components/shared/draw';
 import type { EventWithRSVP } from '@padel/types';
-import { useAuthFetch } from '@/hooks/use-api';
+import {
+  useAuthFetch,
+  useUpdateAssignment,
+  usePublishDraw,
+  useUnpublishDraw,
+  useDeleteDraw,
+} from '@/hooks';
 
 export function AdminDrawView({ eventId }: { eventId: string }) {
   const t = useTranslations('adminDrawView');
   const locale = useLocale();
   const { data: session } = useSession();
   const router = useRouter();
-  const queryClient = useQueryClient();
   const authFetch = useAuthFetch();
   const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -63,74 +68,14 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
     enabled: !!session?.accessToken,
   });
 
-  const updateAssignmentMutation = useMutation({
-    mutationFn: async ({
-      assignmentId,
-      teamA,
-      teamB,
-    }: {
-      assignmentId: string;
-      teamA: string[];
-      teamB: string[];
-    }) => {
-      if (!session?.accessToken) throw new Error(t('notAuthenticated'));
-      return await authFetch.patch(`/draws/assignments/${assignmentId}`, { teamA, teamB });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['draw', eventId] });
-      setEditingAssignment(null);
-      toast.success(t('assignmentUpdated'));
-    },
-    onError: (error: Error) => {
-      toast.error(t('errorUpdatingAssignment', { message: error.message }));
-    },
+  // Use custom hooks for mutations
+  const updateAssignmentMutation = useUpdateAssignment(eventId, () => {
+    setEditingAssignment(null);
   });
-
-  const publishDrawMutation = useMutation({
-    mutationFn: async () => {
-      if (!session?.accessToken) throw new Error(t('notAuthenticated'));
-      return await authFetch.post(`/draws/events/${eventId}/publish`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['draw', eventId] });
-      queryClient.invalidateQueries({ queryKey: ['event', eventId] });
-      toast.success(t('drawPublished'));
-    },
-    onError: (error: Error) => {
-      toast.error(t('errorPublishingDraw', { message: error.message }));
-    },
-  });
-
-  const unpublishDrawMutation = useMutation({
-    mutationFn: async () => {
-      if (!session?.accessToken) throw new Error(t('notAuthenticated'));
-      return await authFetch.post(`/draws/events/${eventId}/unpublish`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['draw', eventId] });
-      queryClient.invalidateQueries({ queryKey: ['event', eventId] });
-      toast.success(t('drawUnpublished'));
-    },
-    onError: (error: Error) => {
-      toast.error(t('errorUnpublishingDraw', { message: error.message }));
-    },
-  });
-
-  const deleteDrawMutation = useMutation({
-    mutationFn: async () => {
-      if (!session?.accessToken) throw new Error(t('notAuthenticated'));
-      return await authFetch.delete(`/draws/events/${eventId}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['draw', eventId] });
-      queryClient.invalidateQueries({ queryKey: ['event', eventId] });
-      toast.success(t('drawDeleted'));
-      // Redirect to the generate draw page
-      router.push(`/admin/events/${eventId}/draw`);
-    },
-    onError: (error: Error) => {
-      toast.error(t('errorDeletingDraw', { message: error.message }));
-    },
+  const publishDrawMutation = usePublishDraw(eventId);
+  const unpublishDrawMutation = useUnpublishDraw(eventId);
+  const deleteDrawMutation = useDeleteDraw(eventId, () => {
+    router.push(`/admin/events/${eventId}/draw`);
   });
 
   return (

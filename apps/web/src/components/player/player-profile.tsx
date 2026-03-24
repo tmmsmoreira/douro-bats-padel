@@ -1,8 +1,9 @@
 'use client';
 
 import { useSession, signOut } from 'next-auth/react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useTranslations, useLocale } from 'next-intl';
+import { useUpdateProfile } from '@/hooks';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -26,7 +27,6 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export function PlayerProfile() {
   const { data: session, status } = useSession();
-  const queryClient = useQueryClient();
   const t = useTranslations('profile');
   const locale = useLocale();
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -86,42 +86,10 @@ export function PlayerProfile() {
     }
   }, [error, pathname, router]);
 
-  const updateProfileMutation = useMutation({
-    mutationFn: async (data: {
-      name?: string;
-      dateOfBirth?: string;
-      phoneNumber?: string;
-      profilePhoto?: string;
-    }) => {
-      if (!session?.accessToken) {
-        throw new Error('No access token');
-      }
-
-      const res = await fetch(`${API_URL}/auth/profile`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.accessToken}`,
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({ message: res.statusText }));
-        throw new Error(errorData.message || res.statusText);
-      }
-
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['profile'] });
-      setIsEditingProfile(false);
-      setValidationErrors({});
-      toast.success('Profile updated successfully');
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Failed to update profile');
-    },
+  // Use custom hook for updating profile
+  const updateProfileMutation = useUpdateProfile(() => {
+    setIsEditingProfile(false);
+    setValidationErrors({});
   });
 
   const validateForm = () => {

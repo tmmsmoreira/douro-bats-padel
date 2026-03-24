@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery, useMutation, useQueryClient, UseMutationResult } from '@tanstack/react-query';
+import { useQuery, UseMutationResult } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
@@ -17,7 +17,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useRef, useState } from 'react';
-import { toast } from 'sonner';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
 import { PageHeader } from '../shared/page-header';
 import { DeleteIcon, DeleteIconHandle } from 'lucide-animated';
@@ -27,6 +26,12 @@ import { Spinner } from '../ui/spinner';
 import { TierSection, WaitlistSection } from '@/components/shared/draw';
 import type { Player, WaitlistedPlayer, Assignment } from '@/components/shared/draw';
 import { cn } from '@/lib/utils';
+import {
+  useFreezeEvent,
+  useUnfreezeEvent,
+  usePublishEvent,
+  useDeleteEvent,
+} from '@/hooks/use-events';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -68,7 +73,6 @@ interface EventDetails {
 
 export function EventDetails({ eventId }: { eventId: string }) {
   const { data: session } = useSession();
-  const queryClient = useQueryClient();
   const router = useRouter();
   const t = useTranslations('eventDetails');
   const locale = useLocale();
@@ -119,120 +123,12 @@ export function EventDetails({ eventId }: { eventId: string }) {
       (event?.state === 'FROZEN' || event?.state === 'DRAWN' || event?.state === 'PUBLISHED'),
   });
 
-  const freezeMutation = useMutation({
-    mutationFn: async () => {
-      if (!session?.accessToken) {
-        throw new Error('Not authenticated');
-      }
-
-      const res = await fetch(`${API_URL}/events/${eventId}/freeze`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.accessToken}`,
-        },
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.message || `API Error: ${res.statusText}`);
-      }
-
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['event', eventId] });
-      toast.success(t('freezeSuccess') || 'Event RSVPs frozen successfully');
-    },
-    onError: (error: Error) => {
-      toast.error(t('freezeError') + ': ' + error.message);
-    },
-  });
-
-  const unfreezeMutation = useMutation({
-    mutationFn: async () => {
-      if (!session?.accessToken) {
-        throw new Error('Not authenticated');
-      }
-
-      const res = await fetch(`${API_URL}/events/${eventId}/unfreeze`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.accessToken}`,
-        },
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({ message: res.statusText }));
-        throw new Error(errorData.message || `API Error: ${res.statusText}`);
-      }
-
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['event', eventId] });
-      toast.success(t('unfreezeSuccess') || 'Event reopened successfully');
-    },
-    onError: (error: Error) => {
-      toast.error(t('unfreezeError') + ': ' + error.message);
-    },
-  });
-
-  const publishMutation = useMutation({
-    mutationFn: async () => {
-      if (!session?.accessToken) {
-        throw new Error('Not authenticated');
-      }
-
-      const res = await fetch(`${API_URL}/events/${eventId}/publish`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.accessToken}`,
-        },
-      });
-
-      if (!res.ok) {
-        throw new Error(`API Error: ${res.statusText}`);
-      }
-
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['event', eventId] });
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: async () => {
-      if (!session?.accessToken) {
-        throw new Error('Not authenticated');
-      }
-
-      const res = await fetch(`${API_URL}/events/${eventId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.accessToken}`,
-        },
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({ message: res.statusText }));
-        throw new Error(errorData.message || 'Failed to delete event');
-      }
-
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-events'] });
-      toast.success(t('deleteSuccess') || 'Event deleted successfully');
-      router.push('/admin');
-    },
-    onError: (error: Error) => {
-      toast.error(t('deleteError') + ': ' + error.message);
-    },
+  // Use custom hooks for mutations
+  const freezeMutation = useFreezeEvent(eventId);
+  const unfreezeMutation = useUnfreezeEvent(eventId);
+  const publishMutation = usePublishEvent(eventId);
+  const deleteMutation = useDeleteEvent(eventId, () => {
+    router.push('/admin');
   });
 
   return (

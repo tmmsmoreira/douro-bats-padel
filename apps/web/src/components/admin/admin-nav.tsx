@@ -97,6 +97,27 @@ export function AdminNav() {
     },
   ];
 
+  // Determine active tab based on current pathname
+  // This ensures child routes also highlight their parent tab
+  const getActiveTab = () => {
+    // Check for exact matches first
+    if (pathname === '/admin') return '/admin';
+    if (pathname === '/leaderboard') return '/leaderboard';
+
+    // Check for child routes
+    if (pathname.startsWith('/admin/players')) return '/admin/players';
+    if (pathname.startsWith('/players/')) return '/admin/players'; // Player detail pages
+    if (pathname.startsWith('/admin/venues')) return '/admin/venues';
+    if (pathname.startsWith('/venues/')) return '/admin/venues'; // Venue detail pages
+    if (pathname.startsWith('/admin/events')) return '/admin';
+    if (pathname.startsWith('/events/')) return '/admin'; // Event detail pages
+
+    // Default to events tab for any other /admin/* routes
+    if (pathname.startsWith('/admin')) return '/admin';
+
+    return pathname;
+  };
+
   // Show loading skeleton while session is loading
   if (status === 'loading') {
     return (
@@ -290,7 +311,7 @@ export function AdminNav() {
       />
 
       {/* Mobile Tab Bar - Only visible on mobile */}
-      <TabBar items={tabBarItems} activeTab={pathname} className="md:hidden" variant="ios" />
+      <TabBar items={tabBarItems} activeTab={getActiveTab()} className="md:hidden" variant="ios" />
     </>
   );
 }

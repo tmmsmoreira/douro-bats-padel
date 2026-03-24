@@ -1,9 +1,10 @@
 'use client';
 
-import { useQuery, useMutation, useQueryClient, UseMutationResult } from '@tanstack/react-query';
+import { useQuery, UseMutationResult } from '@tanstack/react-query';
 import { useTranslations, useLocale } from 'next-intl';
 import { useSession } from 'next-auth/react';
 import { useRouter } from '@/i18n/navigation';
+import { useDeletePlayer, useRevokeInvitation, useResendInvitation } from '@/hooks';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Mail, CheckCircle, XCircle, TrendingUp, MoreVertical } from 'lucide-react';
@@ -77,7 +78,6 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
   const tActions = useTranslations('playerActions');
   const locale = useLocale();
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { data: session } = useSession();
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -104,90 +104,20 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
     },
   });
 
-  // Delete user mutation
-  const deleteMutation = useMutation({
-    mutationFn: async () => {
-      const token = session?.accessToken;
-      const res = await fetch(`${API_URL}/players/${playerId}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || 'Failed to delete user');
-      }
-
-      return res.json();
-    },
-    onSuccess: () => {
-      toast.success(tActions('deleteSuccess'));
-      queryClient.invalidateQueries({ queryKey: ['players'] });
-      router.push('/admin/players');
-    },
-    onError: (error: Error) => {
-      toast.error(tActions('deleteError') + ': ' + error.message);
-      setIsDeleting(false);
-    },
+  // Use custom hooks for mutations
+  const deleteMutation = useDeletePlayer(playerId, () => {
+    router.push('/admin/players');
   });
 
   const handleDeleteUser = () => {
     setShowDeleteDialog(true);
   };
 
-  // Revoke invitation mutation
-  const revokeMutation = useMutation({
-    mutationFn: async (invitationId: string) => {
-      const token = session?.accessToken;
-      const res = await fetch(`${API_URL}/invitations/${invitationId}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!res.ok) {
-        throw new Error('Failed to revoke invitation');
-      }
-    },
-    onSuccess: async () => {
-      toast.success(t('invitationRevoked'));
-      // Wait for both queries to be invalidated before navigating
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['player', playerId] }),
-        queryClient.invalidateQueries({ queryKey: ['players'] }),
-      ]);
-      router.push('/admin/players');
-    },
-    onError: () => {
-      toast.error(t('revokeInvitationError'));
-    },
+  const revokeMutation = useRevokeInvitation(playerId, () => {
+    router.push('/admin/players');
   });
 
-  // Resend invitation mutation
-  const resendMutation = useMutation({
-    mutationFn: async (invitationId: string) => {
-      const token = session?.accessToken;
-      const res = await fetch(`${API_URL}/invitations/${invitationId}/resend`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!res.ok) {
-        throw new Error('Failed to resend invitation');
-      }
-    },
-    onSuccess: () => {
-      toast.success(t('invitationResent'));
-    },
-    onError: () => {
-      toast.error(t('resendInvitationError'));
-    },
-  });
+  const resendMutation = useResendInvitation();
 
   const copyInvitationLink = (token: string) => {
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';

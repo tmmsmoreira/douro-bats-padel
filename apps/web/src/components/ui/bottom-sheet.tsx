@@ -1,6 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence, PanInfo, useMotionValue, useTransform } from 'motion/react';
+import { useEffect } from 'react';
 import { cn } from '@/lib/utils';
 
 interface BottomSheetProps {
@@ -78,6 +79,17 @@ export function BottomSheet({
 }: BottomSheetProps) {
   const y = useMotionValue(0);
   const opacity = useTransform(y, [0, 300], [1, 0]);
+
+  // Prevent pull-to-refresh when bottom sheet is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overscrollBehavior = 'none';
+
+      return () => {
+        document.body.style.overscrollBehavior = '';
+      };
+    }
+  }, [isOpen]);
 
   const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const shouldClose = info.velocity.y > 500 || info.offset.y > 150;

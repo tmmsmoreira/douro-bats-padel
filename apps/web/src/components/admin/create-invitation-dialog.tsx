@@ -1,9 +1,8 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
+import { useCreateInvitation } from '@/hooks';
 import {
   Dialog,
   DialogContent,
@@ -17,55 +16,26 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import type { CreateInvitationDto } from '@padel/types';
 import { SendIcon, SendIconHandle } from '@/components/icons/send-icon';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export function CreateInvitationDialog() {
   const t = useTranslations('admin');
-  const { data: session } = useSession();
-  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [expirationDays, setExpirationDays] = useState('7');
   const iconRef = useRef<SendIconHandle>(null);
 
-  const createMutation = useMutation({
-    mutationFn: async (dto: CreateInvitationDto) => {
-      const res = await fetch(`${API_URL}/invitations`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session?.accessToken}`,
-        },
-        body: JSON.stringify(dto),
-      });
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || 'Failed to create invitation');
-      }
-      return res.json();
-    },
-    onSuccess: (data: { emailSent?: boolean }) => {
-      queryClient.invalidateQueries({ queryKey: ['invitations'] });
-      queryClient.invalidateQueries({ queryKey: ['players'] });
-
-      if (data.emailSent === false) {
-        toast.warning(t('invitationCreatedEmailFailed'));
-      } else {
-        toast.success(t('invitationSent'));
-      }
-
-      setOpen(false);
-      setEmail('');
-      setName('');
-      setExpirationDays('7');
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || t('invitationError'));
-    },
+  // Use custom hook for creating invitation
+  const createMutation = useCreateInvitation((data: unknown) => {
+    const result = data as { emailSent?: boolean };
+    if (result.emailSent === false) {
+      toast.warning(t('invitationCreatedEmailFailed'));
+    }
+    setOpen(false);
+    setEmail('');
+    setName('');
+    setExpirationDays('7');
   });
 
   const handleSubmit = (e: React.FormEvent) => {

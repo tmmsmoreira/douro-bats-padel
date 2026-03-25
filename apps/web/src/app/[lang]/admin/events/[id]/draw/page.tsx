@@ -1,6 +1,6 @@
-import { GenerateDraw } from '@/components/admin/generate-draw';
+import { AdminDrawView } from '@/components/admin/admin-draw-view';
 
 export default async function AdminDrawPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  return <GenerateDraw eventId={id} />;
+  return <AdminDrawView eventId={id} />;
 }

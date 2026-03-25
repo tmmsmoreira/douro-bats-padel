@@ -124,6 +124,13 @@ export class EventsController {
     return this.rsvpService.autoPromoteWaitlist(id);
   }
 
+  @Delete(':id/players/:playerId')
+  @UseGuards(RolesGuard)
+  @Roles(Role.EDITOR, Role.ADMIN)
+  async removePlayerFromEvent(@Param('id') id: string, @Param('playerId') playerId: string) {
+    return this.rsvpService.removePlayerFromEvent(id, playerId);
+  }
+
   @Delete(':id')
   @UseGuards(RolesGuard)
   @Roles(Role.EDITOR, Role.ADMIN)

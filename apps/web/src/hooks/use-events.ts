@@ -185,3 +185,25 @@ export function useDeleteEvent(eventId: string, onSuccessCallback?: () => void) 
     },
   });
 }
+
+/**
+ * Hook to remove a player from an event (admin only)
+ */
+export function useRemovePlayerFromEvent(eventId: string) {
+  const queryClient = useQueryClient();
+  const authFetch = useAuthFetch();
+
+  return useMutation({
+    mutationFn: async (playerId: string) => {
+      return authFetch.delete(`/events/${eventId}/players/${playerId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['event', eventId] });
+      queryClient.invalidateQueries({ queryKey: ['admin-events'] });
+      toast.success('Player removed from event successfully');
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to remove player from event');
+    },
+  });
+}

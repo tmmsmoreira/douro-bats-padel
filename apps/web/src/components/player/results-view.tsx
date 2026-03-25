@@ -2,19 +2,11 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { PlayerNav } from './player-nav';
-import { ArrowLeftIcon, ArrowLeftIconHandle } from 'lucide-animated';
-import { Calendar, Clock, MapPin } from 'lucide-react';
-import { Link } from '@/i18n/navigation';
-import { useRef } from 'react';
-import { formatDate, formatTime } from '@/lib/utils';
-import { motion } from 'motion/react';
-import { DataStateWrapper, PageLayout } from '@/components/shared';
+import { DataStateWrapper } from '@/components/shared';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -42,39 +34,15 @@ interface Match {
   tier?: string;
 }
 
-interface Event {
-  id: string;
-  title: string | null;
-  date: string;
-  startsAt: string;
-  endsAt: string;
-  venue?: {
-    id: string;
-    name: string;
-  };
-}
-
 export function ResultsView({ eventId }: { eventId: string }) {
   const { data: session } = useSession();
   const t = useTranslations('resultsView');
-  const locale = useLocale();
-  const arrowLeftIconRef = useRef<ArrowLeftIconHandle>(null);
 
-  const { data: event, isLoading: isLoadingEvent } = useQuery<Event>({
-    queryKey: ['event', eventId],
-    queryFn: async () => {
-      const headers: HeadersInit = { 'Content-Type': 'application/json' };
-      if (session?.accessToken) {
-        headers.Authorization = `Bearer ${session.accessToken}`;
-      }
-      const res = await fetch(`${API_URL}/events/${eventId}`, { headers });
-      if (!res.ok) throw new Error('Failed to fetch event');
-      return res.json();
-    },
-    enabled: !!session,
-  });
-
-  const { data: matches, isLoading: isLoadingMatches } = useQuery<Match[]>({
+  const {
+    data: matches,
+    isLoading,
+    error,
+  } = useQuery<Match[]>({
     queryKey: ['matches', eventId],
     queryFn: async () => {
       const headers: HeadersInit = { 'Content-Type': 'application/json' };
@@ -85,122 +53,45 @@ export function ResultsView({ eventId }: { eventId: string }) {
       if (!res.ok) throw new Error('Failed to fetch matches');
       return res.json();
     },
+    retry: false, // Don't retry if results don't exist
     enabled: !!session,
   });
 
-  const isLoading = isLoadingEvent || isLoadingMatches;
-
   return (
-    <PageLayout nav={<PlayerNav />}>
-      <DataStateWrapper
-        isLoading={isLoading}
-        data={event}
-        loadingMessage={t('loadingResults')}
-        emptyMessage={t('eventNotFound')}
-      >
-        {(event) =>
-          !matches || matches.length === 0 ? (
-            <NoResultsContent
-              event={event}
-              t={t}
-              arrowLeftIconRef={arrowLeftIconRef}
-              locale={locale}
-            />
-          ) : (
-            <ResultsContent
-              event={event}
-              matches={matches}
-              t={t}
-              arrowLeftIconRef={arrowLeftIconRef}
-              locale={locale}
-            />
-          )
-        }
-      </DataStateWrapper>
-    </PageLayout>
-  );
-}
-
-// Component for when there are no results
-function NoResultsContent({
-  event,
-  t,
-  arrowLeftIconRef,
-  locale,
-}: {
-  event: Event;
-  t: ReturnType<typeof useTranslations>;
-  arrowLeftIconRef: React.RefObject<ArrowLeftIconHandle | null>;
-  locale: string;
-}) {
-  return (
-    <motion.div
-      key="no-results"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
-      className="space-y-6"
+    <DataStateWrapper
+      isLoading={isLoading}
+      data={matches}
+      error={error}
+      loadingMessage={t('loadingResults')}
+      errorComponent={
+        <Card className="glass-card">
+          <CardContent className="py-8 text-center">
+            <p className="text-lg font-medium">{t('resultsNotAvailable')}</p>
+            <p className="text-sm text-muted-foreground mt-2">
+              {t('resultsNotAvailableDescription')}
+            </p>
+            {error && (
+              <p className="text-xs text-red-500 mt-2">
+                {t('error')}: {error instanceof Error ? error.message : 'Failed to load results'}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      }
+      emptyMessage={t('noResults')}
     >
-      {/* Back Button */}
-      <Link href="/">
-        <Button
-          variant="ghost"
-          size="sm"
-          onMouseEnter={() => arrowLeftIconRef.current?.startAnimation()}
-          onMouseLeave={() => arrowLeftIconRef.current?.stopAnimation()}
-        >
-          <ArrowLeftIcon ref={arrowLeftIconRef} size={16} />
-          {t('backToEvents')}
-        </Button>
-      </Link>
-
-      {/* Event Information */}
-      <div>
-        <h1 className="text-3xl font-bold mb-2">{event.title || t('untitledEvent')}</h1>
-        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 text-sm text-muted-foreground">
-          <div className="flex items-center gap-1.5">
-            <Calendar className="h-4 w-4" />
-            <span>{formatDate(event.date, locale)}</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Clock className="h-4 w-4" />
-            <span>
-              {formatTime(event.startsAt, locale)} - {formatTime(event.endsAt, locale)}
-            </span>
-          </div>
-          {event.venue && (
-            <div className="flex items-center gap-1.5">
-              <MapPin className="h-4 w-4" />
-              <span>{event.venue.name}</span>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* No Results Message */}
-      <Card className="glass-card">
-        <CardContent className="py-8 text-center text-muted-foreground">
-          {t('noResults')}
-        </CardContent>
-      </Card>
-    </motion.div>
+      {(matches) => <ResultsContent matches={matches} t={t} />}
+    </DataStateWrapper>
   );
 }
 
 // Component for when there are results
 function ResultsContent({
-  event,
   matches,
   t,
-  arrowLeftIconRef,
-  locale,
 }: {
-  event: Event;
   matches: Match[];
   t: ReturnType<typeof useTranslations>;
-  arrowLeftIconRef: React.RefObject<ArrowLeftIconHandle | null>;
-  locale: string;
 }) {
   // Group by round
   const rounds = matches.reduce(
@@ -215,50 +106,7 @@ function ResultsContent({
   );
 
   return (
-    <motion.div
-      key="content"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
-      className="space-y-6"
-    >
-      {/* Back Button */}
-      <Link href="/">
-        <Button
-          variant="ghost"
-          size="sm"
-          onMouseEnter={() => arrowLeftIconRef.current?.startAnimation()}
-          onMouseLeave={() => arrowLeftIconRef.current?.stopAnimation()}
-        >
-          <ArrowLeftIcon ref={arrowLeftIconRef} size={16} />
-          {t('backToEvents')}
-        </Button>
-      </Link>
-
-      {/* Event Information */}
-      <div>
-        <h1 className="text-3xl font-bold mb-2">{event.title || t('untitledEvent')}</h1>
-        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 text-sm text-muted-foreground">
-          <div className="flex items-center gap-1.5">
-            <Calendar className="h-4 w-4" />
-            <span>{formatDate(event.date, locale)}</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Clock className="h-4 w-4" />
-            <span>
-              {formatTime(event.startsAt, locale)} - {formatTime(event.endsAt, locale)}
-            </span>
-          </div>
-          {event.venue && (
-            <div className="flex items-center gap-1.5">
-              <MapPin className="h-4 w-4" />
-              <span>{event.venue.name}</span>
-            </div>
-          )}
-        </div>
-      </div>
-
+    <div className="space-y-6">
       {(Object.entries(rounds) as [string, Match[]][]).map(([round, roundMatches]) => (
         <Card className="glass-card" key={round}>
           <CardHeader>
@@ -344,6 +192,6 @@ function ResultsContent({
           </CardContent>
         </Card>
       ))}
-    </motion.div>
+    </div>
   );
 }

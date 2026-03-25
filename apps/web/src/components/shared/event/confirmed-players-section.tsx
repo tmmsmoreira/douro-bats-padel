@@ -1,7 +1,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { PlayerListItem } from '@/components/shared/player-list-item';
 import { cn } from '@/lib/utils';
+import { X } from 'lucide-react';
 
 interface Player {
   id: string;
@@ -24,6 +26,9 @@ interface ConfirmedPlayersSectionProps {
   fullCapacityText?: string;
   emptyMessage?: string;
   canRegister?: boolean;
+  onRemovePlayer?: (playerId: string) => void;
+  isRemoving?: boolean;
+  showDeleteAction?: boolean;
 }
 
 export function ConfirmedPlayersSection({
@@ -40,6 +45,9 @@ export function ConfirmedPlayersSection({
   fullCapacityText,
   emptyMessage = 'No confirmed players yet',
   canRegister = false,
+  onRemovePlayer,
+  isRemoving = false,
+  showDeleteAction = false,
 }: ConfirmedPlayersSectionProps) {
   const spotsRemaining = capacity - confirmedCount;
 
@@ -84,6 +92,9 @@ export function ConfirmedPlayersSection({
                   profilePhoto={player.profilePhoto}
                   rank={showIndex ? index + 1 : undefined}
                   variant="leaderboard"
+                  onDelete={onRemovePlayer}
+                  isDeleting={isRemoving}
+                  showDeleteAction={showDeleteAction}
                 />
               ) : (
                 <div
@@ -106,6 +117,18 @@ export function ConfirmedPlayersSection({
                   >
                     {player.rating}
                   </span>
+                  {onRemovePlayer && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onRemovePlayer(player.id)}
+                      disabled={isRemoving}
+                      className="shrink-0 h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      title="Remove player"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
               )
             )}

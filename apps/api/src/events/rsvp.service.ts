@@ -328,4 +328,66 @@ export class RSVPService {
 
     return { promoted };
   }
+
+  async removePlayerFromEvent(eventId: string, playerId: string) {
+    // Find the event
+    const event = await this.prisma.event.findUnique({
+      where: { id: eventId },
+    });
+
+    if (!event) {
+      throw new NotFoundException('Event not found');
+    }
+
+    // Find the RSVP
+    const rsvp = await this.prisma.rSVP.findUnique({
+      where: {
+        eventId_playerId: {
+          eventId,
+          playerId,
+        },
+      },
+    });
+
+    if (!rsvp) {
+      throw new NotFoundException('Player is not registered for this event');
+    }
+
+    const wasConfirmed = rsvp.status === RSVPStatus.CONFIRMED;
+
+    // Delete the RSVP
+    await this.prisma.rSVP.delete({
+      where: {
+        eventId_playerId: {
+          eventId,
+          playerId,
+        },
+      },
+    });
+
+    // If player was confirmed, promote next waitlisted player
+    if (wasConfirmed) {
+      await this.promoteNextWaitlisted(eventId);
+    }
+
+    // If player was waitlisted, reorder remaining waitlist
+    if (rsvp.status === RSVPStatus.WAITLISTED) {
+      const remainingWaitlist = await this.prisma.rSVP.findMany({
+        where: {
+          eventId,
+          status: RSVPStatus.WAITLISTED,
+        },
+        orderBy: { position: 'asc' },
+      });
+
+      for (let i = 0; i < remainingWaitlist.length; i++) {
+        await this.prisma.rSVP.update({
+          where: { id: remainingWaitlist[i].id },
+          data: { position: i + 1 },
+        });
+      }
+    }
+
+    return { message: 'Player removed from event successfully' };
+  }
 }

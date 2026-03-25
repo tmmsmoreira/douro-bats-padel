@@ -171,7 +171,7 @@ function EventsListContent({
             {isMobile ? (
               <>
                 <Button
-                  variant={selectedDate ? 'default' : 'outline'}
+                  variant={selectedDate ? 'secondary' : 'outline'}
                   size="sm"
                   onClick={() => setShowDatePicker(true)}
                   className="rounded-full gap-2 h-9 px-4"
@@ -220,7 +220,7 @@ function EventsListContent({
               <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
                 <PopoverTrigger asChild>
                   <Button
-                    variant={selectedDate ? 'default' : 'outline'}
+                    variant={selectedDate ? 'secondary' : 'outline'}
                     size="sm"
                     className="rounded-full gap-2 h-9 px-4"
                     onMouseEnter={() => iconRef.current?.startAnimation()}
@@ -266,7 +266,7 @@ function EventsListContent({
 
             {/* Status Chips */}
             <Button
-              variant={statusFilter === 'ALL' ? 'default' : 'outline'}
+              variant={statusFilter === 'ALL' ? 'secondary' : 'outline'}
               size="sm"
               onClick={() => setStatusFilter('ALL')}
               className="rounded-full h-9 px-4"
@@ -275,7 +275,7 @@ function EventsListContent({
             </Button>
 
             <Button
-              variant={statusFilter === 'DRAFT' ? 'default' : 'outline'}
+              variant={statusFilter === 'DRAFT' ? 'secondary' : 'outline'}
               size="sm"
               onClick={() => setStatusFilter('DRAFT')}
               className="rounded-full h-9 px-4"
@@ -284,7 +284,7 @@ function EventsListContent({
             </Button>
 
             <Button
-              variant={statusFilter === 'OPEN' ? 'default' : 'outline'}
+              variant={statusFilter === 'OPEN' ? 'secondary' : 'outline'}
               size="sm"
               onClick={() => setStatusFilter('OPEN')}
               className="rounded-full h-9 px-4"
@@ -293,7 +293,7 @@ function EventsListContent({
             </Button>
 
             <Button
-              variant={statusFilter === 'FROZEN' ? 'default' : 'outline'}
+              variant={statusFilter === 'FROZEN' ? 'secondary' : 'outline'}
               size="sm"
               onClick={() => setStatusFilter('FROZEN')}
               className="rounded-full h-9 px-4"
@@ -302,7 +302,7 @@ function EventsListContent({
             </Button>
 
             <Button
-              variant={statusFilter === 'DRAWN' ? 'default' : 'outline'}
+              variant={statusFilter === 'DRAWN' ? 'secondary' : 'outline'}
               size="sm"
               onClick={() => setStatusFilter('DRAWN')}
               className="rounded-full h-9 px-4"
@@ -311,7 +311,7 @@ function EventsListContent({
             </Button>
 
             <Button
-              variant={statusFilter === 'PUBLISHED' ? 'default' : 'outline'}
+              variant={statusFilter === 'PUBLISHED' ? 'secondary' : 'outline'}
               size="sm"
               onClick={() => setStatusFilter('PUBLISHED')}
               className="rounded-full h-9 px-4"

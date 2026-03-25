@@ -6,3 +6,4 @@ export { RSVPBadges } from './rsvp-badges';
 export { RSVPButtons } from './rsvp-buttons';
 export { EventHeaderInfo } from './event-header';
 export { ConfirmedPlayersSection } from './confirmed-players-section';
+export { EventTabs } from './event-tabs';

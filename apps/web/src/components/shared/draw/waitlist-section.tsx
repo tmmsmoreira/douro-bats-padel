@@ -1,5 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { PlayerListItem } from '@/components/shared/player-list-item';
+import { X } from 'lucide-react';
 
 interface WaitlistedPlayerBase {
   id: string;
@@ -14,6 +16,9 @@ interface WaitlistSectionProps {
   showAvatar?: boolean;
   title: string;
   avatarSize?: 'sm' | 'md';
+  onRemovePlayer?: (playerId: string) => void;
+  isRemoving?: boolean;
+  showDeleteAction?: boolean;
 }
 
 export function WaitlistSection({
@@ -21,6 +26,9 @@ export function WaitlistSection({
   showAvatar = false,
   title,
   avatarSize = 'sm',
+  onRemovePlayer,
+  isRemoving = false,
+  showDeleteAction = false,
 }: WaitlistSectionProps) {
   if (!players || players.length === 0) {
     return null;
@@ -44,6 +52,9 @@ export function WaitlistSection({
                 position={player.position}
                 variant="leaderboard"
                 avatarSize={avatarSize === 'md' ? 'md' : 'sm'}
+                onDelete={onRemovePlayer}
+                isDeleting={isRemoving}
+                showDeleteAction={showDeleteAction}
               />
             ) : (
               <div
@@ -52,6 +63,18 @@ export function WaitlistSection({
               >
                 <span className="flex-1">{player.name}</span>
                 <span className="text-sm text-muted-foreground">{player.rating}</span>
+                {onRemovePlayer && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onRemovePlayer(player.id)}
+                    disabled={isRemoving}
+                    className="shrink-0 h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10 ml-2"
+                    title="Remove player"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
             )
           )}

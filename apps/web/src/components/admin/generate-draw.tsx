@@ -140,9 +140,11 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
     selectedExplorersCourts.length,
   ]);
 
-  const generateDrawMutation = useGenerateDraw(eventId, () => {
-    router.push(`/admin/events/${eventId}/draw/view`);
-  });
+  const generateDrawMutation = useGenerateDraw(eventId);
+
+  // Check if event has passed
+  const eventEndTime = event?.endsAt ? new Date(event.endsAt) : null;
+  const hasEventPassed = eventEndTime ? eventEndTime < new Date() : false;
 
   if (eventLoading) {
     return <div className="text-center py-8">{t('loading')}</div>;
@@ -152,13 +154,21 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
     return <div className="text-center py-8">{t('eventNotFound')}</div>;
   }
 
-  // Check if event has passed - redirect to view page if it has
-  const eventEndTime = new Date(event.endsAt);
-  const hasEventPassed = eventEndTime < new Date();
-
-  if (hasEventPassed) {
-    router.push(`/admin/events/${eventId}`);
-    return <div className="text-center py-8">{t('redirecting')}</div>;
+  // If event has passed and no draw exists, show a message instead of allowing draw generation
+  if (hasEventPassed && !existingDraw) {
+    return (
+      <Card className="glass-card">
+        <CardHeader>
+          <CardTitle>{t('eventCompleted')}</CardTitle>
+          <CardDescription>{t('eventCompletedDescription')}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button variant="outline" onClick={() => router.push(`/admin/events/${eventId}`)}>
+            {t('backToEvent')}
+          </Button>
+        </CardContent>
+      </Card>
+    );
   }
 
   const confirmedCount = event.confirmedCount || 0;
@@ -243,10 +253,7 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
             </div>
           </CardHeader>
           <CardContent>
-            <Button
-              variant="outline"
-              onClick={() => router.push(`/admin/events/${eventId}/draw/view`)}
-            >
+            <Button variant="outline" onClick={() => router.push(`/admin/events/${eventId}/draw`)}>
               {t('viewManageDraw')}
             </Button>
           </CardContent>

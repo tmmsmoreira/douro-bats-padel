@@ -252,7 +252,7 @@ function PlayersListContent({
 
             {/* Status Filter Chips */}
             <Button
-              variant={statusFilter === 'ALL' ? 'default' : 'outline'}
+              variant={statusFilter === 'ALL' ? 'secondary' : 'outline'}
               size="sm"
               onClick={() => setStatusFilter('ALL')}
               className="rounded-full h-9 px-4"
@@ -261,7 +261,7 @@ function PlayersListContent({
             </Button>
 
             <Button
-              variant={statusFilter === 'ACTIVE' ? 'default' : 'outline'}
+              variant={statusFilter === 'ACTIVE' ? 'secondary' : 'outline'}
               size="sm"
               onClick={() => setStatusFilter('ACTIVE')}
               className="rounded-full h-9 px-4"
@@ -270,7 +270,7 @@ function PlayersListContent({
             </Button>
 
             <Button
-              variant={statusFilter === 'INACTIVE' ? 'default' : 'outline'}
+              variant={statusFilter === 'INACTIVE' ? 'secondary' : 'outline'}
               size="sm"
               onClick={() => setStatusFilter('INACTIVE')}
               className="rounded-full h-9 px-4"
@@ -279,7 +279,7 @@ function PlayersListContent({
             </Button>
 
             <Button
-              variant={statusFilter === 'INVITED' ? 'default' : 'outline'}
+              variant={statusFilter === 'INVITED' ? 'secondary' : 'outline'}
               size="sm"
               onClick={() => setStatusFilter('INVITED')}
               className="rounded-full h-9 px-4"

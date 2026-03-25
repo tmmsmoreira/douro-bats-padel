@@ -1,23 +1,4 @@
 {
-  "common": {
-    "loading": "Loading...",
-    "error": "Error",
-    "success": "Success",
-    "cancel": "Cancel",
-    "save": "Save",
-    "delete": "Delete",
-    "edit": "Edit",
-    "create": "Create",
-    "back": "Back",
-    "next": "Next",
-    "previous": "Previous",
-    "search": "Search",
-    "filter": "Filter",
-    "sort": "Sort",
-    "actions": "Actions",
-    "confirm": "Confirm",
-    "close": "Close"
-  },
   "status": {
     "draft": "Draft",
     "open": "Open",
@@ -93,7 +74,9 @@
       "confirmPasswordPlaceholder": "••••••••",
       "createAccount": "Create Account",
       "creating": "Creating account...",
+      "creatingAccount": "Creating account...",
       "haveAccount": "Already have an account?",
+      "alreadyHaveAccount": "Already have an account?",
       "signIn": "Sign in",
       "passwordsDoNotMatch": "Passwords do not match",
       "passwordTooShort": "Password must be at least 6 characters",
@@ -107,13 +90,17 @@
       "successMessage": "We've sent a verification link to",
       "successInstructions": "Please check your email and click the verification link to activate your account.",
       "resendLink": "Didn't receive the email?",
+      "didntReceiveEmail": "Didn't receive the email?",
       "resendVerification": "Resend verification",
       "goToLogin": "Go to Login",
       "validatingInvitation": "Validating invitation...",
       "invitationRequired": "Invitation Required",
       "invitationRequiredDescription": "You need a valid invitation to create an account",
       "invitationOnlyMessage": "This application is invitation-only. Please contact an administrator to receive an invitation link.",
+      "invalidInvitation": "Invalid invitation",
+      "failedToValidate": "Failed to validate invitation",
       "emailPrefilledNote": "Email is pre-filled from your invitation",
+      "emailPreFilled": "Email pre-filled from your invitation",
       "devModeToken": "Development Mode - Verification Token:",
       "clickToVerify": "Click here to verify"
     },
@@ -312,6 +299,7 @@
   },
   "admin": {
     "loading": "Loading...",
+    "loadingVenue": "Loading venue...",
     "eventsManagement": "Events Management",
     "eventsDescription": "Manage game nights, RSVPs, and draws",
     "createEvent": "Create Event",
@@ -399,6 +387,10 @@
     "createVenue": "Create Venue",
     "updating": "Updating...",
     "creating": "Creating...",
+    "venueCreatedSuccess": "Venue created successfully",
+    "venueCreateError": "Error creating venue",
+    "venueUpdatedSuccess": "Venue updated successfully",
+    "venueUpdateError": "Error updating venue",
     "errorPrefix": "Error:",
     "failedToUpdate": "Failed to update venue",
     "failedToCreate": "Failed to create venue",
@@ -509,17 +501,6 @@
     "previous": "Previous",
     "next": "Next"
   },
-  "playerStatus": {
-    "ACTIVE": "Active",
-    "INACTIVE": "Inactive",
-    "INVITED": "Invited"
-  },
-  "invitationStatus": {
-    "PENDING": "Pending",
-    "ACCEPTED": "Accepted",
-    "REVOKED": "Revoked",
-    "EXPIRED": "Expired"
-  },
   "playerActions": {
     "actions": "Actions",
     "actionsDescription": "Manage this user account. These actions are permanent and cannot be undone.",
@@ -553,6 +534,10 @@
     "enterResults": "Enter Results",
     "confirmedPlayers": "Confirmed Players",
     "spotsRemaining": "{count} spots remaining",
+    "removePlayer": "Remove Player",
+    "removingPlayer": "Removing...",
+    "removePlayerConfirmation": "Remove player from event?",
+    "removePlayerConfirmationDescription": "Are you sure you want to remove {playerName} from this event? This action cannot be undone.",
     "registrationTitle": "Registration",
     "registrationDescription": "Register for this event or manage your registration",
     "fullCapacity": "Event is at full capacity",
@@ -570,6 +555,8 @@
     "rsvpClosed": "Registration closed",
     "deleteEvent": "Delete Event",
     "deleting": "Deleting...",
+    "deleteEventTitle": "Delete Event?",
+    "deleteEventDescription": "This will permanently delete this event and all associated data. This action cannot be undone.",
     "deleteConfirmation": "Are you sure you want to delete this event?",
     "deleteConfirmationDescription": "This will permanently delete this event and all associated data. This action cannot be undone.",
     "deleteSuccess": "Event deleted successfully",
@@ -585,6 +572,9 @@
   "resultsView": {
     "loadingResults": "Loading results...",
     "noResults": "Results not available yet",
+    "resultsNotAvailable": "Results not available yet",
+    "resultsNotAvailableDescription": "The results will be published once the event organizers have entered all match scores.",
+    "error": "Error",
     "eventNotFound": "Event not found",
     "untitledEvent": "Untitled Event",
     "backToEvents": "Back to Events",
@@ -723,6 +713,9 @@
     "loading": "Loading event...",
     "eventNotFound": "Event not found",
     "redirecting": "Redirecting...",
+    "eventCompleted": "Event Has Ended",
+    "eventCompletedDescription": "This event has already ended. You cannot generate a draw for past events.",
+    "backToEvent": "Back to Event",
     "drawAlreadyExists": "Draw Already Exists",
     "drawPublishedWarning": "This draw is currently <strong>published</strong> and visible to players.",
     "drawPublishedInstructions": "To generate a new draw, you must first <strong>unpublish or delete</strong> the existing draw from the draw view page.",
@@ -786,6 +779,12 @@
     "minimumPlayersRequired": "Minimum Players Required",
     "minimumPlayersDescription": "You currently have {confirmedCount} confirmed player(s). Padel requires exactly 4 players per match, so you need at least 4 confirmed players to generate a draw."
   },
+  "eventTabs": {
+    "details": "Details",
+    "draw": "Draw",
+    "results": "Results",
+    "edit": "Edit"
+  },
   "drawView": {
     "loadingDraw": "Loading draw...",
     "drawNotAvailable": "Draw not available yet",
@@ -808,6 +807,7 @@
   },
   "adminDrawView": {
     "loading": "Loading draw...",
+    "noDraw": "No draw found",
     "notAvailable": "Draw not available yet",
     "backToEvent": "Back to Event",
     "manageDraw": "Manage Draw",
@@ -899,18 +899,6 @@
     "callUs": "Call Us",
     "businessHours": "Business Hours",
     "hours": "Mon-Fri: 9:00 AM - 6:00 PM"
-  },
-  "terms": {
-    "title": "Terms and Conditions",
-    "lastUpdated": "Last updated: February 2026"
-  },
-  "privacy": {
-    "title": "Privacy Policy",
-    "lastUpdated": "Last updated: February 2026"
-  },
-  "cookies": {
-    "title": "Cookie Policy",
-    "lastUpdated": "Last updated: February 2026"
   },
   "faq": {
     "title": "Frequently Asked Questions",

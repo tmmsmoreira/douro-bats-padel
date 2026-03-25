@@ -102,6 +102,11 @@ export function PlayerNav() {
     return pathname;
   };
 
+  // Helper function to check if a nav item is active (for desktop links)
+  const isNavItemActive = (href: string) => {
+    return getActiveTab() === href;
+  };
+
   // Show loading skeleton while session is loading
   if (status === 'loading') {
     return (
@@ -170,7 +175,7 @@ export function PlayerNav() {
                       href={item.href}
                       className={cn(
                         'px-4 py-2 text-sm font-medium rounded-[999px]  transition-colors',
-                        pathname === item.href
+                        isNavItemActive(item.href)
                           ? 'bg-primary text-primary-foreground'
                           : 'text-muted-foreground hover:text-muted-foreground/60'
                       )}

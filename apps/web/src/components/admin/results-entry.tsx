@@ -10,9 +10,7 @@ import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
 import { Lock } from 'lucide-react';
 import { LockIcon, LockIconHandle } from 'lucide-animated';
 import { useAuthFetch, usePublishMatches } from '@/hooks';
-import { useTranslations, useLocale } from 'next-intl';
-import { PageHeader } from '../shared/page-header';
-import { EventHeaderInfo } from '../shared/event';
+import { useTranslations } from 'next-intl';
 import { MatchResultEntry } from '../shared/draw';
 import { DataStateWrapper } from '@/components/shared';
 import type { Assignment as DrawAssignment } from '../shared/draw/types';
@@ -56,7 +54,6 @@ interface ResultsEntryProps {
 
 export function ResultsEntry({ eventId }: ResultsEntryProps) {
   const t = useTranslations('resultsEntry');
-  const locale = useLocale();
   const authFetch = useAuthFetch();
   const queryClient = useQueryClient();
   const [showPublishDialog, setShowPublishDialog] = useState(false);
@@ -216,12 +213,11 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
       loadingMessage={t('loading')}
       emptyMessage={t('eventNotFound')}
     >
-      {(event) =>
+      {() =>
         validationMessage ? (
           validationMessage
         ) : draw ? (
           <ResultsEntryContent
-            event={event}
             draw={draw}
             matches={matches}
             matchResults={matchResults}
@@ -231,9 +227,7 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
             showPublishDialog={showPublishDialog}
             setShowPublishDialog={setShowPublishDialog}
             lockIconRef={lockIconRef}
-            locale={locale}
             t={t}
-            eventId={eventId}
           />
         ) : null
       }
@@ -322,7 +316,6 @@ function ResultsTierSection({
 
 // Separate component for results entry content
 function ResultsEntryContent({
-  event,
   draw,
   matches,
   matchResults,
@@ -332,11 +325,8 @@ function ResultsEntryContent({
   showPublishDialog,
   setShowPublishDialog,
   lockIconRef,
-  locale,
   t,
-  eventId,
 }: {
-  event: Event;
   draw: Draw;
   matches: Match[] | undefined;
   matchResults: Record<string, { setsA: number; setsB: number }>;
@@ -346,9 +336,7 @@ function ResultsEntryContent({
   showPublishDialog: boolean;
   setShowPublishDialog: (show: boolean) => void;
   lockIconRef: React.RefObject<LockIconHandle | null>;
-  locale: string;
   t: ReturnType<typeof useTranslations>;
-  eventId: string;
 }) {
   // Group assignments by tier and round (same as draw page)
   const masterAssignments = draw.assignments.filter((a) => a.tier === 'MASTERS');
@@ -382,84 +370,74 @@ function ResultsEntryContent({
 
   return (
     <div className="space-y-8">
-      <PageHeader
-        title={event.title || t('untitledEvent')}
-        description={<EventHeaderInfo event={event} locale={locale} showStatus={false} />}
-        showBackButton
-        backButtonHref={`/admin/events/${eventId}`}
-        backButtonLabel={t('backToEvent')}
-      />
-
-      <div className="space-y-8">
-        {/* Header with stats */}
-        <Card className="glass-card">
-          <CardHeader>
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <CardTitle>{t('matchResultsEntry')}</CardTitle>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {t('matchesEntered', { entered: enteredMatches, total: totalMatches })}
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {hasPublishedMatches && (
-                  <Badge variant="default" className="gap-1">
-                    <Lock className="h-3 w-3" />
-                    {t('published')}
-                  </Badge>
-                )}
-                {!hasPublishedMatches && (
-                  <>
-                    <Button
-                      onClick={handleSaveAllResults}
-                      variant="outline"
-                      className="gap-2"
-                      animate
-                    >
-                      {t('saveAllResults')}
-                    </Button>
-                    <Button
-                      onClick={() => setShowPublishDialog(true)}
-                      disabled={!allMatchesEntered || publishMutation.isPending}
-                      className="gap-2"
-                      onMouseEnter={() => lockIconRef.current?.startAnimation()}
-                      onMouseLeave={() => lockIconRef.current?.stopAnimation()}
-                      animate
-                    >
-                      <LockIcon ref={lockIconRef} size={16} />
-                      {t('publishResults')}
-                    </Button>
-                  </>
-                )}
-              </div>
+      {/* Header with stats */}
+      <Card className="glass-card">
+        <CardHeader>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <CardTitle>{t('matchResultsEntry')}</CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                {t('matchesEntered', { entered: enteredMatches, total: totalMatches })}
+              </p>
             </div>
-          </CardHeader>
-        </Card>
+            <div className="flex flex-wrap gap-2">
+              {hasPublishedMatches && (
+                <Badge variant="default" className="gap-1">
+                  <Lock className="h-3 w-3" />
+                  {t('published')}
+                </Badge>
+              )}
+              {!hasPublishedMatches && (
+                <>
+                  <Button
+                    onClick={handleSaveAllResults}
+                    variant="outline"
+                    className="gap-2"
+                    animate
+                  >
+                    {t('saveAllResults')}
+                  </Button>
+                  <Button
+                    onClick={() => setShowPublishDialog(true)}
+                    disabled={!allMatchesEntered || publishMutation.isPending}
+                    className="gap-2"
+                    onMouseEnter={() => lockIconRef.current?.startAnimation()}
+                    onMouseLeave={() => lockIconRef.current?.stopAnimation()}
+                    animate
+                  >
+                    <LockIcon ref={lockIconRef} size={16} />
+                    {t('publishResults')}
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
 
-        {/* Masters Results - Using TierSection with custom render */}
-        {Object.keys(mastersRounds).length > 0 && (
-          <ResultsTierSection
-            tier="MASTERS"
-            rounds={mastersRounds}
-            matchResults={matchResults}
-            matches={matches}
-            handleScoreChange={handleScoreChange}
-            t={t}
-          />
-        )}
+      {/* Masters Results - Using TierSection with custom render */}
+      {Object.keys(mastersRounds).length > 0 && (
+        <ResultsTierSection
+          tier="MASTERS"
+          rounds={mastersRounds}
+          matchResults={matchResults}
+          matches={matches}
+          handleScoreChange={handleScoreChange}
+          t={t}
+        />
+      )}
 
-        {/* Explorers Results - Using TierSection with custom render */}
-        {Object.keys(explorersRounds).length > 0 && (
-          <ResultsTierSection
-            tier="EXPLORERS"
-            rounds={explorersRounds}
-            matchResults={matchResults}
-            matches={matches}
-            handleScoreChange={handleScoreChange}
-            t={t}
-          />
-        )}
-      </div>
+      {/* Explorers Results - Using TierSection with custom render */}
+      {Object.keys(explorersRounds).length > 0 && (
+        <ResultsTierSection
+          tier="EXPLORERS"
+          rounds={explorersRounds}
+          matchResults={matchResults}
+          matches={matches}
+          handleScoreChange={handleScoreChange}
+          t={t}
+        />
+      )}
 
       {/* Publish confirmation dialog */}
       <ConfirmationDialog

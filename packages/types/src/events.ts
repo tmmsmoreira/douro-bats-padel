@@ -1,5 +1,5 @@
 import type { EventState, RSVPStatus } from './common';
-import type { Player } from './users';
+import type { Player, WaitlistedPlayer } from './users';
 
 /**
  * Time slot for a tier with court assignments
@@ -104,6 +104,45 @@ export interface EventWithRSVP {
     position: number;
   };
 }
+
+/**
+ * Event with RSVP information and player lists
+ * Used for detailed event views that show confirmed and waitlisted players
+ */
+export interface EventWithPlayers extends EventWithRSVP {
+  confirmedPlayers: Player[];
+  waitlistedPlayers: WaitlistedPlayer[];
+}
+
+/**
+ * Serialized version of EventWithRSVP (as returned from API)
+ * Dates are serialized as strings when returned from API
+ */
+export type EventWithRSVPSerialized = Omit<
+  EventWithRSVP,
+  'date' | 'startsAt' | 'endsAt' | 'rsvpOpensAt' | 'rsvpClosesAt'
+> & {
+  date: string;
+  startsAt: string;
+  endsAt: string;
+  rsvpOpensAt: string;
+  rsvpClosesAt: string;
+};
+
+/**
+ * Serialized version of EventWithPlayers (as returned from API)
+ * Dates are serialized as strings when returned from API
+ */
+export type EventWithPlayersSerialized = Omit<
+  EventWithPlayers,
+  'date' | 'startsAt' | 'endsAt' | 'rsvpOpensAt' | 'rsvpClosesAt'
+> & {
+  date: string;
+  startsAt: string;
+  endsAt: string;
+  rsvpOpensAt: string;
+  rsvpClosesAt: string;
+};
 
 /**
  * Assignment for draw/matches

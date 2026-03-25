@@ -2,11 +2,10 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
-import { useTranslations, useLocale } from 'next-intl';
-import { PlayerNav } from './player-nav';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
-import { DataStateWrapper, PageLayout } from '@/components/shared';
-import { DrawHeader, TierSection, WaitlistSection } from '@/components/shared/draw';
+import { DataStateWrapper } from '@/components/shared';
+import { TierSection, WaitlistSection } from '@/components/shared/draw';
 import type { Draw, Assignment } from '@/components/shared/draw';
 import type { EventWithRSVP } from '@padel/types';
 
@@ -15,7 +14,6 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 export function DrawView({ eventId }: { eventId: string }) {
   const { data: session } = useSession();
   const t = useTranslations('drawView');
-  const locale = useLocale();
 
   const {
     data: draw,
@@ -56,32 +54,28 @@ export function DrawView({ eventId }: { eventId: string }) {
   });
 
   return (
-    <PageLayout nav={<PlayerNav />} maxWidth="7xl">
-      <DataStateWrapper
-        isLoading={isLoading}
-        data={draw}
-        error={error}
-        loadingMessage={t('loadingDraw')}
-        errorComponent={
-          <Card className="glass-card">
-            <CardContent className="py-8 text-center">
-              <p className="text-lg font-medium">{t('drawNotAvailable')}</p>
-              <p className="text-sm text-muted-foreground mt-2">
-                {t('drawNotAvailableDescription')}
+    <DataStateWrapper
+      isLoading={isLoading}
+      data={draw}
+      error={error}
+      loadingMessage={t('loadingDraw')}
+      errorComponent={
+        <Card className="glass-card">
+          <CardContent className="py-8 text-center">
+            <p className="text-lg font-medium">{t('drawNotAvailable')}</p>
+            <p className="text-sm text-muted-foreground mt-2">{t('drawNotAvailableDescription')}</p>
+            {error && (
+              <p className="text-xs text-red-500 mt-2">
+                {t('error')}: {error instanceof Error ? error.message : 'Failed to load draw'}
               </p>
-              {error && (
-                <p className="text-xs text-red-500 mt-2">
-                  {t('error')}: {error instanceof Error ? error.message : 'Failed to load draw'}
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        }
-        emptyMessage={t('drawNotAvailable')}
-      >
-        {(draw) => <DrawContent draw={draw} event={event} t={t} locale={locale} />}
-      </DataStateWrapper>
-    </PageLayout>
+            )}
+          </CardContent>
+        </Card>
+      }
+      emptyMessage={t('drawNotAvailable')}
+    >
+      {(draw) => <DrawContent draw={draw} event={event} t={t} />}
+    </DataStateWrapper>
   );
 }
 
@@ -90,12 +84,10 @@ function DrawContent({
   draw,
   event,
   t,
-  locale,
 }: {
   draw: Draw;
   event: EventWithRSVP | null | undefined;
   t: ReturnType<typeof useTranslations>;
-  locale: string;
 }) {
   // Group assignments by tier and round
   const masterAssignments = draw.assignments.filter((a) => a.tier === 'MASTERS');
@@ -117,14 +109,6 @@ function DrawContent({
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <DrawHeader
-        title={draw.event.title || t('gameDraw')}
-        date={draw.event.date}
-        venue={draw.event.venue}
-        locale={locale}
-      />
-
       {/* Masters Tier Matches */}
       <TierSection
         tier="MASTERS"

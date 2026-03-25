@@ -69,11 +69,19 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     enabled: !!session?.accessToken,
   });
 
-  // Check if event has passed - redirect to event details if it has
-  // DRAFT events can always be edited regardless of date
+  // Check if event can be edited
+  // Allow editing if:
+  // 1. Event hasn't passed yet, OR
+  // 2. Event was never published (state is DRAFT, OPEN, or FROZEN), OR
+  // 3. Event was never drawn (state is DRAFT, OPEN, or FROZEN)
   const eventEndTime = event?.endsAt ? new Date(event.endsAt) : null;
   const hasEventPassed = eventEndTime ? eventEndTime < new Date() : false;
-  const cannotEdit = hasEventPassed && event?.state !== 'DRAFT';
+  const canEdit =
+    !hasEventPassed ||
+    event?.state === 'DRAFT' ||
+    event?.state === 'OPEN' ||
+    event?.state === 'FROZEN';
+  const cannotEdit = !canEdit;
 
   // Use useEffect to handle navigation to avoid setState during render
   // This must be called before any conditional returns to follow Rules of Hooks

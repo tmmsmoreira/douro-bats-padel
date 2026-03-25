@@ -1,17 +1,15 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useQuery, UseMutationResult } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useRouter } from '@/i18n/navigation';
 import { toast } from 'sonner';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Trash2, RefreshCw, Send, ArchiveRestore } from 'lucide-react';
-import { ArrowLeftIcon, ArrowLeftIconHandle } from 'lucide-animated';
-import { Link } from '@/i18n/navigation';
 import {
   Dialog,
   DialogContent,
@@ -20,9 +18,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { DataStateWrapper } from '@/components/shared';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
-import { DrawHeader, TierSection, WaitlistSection } from '@/components/shared/draw';
+import { DataStateWrapper } from '@/components/shared';
+import { TierSection, WaitlistSection } from '@/components/shared/draw';
 import type { Draw, Assignment } from '@/components/shared/draw';
 import type { EventWithRSVP } from '@padel/types';
 import {
@@ -32,24 +30,23 @@ import {
   useUnpublishDraw,
   useDeleteDraw,
 } from '@/hooks';
+import { GenerateDraw } from './generate-draw';
 
 export function AdminDrawView({ eventId }: { eventId: string }) {
   const t = useTranslations('adminDrawView');
-  const locale = useLocale();
   const { data: session } = useSession();
   const router = useRouter();
   const authFetch = useAuthFetch();
   const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const arrowLeftIconRef = useRef<ArrowLeftIconHandle | null>(null);
 
-  const { data: draw, isLoading } = useQuery<Draw>({
+  const { data: draw, isLoading } = useQuery<Draw | null>({
     queryKey: ['draw', eventId, session?.accessToken],
     queryFn: async () => {
       try {
         return await authFetch.get<Draw>(`/draws/events/${eventId}`);
       } catch {
-        throw new Error(t('errorFetchingDraw'));
+        return null;
       }
     },
     enabled: !!session?.accessToken,
@@ -74,16 +71,16 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
   });
   const publishDrawMutation = usePublishDraw(eventId);
   const unpublishDrawMutation = useUnpublishDraw(eventId);
-  const deleteDrawMutation = useDeleteDraw(eventId, () => {
-    router.push(`/admin/events/${eventId}/draw`);
-  });
+  const deleteDrawMutation = useDeleteDraw(eventId);
 
   return (
     <DataStateWrapper
       isLoading={isLoading}
       data={draw}
       loadingMessage={t('loading')}
-      emptyMessage={t('notAvailable')}
+      emptyMessage={t('noDraw')}
+      emptyComponent={<GenerateDraw eventId={eventId} />}
+      isEmpty={(data) => !data}
     >
       {(draw) => (
         <AdminDrawContent
@@ -98,10 +95,8 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
           unpublishDrawMutation={unpublishDrawMutation}
           deleteDrawMutation={deleteDrawMutation}
           updateAssignmentMutation={updateAssignmentMutation}
-          arrowLeftIconRef={arrowLeftIconRef}
           router={router}
           t={t}
-          locale={locale}
         />
       )}
     </DataStateWrapper>
@@ -125,10 +120,8 @@ interface AdminDrawContentProps {
     { assignmentId: string; teamA: string[]; teamB: string[] },
     unknown
   >;
-  arrowLeftIconRef: React.RefObject<ArrowLeftIconHandle | null>;
   router: ReturnType<typeof useRouter>;
   t: ReturnType<typeof useTranslations>;
-  locale: string;
 }
 
 // Separate component for admin draw content
@@ -144,10 +137,8 @@ function AdminDrawContent({
   unpublishDrawMutation,
   deleteDrawMutation,
   updateAssignmentMutation,
-  arrowLeftIconRef,
   router,
   t,
-  locale,
 }: AdminDrawContentProps) {
   // Group assignments by tier and round
   const masterAssignments = draw.assignments.filter((a: Assignment) => a.tier === 'MASTERS');
@@ -175,67 +166,47 @@ function AdminDrawContent({
 
   return (
     <div className="space-y-6">
-      {/* Back Button */}
-      <div>
-        <Link
-          href={`/admin/events/${eventId}`}
-          onMouseEnter={() => arrowLeftIconRef.current?.startAnimation()}
-        >
-          <Button variant="ghost" size="sm">
-            <ArrowLeftIcon ref={arrowLeftIconRef} size={16} />
-            {t('backToEvent')}
-          </Button>
-        </Link>
-      </div>
-
-      <DrawHeader
-        title={draw.event.title}
-        date={draw.event.date}
-        venue={draw.event.venue}
-        locale={locale}
-        actions={
-          !hasEventPassed ? (
+      {/* Action Buttons */}
+      {!hasEventPassed && (
+        <div className="flex justify-end gap-2">
+          {draw.event.state !== 'PUBLISHED' && (
             <>
-              {draw.event.state !== 'PUBLISHED' && (
-                <>
-                  <Button
-                    variant="outline"
-                    onClick={() => router.push(`/admin/events/${eventId}/draw`)}
-                  >
-                    <RefreshCw className="h-4 w-4" />
-                    {t('generateNew')}
-                  </Button>
-                  <Button
-                    onClick={() => publishDrawMutation.mutate(undefined)}
-                    disabled={publishDrawMutation.isPending}
-                  >
-                    <Send className="h-4 w-4" />
-                    {publishDrawMutation.isPending ? t('publishing') : t('publish')}
-                  </Button>
-                </>
-              )}
-              {draw.event.state === 'PUBLISHED' && (
-                <Button
-                  variant="outline"
-                  onClick={() => unpublishDrawMutation.mutate(undefined)}
-                  disabled={unpublishDrawMutation.isPending}
-                >
-                  <ArchiveRestore className="h-4 w-4" />
-                  {unpublishDrawMutation.isPending ? t('unpublishing') : t('unpublish')}
-                </Button>
-              )}
               <Button
-                variant="destructive"
-                onClick={() => setShowDeleteDialog(true)}
-                disabled={deleteDrawMutation.isPending}
+                variant="outline"
+                onClick={() => router.push(`/admin/events/${eventId}/draw`)}
               >
-                <Trash2 className="h-4 w-4" />
-                {deleteDrawMutation.isPending ? t('deleting') : t('delete')}
+                <RefreshCw className="h-4 w-4" />
+                {t('generateNew')}
+              </Button>
+              <Button
+                onClick={() => publishDrawMutation.mutate(undefined)}
+                disabled={publishDrawMutation.isPending}
+              >
+                <Send className="h-4 w-4" />
+                {publishDrawMutation.isPending ? t('publishing') : t('publish')}
               </Button>
             </>
-          ) : undefined
-        }
-      />
+          )}
+          {draw.event.state === 'PUBLISHED' && (
+            <Button
+              variant="outline"
+              onClick={() => unpublishDrawMutation.mutate(undefined)}
+              disabled={unpublishDrawMutation.isPending}
+            >
+              <ArchiveRestore className="h-4 w-4" />
+              {unpublishDrawMutation.isPending ? t('unpublishing') : t('unpublish')}
+            </Button>
+          )}
+          <Button
+            variant="destructive"
+            onClick={() => setShowDeleteDialog(true)}
+            disabled={deleteDrawMutation.isPending}
+          >
+            <Trash2 className="h-4 w-4" />
+            {deleteDrawMutation.isPending ? t('deleting') : t('delete')}
+          </Button>
+        </div>
+      )}
 
       {/* Masters Assignments */}
       <TierSection

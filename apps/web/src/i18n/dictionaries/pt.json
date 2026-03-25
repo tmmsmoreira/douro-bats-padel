@@ -1,23 +1,4 @@
 {
-  "common": {
-    "loading": "A carregar...",
-    "error": "Erro",
-    "success": "Sucesso",
-    "cancel": "Cancelar",
-    "save": "Guardar",
-    "delete": "Eliminar",
-    "edit": "Editar",
-    "create": "Criar",
-    "back": "Voltar",
-    "next": "Seguinte",
-    "previous": "Anterior",
-    "search": "Pesquisar",
-    "filter": "Filtrar",
-    "sort": "Ordenar",
-    "actions": "Ações",
-    "confirm": "Confirmar",
-    "close": "Fechar"
-  },
   "status": {
     "draft": "Rascunho",
     "open": "Aberto",
@@ -92,17 +73,23 @@
       "confirmPassword": "Confirmar Palavra-passe",
       "confirmPasswordPlaceholder": "••••••••",
       "createAccount": "Criar Conta",
+      "creating": "A criar conta...",
       "creatingAccount": "A criar conta...",
+      "haveAccount": "Já tem uma conta?",
       "alreadyHaveAccount": "Já tem uma conta?",
       "signIn": "Entrar",
       "passwordsDoNotMatch": "As palavras-passe não coincidem",
       "passwordTooShort": "A palavra-passe deve ter pelo menos 6 caracteres",
+      "emailAlreadyExists": "Email já existe",
       "emailMustMatch": "O email deve corresponder ao email do convite",
       "registrationFailed": "Falha no registo",
+      "registrationError": "Ocorreu um erro durante o registo",
       "errorOccurred": "Ocorreu um erro durante o registo",
       "successTitle": "Verifique o Seu Email",
       "successDescription": "Registo bem-sucedido!",
       "successMessage": "Enviámos um email de verificação para {email}. Por favor, verifique a sua caixa de entrada e clique no link de verificação para ativar a sua conta.",
+      "successInstructions": "Por favor, verifique o seu email e clique no link de verificação para ativar a sua conta.",
+      "resendLink": "Não recebeu o email?",
       "devModeToken": "Modo de Desenvolvimento - Token de Verificação:",
       "clickToVerify": "Clique aqui para verificar",
       "goToLogin": "Ir para Login",
@@ -114,11 +101,14 @@
       "invitationOnlyMessage": "Esta aplicação é apenas por convite. Por favor, contacte um administrador para receber um link de convite.",
       "invalidInvitation": "Convite inválido",
       "failedToValidate": "Falha ao validar convite",
+      "emailPrefilledNote": "Email pré-preenchido do seu convite",
       "emailPreFilled": "Email pré-preenchido do seu convite"
     },
     "forgotPassword": {
       "title": "Esqueceu-se da Palavra-passe",
+      "titleQuestion": "Esqueceu-se da palavra-passe?",
       "description": "Introduza o seu email para redefinir a sua palavra-passe",
+      "descriptionAlt": "Introduza o seu email e enviaremos um link de redefinição",
       "email": "Email",
       "emailPlaceholder": "ola@exemplo.com",
       "sendResetLink": "Enviar Link de Redefinição",
@@ -137,10 +127,16 @@
       "description": "Introduza a sua nova palavra-passe",
       "password": "Nova Palavra-passe",
       "passwordPlaceholder": "••••••••",
+      "confirmPassword": "Confirmar Nova Palavra-passe",
       "confirmPasswordLabel": "Confirmar Palavra-passe",
       "confirmPasswordPlaceholder": "••••••••",
       "resetPassword": "Redefinir Palavra-passe",
       "resetting": "A redefinir...",
+      "successMessage": "Palavra-passe redefinida com sucesso! A redirecionar para o login...",
+      "invalidToken": "Link de Redefinição Inválido",
+      "tokenExpired": "Este link de redefinição de palavra-passe é inválido ou expirou",
+      "requestNewLink": "Por favor, solicite um novo link de redefinição de palavra-passe.",
+      "requestNewLinkButton": "Solicitar novo link de redefinição",
       "passwordsDoNotMatch": "As palavras-passe não coincidem",
       "passwordTooShort": "A palavra-passe deve ter pelo menos 6 caracteres",
       "failedToReset": "Falha ao redefinir palavra-passe",
@@ -378,6 +374,8 @@
     "failedToCreate": "Falha ao criar o clube",
     "pleaseEnterVenueName": "Por favor insira um nome para o clube",
     "pleaseAddAtLeastOneCourt": "Por favor adicione pelo menos um campo",
+    "venueCreatedSuccess": "Clube criado com sucesso",
+    "venueCreateError": "Erro ao criar clube",
     "venueUpdatedSuccess": "Clube atualizado com sucesso",
     "venueUpdateError": "Erro ao atualizar clube"
   },
@@ -485,17 +483,6 @@
     "previous": "Anterior",
     "next": "Seguinte"
   },
-  "playerStatus": {
-    "ACTIVE": "Ativo",
-    "INACTIVE": "Inativo",
-    "INVITED": "Convidado"
-  },
-  "invitationStatus": {
-    "PENDING": "Pendente",
-    "ACCEPTED": "Aceite",
-    "REVOKED": "Revogado",
-    "EXPIRED": "Expirado"
-  },
   "playerActions": {
     "actions": "Ações",
     "actionsDescription": "Gerir esta conta de utilizador. Estas ações são permanentes e não podem ser desfeitas.",
@@ -528,6 +515,10 @@
     "viewEditDraw": "Ver & Editar Sorteio",
     "enterResults": "Inserir Resultados",
     "confirmedPlayers": "Jogadores Confirmados",
+    "removePlayer": "Remover Jogador",
+    "removingPlayer": "A remover...",
+    "removePlayerConfirmation": "Remover jogador do evento?",
+    "removePlayerConfirmationDescription": "Tem a certeza que deseja remover {playerName} deste evento? Esta ação não pode ser revertida.",
     "spotsRemaining": "{count} vagas restantes",
     "registrationTitle": "Inscrição",
     "registrationDescription": "Inscreva-se neste evento ou gerir a sua inscrição",
@@ -546,6 +537,8 @@
     "rsvpClosed": "Registo encerrado",
     "deleteEvent": "Eliminar Evento",
     "deleting": "A eliminar...",
+    "deleteEventTitle": "Eliminar Evento?",
+    "deleteEventDescription": "Isto irá eliminar permanentemente este evento e todos os dados associados. Esta ação não pode ser revertida.",
     "deleteConfirmation": "Tem a certeza que deseja eliminar este evento?",
     "deleteConfirmationDescription": "Isto irá eliminar permanentemente este evento e todos os dados associados. Esta ação não pode ser revertida.",
     "deleteSuccess": "Evento eliminado com sucesso",
@@ -561,6 +554,9 @@
   "resultsView": {
     "loadingResults": "A carregar resultados...",
     "noResults": "Resultados ainda não disponíveis",
+    "resultsNotAvailable": "Resultados ainda não disponíveis",
+    "resultsNotAvailableDescription": "Os resultados serão publicados assim que os organizadores do evento inserirem todas as pontuações dos jogos.",
+    "error": "Erro",
     "eventNotFound": "Evento não encontrado",
     "untitledEvent": "Evento Sem Título",
     "backToEvents": "Voltar aos Eventos",
@@ -699,6 +695,9 @@
     "loading": "A carregar evento...",
     "eventNotFound": "Evento não encontrado",
     "redirecting": "A redirecionar...",
+    "eventCompleted": "Evento Terminado",
+    "eventCompletedDescription": "Este evento já terminou. Não é possível gerar um sorteio para eventos passados.",
+    "backToEvent": "Voltar ao Evento",
     "drawAlreadyExists": "Sorteio Já Existe",
     "drawPublishedWarning": "Este sorteio está atualmente <strong>publicado</strong> e visível para os jogadores.",
     "drawPublishedInstructions": "Para gerar um novo sorteio, deve primeiro <strong>despublicar ou eliminar</strong> o sorteio existente na página de visualização do sorteio.",
@@ -762,6 +761,12 @@
     "minimumPlayersRequired": "Número Mínimo de Jogadores Necessário",
     "minimumPlayersDescription": "Atualmente tem {confirmedCount} jogador(es) confirmado(s). O padel requer exatamente 4 jogadores por jogo, portanto precisa de pelo menos 4 jogadores confirmados para gerar um sorteio."
   },
+  "eventTabs": {
+    "details": "Detalhes",
+    "draw": "Sorteio",
+    "results": "Resultados",
+    "edit": "Editar"
+  },
   "drawView": {
     "loadingDraw": "A carregar sorteio...",
     "drawNotAvailable": "Sorteio ainda não disponível",
@@ -784,6 +789,7 @@
   },
   "adminDrawView": {
     "loading": "A carregar sorteio...",
+    "noDraw": "Nenhum sorteio encontrado",
     "notAvailable": "Sorteio ainda não disponível",
     "backToEvent": "Voltar ao Evento",
     "manageDraw": "Gerir Sorteio",
@@ -875,18 +881,6 @@
     "callUs": "Ligue-nos",
     "businessHours": "Horário de Funcionamento",
     "hours": "Seg-Sex: 9:00 - 18:00"
-  },
-  "terms": {
-    "title": "Termos e Condições",
-    "lastUpdated": "Última atualização: Fevereiro 2026"
-  },
-  "privacy": {
-    "title": "Política de Privacidade",
-    "lastUpdated": "Última atualização: Fevereiro 2026"
-  },
-  "cookies": {
-    "title": "Política de Cookies",
-    "lastUpdated": "Última atualização: Fevereiro 2026"
   },
   "faq": {
     "title": "Perguntas Frequentes",

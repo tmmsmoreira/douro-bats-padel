@@ -95,7 +95,9 @@ export function DataStateWrapper<T>({
   errorClassName = 'text-center py-8',
 }: DataStateWrapperProps<T>) {
   // Use minimum loading to prevent jarring flashes
-  const showLoading = useMinimumLoading(isLoading, !!data, minLoadingDuration);
+  // Consider loading complete if we have data OR an error
+  const hasDataOrError = !!data || !!error;
+  const showLoading = useMinimumLoading(isLoading, hasDataOrError, minLoadingDuration);
 
   return (
     <div aria-live="polite" aria-busy={showLoading}>
@@ -103,7 +105,18 @@ export function DataStateWrapper<T>({
         {showLoading ? (
           <LoadingState message={loadingMessage} />
         ) : error ? (
-          errorComponent || (
+          errorComponent ? (
+            <motion.div
+              key="error"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              role="alert"
+            >
+              {errorComponent}
+            </motion.div>
+          ) : (
             <motion.div
               key="error"
               initial={{ opacity: 0 }}

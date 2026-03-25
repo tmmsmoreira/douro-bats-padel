@@ -31,9 +31,9 @@ export function MatchAssignment({
   };
 
   return (
-    <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+    <div className="bg-muted/50 rounded-lg p-4 space-y-4">
       {/* Campo Label */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-center">
         <div className="flex items-center gap-2">
           <Badge variant="outline">
             {assignment.court?.label || courtLabel(assignment.courtId)}
@@ -47,13 +47,15 @@ export function MatchAssignment({
       </div>
 
       {/* Match Display */}
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 items-center">
+      <div className="flex flex-col md:grid md:grid-cols-[1fr_auto_1fr] gap-4 md:items-center">
         {/* Team A */}
-        <div className="space-y-2">
-          <div className="text-xs text-muted-foreground text-center font-semibold">TEAM A</div>
-          <div className="space-y-1 flex flex-col items-center">
+        <div className="flex flex-col gap-2 px-4">
+          <div className="text-xs text-muted-foreground text-center font-semibold order-2 md:order-1">
+            TEAM A
+          </div>
+          <div className="space-y-1 flex flex-col items-center order-1 md:order-2">
             {assignment.teamA.map((player) => (
-              <div key={player.id} className="flex items-center gap-2">
+              <div key={player.id} className="flex items-center gap-2 w-full">
                 <Avatar className="h-6 w-6">
                   <AvatarImage
                     src={player.profilePhoto || undefined}
@@ -63,8 +65,8 @@ export function MatchAssignment({
                     {player.name ? getPlayerInitials(player.name) : '?'}
                   </AvatarFallback>
                 </Avatar>
-                <span className="font-medium">{player.name}</span>
-                <span className="text-sm text-muted-foreground">{player.rating}</span>
+                <span className="font-medium flex-1 min-w-0">{player.name}</span>
+                <span className="text-sm text-muted-foreground ml-auto">{player.rating}</span>
               </div>
             ))}
           </div>
@@ -76,11 +78,13 @@ export function MatchAssignment({
         </div>
 
         {/* Team B */}
-        <div className="space-y-2">
-          <div className="text-xs text-muted-foreground text-center font-semibold">TEAM B</div>
-          <div className="space-y-1 flex flex-col items-center">
+        <div className="flex flex-col gap-2 px-4">
+          <div className="text-xs text-muted-foreground text-center font-semibold order-1 md:order-1">
+            TEAM B
+          </div>
+          <div className="space-y-1 flex flex-col items-center order-2 md:order-2">
             {assignment.teamB.map((player) => (
-              <div key={player.id} className="flex items-center gap-2">
+              <div key={player.id} className="flex items-center gap-2 w-full">
                 <Avatar className="h-6 w-6">
                   <AvatarImage
                     src={player.profilePhoto || undefined}
@@ -90,8 +94,8 @@ export function MatchAssignment({
                     {player.name ? getPlayerInitials(player.name) : '?'}
                   </AvatarFallback>
                 </Avatar>
-                <span className="font-medium">{player.name}</span>
-                <span className="text-sm text-muted-foreground">{player.rating}</span>
+                <span className="font-medium flex-1 min-w-0">{player.name}</span>
+                <span className="text-sm text-muted-foreground ml-auto">{player.rating}</span>
               </div>
             ))}
           </div>

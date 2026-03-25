@@ -271,7 +271,14 @@ export class EventsService {
   }
 
   async update(id: string, dto: Partial<CreateEventDto>) {
-    const event = await this.prisma.event.findUnique({ where: { id } });
+    const event = await this.prisma.event.findUnique({
+      where: { id },
+      include: {
+        rsvps: {
+          where: { status: RSVPStatus.CONFIRMED },
+        },
+      },
+    });
 
     if (!event) {
       throw new NotFoundException('Event not found');
@@ -281,8 +288,29 @@ export class EventsService {
     const eventEndTime = new Date(event.endsAt);
     const hasEventPassed = eventEndTime < new Date();
 
-    if (hasEventPassed) {
-      throw new BadRequestException('Cannot update a past event');
+    // Allow editing if:
+    // 1. Event hasn't passed yet, OR
+    // 2. Event was never published (state is DRAFT, OPEN, or FROZEN), OR
+    // 3. Event was never drawn (state is DRAFT, OPEN, or FROZEN)
+    const canEdit =
+      !hasEventPassed ||
+      event.state === EventState.DRAFT ||
+      event.state === EventState.OPEN ||
+      event.state === EventState.FROZEN;
+
+    if (!canEdit) {
+      throw new BadRequestException('Cannot update a past event that has been drawn or published');
+    }
+
+    // Check if trying to edit timing fields when players are already registered
+    const isEditingTiming =
+      dto.date !== undefined || dto.startsAt !== undefined || dto.endsAt !== undefined;
+    const hasConfirmedPlayers = event.rsvps.length > 0;
+
+    if (isEditingTiming && hasConfirmedPlayers) {
+      throw new BadRequestException(
+        'Cannot edit event timing (date, start time, or end time) when players are already registered'
+      );
     }
 
     // Validate tier rules if provided

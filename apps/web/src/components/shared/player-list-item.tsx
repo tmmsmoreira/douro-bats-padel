@@ -1,9 +1,14 @@
+'use client';
+
 import { motion } from 'motion/react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ArrowUp, ArrowDown, Minus } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-media-query';
+import { XIcon, XIconHandle } from 'lucide-animated';
+import { useRef } from 'react';
 
 interface PlayerListItemProps {
   /**
@@ -60,6 +65,18 @@ interface PlayerListItemProps {
    * Whether to show rank with large styling
    */
   largeRank?: boolean;
+  /**
+   * Optional delete action callback (only visible to admins)
+   */
+  onDelete?: (playerId: string) => void;
+  /**
+   * Whether the delete action is currently processing
+   */
+  isDeleting?: boolean;
+  /**
+   * Whether to show the delete action (typically based on admin status)
+   */
+  showDeleteAction?: boolean;
 }
 
 export function PlayerListItem({
@@ -74,6 +91,9 @@ export function PlayerListItem({
   position,
   animate = false,
   variant = 'simple',
+  onDelete,
+  isDeleting = false,
+  showDeleteAction = false,
 }: PlayerListItemProps) {
   const getInitials = (name: string) => {
     return name
@@ -84,6 +104,7 @@ export function PlayerListItem({
       .slice(0, 2);
   };
 
+  const xIconRef = useRef<XIconHandle>(null);
   const isMobile = useIsMobile();
 
   const content = (
@@ -93,7 +114,7 @@ export function PlayerListItem({
         {rank !== undefined && (
           <span
             className={cn(
-              'font-heading font-bold',
+              'font-heading tabular-nums font-bold',
               !isMobile ? 'text-2xl w-10' : 'text-lg w-8',
               rankColor || 'text-muted-foreground'
             )}
@@ -143,9 +164,30 @@ export function PlayerListItem({
         )}
 
         {/* Rating */}
-        <span className={cn('text-muted-foreground font-bold', !isMobile ? 'text-2xl' : 'text-md')}>
+        <span
+          className={cn(
+            'text-muted-foreground font-heading gradient-text tabular-nums font-bold',
+            !isMobile ? 'text-2xl' : 'text-md'
+          )}
+        >
           {rating}
         </span>
+
+        {/* Delete Action (Admin Only) */}
+        {showDeleteAction && onDelete && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onDelete(id)}
+            disabled={isDeleting}
+            className="shrink-0 h-8 w-8"
+            title="Remove player"
+            onMouseEnter={() => xIconRef.current?.startAnimation()}
+            onMouseLeave={() => xIconRef.current?.stopAnimation()}
+          >
+            <XIcon ref={xIconRef} size={16} className="h-4 w-4" />
+          </Button>
+        )}
       </div>
     </>
   );

@@ -213,6 +213,7 @@ function AdminDrawContent({
         tier="MASTERS"
         rounds={mastersRounds}
         timeSlot={draw.event.tierRules?.mastersTimeSlot}
+        eventDate={draw.event.date}
         translations={{
           tierName: t('masters'),
           round: (round) => t('round', { number: round }),
@@ -230,6 +231,7 @@ function AdminDrawContent({
         tier="EXPLORERS"
         rounds={explorersRounds}
         timeSlot={draw.event.tierRules?.explorersTimeSlot}
+        eventDate={draw.event.date}
         translations={{
           tierName: t('explorers'),
           round: (round) => t('round', { number: round }),

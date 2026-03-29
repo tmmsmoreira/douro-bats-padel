@@ -12,7 +12,7 @@ import { StatusBadge } from '@/components/shared';
 import { ConfirmedPlayersSection } from '@/components/shared/event';
 import { WaitlistSection } from '@/components/shared/draw';
 import { useRSVP } from '@/hooks';
-import { formatTime } from '@/lib/utils';
+import { formatTimeSlot } from '@/lib/utils';
 import type { EventWithPlayersSerialized } from '@padel/types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
@@ -159,8 +159,8 @@ function EventDetailsContent({
                 <Clock className="mr-2 h-3 w-3" />
                 <span className="font-semibold">{t('masters')}</span>
                 <span className="ml-1">
-                  {formatTime(event.tierRules.mastersTimeSlot.startsAt, locale)} -{' '}
-                  {formatTime(event.tierRules.mastersTimeSlot.endsAt, locale)}
+                  {formatTimeSlot(event.tierRules.mastersTimeSlot.startsAt, event.date, locale)} -{' '}
+                  {formatTimeSlot(event.tierRules.mastersTimeSlot.endsAt, event.date, locale)}
                 </span>
               </Badge>
             )}
@@ -172,8 +172,8 @@ function EventDetailsContent({
                 <Clock className="mr-2 h-3 w-3" />
                 <span className="font-semibold">{t('explorers')}</span>
                 <span className="ml-1">
-                  {formatTime(event.tierRules.explorersTimeSlot.startsAt, locale)} -{' '}
-                  {formatTime(event.tierRules.explorersTimeSlot.endsAt, locale)}
+                  {formatTimeSlot(event.tierRules.explorersTimeSlot.startsAt, event.date, locale)} -{' '}
+                  {formatTimeSlot(event.tierRules.explorersTimeSlot.endsAt, event.date, locale)}
                 </span>
               </Badge>
             )}

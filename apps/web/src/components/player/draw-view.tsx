@@ -114,6 +114,7 @@ function DrawContent({
         tier="MASTERS"
         rounds={masterRounds}
         timeSlot={draw.event.tierRules?.mastersTimeSlot}
+        eventDate={draw.event.date}
         translations={{
           tierName: t('mastersTier'),
           round: (round) => t('round', { round }),
@@ -126,6 +127,7 @@ function DrawContent({
         tier="EXPLORERS"
         rounds={explorerRounds}
         timeSlot={draw.event.tierRules?.explorersTimeSlot}
+        eventDate={draw.event.date}
         translations={{
           tierName: t('explorersTier'),
           round: (round) => t('round', { round }),

@@ -21,7 +21,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { AlertTriangle } from 'lucide-react';
 import { useAuthFetch, useGenerateDraw } from '@/hooks';
 import { StatusBadge } from '../shared';
-import { formatTime } from '@/lib/utils';
+import { formatTimeSlot } from '@/lib/utils';
 
 interface Court {
   id: string;
@@ -447,8 +447,8 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
                   {t('masters')} Time Slot
                 </div>
                 <div className="text-sm">
-                  {formatTime(tierRules.mastersTimeSlot.startsAt, locale)} -{' '}
-                  {formatTime(tierRules.mastersTimeSlot.endsAt, locale)}
+                  {formatTimeSlot(tierRules.mastersTimeSlot.startsAt, event.date, locale)} -{' '}
+                  {formatTimeSlot(tierRules.mastersTimeSlot.endsAt, event.date, locale)}
                 </div>
                 <div className="text-xs text-muted-foreground mt-1">
                   {mastersCourts.length} {t('courtPlural', { count: mastersCourts.length })} (
@@ -462,8 +462,8 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
                   {t('explorers')} Time Slot
                 </div>
                 <div className="text-sm">
-                  {formatTime(tierRules.explorersTimeSlot.startsAt, locale)} -{' '}
-                  {formatTime(tierRules.explorersTimeSlot.endsAt, locale)}
+                  {formatTimeSlot(tierRules.explorersTimeSlot.startsAt, event.date, locale)} -{' '}
+                  {formatTimeSlot(tierRules.explorersTimeSlot.endsAt, event.date, locale)}
                 </div>
                 <div className="text-xs text-muted-foreground mt-1">
                   {explorersCourts.length} {t('courtPlural', { count: explorersCourts.length })} (

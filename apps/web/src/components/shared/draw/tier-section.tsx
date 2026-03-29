@@ -4,12 +4,13 @@ import { Clock } from 'lucide-react';
 import { useLocale } from 'next-intl';
 import { MatchAssignment } from './match-assignment';
 import type { Assignment, TierTimeSlot } from './types';
-import { formatTime } from '@/lib/utils';
+import { formatTimeSlot } from '@/lib/utils';
 
 interface TierSectionProps {
   tier: 'MASTERS' | 'EXPLORERS';
   rounds: Record<number, Assignment[]>;
   timeSlot?: TierTimeSlot;
+  eventDate?: string | Date;
   onEditAssignment?: (assignmentId: string) => void;
   canEdit?: boolean;
   translations: {
@@ -23,6 +24,7 @@ export function TierSection({
   tier,
   rounds,
   timeSlot,
+  eventDate,
   onEditAssignment,
   canEdit,
   translations,
@@ -43,10 +45,11 @@ export function TierSection({
       <div className="flex items-center gap-3">
         <div className={tierIndicatorClass}></div>
         <h2 className="text-2xl font-bold">{translations.tierName}</h2>
-        {timeSlot && (
+        {timeSlot && eventDate && (
           <Badge variant="secondary" className="text-sm">
-            <Clock className="mr-2 h-4 w-4" /> {formatTime(timeSlot.startsAt, locale)} -{' '}
-            {formatTime(timeSlot.endsAt, locale)}
+            <Clock className="mr-2 h-4 w-4" />{' '}
+            {formatTimeSlot(timeSlot.startsAt, eventDate, locale)} -{' '}
+            {formatTimeSlot(timeSlot.endsAt, eventDate, locale)}
           </Badge>
         )}
       </div>

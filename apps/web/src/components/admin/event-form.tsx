@@ -148,6 +148,7 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
       setFormData({
         title: initialData.title || '',
         date: initialData.date ? new Date(initialData.date) : undefined,
+        format: 'NON_STOP',
         duration,
         capacity: initialData.capacity?.toString() || '0',
         rsvpOpensAt: initialData.rsvpOpensAt ? new Date(initialData.rsvpOpensAt) : undefined,

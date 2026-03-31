@@ -37,7 +37,11 @@ export function EventDetails({ eventId }: { eventId: string }) {
   const { data: session } = useSession();
   const t = useTranslations('eventDetails');
 
-  const { data: event, isLoading } = useQuery<EventDetails>({
+  const {
+    data: event,
+    isLoading,
+    error,
+  } = useQuery<EventDetails>({
     queryKey: ['event', eventId, session?.accessToken],
     queryFn: async () => {
       const headers: HeadersInit = {
@@ -57,6 +61,10 @@ export function EventDetails({ eventId }: { eventId: string }) {
 
       return res.json();
     },
+    // Retry a few times with exponential backoff to handle transient errors
+    // (e.g., database replication lag after event creation)
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(300 * 2 ** attemptIndex, 1000),
   });
 
   // Use custom hook for removing players
@@ -66,8 +74,10 @@ export function EventDetails({ eventId }: { eventId: string }) {
     <DataStateWrapper
       isLoading={isLoading}
       data={event}
+      error={error}
       loadingMessage={t('loadingEvent')}
       emptyMessage={t('eventNotFound')}
+      errorMessage={t('errorLoadingEvent')}
     >
       {(event) => (
         <EventDetailsContent event={event} removePlayerMutation={removePlayerMutation} t={t} />

@@ -1,9 +1,9 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { useQuery, useMutation, useQueryClient, UseMutationResult } from '@tanstack/react-query';
-import { useSession } from 'next-auth/react';
+import { useQuery, UseMutationResult } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
+import { useDeleteVenue } from '@/hooks/use-venues';
 import Image from 'next/image';
 import { motion } from 'motion/react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -25,7 +25,6 @@ import {
 } from 'lucide-animated';
 import { MoreVertical } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { toast } from 'sonner';
 import { getShimmerDataURL } from '@/lib/image-blur';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
 import { DataStateWrapper } from '@/components/shared/data-state-wrapper';
@@ -36,9 +35,7 @@ import type { Venue } from '@padel/types';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export function VenuesList() {
-  const { data: session } = useSession();
   const router = useRouter();
-  const queryClient = useQueryClient();
   const t = useTranslations('venuesList');
   const [deleteVenue, setDeleteVenue] = useState<{ id: string; name: string } | null>(null);
   const deleteIconRef = useRef<DeleteIconHandle>(null);
@@ -53,34 +50,8 @@ export function VenuesList() {
     },
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: async (venueId: string) => {
-      if (!session?.accessToken) {
-        throw new Error('Not authenticated');
-      }
-
-      const res = await fetch(`${API_URL}/venues/${venueId}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${session.accessToken}`,
-        },
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({ message: res.statusText }));
-        throw new Error(errorData.message || 'Failed to delete venue');
-      }
-
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['venues'] });
-      toast.success('Venue deleted successfully');
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to delete venue: ${error.message}`);
-    },
-  });
+  // Use dedicated hook for deletion
+  const deleteMutation = useDeleteVenue();
 
   const handleEdit = (venueId: string) => {
     router.push(`/admin/venues/${venueId}/edit`);

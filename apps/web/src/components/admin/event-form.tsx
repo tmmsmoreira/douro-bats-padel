@@ -24,7 +24,7 @@ import { TimePicker } from '@/components/shared/time-picker';
 import { DateTimePicker } from '@/components/shared/datetime-picker';
 import type { CreateEventDto, TierRules } from '@padel/types';
 import { EventFormat } from '@padel/types';
-import { useFormMutation } from '@/hooks';
+import { useCreateEvent, useUpdateEvent } from '@/hooks/use-events';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -185,25 +185,9 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
     }));
   }, [formData.mastersCourtIds, formData.explorersCourtIds]);
 
-  // Use the standardized form mutation hook for create
-  const createMutation = useFormMutation<CreateEventDto, { id: string }>({
-    endpoint: '/events',
-    method: 'POST',
-    invalidateKeys: [['admin-events']],
-    showToast: false, // We handle toast manually for create (redirect happens)
-    onSuccess: (data) => {
-      router.push(`/admin/events/${data.id}`);
-    },
-  });
-
-  // Use the standardized form mutation hook for update
-  const updateMutation = useFormMutation<Partial<CreateEventDto>>({
-    endpoint: `/events/${eventId}`,
-    method: 'PATCH',
-    invalidateKeys: [['admin-events'], ['event', eventId || '']],
-    showToast: false, // We handle toast manually for update
-    redirectPath: `/admin/events/${eventId}`,
-  });
+  // Use dedicated hooks for create and update
+  const createMutation = useCreateEvent();
+  const updateMutation = useUpdateEvent(eventId || '');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

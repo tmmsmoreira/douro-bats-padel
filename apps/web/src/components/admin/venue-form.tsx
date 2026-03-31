@@ -21,7 +21,7 @@ import type { CreateVenueDto, UpdateVenueDto } from '@padel/types';
 import { PlusIcon, PlusIconHandle, XIcon } from 'lucide-animated';
 import { useTranslations } from 'next-intl';
 import { getShimmerDataURL } from '@/lib/image-blur';
-import { useFormMutation } from '@/hooks';
+import { useCreateVenue, useUpdateVenue } from '@/hooks/use-venues';
 
 interface VenueFormProps {
   venueId?: string;
@@ -64,15 +64,9 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
 
   const [courtInput, setCourtInput] = useState('');
 
-  // Use the standardized form mutation hook
-  const saveMutation = useFormMutation<CreateVenueDto | UpdateVenueDto>({
-    endpoint: venueId ? `/venues/${venueId}` : '/venues',
-    method: venueId ? 'PATCH' : 'POST',
-    invalidateKeys: venueId ? [['venues'], ['venue', venueId]] : [['venues']],
-    successMessage: venueId ? t('venueUpdatedSuccess') : t('venueCreatedSuccess'),
-    errorMessage: venueId ? t('venueUpdateError') : t('venueCreateError'),
-    redirectPath: '/admin/venues',
-  });
+  // Use dedicated hooks for create and update
+  const createMutation = useCreateVenue();
+  const updateMutation = useUpdateVenue(venueId || '');
 
   const handleAddCourt = () => {
     const trimmedCourt = courtInput.trim();
@@ -128,7 +122,12 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
       }
     }
 
-    saveMutation.mutate(dto);
+    // Call appropriate mutation based on mode
+    if (venueId) {
+      updateMutation.mutate(dto as UpdateVenueDto);
+    } else {
+      createMutation.mutate(dto as CreateVenueDto);
+    }
   };
 
   return (
@@ -246,7 +245,7 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
           <LoadingButton
             className="w-full"
             type="submit"
-            isLoading={saveMutation.isPending}
+            isLoading={createMutation.isPending || updateMutation.isPending}
             loadingText={venueId ? t('updating') : t('creating')}
             animate
           >

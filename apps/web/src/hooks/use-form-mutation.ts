@@ -38,8 +38,9 @@ interface UseFormMutationOptions<_TData, TResponse = unknown> {
 
   /**
    * Custom success callback
+   * Can be synchronous or return a Promise for async operations
    */
-  onSuccess?: (data: TResponse) => void;
+  onSuccess?: (data: TResponse) => void | Promise<void>;
 
   /**
    * Custom error callback
@@ -111,24 +112,25 @@ export function useFormMutation<TData = unknown, TResponse = unknown>({
 
       return res.json() as Promise<TResponse>;
     },
-    onSuccess: (data) => {
-      // Invalidate queries
-      invalidateKeys.forEach((key) => {
-        queryClient.invalidateQueries({ queryKey: key });
-      });
+    onSuccess: async (data) => {
+      // Invalidate queries and wait for them to complete
+      await Promise.all(
+        invalidateKeys.map((key) => queryClient.invalidateQueries({ queryKey: key }))
+      );
 
       // Show success toast
       if (showToast && successMessage) {
         toast.success(successMessage);
       }
 
-      // Custom success callback
+      // Custom success callback (await it if it returns a promise)
       if (customOnSuccess) {
-        customOnSuccess(data);
+        await Promise.resolve(customOnSuccess(data));
       }
 
       // Redirect if path provided
-      if (redirectPath) {
+      // Only redirect if there's no custom onSuccess (to avoid double redirect)
+      if (redirectPath && !customOnSuccess) {
         router.push(redirectPath);
       }
     },

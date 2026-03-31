@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useQuery, useQueryClient, UseMutationResult } from '@tanstack/react-query';
+import { useQuery, UseMutationResult } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
 import { Lock } from 'lucide-react';
 import { LockIcon, LockIconHandle } from 'lucide-animated';
-import { useAuthFetch, usePublishMatches } from '@/hooks';
+import { useAuthFetch, usePublishMatches, useSaveMatchResults } from '@/hooks';
+import type { MatchResultData } from '@/hooks/use-matches';
 import { useTranslations } from 'next-intl';
 import { MatchResultEntry } from '../shared/draw';
 import { DataStateWrapper } from '@/components/shared';
@@ -55,7 +56,6 @@ interface ResultsEntryProps {
 export function ResultsEntry({ eventId }: ResultsEntryProps) {
   const t = useTranslations('resultsEntry');
   const authFetch = useAuthFetch();
-  const queryClient = useQueryClient();
   const [showPublishDialog, setShowPublishDialog] = useState(false);
   const [matchResults, setMatchResults] = useState<
     Record<string, { setsA: number; setsB: number }>
@@ -92,7 +92,8 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
     }
   }, [matches]);
 
-  // Use custom hook for publishing matches
+  // Use custom hooks for saving and publishing matches
+  const saveResultsMutation = useSaveMatchResults(eventId);
   const publishMutation = usePublishMatches(eventId, () => {
     setShowPublishDialog(false);
   });
@@ -115,7 +116,7 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
 
     // Collect all results that have been entered
     const resultsToSave = draw.assignments
-      .map((assignment) => {
+      .map((assignment): MatchResultData | null => {
         const key = `${assignment.courtId}-${assignment.round}`;
         const result = matchResults[key];
 
@@ -146,22 +147,14 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
           tier: assignment.tier,
         };
       })
-      .filter(Boolean);
+      .filter((result): result is MatchResultData => result !== null);
 
     if (resultsToSave.length === 0) {
       toast.info(t('noChangesToSave') || 'No changes to save');
       return;
     }
 
-    // Save all results
-    Promise.all(resultsToSave.map((result) => authFetch.post('/matches', result)))
-      .then(() => {
-        queryClient.invalidateQueries({ queryKey: ['matches', eventId] });
-        toast.success(t('resultsSaved', { count: resultsToSave.length }));
-      })
-      .catch((error: Error) => {
-        toast.error(`Failed to save results: ${error.message}`);
-      });
+    saveResultsMutation.mutate(resultsToSave);
   };
 
   const isLoadingData = isLoading || isLoadingEvent;

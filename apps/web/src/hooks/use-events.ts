@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import type { EventWithRSVP } from '@padel/types';
+import type { EventWithRSVP, CreateEventDto } from '@padel/types';
 import { useAuthFetch } from './use-api';
 
 interface UseEventsOptions {
@@ -175,9 +176,14 @@ export function useDeleteEvent(eventId: string, onSuccessCallback?: () => void) 
     mutationFn: async () => {
       return authFetch.delete(`/events/${eventId}`);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-events'] });
+    onSuccess: async () => {
+      // Invalidate and wait for refetch to complete before navigation
+      await queryClient.invalidateQueries({ queryKey: ['admin-events'] });
       toast.success('Event deleted successfully');
+
+      // Small delay to ensure the UI updates with fresh data
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
       onSuccessCallback?.();
     },
     onError: (error: Error) => {
@@ -204,6 +210,62 @@ export function useRemovePlayerFromEvent(eventId: string) {
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to remove player from event');
+    },
+  });
+}
+
+/**
+ * Hook to create a new event
+ */
+export function useCreateEvent() {
+  const queryClient = useQueryClient();
+  const authFetch = useAuthFetch();
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: async (data: CreateEventDto) => {
+      return authFetch.post<{ id: string }>('/events', data);
+    },
+    onSuccess: async (data) => {
+      // Invalidate admin events list
+      await queryClient.invalidateQueries({ queryKey: ['admin-events'] });
+
+      // Small delay to ensure backend transaction is committed
+      await new Promise((resolve) => setTimeout(resolve, 150));
+
+      // Navigate to the newly created event
+      router.push(`/admin/events/${data.id}`);
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to create event');
+    },
+  });
+}
+
+/**
+ * Hook to update an existing event
+ */
+export function useUpdateEvent(eventId: string) {
+  const queryClient = useQueryClient();
+  const authFetch = useAuthFetch();
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: async (data: Partial<CreateEventDto>) => {
+      return authFetch.patch(`/events/${eventId}`, data);
+    },
+    onSuccess: async () => {
+      // Invalidate queries
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['admin-events'] }),
+        queryClient.invalidateQueries({ queryKey: ['event', eventId] }),
+      ]);
+
+      toast.success('Event updated successfully');
+      router.push(`/admin/events/${eventId}`);
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to update event');
     },
   });
 }

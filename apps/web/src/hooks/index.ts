@@ -20,3 +20,4 @@ export * from './use-scroll-direction';
 export * from './use-swipe-back';
 export * from './use-swipe-tabs';
 export * from './use-toast-native';
+export * from './use-venues';

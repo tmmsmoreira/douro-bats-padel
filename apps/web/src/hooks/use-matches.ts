@@ -2,6 +2,41 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useAuthFetch } from './use-api';
 
+export interface MatchResultData {
+  eventId: string;
+  courtId: string;
+  round: number;
+  setsA: number;
+  setsB: number;
+  tier?: string;
+}
+
+/**
+ * Hook to save multiple match results
+ */
+export function useSaveMatchResults(eventId: string) {
+  const queryClient = useQueryClient();
+  const authFetch = useAuthFetch();
+
+  return useMutation({
+    mutationFn: async (results: MatchResultData[]) => {
+      // Save all results in parallel
+      return Promise.all(results.map((result) => authFetch.post('/matches', result)));
+    },
+    onSuccess: async (_, results) => {
+      // Invalidate matches cache
+      await queryClient.invalidateQueries({ queryKey: ['matches', eventId] });
+
+      toast.success(
+        `Results saved successfully (${results.length} ${results.length === 1 ? 'match' : 'matches'})`
+      );
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to save results');
+    },
+  });
+}
+
 /**
  * Hook to publish match results for an event
  */

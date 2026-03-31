@@ -194,6 +194,46 @@
     }
   },
   "home": {
+    "hero": {
+      "title": "Your Padel Community",
+      "subtitle": "Join, Play, Compete",
+      "description": "Connect with players, join tournaments, and track your progress in the Douro Bats Padel community.",
+      "ctaPrimary": "Get Started",
+      "ctaSecondary": "View Events",
+      "ctaSignIn": "Sign In"
+    },
+    "features": {
+      "title": "Everything You Need",
+      "subtitle": "Built for players, by players",
+      "tournament": {
+        "title": "Competitive Tournaments",
+        "description": "Join structured tournaments with automated draws and real-time rankings"
+      },
+      "rsvp": {
+        "title": "Easy Registration",
+        "description": "RSVP to events with automatic waitlist management and instant confirmations"
+      },
+      "rankings": {
+        "title": "Live Rankings",
+        "description": "Track your performance and climb the leaderboard with our ELO-based system"
+      },
+      "community": {
+        "title": "Active Community",
+        "description": "Connect with players of all levels and find your next match"
+      }
+    },
+    "upcomingEvents": {
+      "title": "Upcoming Events",
+      "description": "Register for games and check your status",
+      "viewAll": "View All Events",
+      "noEvents": "No upcoming events available",
+      "loadingEvents": "Loading events..."
+    },
+    "ctaSection": {
+      "title": "Ready to Join?",
+      "description": "Sign up now and become part of the fastest-growing padel community in the Douro region.",
+      "button": "Create Account"
+    },
     "title": "Upcoming Events",
     "description": "Register for games and check your status",
     "descriptionGuest": "Sign in to register for games",

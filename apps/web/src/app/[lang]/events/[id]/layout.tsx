@@ -52,7 +52,7 @@ export default function EventLayout({
               title={event.title || t('untitledEvent')}
               description={<EventHeaderInfo event={event} locale={locale} showStatus={false} />}
               showBackButton
-              backButtonHref="/"
+              backButtonHref="/events"
               backButtonLabel={t('backToEvents')}
             />
 

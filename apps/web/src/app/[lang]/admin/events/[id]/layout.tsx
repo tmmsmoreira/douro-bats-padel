@@ -75,13 +75,13 @@ export default function AdminEventLayout({
                   <EventActionsDropdown
                     event={event}
                     draw={draw ?? null}
-                    onDeleteSuccess={() => router.push('/admin')}
+                    onDeleteSuccess={() => router.push('/admin/events')}
                   />
                 }
               />
             }
             showBackButton
-            backButtonHref="/admin"
+            backButtonHref="/admin/events"
             backButtonLabel={t('backToEvents')}
           />
 

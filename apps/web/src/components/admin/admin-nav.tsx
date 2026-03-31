@@ -63,7 +63,7 @@ export function AdminNav() {
   }, [mobileMenuOpen]);
 
   const navItems = [
-    { href: '/admin', label: t('events') },
+    { href: '/admin/events', label: t('events') },
     { href: '/admin/players', label: t('players') },
     { href: '/leaderboard', label: t('ranking') },
     { href: '/admin/venues', label: t('venues') },
@@ -72,10 +72,10 @@ export function AdminNav() {
   // Tab bar items for mobile navigation
   const tabBarItems = [
     {
-      id: '/admin',
+      id: '/admin/events',
       label: t('events'),
       icon: <CalendarDaysIcon className="w-6 h-6" />,
-      onClick: () => router.push('/admin'),
+      onClick: () => router.push('/admin/events'),
     },
     {
       id: '/admin/players',
@@ -101,7 +101,7 @@ export function AdminNav() {
   // This ensures child routes also highlight their parent tab
   const getActiveTab = () => {
     // Check for exact matches first
-    if (pathname === '/admin') return '/admin';
+    if (pathname === '/admin/events') return '/admin/events';
     if (pathname === '/leaderboard') return '/leaderboard';
 
     // Check for child routes
@@ -109,11 +109,11 @@ export function AdminNav() {
     if (pathname.startsWith('/players/')) return '/admin/players'; // Player detail pages
     if (pathname.startsWith('/admin/venues')) return '/admin/venues';
     if (pathname.startsWith('/venues/')) return '/admin/venues'; // Venue detail pages
-    if (pathname.startsWith('/admin/events')) return '/admin';
-    if (pathname.startsWith('/events/')) return '/admin'; // Event detail pages
+    if (pathname.startsWith('/admin/events')) return '/admin/events';
+    if (pathname.startsWith('/events/')) return '/admin/events'; // Event detail pages
 
     // Default to events tab for any other /admin/* routes
-    if (pathname.startsWith('/admin')) return '/admin';
+    if (pathname.startsWith('/admin')) return '/admin/events';
 
     return pathname;
   };
@@ -131,7 +131,14 @@ export function AdminNav() {
           <div className="container mx-auto px-4">
             <div className="flex h-16 items-center justify-between">
               {/* Logo */}
-              <Link href="/admin" className="flex items-center gap-3 shrink-0">
+              <Link
+                href="/"
+                className="flex items-center gap-3 shrink-0"
+                onClick={() => {
+                  sessionStorage.setItem('lastView', 'player');
+                  window.dispatchEvent(new Event('viewChanged'));
+                }}
+              >
                 <Image
                   src="/icons/logo.png"
                   alt="Douro Bats Padel"
@@ -166,7 +173,14 @@ export function AdminNav() {
           <div className="container mx-auto px-4">
             <div className="flex h-16 items-center justify-between">
               {/* Logo */}
-              <Link href="/admin" className="flex items-center gap-3 shrink-0">
+              <Link
+                href="/"
+                className="flex items-center gap-3 shrink-0"
+                onClick={() => {
+                  sessionStorage.setItem('lastView', 'player');
+                  window.dispatchEvent(new Event('viewChanged'));
+                }}
+              >
                 <Image
                   src="/icons/logo.png"
                   alt="Douro Bats Padel"

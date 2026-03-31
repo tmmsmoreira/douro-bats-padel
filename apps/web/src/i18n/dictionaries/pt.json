@@ -176,6 +176,46 @@
     }
   },
   "home": {
+    "hero": {
+      "title": "A Sua Comunidade de Padel",
+      "subtitle": "Junte-se, Jogue, Compita",
+      "description": "Conecte-se com jogadores, participe em torneios e acompanhe o seu progresso na comunidade Douro Bats Padel.",
+      "ctaPrimary": "Começar",
+      "ctaSecondary": "Ver Eventos",
+      "ctaSignIn": "Entrar"
+    },
+    "features": {
+      "title": "Tudo o Que Precisa",
+      "subtitle": "Feito por jogadores, para jogadores",
+      "tournament": {
+        "title": "Torneios Competitivos",
+        "description": "Participe em torneios estruturados com sorteios automáticos e classificações em tempo real"
+      },
+      "rsvp": {
+        "title": "Registo Fácil",
+        "description": "Inscreva-se em eventos com gestão automática de lista de espera e confirmações instantâneas"
+      },
+      "rankings": {
+        "title": "Classificações ao Vivo",
+        "description": "Acompanhe o seu desempenho e suba na tabela classificativa com o nosso sistema baseado em ELO"
+      },
+      "community": {
+        "title": "Comunidade Ativa",
+        "description": "Conecte-se com jogadores de todos os níveis e encontre o seu próximo jogo"
+      }
+    },
+    "upcomingEvents": {
+      "title": "Próximos Eventos",
+      "description": "Registe-se para participar nos jogos e verifique o seu estado",
+      "viewAll": "Ver Todos os Eventos",
+      "noEvents": "Sem eventos próximos disponíveis",
+      "loadingEvents": "A carregar eventos..."
+    },
+    "ctaSection": {
+      "title": "Pronto para Participar?",
+      "description": "Registe-se agora e faça parte da comunidade de padel que mais cresce na região do Douro.",
+      "button": "Criar Conta"
+    },
     "title": "Próximos Eventos",
     "description": "Registe-se para participar nos jogos e verifique o seu estado",
     "descriptionGuest": "Inicie sessão para se registar nos jogos",

@@ -62,17 +62,17 @@ export function PlayerNav() {
     session?.user?.roles?.includes('EDITOR') || session?.user?.roles?.includes('ADMIN');
 
   const navItems = [
-    { href: '/', label: t('events') },
+    { href: '/events', label: t('events') },
     { href: '/leaderboard', label: t('ranking') },
   ];
 
   // Tab bar items for mobile navigation
   const tabBarItems = [
     {
-      id: '/',
+      id: '/events',
       label: t('events'),
       icon: <CalendarDaysIcon className="w-6 h-6" />,
-      onClick: () => router.push('/'),
+      onClick: () => router.push('/events'),
     },
     {
       id: '/leaderboard',
@@ -93,11 +93,12 @@ export function PlayerNav() {
   const getActiveTab = () => {
     // Check for exact matches first
     if (pathname === '/') return '/';
+    if (pathname === '/events') return '/events';
     if (pathname === '/leaderboard') return '/leaderboard';
     if (pathname === '/profile') return '/profile';
 
-    // Check for child routes
-    if (pathname.startsWith('/events/')) return '/';
+    // Check for child routes - event detail pages should highlight events tab
+    if (pathname.startsWith('/events/')) return '/events';
 
     return pathname;
   };

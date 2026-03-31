@@ -2,14 +2,14 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import type { Assignment } from '@/components/shared/draw';
 
 interface PlayerSelectionColumnProps {
-  team: 'A' | 'B';
   teamPlayers: string[];
   otherTeamPlayers: string[];
   allPlayers: Assignment['teamA'];
   onTogglePlayer: (playerId: string) => void;
   teamLabel: string;
-  bgColor: string;
   selectedColor: string;
+  playerTeamNumberMap?: Map<string, number>;
+  teamText?: string;
 }
 
 export function PlayerSelectionColumn({
@@ -18,12 +18,13 @@ export function PlayerSelectionColumn({
   allPlayers,
   onTogglePlayer,
   teamLabel,
-  bgColor,
   selectedColor,
+  playerTeamNumberMap,
+  teamText = 'Team',
 }: PlayerSelectionColumnProps) {
   return (
     <div className="space-y-2">
-      <h3 className={`font-medium text-center p-2 ${bgColor} rounded-lg`}>
+      <h3 className="text-sm font-medium text-center p-2">
         {teamLabel} ({teamPlayers.length}/2)
       </h3>
       <div className="space-y-1 max-h-96 overflow-y-auto">
@@ -31,6 +32,7 @@ export function PlayerSelectionColumn({
           const isSelected = teamPlayers.includes(player.id);
           const isInOtherTeam = otherTeamPlayers.includes(player.id);
           const canSelect = !isInOtherTeam && teamPlayers.length < 2;
+          const teamNumber = playerTeamNumberMap?.get(player.id);
 
           return (
             <button
@@ -42,7 +44,7 @@ export function PlayerSelectionColumn({
                   ? selectedColor
                   : isInOtherTeam
                     ? 'opacity-50 cursor-not-allowed'
-                    : 'hover:bg-secondary'
+                    : 'hover:bg-secondary hover:text-secondary-foreground'
               }`}
             >
               <div className="flex items-center justify-between gap-2">
@@ -65,7 +67,16 @@ export function PlayerSelectionColumn({
                   </Avatar>
                   <span className="text-sm font-medium truncate">{player.name}</span>
                 </div>
-                <span className="text-xs text-muted-foreground shrink-0">{player.rating}</span>
+                <div className="flex items-center uppercase gap-6 shrink-0">
+                  {teamNumber !== undefined && (
+                    <span className="text-xs text-muted-foreground font-medium tabular-nums">
+                      {teamText} {teamNumber}
+                    </span>
+                  )}
+                  <span className="text-xs tabular-nums text-muted-foreground">
+                    {player.rating}
+                  </span>
+                </div>
               </div>
             </button>
           );

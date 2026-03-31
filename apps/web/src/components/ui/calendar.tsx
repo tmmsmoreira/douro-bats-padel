@@ -1,109 +1,218 @@
 'use client';
 
 import * as React from 'react';
-import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-animated';
-import { DayPicker, type DropdownProps } from 'react-day-picker';
+import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
+import {
+  DayPicker,
+  getDefaultClassNames,
+  type DayButton,
+  type DropdownProps,
+} from 'react-day-picker';
 
 import { cn } from '@/lib/utils';
-import { buttonVariants } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker>;
+function Calendar({
+  className,
+  classNames,
+  showOutsideDays = true,
+  captionLayout = 'label',
+  buttonVariant = 'ghost',
+  formatters,
+  components,
+  ...props
+}: React.ComponentProps<typeof DayPicker> & {
+  buttonVariant?: React.ComponentProps<typeof Button>['variant'];
+}) {
+  const defaultClassNames = getDefaultClassNames();
 
-function Calendar({ className, classNames, showOutsideDays = true, ...props }: CalendarProps) {
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
-      className={cn('p-3', className)}
+      className={cn(
+        'group/calendar bg-background p-3 [--cell-size:--spacing(8)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent',
+        String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
+        String.raw`rtl:**:[.rdp-button\_previous>svg]:rotate-180`,
+        className
+      )}
+      captionLayout={captionLayout}
+      formatters={{
+        formatMonthDropdown: (date) => date.toLocaleString('default', { month: 'short' }),
+        ...formatters,
+      }}
       classNames={{
-        months: 'flex flex-col sm:flex-row space-y-4 sm:space-y-0',
-        month: 'space-y-4',
-        month_caption: 'justify-center pt-1 relative items-center',
-        caption_label: 'text-sm font-medium',
-        nav: 'hidden',
-        month_grid: 'w-full border-collapse space-y-1',
-        weekdays: 'flex',
-        weekday: 'text-muted-foreground rounded-md w-9 font-normal text-[0.8rem] text-center',
-        week: 'flex mt-2',
-        day: 'text-center text-sm p-0 relative w-9 h-9 flex items-center justify-center',
-        day_button: cn(
-          buttonVariants({ variant: 'ghost' }),
-          'h-9 w-9 p-0 font-normal aria-selected:opacity-100'
+        root: cn('w-fit', defaultClassNames.root),
+        months: cn('relative flex flex-col gap-4 md:flex-row', defaultClassNames.months),
+        month: cn('flex w-full flex-col gap-4', defaultClassNames.month),
+        nav: cn(
+          'pointer-events-none absolute inset-x-0 top-0 flex w-full items-center justify-between gap-1',
+          defaultClassNames.nav
         ),
-        range_end: 'day-range-end',
-        selected:
-          'bg-primary text-primary-foreground rounded-md hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground',
-        today: 'bg-accent rounded-md text-accent-foreground',
-        outside:
-          'day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30',
-        disabled: 'text-muted-foreground opacity-50',
-        range_middle: 'aria-selected:bg-accent aria-selected:text-accent-foreground',
-        hidden: 'invisible',
-        dropdown_root: 'relative inline-flex items-center',
-        dropdown:
-          'absolute inset-0 w-full appearance-none opacity-0 cursor-pointer z-10 m-0 p-0 text-left',
-        dropdowns: 'flex gap-2 items-center justify-center',
-        dropdown_month: 'relative inline-flex items-center',
-        dropdown_year: 'relative inline-flex items-center',
-        chevron: 'fill-current',
+        button_previous: cn(
+          buttonVariants({ variant: buttonVariant }),
+          'pointer-events-auto size-(--cell-size) p-0 select-none aria-disabled:opacity-50',
+          defaultClassNames.button_previous
+        ),
+        button_next: cn(
+          buttonVariants({ variant: buttonVariant }),
+          'pointer-events-auto size-(--cell-size) p-0 select-none aria-disabled:opacity-50',
+          defaultClassNames.button_next
+        ),
+        month_caption: cn(
+          'flex h-(--cell-size) w-full items-center justify-center px-(--cell-size)',
+          defaultClassNames.month_caption
+        ),
+        dropdowns: cn(
+          'flex h-(--cell-size) w-full items-center justify-center gap-1.5 text-sm font-medium',
+          defaultClassNames.dropdowns
+        ),
+        dropdown_root: cn(
+          'relative rounded-md border border-input shadow-xs has-focus:border-ring has-focus:ring-[3px] has-focus:ring-ring/50',
+          defaultClassNames.dropdown_root
+        ),
+        dropdown: cn('absolute inset-0 bg-popover opacity-0', defaultClassNames.dropdown),
+        caption_label: cn(
+          'font-medium select-none',
+          captionLayout === 'label'
+            ? 'text-sm'
+            : 'flex h-8 items-center gap-1 rounded-md pr-1 pl-2 text-sm [&>svg]:size-3.5 [&>svg]:text-muted-foreground',
+          defaultClassNames.caption_label
+        ),
+        table: 'w-full border-collapse',
+        weekdays: cn('flex', defaultClassNames.weekdays),
+        weekday: cn(
+          'flex-1 rounded-md text-[0.8rem] font-normal text-muted-foreground select-none',
+          defaultClassNames.weekday
+        ),
+        week: cn('mt-2 flex w-full', defaultClassNames.week),
+        week_number_header: cn('w-(--cell-size) select-none', defaultClassNames.week_number_header),
+        week_number: cn(
+          'text-[0.8rem] text-muted-foreground select-none',
+          defaultClassNames.week_number
+        ),
+        day: cn(
+          'group/day relative aspect-square h-full w-full p-0 text-center select-none [&:last-child[data-selected=true]_button]:rounded-r-md',
+          props.showWeekNumber
+            ? '[&:nth-child(2)[data-selected=true]_button]:rounded-l-md'
+            : '[&:first-child[data-selected=true]_button]:rounded-l-md',
+          defaultClassNames.day
+        ),
+        range_start: cn('rounded-l-md bg-accent', defaultClassNames.range_start),
+        range_middle: cn('rounded-none', defaultClassNames.range_middle),
+        range_end: cn('rounded-r-md bg-accent', defaultClassNames.range_end),
+        today: cn(
+          'rounded-md bg-accent text-accent-foreground data-[selected=true]:rounded-none',
+          defaultClassNames.today
+        ),
+        outside: cn(
+          'text-muted-foreground aria-selected:text-muted-foreground',
+          defaultClassNames.outside
+        ),
+        disabled: cn('text-muted-foreground opacity-50', defaultClassNames.disabled),
+        hidden: cn('invisible', defaultClassNames.hidden),
         ...classNames,
       }}
       components={{
-        Dropdown: (props: DropdownProps) => {
-          const { value, onChange, options } = props;
-          const selected = options?.find((option) => option.value === value);
-          const handleChange = (value: string) => {
-            const changeEvent = {
-              target: { value },
-            } as React.ChangeEvent<HTMLSelectElement>;
-            onChange?.(changeEvent);
-          };
-          return (
-            <Select value={value?.toString()} onValueChange={handleChange}>
-              <SelectTrigger className="h-8 pr-1.5 focus:ring-0">
-                <SelectValue>{selected?.label}</SelectValue>
-              </SelectTrigger>
-              <SelectContent position="popper" className="max-h-80">
-                {options?.map((option, id: number) => (
-                  <SelectItem key={`${option.value}-${id}`} value={option.value?.toString() ?? ''}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          );
+        Root: ({ className, rootRef, ...props }) => {
+          return <div data-slot="calendar" ref={rootRef} className={cn(className)} {...props} />;
         },
-        Chevron: ({ orientation }) => {
+        Chevron: ({ className, orientation, ...props }) => {
           if (orientation === 'left') {
-            return <ChevronLeftIcon size={16} className="h-4 w-4" />;
+            return <ChevronLeftIcon className={cn('size-4', className)} {...props} />;
           }
+
           if (orientation === 'right') {
-            return <ChevronRightIcon size={16} className="h-4 w-4" />;
+            return <ChevronRightIcon className={cn('size-4', className)} {...props} />;
           }
-          if (orientation === 'down') {
-            return <ChevronDownIcon size={16} className="h-4 w-4" />;
-          }
-          return <ChevronRightIcon size={16} className="h-4 w-4" />;
+
+          return <ChevronDownIcon className={cn('size-4', className)} {...props} />;
         },
-        CaptionLabel: ({ children }) => {
+        DayButton: CalendarDayButton,
+        WeekNumber: ({ children, ...props }) => {
           return (
-            <span className="inline-flex items-center gap-1 text-sm font-medium">
-              {children}
-              <ChevronDownIcon size={16} className="h-3 w-3 opacity-50" />
-            </span>
+            <td {...props}>
+              <div className="flex size-(--cell-size) items-center justify-center text-center">
+                {children}
+              </div>
+            </td>
           );
         },
+        Dropdown: CalendarDropdown,
+        ...components,
       }}
       {...props}
     />
   );
 }
-Calendar.displayName = 'Calendar';
 
-export { Calendar };
+function CalendarDayButton({
+  className,
+  day,
+  modifiers,
+  ...props
+}: React.ComponentProps<typeof DayButton>) {
+  const defaultClassNames = getDefaultClassNames();
+
+  const ref = React.useRef<HTMLButtonElement>(null);
+  React.useEffect(() => {
+    if (modifiers.focused) ref.current?.focus();
+  }, [modifiers.focused]);
+
+  return (
+    <Button
+      ref={ref}
+      variant="ghost"
+      size="icon"
+      data-day={day.date.toLocaleDateString()}
+      data-selected-single={
+        modifiers.selected &&
+        !modifiers.range_start &&
+        !modifiers.range_end &&
+        !modifiers.range_middle
+      }
+      data-range-start={modifiers.range_start}
+      data-range-end={modifiers.range_end}
+      data-range-middle={modifiers.range_middle}
+      className={cn(
+        'flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-[3px] group-data-[focused=true]/day:ring-ring/50 data-[range-end=true]:rounded-md data-[range-end=true]:rounded-r-md data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground data-[range-middle=true]:rounded-none data-[range-middle=true]:bg-accent data-[range-middle=true]:text-accent-foreground data-[range-start=true]:rounded-md data-[range-start=true]:rounded-l-md data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground dark:hover:text-accent-foreground [&>span]:text-xs [&>span]:opacity-70',
+        defaultClassNames.day,
+        className
+      )}
+      {...props}
+    />
+  );
+}
+
+function CalendarDropdown({ value, onChange, options }: DropdownProps) {
+  if (!options) return <></>;
+
+  const selected = options.find((option) => option.value === value);
+  const handleChange = (value: string) => {
+    const changeEvent = {
+      target: { value },
+    } as React.ChangeEvent<HTMLSelectElement>;
+    onChange?.(changeEvent);
+  };
+  return (
+    <Select
+      value={value?.toString()}
+      onValueChange={(value) => {
+        handleChange(value);
+      }}
+    >
+      <SelectTrigger className="pr-1.5 focus:ring-0">
+        <SelectValue>{selected?.label}</SelectValue>
+      </SelectTrigger>
+      <SelectContent position="popper" className="max-h-80">
+        {options.map((option, id: number) => (
+          <SelectItem key={`${option.value}-${id}`} value={option.value?.toString() ?? ''}>
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+export { Calendar, CalendarDayButton };

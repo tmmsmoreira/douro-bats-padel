@@ -164,7 +164,7 @@ export function DatePicker({
             </Dialog>
           </>
         ) : (
-          <Popover open={open} onOpenChange={setOpen} modal={false}>
+          <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
               <InputGroupButton
                 variant="ghost"
@@ -177,7 +177,7 @@ export function DatePicker({
                 <span className="sr-only">Select date</span>
               </InputGroupButton>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end" alignOffset={-8} sideOffset={10}>
+            <PopoverContent className="w-auto overflow-hidden p-0">
               {calendarComponent}
             </PopoverContent>
           </Popover>

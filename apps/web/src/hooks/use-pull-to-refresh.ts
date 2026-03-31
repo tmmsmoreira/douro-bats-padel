@@ -90,6 +90,15 @@ export function usePullToRefresh(options: UsePullToRefreshOptions = {}): PullToR
       // Don't start if overscroll is disabled (e.g., when mobile menu is open)
       if (document.body.style.overscrollBehavior === 'none') return;
 
+      // Don't start if a drawer or dialog is open
+      const hasOpenDrawer = document.querySelector(
+        '[data-slot="drawer-overlay"][data-state="open"]'
+      );
+      const hasOpenDialog = document.querySelector(
+        '[data-slot="dialog-overlay"][data-state="open"]'
+      );
+      if (hasOpenDrawer || hasOpenDialog) return;
+
       // Only start if we're at the top of the page
       scrollY.current = window.scrollY;
       if (scrollY.current === 0) {
@@ -100,6 +109,15 @@ export function usePullToRefresh(options: UsePullToRefreshOptions = {}): PullToR
     const handleTouchMove = (e: TouchEvent) => {
       // Don't pull if overscroll is disabled (e.g., when mobile menu is open)
       if (document.body.style.overscrollBehavior === 'none') return;
+
+      // Don't pull if a drawer or dialog is open
+      const hasOpenDrawer = document.querySelector(
+        '[data-slot="drawer-overlay"][data-state="open"]'
+      );
+      const hasOpenDialog = document.querySelector(
+        '[data-slot="dialog-overlay"][data-state="open"]'
+      );
+      if (hasOpenDrawer || hasOpenDialog) return;
 
       // Only pull if we're at the top of the page
       if (scrollY.current !== 0 || isRefreshing) return;

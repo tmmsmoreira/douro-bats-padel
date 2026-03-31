@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Clock } from 'lucide-react';
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
+import { Clock, ChevronDown } from 'lucide-react';
 import { TierSection, TeamList } from '@/components/shared/draw';
 import type { Assignment, TierTimeSlot } from '@/components/shared/draw';
+import { cn } from '@/lib/utils';
 
 interface Team {
   id: string;
@@ -11,8 +13,8 @@ interface Team {
   avgRating: number;
 }
 
-interface TierAccordionItemProps {
-  value: string;
+interface TierCollapsibleItemProps {
+  defaultOpen?: boolean;
   tier: 'MASTERS' | 'EXPLORERS';
   tierName: string;
   assignments: Assignment[];
@@ -22,7 +24,7 @@ interface TierAccordionItemProps {
   teamsCount: number;
   fieldsCount: number;
   canEdit: boolean;
-  onEditTeam: (team: Team, assignmentIds: string[]) => void;
+  onEditTeam: (team: Team, assignmentIds: string[], teamNumber: number) => void;
   tierColor?: string;
   translations: {
     tierName: string;
@@ -39,8 +41,8 @@ interface TierAccordionItemProps {
   };
 }
 
-export function TierAccordionItem({
-  value,
+export function TierCollapsibleItem({
+  defaultOpen = false,
   tier,
   tierName,
   assignments,
@@ -53,12 +55,14 @@ export function TierAccordionItem({
   onEditTeam,
   tierColor,
   translations: t,
-}: TierAccordionItemProps) {
+}: TierCollapsibleItemProps) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+
   if (assignments.length === 0) return null;
 
   return (
-    <AccordionItem value={value} className="border rounded-lg glass-card">
-      <AccordionTrigger className="px-6 hover:no-underline">
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="border rounded-lg glass-card">
+      <CollapsibleTrigger className="flex w-full items-start justify-between gap-4 px-6 py-4 text-left outline-none transition-colors hover:bg-muted/50">
         <div className="flex flex-col gap-3 w-full pr-2">
           {/* Row 1: Tier Title + Time Slot */}
           <div className="flex items-center justify-between w-full">
@@ -91,40 +95,48 @@ export function TierAccordionItem({
             </Badge>
           </div>
         </div>
-      </AccordionTrigger>
-      <AccordionContent className="px-6 pb-6">
-        <div className="space-y-6">
-          {/* Team List */}
-          <TeamList
-            assignments={assignments}
-            onEditTeam={onEditTeam}
-            canEdit={canEdit}
-            translations={{
-              tierName: t.tierName,
-              teamListTitle: t.teamListTitle,
-              teamListDescription: t.teamListDescription,
-              team: t.team,
-              avgRating: t.avgRating,
-            }}
-          />
+        <ChevronDown
+          className={cn(
+            'h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200',
+            isOpen && 'rotate-180'
+          )}
+        />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="text-sm">
+        <div className="p-6">
+          <div className="space-y-6">
+            {/* Team List */}
+            <TeamList
+              assignments={assignments}
+              onEditTeam={onEditTeam}
+              canEdit={canEdit}
+              translations={{
+                tierName: t.tierName,
+                teamListTitle: t.teamListTitle,
+                teamListDescription: t.teamListDescription,
+                team: t.team,
+                avgRating: t.avgRating,
+              }}
+            />
 
-          {/* Rounds */}
-          <TierSection
-            tier={tier}
-            rounds={rounds}
-            assignments={assignments}
-            timeSlot={timeSlot}
-            eventDate={eventDate}
-            translations={{
-              tierName: t.tierName,
-              round: t.round,
-              courtLabel: t.courtLabel,
-              team: t.team,
-            }}
-            canEdit={false}
-          />
+            {/* Rounds */}
+            <TierSection
+              tier={tier}
+              rounds={rounds}
+              assignments={assignments}
+              timeSlot={timeSlot}
+              eventDate={eventDate}
+              translations={{
+                tierName: t.tierName,
+                round: t.round,
+                courtLabel: t.courtLabel,
+                team: t.team,
+              }}
+              canEdit={false}
+            />
+          </div>
         </div>
-      </AccordionContent>
-    </AccordionItem>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }

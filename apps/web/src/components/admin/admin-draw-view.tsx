@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useQuery, UseMutationResult } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
-import { Accordion } from '@/components/ui/accordion';
 import { DataStateWrapper } from '@/components/shared';
 import { WaitlistSection } from '@/components/shared/draw';
 import type { Draw, Assignment } from '@/components/shared/draw';
@@ -19,14 +18,19 @@ import {
   hasEventPassed,
 } from '@/lib/draw-utils';
 import { GenerateDraw } from './generate-draw';
-import { TierAccordionItem } from './tier-accordion-item';
-import { EditAssignmentDialog } from './edit-assignment-dialog';
+import { TierCollapsibleItem } from './tier-accordion-item';
+import { EditTeamDialog } from './edit-team-dialog';
 
 export function AdminDrawView({ eventId }: { eventId: string }) {
   const t = useTranslations('adminDrawView');
   const { data: session } = useSession();
   const authFetch = useAuthFetch();
-  const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
+  const [editingTeam, setEditingTeam] = useState<{
+    assignmentIds: string[];
+    assignment: Assignment;
+    teamNumber: number;
+    teamPlayers: { id: string; name: string; rating: number }[];
+  } | null>(null);
 
   const { data: draw, isLoading } = useQuery<Draw | null>({
     queryKey: ['draw', eventId, session?.accessToken],
@@ -55,7 +59,7 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
 
   // Use custom hook for mutation
   const updateAssignmentMutation = useUpdateAssignment(eventId, () => {
-    setEditingAssignment(null);
+    setEditingTeam(null);
   });
 
   return (
@@ -71,8 +75,8 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
         <AdminDrawContent
           draw={draw}
           event={event}
-          editingAssignment={editingAssignment}
-          setEditingAssignment={setEditingAssignment}
+          editingTeam={editingTeam}
+          setEditingTeam={setEditingTeam}
           updateAssignmentMutation={updateAssignmentMutation}
           t={t}
         />
@@ -84,8 +88,20 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
 interface AdminDrawContentProps {
   draw: Draw;
   event: EventWithRSVP | null | undefined;
-  editingAssignment: Assignment | null;
-  setEditingAssignment: (assignment: Assignment | null) => void;
+  editingTeam: {
+    assignmentIds: string[];
+    assignment: Assignment;
+    teamNumber: number;
+    teamPlayers: { id: string; name: string; rating: number }[];
+  } | null;
+  setEditingTeam: (
+    team: {
+      assignmentIds: string[];
+      assignment: Assignment;
+      teamNumber: number;
+      teamPlayers: { id: string; name: string; rating: number }[];
+    } | null
+  ) => void;
   updateAssignmentMutation: UseMutationResult<
     unknown,
     Error,
@@ -99,8 +115,8 @@ interface AdminDrawContentProps {
 function AdminDrawContent({
   draw,
   event,
-  editingAssignment,
-  setEditingAssignment,
+  editingTeam,
+  setEditingTeam,
   updateAssignmentMutation,
   t,
 }: AdminDrawContentProps) {
@@ -120,17 +136,33 @@ function AdminDrawContent({
   const eventPassed = hasEventPassed(draw.event.endsAt);
 
   // Handle team edit selection
-  const handleEditTeam = (assignmentIds: string[]) => {
+  const handleEditTeam = (
+    team: {
+      id: string;
+      player1: { id: string; name: string; rating: number };
+      player2: { id: string; name: string; rating: number };
+      avgRating: number;
+    },
+    assignmentIds: string[],
+    teamNumber: number
+  ) => {
     const assignment = draw.assignments.find((a) => assignmentIds.includes(a.id));
-    if (assignment) setEditingAssignment(assignment);
+    if (assignment) {
+      setEditingTeam({
+        assignmentIds,
+        assignment,
+        teamNumber,
+        teamPlayers: [team.player1, team.player2],
+      });
+    }
   };
 
   return (
     <div className="space-y-6">
       {/* Tier Sections */}
-      <Accordion type="single" collapsible defaultValue="masters" className="space-y-4">
-        <TierAccordionItem
-          value="masters"
+      <div className="space-y-4">
+        <TierCollapsibleItem
+          defaultOpen={true}
           tier="MASTERS"
           tierName={t('masters')}
           assignments={masterAssignments}
@@ -140,7 +172,7 @@ function AdminDrawContent({
           teamsCount={mastersTeamsCount}
           fieldsCount={mastersFieldsCount}
           canEdit={!eventPassed}
-          onEditTeam={(_, assignmentIds) => handleEditTeam(assignmentIds)}
+          onEditTeam={handleEditTeam}
           tierColor="bg-yellow-500"
           translations={{
             tierName: t('masters'),
@@ -152,13 +184,13 @@ function AdminDrawContent({
             rounds: t('rounds'),
             fields: t('fields'),
             timeSlot: t('timeSlot'),
-            round: (round) => t('round', { number: round }),
-            courtLabel: (courtId) => t('court', { id: courtId }),
+            round: (round: number) => t('round', { number: round }),
+            courtLabel: (courtId: string) => t('court', { id: courtId }),
           }}
         />
 
-        <TierAccordionItem
-          value="explorers"
+        <TierCollapsibleItem
+          defaultOpen={false}
           tier="EXPLORERS"
           tierName={t('explorers')}
           assignments={explorerAssignments}
@@ -168,7 +200,7 @@ function AdminDrawContent({
           teamsCount={explorersTeamsCount}
           fieldsCount={explorersFieldsCount}
           canEdit={!eventPassed}
-          onEditTeam={(_, assignmentIds) => handleEditTeam(assignmentIds)}
+          onEditTeam={handleEditTeam}
           tierColor="bg-green-500"
           translations={{
             tierName: t('explorers'),
@@ -180,11 +212,11 @@ function AdminDrawContent({
             rounds: t('rounds'),
             fields: t('fields'),
             timeSlot: t('timeSlot'),
-            round: (round) => t('round', { number: round }),
-            courtLabel: (courtId) => t('court', { id: courtId }),
+            round: (round: number) => t('round', { number: round }),
+            courtLabel: (courtId: string) => t('court', { id: courtId }),
           }}
         />
-      </Accordion>
+      </div>
 
       {/* Waitlist Section */}
       <WaitlistSection
@@ -196,19 +228,168 @@ function AdminDrawContent({
       />
 
       {/* Edit Dialog */}
-      {editingAssignment && (
-        <EditAssignmentDialog
-          assignment={editingAssignment}
+      {editingTeam && (
+        <EditTeamDialog
+          assignment={editingTeam.assignment}
           allTierPlayers={getUniquePlayers(
-            draw.assignments.filter((a) => a.tier === editingAssignment.tier)
+            draw.assignments.filter((a) => a.tier === editingTeam.assignment.tier)
           )}
-          onClose={() => setEditingAssignment(null)}
-          onSave={(teamA, teamB) => {
-            updateAssignmentMutation.mutate({
-              assignmentId: editingAssignment.id,
-              teamA,
-              teamB,
+          allTierAssignments={draw.assignments.filter(
+            (a) => a.tier === editingTeam.assignment.tier
+          )}
+          teamNumber={editingTeam.teamNumber}
+          teamPlayers={editingTeam.teamPlayers}
+          onClose={() => setEditingTeam(null)}
+          onSave={async (newTeamPlayers) => {
+            // Detect which players were added and removed
+            const originalPlayerIds = editingTeam.teamPlayers.map((p) => p.id).sort();
+            const newPlayerIds = [...newTeamPlayers].sort();
+
+            const playersRemoved = originalPlayerIds.filter((id) => !newPlayerIds.includes(id));
+            const playersAdded = newPlayerIds.filter((id) => !originalPlayerIds.includes(id));
+
+            // Track which teams need updates (by team key)
+            const teamsToUpdate = new Map<
+              string,
+              { assignmentIds: string[]; newPlayers: string[] }
+            >();
+
+            // 1. Update the team being edited
+            const editedTeamKey = originalPlayerIds.join('-');
+            teamsToUpdate.set(editedTeamKey, {
+              assignmentIds: editingTeam.assignmentIds,
+              newPlayers: newTeamPlayers,
             });
+
+            // 2. If a player was added from another team, find that team and update it
+            if (playersAdded.length > 0 && playersRemoved.length > 0) {
+              const playerAdded = playersAdded[0];
+              const playerRemoved = playersRemoved[0];
+
+              // Find which team currently has the player we're adding
+              const tierAssignments = draw.assignments.filter(
+                (a) => a.tier === editingTeam.assignment.tier
+              );
+
+              for (const assignment of tierAssignments) {
+                // Check Team A
+                if (assignment.teamA.some((p) => p.id === playerAdded)) {
+                  const sourceTeamKey = assignment.teamA
+                    .map((p) => p.id)
+                    .sort()
+                    .join('-');
+
+                  // Don't process the same team twice
+                  if (sourceTeamKey !== editedTeamKey && !teamsToUpdate.has(sourceTeamKey)) {
+                    // Replace the player we're taking with the player we're giving
+                    const updatedPlayers = assignment.teamA.map((p) =>
+                      p.id === playerAdded ? playerRemoved : p.id
+                    );
+
+                    // Find all assignments with this team
+                    const sourceTeamAssignmentIds: string[] = [];
+                    for (const a of tierAssignments) {
+                      const aTeamAKey = a.teamA
+                        .map((p) => p.id)
+                        .sort()
+                        .join('-');
+                      const aTeamBKey = a.teamB
+                        .map((p) => p.id)
+                        .sort()
+                        .join('-');
+                      if (aTeamAKey === sourceTeamKey || aTeamBKey === sourceTeamKey) {
+                        sourceTeamAssignmentIds.push(a.id);
+                      }
+                    }
+
+                    teamsToUpdate.set(sourceTeamKey, {
+                      assignmentIds: sourceTeamAssignmentIds,
+                      newPlayers: updatedPlayers,
+                    });
+                  }
+                  break;
+                }
+
+                // Check Team B
+                if (assignment.teamB.some((p) => p.id === playerAdded)) {
+                  const sourceTeamKey = assignment.teamB
+                    .map((p) => p.id)
+                    .sort()
+                    .join('-');
+
+                  // Don't process the same team twice
+                  if (sourceTeamKey !== editedTeamKey && !teamsToUpdate.has(sourceTeamKey)) {
+                    // Replace the player we're taking with the player we're giving
+                    const updatedPlayers = assignment.teamB.map((p) =>
+                      p.id === playerAdded ? playerRemoved : p.id
+                    );
+
+                    // Find all assignments with this team
+                    const sourceTeamAssignmentIds: string[] = [];
+                    for (const a of tierAssignments) {
+                      const aTeamAKey = a.teamA
+                        .map((p) => p.id)
+                        .sort()
+                        .join('-');
+                      const aTeamBKey = a.teamB
+                        .map((p) => p.id)
+                        .sort()
+                        .join('-');
+                      if (aTeamAKey === sourceTeamKey || aTeamBKey === sourceTeamKey) {
+                        sourceTeamAssignmentIds.push(a.id);
+                      }
+                    }
+
+                    teamsToUpdate.set(sourceTeamKey, {
+                      assignmentIds: sourceTeamAssignmentIds,
+                      newPlayers: updatedPlayers,
+                    });
+                  }
+                  break;
+                }
+              }
+            }
+
+            // 3. Apply all updates
+            for (const [teamKey, { assignmentIds, newPlayers }] of teamsToUpdate) {
+              for (const assignmentId of assignmentIds) {
+                const assignment = draw.assignments.find((a) => a.id === assignmentId);
+                if (!assignment) continue;
+
+                // Check if this team is teamA or teamB in this specific assignment
+                const assignmentTeamAIds = assignment.teamA
+                  .map((p) => p.id)
+                  .sort()
+                  .join('-');
+                const assignmentTeamBIds = assignment.teamB
+                  .map((p) => p.id)
+                  .sort()
+                  .join('-');
+
+                let finalTeamA: string[];
+                let finalTeamB: string[];
+
+                if (teamKey === assignmentTeamAIds) {
+                  // Update teamA
+                  finalTeamA = newPlayers;
+                  finalTeamB = assignment.teamB.map((p) => p.id);
+                } else if (teamKey === assignmentTeamBIds) {
+                  // Update teamB
+                  finalTeamA = assignment.teamA.map((p) => p.id);
+                  finalTeamB = newPlayers;
+                } else {
+                  // This shouldn't happen, but skip if team not found
+                  continue;
+                }
+
+                // Update the assignment with the new team composition
+                await updateAssignmentMutation.mutateAsync({
+                  assignmentId,
+                  teamA: finalTeamA,
+                  teamB: finalTeamB,
+                });
+              }
+            }
           }}
           isSaving={updateAssignmentMutation.isPending}
         />

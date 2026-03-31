@@ -1,8 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Pencil } from 'lucide-react';
 import type { Assignment } from './types';
+import { SquarePenIcon, SquarePenIconHandle } from 'lucide-animated';
+import { useMemo } from 'react';
 
 interface Team {
   id: string;
@@ -13,7 +14,7 @@ interface Team {
 
 interface TeamListProps {
   assignments: Assignment[];
-  onEditTeam?: (team: Team, assignmentIds: string[]) => void;
+  onEditTeam?: (team: Team, assignmentIds: string[], teamNumber: number) => void;
   canEdit?: boolean;
   translations: {
     tierName: string;
@@ -35,7 +36,7 @@ export function TeamList({ assignments, onEditTeam, canEdit, translations }: Tea
   };
 
   // Extract all unique teams from assignments
-  const extractTeams = (): Map<string, { team: Team; assignmentIds: string[] }> => {
+  const teams = useMemo(() => {
     const teamsMap = new Map<string, { team: Team; assignmentIds: string[] }>();
 
     assignments.forEach((assignment) => {
@@ -78,11 +79,14 @@ export function TeamList({ assignments, onEditTeam, canEdit, translations }: Tea
       }
     });
 
-    return teamsMap;
-  };
+    return Array.from(teamsMap.values());
+  }, [assignments]);
 
-  const teamsMap = extractTeams();
-  const teams = Array.from(teamsMap.values());
+  // Create a ref for each team's edit button
+  const teamRefs = useMemo(
+    () => teams.map(() => ({ current: null as SquarePenIconHandle | null })),
+    [teams]
+  );
 
   if (teams.length === 0) {
     return null;
@@ -107,9 +111,12 @@ export function TeamList({ assignments, onEditTeam, canEdit, translations }: Tea
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => onEditTeam(team, assignmentIds)}
+                      onClick={() => onEditTeam(team, assignmentIds, index + 1)}
+                      title="Edit team members"
+                      onMouseEnter={() => teamRefs[index].current?.startAnimation()}
+                      onMouseLeave={() => teamRefs[index].current?.stopAnimation()}
                     >
-                      <Pencil className="h-4 w-4" />
+                      <SquarePenIcon ref={teamRefs[index]} className="h-4 w-4" />
                     </Button>
                   )}
                 </div>
@@ -124,7 +131,9 @@ export function TeamList({ assignments, onEditTeam, canEdit, translations }: Tea
                         </AvatarFallback>
                       </Avatar>
                       <span className="font-medium flex-1">{player.name}</span>
-                      <span className="text-sm text-muted-foreground">{player.rating}</span>
+                      <span className="text-sm tabular-nums text-muted-foreground">
+                        {player.rating}
+                      </span>
                     </div>
                   ))}
                 </div>

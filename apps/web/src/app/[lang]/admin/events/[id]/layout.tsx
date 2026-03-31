@@ -63,7 +63,7 @@ export default function AdminEventLayout({
       emptyMessage={t('eventNotFound')}
     >
       {(event) => (
-        <div className="space-y-6">
+        <div className="space-y-4">
           <PageHeader
             title={event.title || t('untitledEvent')}
             description={

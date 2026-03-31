@@ -66,6 +66,8 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
   const [formData, setFormData] = useState<{
     title: string;
     date?: Date;
+    format: 'NON_STOP';
+    duration: number;
     capacity: string;
     rsvpOpensAt?: Date;
     rsvpClosesAt?: Date;
@@ -74,26 +76,24 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
     masterCount: string;
     masterPercentage: string;
     mastersStartTime?: Date;
-    mastersEndTime?: Date;
     mastersCourtIds: string[];
     explorersStartTime?: Date;
-    explorersEndTime?: Date;
     explorersCourtIds: string[];
   }>({
     title: '',
     date: undefined,
+    format: 'NON_STOP', // Default format
+    duration: 90, // Default 90 minutes
     capacity: '0',
     rsvpOpensAt: undefined,
     rsvpClosesAt: undefined,
     venueId: '',
-    tierRuleType: 'percentage',
+    tierRuleType: 'auto', // Default to 50/50 auto split
     masterCount: '',
-    masterPercentage: '50',
+    masterPercentage: '',
     mastersStartTime: undefined,
-    mastersEndTime: undefined,
     mastersCourtIds: [],
     explorersStartTime: undefined,
-    explorersEndTime: undefined,
     explorersCourtIds: [],
   });
 
@@ -135,9 +135,20 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
         tierRuleType = 'percentage';
       }
 
+      // Calculate duration from existing start/end times if not provided
+      let duration = 90; // default
+      if (mastersTimeSlot?.startsAt && mastersTimeSlot?.endsAt) {
+        const start = parseTime(mastersTimeSlot.startsAt);
+        const end = parseTime(mastersTimeSlot.endsAt);
+        if (start && end) {
+          duration = (end.getTime() - start.getTime()) / (1000 * 60); // Convert to minutes
+        }
+      }
+
       setFormData({
         title: initialData.title || '',
         date: initialData.date ? new Date(initialData.date) : undefined,
+        duration,
         capacity: initialData.capacity?.toString() || '0',
         rsvpOpensAt: initialData.rsvpOpensAt ? new Date(initialData.rsvpOpensAt) : undefined,
         rsvpClosesAt: initialData.rsvpClosesAt ? new Date(initialData.rsvpClosesAt) : undefined,
@@ -148,13 +159,9 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
         mastersStartTime: mastersTimeSlot?.startsAt
           ? parseTime(mastersTimeSlot.startsAt)
           : undefined,
-        mastersEndTime: mastersTimeSlot?.endsAt ? parseTime(mastersTimeSlot.endsAt) : undefined,
         mastersCourtIds: mastersTimeSlot?.courtIds || [],
         explorersStartTime: explorersTimeSlot?.startsAt
           ? parseTime(explorersTimeSlot.startsAt)
-          : undefined,
-        explorersEndTime: explorersTimeSlot?.endsAt
-          ? parseTime(explorersTimeSlot.endsAt)
           : undefined,
         explorersCourtIds: explorersTimeSlot?.courtIds || [],
       });
@@ -218,7 +225,7 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
     }
 
     // Validate time slots are provided
-    if (!formData.mastersStartTime || !formData.mastersEndTime) {
+    if (!formData.mastersStartTime) {
       alert(t('validationMastersTime'));
       return;
     }
@@ -226,7 +233,7 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
       alert(t('validationMastersCourts'));
       return;
     }
-    if (!formData.explorersStartTime || !formData.explorersEndTime) {
+    if (!formData.explorersStartTime) {
       alert(t('validationExplorersTime'));
       return;
     }
@@ -238,15 +245,14 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
     // Derive overall event start/end times from time slots
     const eventDate = new Date(formData.date);
 
-    // Find the earliest start time and latest end time from both time slots
+    // Calculate end times based on start time + duration
     const mastersStart = new Date(eventDate);
     mastersStart.setHours(
       formData.mastersStartTime.getHours(),
       formData.mastersStartTime.getMinutes()
     );
 
-    const mastersEnd = new Date(eventDate);
-    mastersEnd.setHours(formData.mastersEndTime.getHours(), formData.mastersEndTime.getMinutes());
+    const mastersEnd = new Date(mastersStart.getTime() + formData.duration * 60 * 1000);
 
     const explorersStart = new Date(eventDate);
     explorersStart.setHours(
@@ -254,11 +260,7 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
       formData.explorersStartTime.getMinutes()
     );
 
-    const explorersEnd = new Date(eventDate);
-    explorersEnd.setHours(
-      formData.explorersEndTime.getHours(),
-      formData.explorersEndTime.getMinutes()
-    );
+    const explorersEnd = new Date(explorersStart.getTime() + formData.duration * 60 * 1000);
 
     const startsAt = mastersStart < explorersStart ? mastersStart : explorersStart;
     const endsAt = mastersEnd > explorersEnd ? mastersEnd : explorersEnd;
@@ -294,7 +296,7 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
 
     // Add MASTERS time slot
     const mastersStartTime = `${String(formData.mastersStartTime.getHours()).padStart(2, '0')}:${String(formData.mastersStartTime.getMinutes()).padStart(2, '0')}`;
-    const mastersEndTime = `${String(formData.mastersEndTime.getHours()).padStart(2, '0')}:${String(formData.mastersEndTime.getMinutes()).padStart(2, '0')}`;
+    const mastersEndTime = `${String(mastersEnd.getHours()).padStart(2, '0')}:${String(mastersEnd.getMinutes()).padStart(2, '0')}`;
     tierRules.mastersTimeSlot = {
       startsAt: mastersStartTime,
       endsAt: mastersEndTime,
@@ -303,7 +305,7 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
 
     // Add EXPLORERS time slot
     const explorersStartTime = `${String(formData.explorersStartTime.getHours()).padStart(2, '0')}:${String(formData.explorersStartTime.getMinutes()).padStart(2, '0')}`;
-    const explorersEndTime = `${String(formData.explorersEndTime.getHours()).padStart(2, '0')}:${String(formData.explorersEndTime.getMinutes()).padStart(2, '0')}`;
+    const explorersEndTime = `${String(explorersEnd.getHours()).padStart(2, '0')}:${String(explorersEnd.getMinutes()).padStart(2, '0')}`;
     tierRules.explorersTimeSlot = {
       startsAt: explorersStartTime,
       endsAt: explorersEndTime,
@@ -320,6 +322,8 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
       date: eventDate,
       startsAt,
       endsAt,
+      format: formData.format,
+      duration: formData.duration,
       venueId: formData.venueId,
       courtIds: allCourtIds,
       capacity: parseInt(formData.capacity),
@@ -537,9 +541,112 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
                 <FieldDescription>{t('timeSlotsDescription')}</FieldDescription>
               </Field>
 
-              <div className="space-y-3 p-3 rounded-lg border bg-card">
-                <FieldLabel className="text-sm font-medium">{t('mastersTimeSlot')}</FieldLabel>
-                <div className="grid grid-cols-2 gap-4">
+              <Field>
+                <FieldLabel htmlFor="duration">{t('duration')}</FieldLabel>
+                <Select
+                  value={formData.duration.toString()}
+                  onValueChange={(value) => setFormData({ ...formData, duration: parseInt(value) })}
+                >
+                  <SelectTrigger id="duration">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="60">{t('60minutes')}</SelectItem>
+                    <SelectItem value="90">{t('90minutes')}</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FieldDescription>{t('durationDescription')}</FieldDescription>
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="format">{t('gameFormat')}</FieldLabel>
+                <Select
+                  value={formData.format}
+                  onValueChange={(value: 'NON_STOP') => setFormData({ ...formData, format: value })}
+                >
+                  <SelectTrigger id="format">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="NON_STOP">{t('nonStopFormat')}</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FieldDescription>{t('gameFormatDescription')}</FieldDescription>
+              </Field>
+
+              {/* Game calculation display */}
+              {(() => {
+                const WARMUP_TIME = 5; // minutes
+                const BREAK_TIME = 2; // minutes between rounds
+                const MIN_GAME_TIME = 15; // minimum minutes per game
+
+                const totalDuration = formData.duration;
+                const availableTime = totalDuration - WARMUP_TIME;
+
+                // Calculate maximum rounds based on available time
+                // Formula: (Available Time - Breaks) / Min Game Time
+                // Or: Available Time / (Min Game Time + Break)
+                const maxRounds = Math.floor(availableTime / (MIN_GAME_TIME + BREAK_TIME));
+                const timePerRound = maxRounds > 0 ? Math.floor(availableTime / maxRounds) : 0;
+                const gameTime = maxRounds > 0 ? timePerRound - BREAK_TIME : 0;
+
+                // Calculate courts for each tier
+                const mastersCourts = formData.mastersCourtIds.length;
+                const explorersCourts = formData.explorersCourtIds.length;
+
+                // Calculate total teams (each court has 4 players = 2 teams)
+                // Teams play across multiple rounds, so total teams = courts × 2
+                const mastersTeams = mastersCourts * 2; // 2 teams per court
+                const explorersTeams = explorersCourts * 2;
+                const totalTeams = mastersTeams + explorersTeams;
+
+                return (
+                  <div className="p-3 rounded-lg border bg-muted/50 space-y-2">
+                    <div className="text-sm font-medium">{t('gameCalculation')}</div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                      <div>
+                        • {t('duration')}: {totalDuration} min
+                      </div>
+                      <div>
+                        • {t('warmup')}: {WARMUP_TIME} min
+                      </div>
+                      <div>
+                        • {t('availableTime')}: {availableTime} min
+                      </div>
+                      <div>
+                        • {t('maxRounds')}: {maxRounds}
+                      </div>
+                      <div>
+                        • {t('gameTime')}: ~{gameTime} min
+                      </div>
+                      <div></div> {/* Spacer for grid alignment */}
+                      {mastersCourts > 0 && (
+                        <div>
+                          • Masters: {mastersCourts} {t('courts').toLowerCase()} × {maxRounds}{' '}
+                          {t('rounds').toLowerCase()} = {mastersCourts * maxRounds}{' '}
+                          {t('games').toLowerCase()} ({mastersTeams} {t('teams').toLowerCase()})
+                        </div>
+                      )}
+                      {explorersCourts > 0 && (
+                        <div>
+                          • Explorers: {explorersCourts} {t('courts').toLowerCase()} × {maxRounds}{' '}
+                          {t('rounds').toLowerCase()} = {explorersCourts * maxRounds}{' '}
+                          {t('games').toLowerCase()} ({explorersTeams} {t('teams').toLowerCase()})
+                        </div>
+                      )}
+                      {totalTeams > 0 && (
+                        <div className="font-medium pt-1 border-t mt-2 md:col-span-2">
+                          • {t('totalTeams')}: {totalTeams}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-3 p-3 rounded-lg border bg-card">
+                  <FieldLabel className="text-sm font-medium">{t('mastersTimeSlot')}</FieldLabel>
                   <Field>
                     <FieldLabel
                       htmlFor="mastersStartTime"
@@ -555,59 +662,45 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
                     />
                     <FieldDescription>Format: HH:MM (24h)</FieldDescription>
                   </Field>
-                  <Field>
-                    <FieldLabel htmlFor="mastersEndTime" className="text-xs text-muted-foreground">
-                      {t('endTime')}
-                    </FieldLabel>
-                    <TimePicker
-                      id="mastersEndTime"
-                      value={formData.mastersEndTime}
-                      onChange={(time) => setFormData({ ...formData, mastersEndTime: time })}
-                      placeholder={t('endTimePlaceholder')}
-                    />
-                    <FieldDescription>Format: HH:MM (24h)</FieldDescription>
-                  </Field>
+
+                  {selectedVenue && selectedVenue.courts.length > 0 && (
+                    <div className="space-y-2">
+                      <FieldLabel className="text-xs text-muted-foreground">
+                        {t('courtsAvailable')}
+                      </FieldLabel>
+                      <div className="grid grid-cols-2 gap-2">
+                        {selectedVenue.courts.map((court) => (
+                          <div key={court.id} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`masters-court-${court.id}`}
+                              checked={formData.mastersCourtIds.includes(court.id)}
+                              onCheckedChange={(checked) => {
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  mastersCourtIds: checked
+                                    ? [...prev.mastersCourtIds, court.id]
+                                    : prev.mastersCourtIds.filter((id) => id !== court.id),
+                                }));
+                              }}
+                            />
+                            <label
+                              htmlFor={`masters-court-${court.id}`}
+                              className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                            >
+                              {court.label}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                      <FieldDescription>
+                        {t('courtsSelected', { count: formData.mastersCourtIds.length })}
+                      </FieldDescription>
+                    </div>
+                  )}
                 </div>
 
-                {selectedVenue && selectedVenue.courts.length > 0 && (
-                  <div className="space-y-2">
-                    <FieldLabel className="text-xs text-muted-foreground">
-                      {t('courtsAvailable')}
-                    </FieldLabel>
-                    <div className="grid grid-cols-2 gap-2">
-                      {selectedVenue.courts.map((court) => (
-                        <div key={court.id} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`masters-court-${court.id}`}
-                            checked={formData.mastersCourtIds.includes(court.id)}
-                            onCheckedChange={(checked) => {
-                              setFormData((prev) => ({
-                                ...prev,
-                                mastersCourtIds: checked
-                                  ? [...prev.mastersCourtIds, court.id]
-                                  : prev.mastersCourtIds.filter((id) => id !== court.id),
-                              }));
-                            }}
-                          />
-                          <label
-                            htmlFor={`masters-court-${court.id}`}
-                            className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                          >
-                            {court.label}
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                    <FieldDescription>
-                      {t('courtsSelected', { count: formData.mastersCourtIds.length })}
-                    </FieldDescription>
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-3 p-3 rounded-lg border bg-card">
-                <FieldLabel className="text-sm font-medium">{t('explorersTimeSlot')}</FieldLabel>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-3 p-3 rounded-lg border bg-card">
+                  <FieldLabel className="text-sm font-medium">{t('explorersTimeSlot')}</FieldLabel>
                   <Field>
                     <FieldLabel
                       htmlFor="explorersStartTime"
@@ -623,57 +716,42 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
                     />
                     <FieldDescription>Format: HH:MM (24h)</FieldDescription>
                   </Field>
-                  <Field>
-                    <FieldLabel
-                      htmlFor="explorersEndTime"
-                      className="text-xs text-muted-foreground"
-                    >
-                      {t('endTime')}
-                    </FieldLabel>
-                    <TimePicker
-                      id="explorersEndTime"
-                      value={formData.explorersEndTime}
-                      onChange={(time) => setFormData({ ...formData, explorersEndTime: time })}
-                      placeholder={t('explorersEndTimePlaceholder')}
-                    />
-                    <FieldDescription>Format: HH:MM (24h)</FieldDescription>
-                  </Field>
-                </div>
 
-                {selectedVenue && selectedVenue.courts.length > 0 && (
-                  <div className="space-y-2">
-                    <FieldLabel className="text-xs text-muted-foreground">
-                      {t('courtsAvailable')}
-                    </FieldLabel>
-                    <div className="grid grid-cols-2 gap-2">
-                      {selectedVenue.courts.map((court) => (
-                        <div key={court.id} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`explorers-court-${court.id}`}
-                            checked={formData.explorersCourtIds.includes(court.id)}
-                            onCheckedChange={(checked) => {
-                              setFormData((prev) => ({
-                                ...prev,
-                                explorersCourtIds: checked
-                                  ? [...prev.explorersCourtIds, court.id]
-                                  : prev.explorersCourtIds.filter((id) => id !== court.id),
-                              }));
-                            }}
-                          />
-                          <label
-                            htmlFor={`explorers-court-${court.id}`}
-                            className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                          >
-                            {court.label}
-                          </label>
-                        </div>
-                      ))}
+                  {selectedVenue && selectedVenue.courts.length > 0 && (
+                    <div className="space-y-2">
+                      <FieldLabel className="text-xs text-muted-foreground">
+                        {t('courtsAvailable')}
+                      </FieldLabel>
+                      <div className="grid grid-cols-2 gap-2">
+                        {selectedVenue.courts.map((court) => (
+                          <div key={court.id} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`explorers-court-${court.id}`}
+                              checked={formData.explorersCourtIds.includes(court.id)}
+                              onCheckedChange={(checked) => {
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  explorersCourtIds: checked
+                                    ? [...prev.explorersCourtIds, court.id]
+                                    : prev.explorersCourtIds.filter((id) => id !== court.id),
+                                }));
+                              }}
+                            />
+                            <label
+                              htmlFor={`explorers-court-${court.id}`}
+                              className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                            >
+                              {court.label}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {t('courtsSelected', { count: formData.explorersCourtIds.length })}
+                      </p>
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      {t('courtsSelected', { count: formData.explorersCourtIds.length })}
-                    </p>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
           </div>

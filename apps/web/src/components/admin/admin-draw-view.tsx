@@ -3,42 +3,30 @@
 import { useState } from 'react';
 import { useQuery, UseMutationResult } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
-import { useRouter } from '@/i18n/navigation';
-import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Trash2, RefreshCw, Send, ArchiveRestore } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
+import { Accordion } from '@/components/ui/accordion';
 import { DataStateWrapper } from '@/components/shared';
-import { TierSection, WaitlistSection } from '@/components/shared/draw';
+import { WaitlistSection } from '@/components/shared/draw';
 import type { Draw, Assignment } from '@/components/shared/draw';
 import type { EventWithRSVP } from '@padel/types';
+import { useAuthFetch, useUpdateAssignment } from '@/hooks';
 import {
-  useAuthFetch,
-  useUpdateAssignment,
-  usePublishDraw,
-  useUnpublishDraw,
-  useDeleteDraw,
-} from '@/hooks';
+  groupByRound,
+  getUniqueTeamsCount,
+  getFieldsCount,
+  filterByTier,
+  getUniquePlayers,
+  hasEventPassed,
+} from '@/lib/draw-utils';
 import { GenerateDraw } from './generate-draw';
+import { TierAccordionItem } from './tier-accordion-item';
+import { EditAssignmentDialog } from './edit-assignment-dialog';
 
 export function AdminDrawView({ eventId }: { eventId: string }) {
   const t = useTranslations('adminDrawView');
   const { data: session } = useSession();
-  const router = useRouter();
   const authFetch = useAuthFetch();
   const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const { data: draw, isLoading } = useQuery<Draw | null>({
     queryKey: ['draw', eventId, session?.accessToken],
@@ -65,13 +53,10 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
     enabled: !!session?.accessToken,
   });
 
-  // Use custom hooks for mutations
+  // Use custom hook for mutation
   const updateAssignmentMutation = useUpdateAssignment(eventId, () => {
     setEditingAssignment(null);
   });
-  const publishDrawMutation = usePublishDraw(eventId);
-  const unpublishDrawMutation = useUnpublishDraw(eventId);
-  const deleteDrawMutation = useDeleteDraw(eventId);
 
   return (
     <DataStateWrapper
@@ -86,16 +71,9 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
         <AdminDrawContent
           draw={draw}
           event={event}
-          eventId={eventId}
           editingAssignment={editingAssignment}
           setEditingAssignment={setEditingAssignment}
-          showDeleteDialog={showDeleteDialog}
-          setShowDeleteDialog={setShowDeleteDialog}
-          publishDrawMutation={publishDrawMutation}
-          unpublishDrawMutation={unpublishDrawMutation}
-          deleteDrawMutation={deleteDrawMutation}
           updateAssignmentMutation={updateAssignmentMutation}
-          router={router}
           t={t}
         />
       )}
@@ -106,21 +84,14 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
 interface AdminDrawContentProps {
   draw: Draw;
   event: EventWithRSVP | null | undefined;
-  eventId: string;
   editingAssignment: Assignment | null;
   setEditingAssignment: (assignment: Assignment | null) => void;
-  showDeleteDialog: boolean;
-  setShowDeleteDialog: (show: boolean) => void;
-  publishDrawMutation: UseMutationResult<unknown, Error, void, unknown>;
-  unpublishDrawMutation: UseMutationResult<unknown, Error, void, unknown>;
-  deleteDrawMutation: UseMutationResult<unknown, Error, void, unknown>;
   updateAssignmentMutation: UseMutationResult<
     unknown,
     Error,
     { assignmentId: string; teamA: string[]; teamB: string[] },
     unknown
   >;
-  router: ReturnType<typeof useRouter>;
   t: ReturnType<typeof useTranslations>;
 }
 
@@ -128,121 +99,92 @@ interface AdminDrawContentProps {
 function AdminDrawContent({
   draw,
   event,
-  eventId,
   editingAssignment,
   setEditingAssignment,
-  showDeleteDialog,
-  setShowDeleteDialog,
-  publishDrawMutation,
-  unpublishDrawMutation,
-  deleteDrawMutation,
   updateAssignmentMutation,
-  router,
   t,
 }: AdminDrawContentProps) {
-  // Group assignments by tier and round
-  const masterAssignments = draw.assignments.filter((a: Assignment) => a.tier === 'MASTERS');
-  const explorerAssignments = draw.assignments.filter((a: Assignment) => a.tier === 'EXPLORERS');
+  // Filter assignments by tier
+  const masterAssignments = filterByTier(draw.assignments, 'MASTERS');
+  const explorerAssignments = filterByTier(draw.assignments, 'EXPLORERS');
 
-  const groupByRound = (assignments: Assignment[]) => {
-    return assignments.reduce(
-      (acc, assignment) => {
-        if (!acc[assignment.round]) {
-          acc[assignment.round] = [];
-        }
-        acc[assignment.round].push(assignment);
-        return acc;
-      },
-      {} as Record<number, Assignment[]>
-    );
-  };
-
+  // Calculate tier statistics
   const mastersRounds = groupByRound(masterAssignments);
   const explorersRounds = groupByRound(explorerAssignments);
+  const mastersTeamsCount = getUniqueTeamsCount(masterAssignments);
+  const explorersTeamsCount = getUniqueTeamsCount(explorerAssignments);
+  const mastersFieldsCount = getFieldsCount(masterAssignments);
+  const explorersFieldsCount = getFieldsCount(explorerAssignments);
 
   // Check if event has passed
-  const eventEndTime = new Date(draw.event.endsAt);
-  const hasEventPassed = eventEndTime < new Date();
+  const eventPassed = hasEventPassed(draw.event.endsAt);
+
+  // Handle team edit selection
+  const handleEditTeam = (assignmentIds: string[]) => {
+    const assignment = draw.assignments.find((a) => assignmentIds.includes(a.id));
+    if (assignment) setEditingAssignment(assignment);
+  };
 
   return (
     <div className="space-y-6">
-      {/* Action Buttons */}
-      {!hasEventPassed && (
-        <div className="flex justify-end gap-2">
-          {draw.event.state !== 'PUBLISHED' && (
-            <>
-              <Button
-                variant="outline"
-                onClick={() => router.push(`/admin/events/${eventId}/draw`)}
-              >
-                <RefreshCw className="h-4 w-4" />
-                {t('generateNew')}
-              </Button>
-              <Button
-                onClick={() => publishDrawMutation.mutate(undefined)}
-                disabled={publishDrawMutation.isPending}
-              >
-                <Send className="h-4 w-4" />
-                {publishDrawMutation.isPending ? t('publishing') : t('publish')}
-              </Button>
-            </>
-          )}
-          {draw.event.state === 'PUBLISHED' && (
-            <Button
-              variant="outline"
-              onClick={() => unpublishDrawMutation.mutate(undefined)}
-              disabled={unpublishDrawMutation.isPending}
-            >
-              <ArchiveRestore className="h-4 w-4" />
-              {unpublishDrawMutation.isPending ? t('unpublishing') : t('unpublish')}
-            </Button>
-          )}
-          <Button
-            variant="destructive"
-            onClick={() => setShowDeleteDialog(true)}
-            disabled={deleteDrawMutation.isPending}
-          >
-            <Trash2 className="h-4 w-4" />
-            {deleteDrawMutation.isPending ? t('deleting') : t('delete')}
-          </Button>
-        </div>
-      )}
+      {/* Tier Sections */}
+      <Accordion type="single" collapsible defaultValue="masters" className="space-y-4">
+        <TierAccordionItem
+          value="masters"
+          tier="MASTERS"
+          tierName={t('masters')}
+          assignments={masterAssignments}
+          rounds={mastersRounds}
+          timeSlot={draw.event.tierRules?.mastersTimeSlot}
+          eventDate={draw.event.date}
+          teamsCount={mastersTeamsCount}
+          fieldsCount={mastersFieldsCount}
+          canEdit={!eventPassed}
+          onEditTeam={(_, assignmentIds) => handleEditTeam(assignmentIds)}
+          tierColor="bg-yellow-500"
+          translations={{
+            tierName: t('masters'),
+            teamListTitle: t('teamListTitle'),
+            teamListDescription: t('teamListDescription'),
+            team: t('team'),
+            avgRating: t('avgRating'),
+            teams: t('teams'),
+            rounds: t('rounds'),
+            fields: t('fields'),
+            timeSlot: t('timeSlot'),
+            round: (round) => t('round', { number: round }),
+            courtLabel: (courtId) => t('court', { id: courtId }),
+          }}
+        />
 
-      {/* Masters Assignments */}
-      <TierSection
-        tier="MASTERS"
-        rounds={mastersRounds}
-        timeSlot={draw.event.tierRules?.mastersTimeSlot}
-        eventDate={draw.event.date}
-        translations={{
-          tierName: t('masters'),
-          round: (round) => t('round', { number: round }),
-          courtLabel: (courtId) => t('court', { id: courtId }),
-        }}
-        onEditAssignment={(assignmentId) => {
-          const assignment = draw.assignments.find((a) => a.id === assignmentId);
-          if (assignment) setEditingAssignment(assignment);
-        }}
-        canEdit={!hasEventPassed}
-      />
-
-      {/* Explorers Assignments */}
-      <TierSection
-        tier="EXPLORERS"
-        rounds={explorersRounds}
-        timeSlot={draw.event.tierRules?.explorersTimeSlot}
-        eventDate={draw.event.date}
-        translations={{
-          tierName: t('explorers'),
-          round: (round) => t('round', { number: round }),
-          courtLabel: (courtId) => t('court', { id: courtId }),
-        }}
-        onEditAssignment={(assignmentId) => {
-          const assignment = draw.assignments.find((a) => a.id === assignmentId);
-          if (assignment) setEditingAssignment(assignment);
-        }}
-        canEdit={!hasEventPassed}
-      />
+        <TierAccordionItem
+          value="explorers"
+          tier="EXPLORERS"
+          tierName={t('explorers')}
+          assignments={explorerAssignments}
+          rounds={explorersRounds}
+          timeSlot={draw.event.tierRules?.explorersTimeSlot}
+          eventDate={draw.event.date}
+          teamsCount={explorersTeamsCount}
+          fieldsCount={explorersFieldsCount}
+          canEdit={!eventPassed}
+          onEditTeam={(_, assignmentIds) => handleEditTeam(assignmentIds)}
+          tierColor="bg-green-500"
+          translations={{
+            tierName: t('explorers'),
+            teamListTitle: t('teamListTitle'),
+            teamListDescription: t('teamListDescription'),
+            team: t('team'),
+            avgRating: t('avgRating'),
+            teams: t('teams'),
+            rounds: t('rounds'),
+            fields: t('fields'),
+            timeSlot: t('timeSlot'),
+            round: (round) => t('round', { number: round }),
+            courtLabel: (courtId) => t('court', { id: courtId }),
+          }}
+        />
+      </Accordion>
 
       {/* Waitlist Section */}
       <WaitlistSection
@@ -257,6 +199,9 @@ function AdminDrawContent({
       {editingAssignment && (
         <EditAssignmentDialog
           assignment={editingAssignment}
+          allTierPlayers={getUniquePlayers(
+            draw.assignments.filter((a) => a.tier === editingAssignment.tier)
+          )}
           onClose={() => setEditingAssignment(null)}
           onSave={(teamA, teamB) => {
             updateAssignmentMutation.mutate({
@@ -268,190 +213,6 @@ function AdminDrawContent({
           isSaving={updateAssignmentMutation.isPending}
         />
       )}
-
-      {/* Delete Draw Confirmation Dialog */}
-      <ConfirmationDialog
-        open={showDeleteDialog}
-        onOpenChange={setShowDeleteDialog}
-        title={t('deleteDrawTitle')}
-        description={t('deleteDrawDescription')}
-        confirmText={t('deleteDraw')}
-        cancelText={t('cancel')}
-        variant="destructive"
-        isLoading={deleteDrawMutation.isPending}
-        onConfirm={() => {
-          deleteDrawMutation.mutate(undefined);
-          setShowDeleteDialog(false);
-        }}
-      />
     </div>
-  );
-}
-
-function EditAssignmentDialog({
-  assignment,
-  onClose,
-  onSave,
-  isSaving,
-}: {
-  assignment: Assignment;
-  onClose: () => void;
-  onSave: (teamA: string[], teamB: string[]) => void;
-  isSaving: boolean;
-}) {
-  const t = useTranslations('adminDrawView');
-  const [teamA, setTeamA] = useState<string[]>(assignment.teamA.map((p) => p.id));
-  const [teamB, setTeamB] = useState<string[]>(assignment.teamB.map((p) => p.id));
-
-  const allPlayers = [...assignment.teamA, ...assignment.teamB];
-
-  const swapPlayer = (playerId: string) => {
-    if (teamA.includes(playerId)) {
-      setTeamA(teamA.filter((id) => id !== playerId));
-      setTeamB([...teamB, playerId]);
-    } else {
-      setTeamB(teamB.filter((id) => id !== playerId));
-      setTeamA([...teamA, playerId]);
-    }
-  };
-
-  const handleSave = () => {
-    if (teamA.length !== 2 || teamB.length !== 2) {
-      toast.error(t('teamValidationError'));
-      return;
-    }
-
-    // Check if teams have changed
-    const originalTeamA = assignment.teamA.map((p) => p.id).sort();
-    const originalTeamB = assignment.teamB.map((p) => p.id).sort();
-    const newTeamA = [...teamA].sort();
-    const newTeamB = [...teamB].sort();
-
-    const hasChanges =
-      JSON.stringify(originalTeamA) !== JSON.stringify(newTeamA) ||
-      JSON.stringify(originalTeamB) !== JSON.stringify(newTeamB);
-
-    if (!hasChanges) {
-      toast.info(t('noChangesToSave') || 'No changes to save');
-      onClose();
-      return;
-    }
-
-    onSave(teamA, teamB);
-  };
-
-  return (
-    <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>{t('editAssignment')}</DialogTitle>
-          <DialogDescription>{t('editAssignmentDescription')}</DialogDescription>
-        </DialogHeader>
-
-        <div className="grid grid-cols-2 gap-4 py-4">
-          <div className="space-y-2">
-            <h3 className="font-medium">
-              {t('teamA')} ({teamA.length}/2)
-            </h3>
-            <div className="space-y-2">
-              {allPlayers
-                .filter((p) => teamA.includes(p.id))
-                .map((player) => (
-                  <button
-                    key={player.id}
-                    onClick={() => swapPlayer(player.id)}
-                    className="w-full p-3 border rounded-lg hover:bg-secondary transition-colors text-left"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage
-                            src={player.profilePhoto || undefined}
-                            alt={player.name || 'Player'}
-                          />
-                          <AvatarFallback className="gradient-primary text-sm">
-                            {player.name
-                              ? player.name
-                                  .split(' ')
-                                  .map((n) => n[0])
-                                  .join('')
-                                  .toUpperCase()
-                                  .slice(0, 2)
-                              : '?'}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="font-medium">{player.name}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-xs">
-                          {player.tier}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">{player.rating}</span>
-                      </div>
-                    </div>
-                  </button>
-                ))}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <h3 className="font-medium">
-              {t('teamB')} ({teamB.length}/2)
-            </h3>
-            <div className="space-y-2">
-              {allPlayers
-                .filter((p) => teamB.includes(p.id))
-                .map((player) => (
-                  <button
-                    key={player.id}
-                    onClick={() => swapPlayer(player.id)}
-                    className="w-full p-3 border rounded-lg hover:bg-secondary transition-colors text-left"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage
-                            src={player.profilePhoto || undefined}
-                            alt={player.name || 'Player'}
-                          />
-                          <AvatarFallback className="gradient-primary text-sm">
-                            {player.name
-                              ? player.name
-                                  .split(' ')
-                                  .map((n) => n[0])
-                                  .join('')
-                                  .toUpperCase()
-                                  .slice(0, 2)
-                              : '?'}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="font-medium">{player.name}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-xs">
-                          {player.tier}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">{player.rating}</span>
-                      </div>
-                    </div>
-                  </button>
-                ))}
-            </div>
-          </div>
-        </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={isSaving}>
-            {t('cancel')}
-          </Button>
-          <Button
-            onClick={handleSave}
-            disabled={isSaving || teamA.length !== 2 || teamB.length !== 2}
-          >
-            {isSaving ? t('saving') : t('saveChanges')}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
   );
 }

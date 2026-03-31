@@ -9,8 +9,9 @@ interface MatchAssignmentProps {
   onEdit?: (assignmentId: string) => void;
   canEdit?: boolean;
   courtLabel: (courtId: string) => string;
-  tierLabel: string;
-  tierBadgeClass?: string;
+  teamANumber?: number;
+  teamBNumber?: number;
+  teamLabel?: string;
 }
 
 export function MatchAssignment({
@@ -18,8 +19,9 @@ export function MatchAssignment({
   onEdit,
   canEdit,
   courtLabel,
-  tierLabel: _tierLabel,
-  tierBadgeClass: _tierBadgeClass,
+  teamANumber,
+  teamBNumber,
+  teamLabel = 'TEAM',
 }: MatchAssignmentProps) {
   const getPlayerInitials = (name: string) => {
     return name
@@ -31,10 +33,10 @@ export function MatchAssignment({
   };
 
   return (
-    <div className="bg-muted/50 rounded-lg p-4 space-y-4">
+    <div className="bg-muted/50 rounded-lg p-4 border space-y-4">
       {/* Campo Label */}
-      <div className="flex items-center justify-center">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between">
+        <div className="flex-1 flex items-center justify-center gap-2">
           <Badge variant="outline">
             {assignment.court?.label || courtLabel(assignment.courtId)}
           </Badge>
@@ -50,8 +52,8 @@ export function MatchAssignment({
       <div className="flex flex-col md:grid md:grid-cols-[1fr_auto_1fr] gap-4 md:items-center">
         {/* Team A */}
         <div className="flex flex-col gap-2 px-4">
-          <div className="text-xs text-muted-foreground text-center font-semibold order-2 md:order-1">
-            TEAM A
+          <div className="text-xs text-muted-foreground uppercase text-center font-semibold order-2 md:order-1">
+            {teamANumber ? `${teamLabel} ${teamANumber}` : 'Team A'}
           </div>
           <div className="space-y-1 flex flex-col items-center order-1 md:order-2">
             {assignment.teamA.map((player) => (
@@ -80,7 +82,7 @@ export function MatchAssignment({
         {/* Team B */}
         <div className="flex flex-col gap-2 px-4">
           <div className="text-xs text-muted-foreground text-center font-semibold order-1 md:order-1">
-            TEAM B
+            {teamBNumber ? `${teamLabel.toUpperCase()} ${teamBNumber}` : 'TEAM B'}
           </div>
           <div className="space-y-1 flex flex-col items-center order-2 md:order-2">
             {assignment.teamB.map((player) => (

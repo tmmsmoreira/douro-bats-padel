@@ -68,6 +68,8 @@ model Event {
   date          DateTime
   startsAt      DateTime
   endsAt        DateTime
+  format        EventFormat  @default(NON_STOP)
+  duration      Int?
   venueId       String?
   venue         Venue?       @relation(fields: [venueId], references: [id])
   capacity      Int
@@ -217,6 +219,10 @@ enum PlayerStatus {
   ACTIVE
   INACTIVE
   INVITED
+}
+
+enum EventFormat {
+  NON_STOP
 }
 
 enum Tier {

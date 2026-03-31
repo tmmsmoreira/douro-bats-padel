@@ -2,8 +2,7 @@
 
 @import 'tailwindcss';
 @import 'shadcn/tailwind.css';
-
-@plugin 'tailwindcss-animate';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -347,6 +346,37 @@
   .touch-target-lg {
     min-width: 48px;
     min-height: 48px;
+  }
+
+  /* Custom smooth accordion animations - override tw-animate-css */
+  @keyframes accordion-down {
+    from {
+      height: 0;
+      opacity: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+      opacity: 1;
+    }
+  }
+
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+      opacity: 1;
+    }
+    to {
+      height: 0;
+      opacity: 0;
+    }
+  }
+
+  .animate-accordion-down {
+    animation: accordion-down 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .animate-accordion-up {
+    animation: accordion-up 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 

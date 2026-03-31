@@ -1,14 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Clock } from 'lucide-react';
-import { useLocale } from 'next-intl';
+import { useMemo } from 'react';
 import { MatchAssignment } from './match-assignment';
 import type { Assignment, TierTimeSlot } from './types';
-import { formatTimeSlot } from '@/lib/utils';
 
 interface TierSectionProps {
   tier: 'MASTERS' | 'EXPLORERS';
   rounds: Record<number, Assignment[]>;
+  assignments: Assignment[];
   timeSlot?: TierTimeSlot;
   eventDate?: string | Date;
   onEditAssignment?: (assignmentId: string) => void;
@@ -17,52 +15,80 @@ interface TierSectionProps {
     tierName: string;
     round: (round: number) => string;
     courtLabel: (courtId: string) => string;
+    team?: string;
   };
 }
 
 export function TierSection({
   tier,
   rounds,
-  timeSlot,
-  eventDate,
+  assignments,
   onEditAssignment,
   canEdit,
   translations,
 }: TierSectionProps) {
-  const locale = useLocale();
-  const tierBadgeClass =
-    tier === 'MASTERS' ? 'bg-yellow-50 dark:bg-yellow-950/30' : 'bg-blue-50 dark:bg-blue-950/30';
+  // Build team-to-number mapping (same logic as TeamList)
+  const teamNumberMap = useMemo(() => {
+    const teamsMap = new Map<string, number>();
+    const uniqueTeams = new Map<string, boolean>();
 
-  const tierIndicatorClass =
-    tier === 'MASTERS' ? 'w-2 h-6 bg-yellow-500 rounded-full' : 'w-2 h-6 bg-blue-500 rounded-full';
+    assignments.forEach((assignment) => {
+      // Process Team A
+      if (assignment.teamA.length === 2) {
+        const teamKey = assignment.teamA
+          .map((p) => p.id)
+          .sort()
+          .join('-');
+        if (!uniqueTeams.has(teamKey)) {
+          uniqueTeams.set(teamKey, true);
+        }
+      }
+
+      // Process Team B
+      if (assignment.teamB.length === 2) {
+        const teamKey = assignment.teamB
+          .map((p) => p.id)
+          .sort()
+          .join('-');
+        if (!uniqueTeams.has(teamKey)) {
+          uniqueTeams.set(teamKey, true);
+        }
+      }
+    });
+
+    // Assign numbers based on order
+    Array.from(uniqueTeams.keys()).forEach((teamKey, index) => {
+      teamsMap.set(teamKey, index + 1);
+    });
+
+    return teamsMap;
+  }, [assignments]);
+
+  // Helper to get team number from player IDs
+  const getTeamNumber = (players: Assignment['teamA']) => {
+    if (players.length !== 2) return undefined;
+    const teamKey = players
+      .map((p) => p.id)
+      .sort()
+      .join('-');
+    return teamNumberMap.get(teamKey);
+  };
 
   if (Object.keys(rounds).length === 0) {
     return null;
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <div className={tierIndicatorClass}></div>
-        <h2 className="text-2xl font-bold">{translations.tierName}</h2>
-        {timeSlot && eventDate && (
-          <Badge variant="secondary" className="text-sm">
-            <Clock className="mr-2 h-4 w-4" />{' '}
-            {formatTimeSlot(timeSlot.startsAt, eventDate, locale)} -{' '}
-            {formatTimeSlot(timeSlot.endsAt, eventDate, locale)}
-          </Badge>
-        )}
-      </div>
-
+    <div className="space-y-4">
       {Object.entries(rounds)
         .sort(([a], [b]) => Number(a) - Number(b))
         .map(([round, assignments]) => (
-          <Card key={`${tier}-${round}`} className="glass-card">
+          <Card key={`${tier}-${round}`} className="shadow-none">
             <CardHeader className="pb-4">
               <CardTitle className="text-lg">{translations.round(Number(round))}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 pt-0">
-              <div className="grid grid-cols-1 gap-2">
+              <div className="grid grid-cols-1 gap-4">
                 {assignments.map((assignment) => (
                   <MatchAssignment
                     key={assignment.id}
@@ -70,8 +96,9 @@ export function TierSection({
                     onEdit={onEditAssignment}
                     canEdit={canEdit}
                     courtLabel={translations.courtLabel}
-                    tierLabel={tier}
-                    tierBadgeClass={tierBadgeClass}
+                    teamANumber={getTeamNumber(assignment.teamA)}
+                    teamBNumber={getTeamNumber(assignment.teamB)}
+                    teamLabel={translations.team}
                   />
                 ))}
               </div>

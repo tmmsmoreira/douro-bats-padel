@@ -728,13 +728,6 @@ export class DrawService {
       include: { user: true },
     });
 
-    // Sort players by rating to recalculate tier assignment for this event
-    const sortedPlayers = [...players].sort((a, b) => b.rating - a.rating);
-    const playerIndexMap = new Map<string, number>();
-    sortedPlayers.forEach((p, index) => {
-      playerIndexMap.set(p.id, index);
-    });
-
     type PlayerWithUser = (typeof players)[0];
     const playerMap = new Map<string, PlayerWithUser>(players.map((p) => [p.id, p]));
 
@@ -745,26 +738,24 @@ export class DrawService {
         teamA: a.teamA.map((id) => {
           const p = playerMap.get(id);
           if (!p) throw new Error(`Player with id ${id} not found`);
-          const playerIndex = playerIndexMap.get(id) || 0;
-          const tier = this.assignTierForEvent(playerIndex, players.length, draw.event);
+          // Use the assignment's tier, not the player's recalculated tier
           return {
             id: p.id,
             name: p.user.name,
             rating: p.rating,
-            tier,
+            tier: a.tier, // Use assignment tier instead of recalculating
             profilePhoto: p.user.profilePhoto,
           };
         }),
         teamB: a.teamB.map((id) => {
           const p = playerMap.get(id);
           if (!p) throw new Error(`Player with id ${id} not found`);
-          const playerIndex = playerIndexMap.get(id) || 0;
-          const tier = this.assignTierForEvent(playerIndex, players.length, draw.event);
+          // Use the assignment's tier, not the player's recalculated tier
           return {
             id: p.id,
             name: p.user.name,
             rating: p.rating,
-            tier,
+            tier: a.tier, // Use assignment tier instead of recalculating
             profilePhoto: p.user.profilePhoto,
           };
         }),

@@ -29,3 +29,7 @@ export enum PlayerStatus {
   INACTIVE = 'INACTIVE',
   INVITED = 'INVITED',
 }
+
+export enum EventFormat {
+  NON_STOP = 'NON_STOP',
+}

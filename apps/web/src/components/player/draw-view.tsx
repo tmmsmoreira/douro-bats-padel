@@ -113,12 +113,14 @@ function DrawContent({
       <TierSection
         tier="MASTERS"
         rounds={masterRounds}
+        assignments={masterAssignments}
         timeSlot={draw.event.tierRules?.mastersTimeSlot}
         eventDate={draw.event.date}
         translations={{
           tierName: t('mastersTier'),
           round: (round) => t('round', { round }),
           courtLabel: (courtId) => t('courtLabel', { courtId }),
+          team: t('team'),
         }}
       />
 
@@ -126,12 +128,14 @@ function DrawContent({
       <TierSection
         tier="EXPLORERS"
         rounds={explorerRounds}
+        assignments={explorerAssignments}
         timeSlot={draw.event.tierRules?.explorersTimeSlot}
         eventDate={draw.event.date}
         translations={{
           tierName: t('explorersTier'),
           round: (round) => t('round', { round }),
           courtLabel: (courtId) => t('courtLabel', { courtId }),
+          team: t('team'),
         }}
       />
 

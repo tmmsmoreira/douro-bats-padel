@@ -1,4 +1,4 @@
-import type { EventState, RSVPStatus } from './common';
+import type { EventState, RSVPStatus, EventFormat } from './common';
 import type { Player, WaitlistedPlayer } from './users';
 
 /**
@@ -26,6 +26,8 @@ export interface CreateEventDto {
   date: Date;
   startsAt: Date;
   endsAt: Date;
+  format?: EventFormat;
+  duration?: number;
   venueId: string;
   courtIds: string[];
   capacity: number;
@@ -53,6 +55,8 @@ export interface Event {
   date: Date;
   startsAt: Date;
   endsAt: Date;
+  format: EventFormat;
+  duration?: number | null;
   venueId?: string | null;
   capacity: number;
   seed?: string | null;
@@ -86,6 +90,8 @@ export interface EventWithRSVP {
   date: Date;
   startsAt: Date;
   endsAt: Date;
+  format: EventFormat;
+  duration?: number | null;
   venueId?: string | null;
   capacity: number;
   state: EventState;

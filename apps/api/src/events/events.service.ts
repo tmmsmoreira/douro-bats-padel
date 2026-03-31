@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import type { CreateEventDto, EventWithRSVP, TierRules } from '@padel/types';
-import { EventState } from '@padel/types';
+import { EventState, RSVPStatus } from '@padel/types';
 
 @Injectable()
 export class EventsService {
@@ -107,6 +107,8 @@ export class EventsService {
         date: new Date(dto.date),
         startsAt: new Date(dto.startsAt),
         endsAt: new Date(dto.endsAt),
+        format: dto.format || 'NON_STOP',
+        duration: dto.duration,
         venueId: dto.venueId,
         capacity: dto.capacity,
         rsvpOpensAt: new Date(dto.rsvpOpensAt),
@@ -342,6 +344,8 @@ export class EventsService {
         date: dto.date ? new Date(dto.date) : undefined,
         startsAt: dto.startsAt ? new Date(dto.startsAt) : undefined,
         endsAt: dto.endsAt ? new Date(dto.endsAt) : undefined,
+        format: dto.format,
+        duration: dto.duration,
         venueId: dto.venueId,
         capacity: dto.capacity,
         rsvpOpensAt: dto.rsvpOpensAt ? new Date(dto.rsvpOpensAt) : undefined,

@@ -25,4 +25,7 @@ export declare enum PlayerStatus {
     INACTIVE = "INACTIVE",
     INVITED = "INVITED"
 }
+export declare enum EventFormat {
+    NON_STOP = "NON_STOP"
+}
 //# sourceMappingURL=common.d.ts.map

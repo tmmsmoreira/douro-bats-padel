@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useState } from 'react';
+import { use } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useLocale, useTranslations } from 'next-intl';
@@ -8,13 +8,6 @@ import { useRouter } from '@/i18n/navigation';
 import { DataStateWrapper, PageHeader } from '@/components/shared';
 import { EventHeaderInfo, EventTabs } from '@/components/shared/event';
 import { EventActionsDropdown } from '@/components/admin/event-actions-dropdown';
-import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
-import {
-  useFreezeEvent,
-  useUnfreezeEvent,
-  usePublishEvent,
-  useDeleteEvent,
-} from '@/hooks/use-events';
 import { useAuthFetch } from '@/hooks';
 import type { EventWithRSVPSerialized } from '@padel/types';
 
@@ -33,7 +26,6 @@ export default function AdminEventLayout({
   const locale = useLocale();
   const router = useRouter();
   const authFetch = useAuthFetch();
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const { data: event, isLoading } = useQuery<EventWithRSVPSerialized>({
     queryKey: ['event', eventId],
@@ -63,14 +55,6 @@ export default function AdminEventLayout({
     enabled: !!session?.accessToken && !!event,
   });
 
-  // Use custom hooks for mutations
-  const freezeMutation = useFreezeEvent(eventId);
-  const unfreezeMutation = useUnfreezeEvent(eventId);
-  const publishMutation = usePublishEvent(eventId);
-  const deleteMutation = useDeleteEvent(eventId, () => {
-    router.push('/admin');
-  });
-
   return (
     <DataStateWrapper
       isLoading={isLoading}
@@ -91,10 +75,7 @@ export default function AdminEventLayout({
                   <EventActionsDropdown
                     event={event}
                     draw={draw ?? null}
-                    freezeMutation={freezeMutation}
-                    unfreezeMutation={unfreezeMutation}
-                    publishMutation={publishMutation}
-                    onDeleteClick={() => setShowDeleteDialog(true)}
+                    onDeleteSuccess={() => router.push('/admin')}
                   />
                 }
               />
@@ -111,22 +92,6 @@ export default function AdminEventLayout({
           />
 
           {children}
-
-          {/* Delete Event Confirmation Dialog */}
-          <ConfirmationDialog
-            open={showDeleteDialog}
-            onOpenChange={setShowDeleteDialog}
-            title={t('deleteEventTitle')}
-            description={t('deleteEventDescription')}
-            confirmText={t('deleteEvent')}
-            cancelText={t('cancel')}
-            variant="destructive"
-            isLoading={deleteMutation.isPending}
-            onConfirm={() => {
-              deleteMutation.mutate();
-              setShowDeleteDialog(false);
-            }}
-          />
         </div>
       )}
     </DataStateWrapper>

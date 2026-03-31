@@ -5,6 +5,15 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Seeding test events...');
 
+  // 🧹 Clear existing test events and related data
+  console.log('🧹 Clearing existing events...');
+  await prisma.assignment.deleteMany({});
+  await prisma.draw.deleteMany({});
+  await prisma.rSVP.deleteMany({});
+  await prisma.eventCourt.deleteMany({});
+  await prisma.event.deleteMany({});
+  console.log('✅ Cleared all existing events and related data');
+
   // Get the first venue (or create one if none exists)
   let venue = await prisma.venue.findFirst();
   if (!venue) {
@@ -82,12 +91,18 @@ async function main() {
     const rsvpClosesAt = new Date(eventDate);
     rsvpClosesAt.setHours(12, 0, 0, 0);
 
+    // Split courts: first 2 for MASTERS, last 2 for EXPLORERS
+    const mastersCourts = courts.slice(0, 2).map((c) => c.id);
+    const explorersCourts = courts.slice(2, 4).map((c) => c.id);
+
     const event = await prisma.event.create({
       data: {
         title,
         date: eventDate,
         startsAt,
         endsAt,
+        format: 'NON_STOP',
+        duration: 90, // Default 90 minutes for all events
         venueId: venue.id,
         capacity,
         rsvpOpensAt,
@@ -97,6 +112,16 @@ async function main() {
           topPercentage: 0.4,
           mastersTier: 'MASTERS',
           explorersTier: 'EXPLORERS',
+          mastersTimeSlot: {
+            startsAt: '19:00',
+            endsAt: '20:30',
+            courtIds: mastersCourts,
+          },
+          explorersTimeSlot: {
+            startsAt: '20:30',
+            endsAt: '22:00',
+            courtIds: explorersCourts,
+          },
         },
       },
     });
@@ -114,24 +139,26 @@ async function main() {
     return event;
   };
 
-  // 1. Last Week - PUBLISHED (with RSVPs and draw, for testing consecutive week avoidance)
-  const lastWeekPublished = await createEvent('Last Week - Published', -7, EventState.PUBLISHED);
+  // ========================================
+  // 1. Past Event - PUBLISHED (2 weeks ago, completed with draw and results)
+  // ========================================
+  const pastPublished = await createEvent('Sunday Session - Feb 16', -14, EventState.PUBLISHED);
 
-  // Add RSVPs for this event (16 players)
+  // Add 16 RSVPs
   for (const player of players) {
     await prisma.rSVP.create({
       data: {
-        eventId: lastWeekPublished.id,
+        eventId: pastPublished.id,
         playerId: player.id,
         status: 'CONFIRMED',
       },
     });
   }
 
-  // Create a draw for this event with specific team pairings
-  const lastWeekDraw = await prisma.draw.create({
+  // Create a draw with team pairings
+  const pastDraw = await prisma.draw.create({
     data: {
-      eventId: lastWeekPublished.id,
+      eventId: pastPublished.id,
       createdBy: players[0].userId,
       constraintsJson: {
         avoidRecentSessions: 4,
@@ -140,12 +167,8 @@ async function main() {
     },
   });
 
-  // Create specific team pairings that we'll want to avoid in the next event
-  // Team 1: players[0] + players[1]
-  // Team 2: players[2] + players[3]
-  // Team 3: players[8] + players[9]
-  // Team 4: players[10] + players[11]
-  const lastWeekAssignments = [
+  // Create assignments
+  const pastAssignments = [
     {
       courtIndex: 0,
       round: 1,
@@ -176,6 +199,76 @@ async function main() {
     },
   ];
 
+  for (const assignment of pastAssignments) {
+    await prisma.assignment.create({
+      data: {
+        drawId: pastDraw.id,
+        courtId: courts[assignment.courtIndex].id,
+        round: assignment.round,
+        teamA: assignment.teamA,
+        teamB: assignment.teamB,
+        tier: assignment.tier,
+      },
+    });
+  }
+
+  console.log(
+    `✅ Created: ${pastPublished.title} (${pastPublished.state}) - 2 weeks ago, with draw`
+  );
+
+  // ========================================
+  // 2. Recent Event - PUBLISHED (last week, completed)
+  // ========================================
+  const lastWeekPublished = await createEvent('Sunday Session - Mar 23', -7, EventState.PUBLISHED);
+
+  // Add 12 RSVPs
+  for (let i = 0; i < 12; i++) {
+    await prisma.rSVP.create({
+      data: {
+        eventId: lastWeekPublished.id,
+        playerId: players[i].id,
+        status: 'CONFIRMED',
+      },
+    });
+  }
+
+  // Create a draw for this event
+  const lastWeekDraw = await prisma.draw.create({
+    data: {
+      eventId: lastWeekPublished.id,
+      createdBy: players[0].userId,
+      constraintsJson: {
+        avoidRecentSessions: 4,
+        balanceStrength: true,
+      },
+    },
+  });
+
+  // Create assignments (3 courts, 12 players)
+  const lastWeekAssignments = [
+    {
+      courtIndex: 0,
+      round: 1,
+      teamA: [players[0].id, players[1].id],
+      teamB: [players[2].id, players[3].id],
+      tier: 'MASTERS',
+    },
+    {
+      courtIndex: 1,
+      round: 1,
+      teamA: [players[4].id, players[5].id],
+      teamB: [players[6].id, players[7].id],
+      tier: 'EXPLORERS',
+    },
+    {
+      courtIndex: 2,
+      round: 1,
+      teamA: [players[8].id, players[9].id],
+      teamB: [players[10].id, players[11].id],
+      tier: 'EXPLORERS',
+    },
+  ];
+
   for (const assignment of lastWeekAssignments) {
     await prisma.assignment.create({
       data: {
@@ -190,40 +283,93 @@ async function main() {
   }
 
   console.log(
-    `✅ Created: ${lastWeekPublished.title} (${lastWeekPublished.state}) with ${players.length} RSVPs and draw`
+    `✅ Created: ${lastWeekPublished.title} (${lastWeekPublished.state}) - last week, 12 players with draw`
   );
 
-  // 2. This Week - FROZEN (ready for draw generation, should avoid last week's teams)
-  const thisWeekFrozen = await createEvent(
-    'This Week - Frozen (Test Duplicate Avoidance)',
-    0,
-    EventState.FROZEN
-  );
+  // ========================================
+  // 3. Next Week - DRAWN (draw created but not yet published)
+  // ========================================
+  const thisWeekDrawn = await createEvent('Sunday Session - Apr 6', 7, EventState.DRAWN);
 
-  // Add same 16 players to test duplicate team avoidance
+  // Add 16 RSVPs
   for (const player of players) {
     await prisma.rSVP.create({
       data: {
-        eventId: thisWeekFrozen.id,
+        eventId: thisWeekDrawn.id,
         playerId: player.id,
         status: 'CONFIRMED',
       },
     });
   }
 
+  // Create unpublished draw
+  const thisWeekDraw = await prisma.draw.create({
+    data: {
+      eventId: thisWeekDrawn.id,
+      createdBy: players[0].userId,
+      constraintsJson: {
+        avoidRecentSessions: 4,
+        balanceStrength: true,
+      },
+    },
+  });
+
+  // Create assignments for the draw
+  const thisWeekAssignments = [
+    {
+      courtIndex: 0,
+      round: 1,
+      teamA: [players[0].id, players[1].id],
+      teamB: [players[2].id, players[3].id],
+      tier: 'MASTERS',
+    },
+    {
+      courtIndex: 1,
+      round: 1,
+      teamA: [players[4].id, players[5].id],
+      teamB: [players[6].id, players[7].id],
+      tier: 'MASTERS',
+    },
+    {
+      courtIndex: 2,
+      round: 1,
+      teamA: [players[8].id, players[9].id],
+      teamB: [players[10].id, players[11].id],
+      tier: 'EXPLORERS',
+    },
+    {
+      courtIndex: 3,
+      round: 1,
+      teamA: [players[12].id, players[13].id],
+      teamB: [players[14].id, players[15].id],
+      tier: 'EXPLORERS',
+    },
+  ];
+
+  for (const assignment of thisWeekAssignments) {
+    await prisma.assignment.create({
+      data: {
+        drawId: thisWeekDraw.id,
+        courtId: courts[assignment.courtIndex].id,
+        round: assignment.round,
+        teamA: assignment.teamA,
+        teamB: assignment.teamB,
+        tier: assignment.tier,
+      },
+    });
+  }
+
   console.log(
-    `✅ Created: ${thisWeekFrozen.title} (${thisWeekFrozen.state}) with ${players.length} RSVPs`
+    `✅ Created: ${thisWeekDrawn.title} (${thisWeekDrawn.state}) - draw ready, not published yet`
   );
 
-  // 3. Next Week - FROZEN with only 3 players (test minimum player validation)
-  const nextWeekFrozen = await createEvent(
-    'Next Week - Only 3 Players (Test Min Validation)',
-    7,
-    EventState.FROZEN
-  );
+  // ========================================
+  // 4. Two Weeks Out - FROZEN (RSVPs closed, ready for draw)
+  // ========================================
+  const nextWeekFrozen = await createEvent('Sunday Session - Apr 13', 14, EventState.FROZEN);
 
-  // Add only 3 players to test the minimum player requirement
-  for (let i = 0; i < 3; i++) {
+  // Add exactly 8 RSVPs (smaller event)
+  for (let i = 0; i < 8; i++) {
     await prisma.rSVP.create({
       data: {
         eventId: nextWeekFrozen.id,
@@ -234,21 +380,19 @@ async function main() {
   }
 
   console.log(
-    `✅ Created: ${nextWeekFrozen.title} (${nextWeekFrozen.state}) with 3 RSVPs (below minimum)`
+    `✅ Created: ${nextWeekFrozen.title} (${nextWeekFrozen.state}) - ready for draw generation, 8 players`
   );
 
-  // 4. Week After - FROZEN with exactly 4 players (test minimum edge case)
-  const weekAfterFrozen = await createEvent(
-    'Week After - Exactly 4 Players (Min Edge Case)',
-    14,
-    EventState.FROZEN
-  );
+  // ========================================
+  // 5. Three Weeks Out - OPEN (accepting RSVPs, some players already signed up)
+  // ========================================
+  const weekAfterOpen = await createEvent('Sunday Session - Apr 20', 21, EventState.OPEN);
 
-  // Add exactly 4 players
-  for (let i = 0; i < 4; i++) {
+  // Add 5 RSVPs (event is filling up)
+  for (let i = 0; i < 5; i++) {
     await prisma.rSVP.create({
       data: {
-        eventId: weekAfterFrozen.id,
+        eventId: weekAfterOpen.id,
         playerId: players[i].id,
         status: 'CONFIRMED',
       },
@@ -256,51 +400,72 @@ async function main() {
   }
 
   console.log(
-    `✅ Created: ${weekAfterFrozen.title} (${weekAfterFrozen.state}) with 4 RSVPs (exactly minimum)`
+    `✅ Created: ${weekAfterOpen.title} (${weekAfterOpen.state}) - accepting RSVPs, 5/16 spots filled`
   );
 
-  // 5. Future - FROZEN with 8 players (test small draw)
-  const futureFrozen = await createEvent('Future - 8 Players (Small Draw)', 21, EventState.FROZEN);
+  // ========================================
+  // 6. Four Weeks Out - OPEN (just opened for RSVP)
+  // ========================================
+  const threeWeeksOpen = await createEvent('Sunday Session - Apr 27', 28, EventState.OPEN);
 
-  // Add 8 players
-  for (let i = 0; i < 8; i++) {
+  // Add 2 early RSVPs
+  for (let i = 0; i < 2; i++) {
     await prisma.rSVP.create({
       data: {
-        eventId: futureFrozen.id,
+        eventId: threeWeeksOpen.id,
         playerId: players[i].id,
         status: 'CONFIRMED',
       },
     });
   }
 
-  console.log(`✅ Created: ${futureFrozen.title} (${futureFrozen.state}) with 8 RSVPs`);
+  console.log(
+    `✅ Created: ${threeWeeksOpen.title} (${threeWeeksOpen.state}) - just opened, 2 early birds`
+  );
 
-  // 6. Far Future - OPEN (accepting RSVPs)
-  const farFutureOpen = await createEvent('Far Future - Open for RSVP', 28, EventState.OPEN);
-  console.log(`✅ Created: ${farFutureOpen.title} (${farFutureOpen.state})`);
+  // ========================================
+  // 7. Five Weeks Out - OPEN (empty, waiting for RSVPs)
+  // ========================================
+  const fourWeeksOpen = await createEvent('Sunday Session - May 4', 35, EventState.OPEN);
+  console.log(`✅ Created: ${fourWeeksOpen.title} (${fourWeeksOpen.state}) - no RSVPs yet`);
 
-  // 7. Very Far Future - DRAFT (not published yet)
-  const veryFarFutureDraft = await createEvent('Very Far Future - Draft', 35, EventState.DRAFT);
-  console.log(`✅ Created: ${veryFarFutureDraft.title} (${veryFarFutureDraft.state})`);
+  // ========================================
+  // 8. Far Future - DRAFT (not published yet, being planned)
+  // ========================================
+  const farFutureDraft = await createEvent('Sunday Session - May 11', 42, EventState.DRAFT);
+  console.log(`✅ Created: ${farFutureDraft.title} (${farFutureDraft.state}) - still in planning`);
+
+  // ========================================
+  // 9. Very Far Future - DRAFT (long-term planning)
+  // ========================================
+  const veryFarDraft = await createEvent('Sunday Session - May 18', 49, EventState.DRAFT);
+  console.log(`✅ Created: ${veryFarDraft.title} (${veryFarDraft.state}) - future planning`);
 
   console.log('\n🎉 Test events created successfully!');
   console.log('\n📋 Event States Summary:');
-  console.log('- DRAFT: Event created but not published');
-  console.log('- OPEN: Published and accepting RSVPs');
-  console.log('- FROZEN: RSVPs closed, ready for draw generation');
-  console.log('- PUBLISHED: Draw published, event completed, ready for results entry');
-  console.log('\n🧪 Test Scenarios Created:');
-  console.log('   1. Last Week PUBLISHED: Has draw with specific team pairings');
-  console.log('   2. This Week FROZEN: Same 16 players (test duplicate team avoidance)');
-  console.log('   3. Next Week FROZEN: Only 3 players (test minimum validation - should fail)');
-  console.log('   4. Week After FROZEN: Exactly 4 players (test minimum edge case - should work)');
-  console.log('   5. Future FROZEN: 8 players (test small draw generation)');
-  console.log('   6. Far Future OPEN: No RSVPs yet');
-  console.log('   7. Very Far Future DRAFT: Not published yet');
-  console.log('\n💡 Testing Tips:');
-  console.log('   - Generate draw for "This Week" event to see duplicate team avoidance in action');
-  console.log('   - Try to generate draw for "Next Week" event to see minimum player validation');
-  console.log('   - Generate draw for "Week After" event to test exactly 4 players');
+  console.log('  • DRAFT: Event created but not published yet');
+  console.log('  • OPEN: Published and accepting RSVPs');
+  console.log('  • FROZEN: RSVPs closed, ready for draw generation');
+  console.log('  • DRAWN: Draw created but not yet published to players');
+  console.log('  • PUBLISHED: Draw published, event completed');
+  console.log('\n🗓️  Events Created:');
+  console.log('  Past:');
+  console.log('    1. Feb 16 (2 weeks ago) - PUBLISHED with full draw');
+  console.log('    2. Mar 23 (last week) - PUBLISHED, 12 players');
+  console.log('  Future:');
+  console.log('    3. Apr 6 (next week) - DRAWN (draw ready, not published)');
+  console.log('    4. Apr 13 (2 weeks) - FROZEN, 8 players, ready for draw');
+  console.log('    5. Apr 20 (3 weeks) - OPEN, 5/16 spots filled');
+  console.log('    6. Apr 27 (4 weeks) - OPEN, 2/16 spots filled');
+  console.log('    7. May 4 (5 weeks) - OPEN, empty');
+  console.log('    8. May 11 (6 weeks) - DRAFT, planning phase');
+  console.log('    9. May 18 (7 weeks) - DRAFT, planning phase');
+  console.log('\n💡 Testing Scenarios:');
+  console.log('  ✓ Historical events with completed draws');
+  console.log('  ✓ Event with draw ready to publish (DRAWN state)');
+  console.log('  ✓ Event ready for draw generation (FROZEN)');
+  console.log('  ✓ Events at various RSVP stages (empty, partial, ready)');
+  console.log('  ✓ Draft events for planning future sessions');
 }
 
 main()

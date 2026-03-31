@@ -23,6 +23,7 @@ import { DatePicker } from '@/components/shared/date-picker';
 import { TimePicker } from '@/components/shared/time-picker';
 import { DateTimePicker } from '@/components/shared/datetime-picker';
 import type { CreateEventDto, TierRules } from '@padel/types';
+import { EventFormat } from '@padel/types';
 import { useFormMutation } from '@/hooks';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -66,7 +67,7 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
   const [formData, setFormData] = useState<{
     title: string;
     date?: Date;
-    format: 'NON_STOP';
+    format: EventFormat;
     duration: number;
     capacity: string;
     rsvpOpensAt?: Date;
@@ -82,7 +83,7 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
   }>({
     title: '',
     date: undefined,
-    format: 'NON_STOP', // Default format
+    format: EventFormat.NON_STOP, // Default format
     duration: 90, // Default 90 minutes
     capacity: '0',
     rsvpOpensAt: undefined,
@@ -148,7 +149,7 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
       setFormData({
         title: initialData.title || '',
         date: initialData.date ? new Date(initialData.date) : undefined,
-        format: 'NON_STOP',
+        format: EventFormat.NON_STOP,
         duration,
         capacity: initialData.capacity?.toString() || '0',
         rsvpOpensAt: initialData.rsvpOpensAt ? new Date(initialData.rsvpOpensAt) : undefined,
@@ -563,13 +564,15 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
                 <FieldLabel htmlFor="format">{t('gameFormat')}</FieldLabel>
                 <Select
                   value={formData.format}
-                  onValueChange={(value: 'NON_STOP') => setFormData({ ...formData, format: value })}
+                  onValueChange={(value: EventFormat) =>
+                    setFormData({ ...formData, format: value })
+                  }
                 >
                   <SelectTrigger id="format">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="NON_STOP">{t('nonStopFormat')}</SelectItem>
+                    <SelectItem value={EventFormat.NON_STOP}>{t('nonStopFormat')}</SelectItem>
                   </SelectContent>
                 </Select>
                 <FieldDescription>{t('gameFormatDescription')}</FieldDescription>

@@ -4,11 +4,18 @@ import { useState, useEffect, useRef } from 'react';
 import { useQuery, UseMutationResult } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from '@/components/ui/empty';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
-import { Lock } from 'lucide-react';
-import { LockIcon, LockIconHandle } from 'lucide-animated';
+import { Lock, Calendar, ClipboardList } from 'lucide-react';
+import { BadgeAlertIcon, LockIcon, LockIconHandle } from 'lucide-animated';
 import { useAuthFetch, usePublishMatches, useSaveMatchResults } from '@/hooks';
 import type { MatchResultData } from '@/hooks/use-matches';
 import { useTranslations } from 'next-intl';
@@ -164,34 +171,46 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
     if (!event) return null;
     if (event.state !== 'PUBLISHED') {
       return (
-        <Card className="glass-card">
-          <CardContent className="py-8 text-center text-muted-foreground">
-            <p className="text-lg font-medium mb-2">{t('eventNotPublished')}</p>
-            <p>{t('eventNotPublishedDescription')}</p>
-          </CardContent>
-        </Card>
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <BadgeAlertIcon className="size-6" />
+            </EmptyMedia>
+            <EmptyTitle>{t('eventNotPublished')}</EmptyTitle>
+            <EmptyDescription>{t('eventNotPublishedDescription')}</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       );
     }
     if (new Date(event.endsAt) > new Date()) {
       return (
-        <Card className="glass-card">
-          <CardContent className="py-8 text-center text-muted-foreground">
-            <p className="text-lg font-medium mb-2">{t('eventNotCompleted')}</p>
-            <p>{t('eventNotCompletedDescription')}</p>
-            <p className="text-sm mt-2">
-              {t('eventEnds', { date: new Date(event.endsAt).toLocaleString() })}
-            </p>
-          </CardContent>
-        </Card>
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Calendar className="size-6" />
+            </EmptyMedia>
+            <EmptyTitle>{t('eventNotCompleted')}</EmptyTitle>
+            <EmptyDescription>
+              {t('eventNotCompletedDescription')}
+              <br />
+              <span className="text-xs mt-2 block">
+                {t('eventEnds', { date: new Date(event.endsAt).toLocaleString() })}
+              </span>
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       );
     }
     if (!draw || !draw.assignments || draw.assignments.length === 0) {
       return (
-        <Card className="glass-card">
-          <CardContent className="py-8 text-center text-muted-foreground">
-            {t('noDrawFound')}
-          </CardContent>
-        </Card>
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <ClipboardList className="size-6" />
+            </EmptyMedia>
+            <EmptyTitle>{t('noDrawFound')}</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
       );
     }
     return null;

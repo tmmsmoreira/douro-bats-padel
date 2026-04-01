@@ -1,9 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { PlayerListItem } from '@/components/shared/player-list-item';
 import { cn } from '@/lib/utils';
 import { X } from 'lucide-react';
+import { UserCheckIcon } from 'lucide-animated';
 
 interface Player {
   id: string;
@@ -134,7 +136,14 @@ export function ConfirmedPlayersSection({
             )}
           </div>
         ) : (
-          <p className="text-center text-muted-foreground py-4">{emptyMessage}</p>
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <UserCheckIcon className="size-6" />
+              </EmptyMedia>
+              <EmptyTitle>{emptyMessage}</EmptyTitle>
+            </EmptyHeader>
+          </Empty>
         )}
       </CardContent>
     </Card>

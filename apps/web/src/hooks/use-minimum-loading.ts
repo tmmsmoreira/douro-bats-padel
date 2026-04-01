@@ -26,21 +26,27 @@ export function useMinimumLoading(
   hasData: boolean = !isLoading,
   minDuration: number = 500
 ): boolean {
-  const [showLoading, setShowLoading] = useState(true);
+  const [showLoading, setShowLoading] = useState(isLoading);
+  const [loadingStartTime, setLoadingStartTime] = useState<number | null>(null);
 
   useEffect(() => {
-    if (!isLoading && hasData) {
-      // Data has loaded, start the minimum duration timer
+    if (isLoading && loadingStartTime === null) {
+      // Started loading, record the start time
+      setLoadingStartTime(Date.now());
+      setShowLoading(true);
+    } else if (!isLoading && loadingStartTime !== null) {
+      // Loading finished, enforce minimum duration
+      const elapsed = Date.now() - loadingStartTime;
+      const remaining = Math.max(0, minDuration - elapsed);
+
       const timer = setTimeout(() => {
         setShowLoading(false);
-      }, minDuration);
+        setLoadingStartTime(null);
+      }, remaining);
 
       return () => clearTimeout(timer);
-    } else {
-      // Still loading or no data, keep showing loading state
-      setShowLoading(true);
     }
-  }, [isLoading, hasData, minDuration]);
+  }, [isLoading, loadingStartTime, minDuration]);
 
-  return isLoading || showLoading;
+  return showLoading;
 }

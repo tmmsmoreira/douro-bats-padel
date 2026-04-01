@@ -230,12 +230,25 @@ export class EventsService {
     });
 
     if (!event) {
+      console.log(`Event not found in database: ${id}`);
       throw new NotFoundException('Event not found');
     }
 
     // If not admin/editor, only allow access to published events
-    if (!includeUnpublished && event.state === EventState.DRAFT) {
-      throw new NotFoundException('Event not found');
+    // Must match the same state filter as findAll()
+    if (!includeUnpublished) {
+      const allowedStates: string[] = [
+        EventState.OPEN,
+        EventState.FROZEN,
+        EventState.DRAWN,
+        EventState.PUBLISHED,
+      ];
+      if (!allowedStates.includes(event.state as string)) {
+        console.log(
+          `Event ${id} exists but state ${event.state} is not in allowed states for non-admin users`
+        );
+        throw new NotFoundException('Event not found');
+      }
     }
 
     const confirmedCount = event.rsvps.filter((r) => r.status === 'CONFIRMED').length;

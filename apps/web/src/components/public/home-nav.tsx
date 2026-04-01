@@ -66,8 +66,8 @@ export function HomeNav() {
               </Link>
 
               {/* Desktop Actions */}
-              <div className="hidden md:flex flex-1 items-center justify-between">
-                <div className="flex flex-1 gap-2 justify-end px-6">
+              <div className="hidden md:flex flex-1 items-center justify-center">
+                <div className="flex gap-2">
                   <LanguageToggleButton />
                   <ThemeToggleButton />
                   <Link href="/login">

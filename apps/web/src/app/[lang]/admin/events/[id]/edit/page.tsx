@@ -58,7 +58,8 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         headers.Authorization = `Bearer ${session.accessToken}`;
       }
 
-      const res = await fetch(`${API_URL}/events/${eventId}?includeUnpublished=true`, { headers });
+      // Backend automatically determines access based on user roles from JWT
+      const res = await fetch(`${API_URL}/events/${eventId}`, { headers });
 
       if (!res.ok) {
         throw new Error(`API Error: ${res.statusText}`);

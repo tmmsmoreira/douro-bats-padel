@@ -169,7 +169,7 @@ export function PlayerNav() {
 
               {/* Desktop Navigation - Only shown on desktop (md and up) */}
               <div className="hidden md:flex flex-1 items-center justify-between">
-                <div className="flex flex-1 gap-2 justify-center px-6">
+                <div className="flex flex-1 gap-2 px-14">
                   {navItems.map((item) => (
                     <Link
                       key={item.href}

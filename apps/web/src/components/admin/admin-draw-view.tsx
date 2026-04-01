@@ -49,7 +49,8 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
     queryKey: ['event', eventId, session?.accessToken],
     queryFn: async () => {
       try {
-        return await authFetch.get(`/events/${eventId}?includeUnpublished=true`);
+        // Backend automatically determines access based on user roles from JWT
+        return await authFetch.get(`/events/${eventId}`);
       } catch {
         return null;
       }

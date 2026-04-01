@@ -22,6 +22,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from '@/components/ui/drawer';
+import { cn } from '@/lib/utils';
 
 interface BaseProps {
   children: React.ReactNode;
@@ -117,7 +118,7 @@ const ResponsiveDialogFooter = ({ className, children, ...props }: ResponsiveDia
   const ResponsiveDialogFooter = isDesktop ? DialogFooter : DrawerFooter;
 
   return (
-    <ResponsiveDialogFooter className={className} {...props}>
+    <ResponsiveDialogFooter className={cn('bg-muted/50 md:bg-transparent', className)} {...props}>
       {children}
     </ResponsiveDialogFooter>
   );

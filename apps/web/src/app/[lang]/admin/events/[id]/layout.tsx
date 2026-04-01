@@ -36,6 +36,7 @@ export default function AdminEventLayout({
       if (session?.accessToken) {
         headers.Authorization = `Bearer ${session.accessToken}`;
       }
+      // Backend automatically determines access based on user roles from JWT
       const res = await fetch(`${API_URL}/events/${eventId}`, { headers });
       if (!res.ok) throw new Error('Failed to fetch event');
       return res.json();

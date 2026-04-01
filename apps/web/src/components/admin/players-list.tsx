@@ -3,9 +3,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'motion/react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
-import { Mail, CheckCircle } from 'lucide-react';
+import { Mail, CheckCircle, UserX } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { useState, useMemo, useRef, useEffect } from 'react';
@@ -297,11 +298,14 @@ function PlayersListContent({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3 }}
         >
-          <Card className="glass-card group transition-all duration-300 border-border/50">
-            <CardContent className="py-8 text-center text-muted-foreground">
-              {t('noPlayersMatchSearch')}
-            </CardContent>
-          </Card>
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <UserX className="size-6" />
+              </EmptyMedia>
+              <EmptyTitle>{t('noPlayersMatchSearch')}</EmptyTitle>
+            </EmptyHeader>
+          </Empty>
         </motion.div>
       ) : (
         <>

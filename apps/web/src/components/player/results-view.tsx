@@ -4,8 +4,16 @@ import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from '@/components/ui/empty';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { AlertCircle } from 'lucide-react';
 import { DataStateWrapper } from '@/components/shared';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -64,19 +72,26 @@ export function ResultsView({ eventId }: { eventId: string }) {
       error={error}
       loadingMessage={t('loadingResults')}
       errorComponent={
-        <Card className="glass-card">
-          <CardContent className="py-8 text-center">
-            <p className="text-lg font-medium">{t('resultsNotAvailable')}</p>
-            <p className="text-sm text-muted-foreground mt-2">
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <AlertCircle className="size-6" />
+            </EmptyMedia>
+            <EmptyTitle>{t('resultsNotAvailable')}</EmptyTitle>
+            <EmptyDescription>
               {t('resultsNotAvailableDescription')}
-            </p>
-            {error && (
-              <p className="text-xs text-red-500 mt-2">
-                {t('error')}: {error instanceof Error ? error.message : 'Failed to load results'}
-              </p>
-            )}
-          </CardContent>
-        </Card>
+              {error && (
+                <>
+                  <br />
+                  <span className="text-xs text-destructive mt-2 block">
+                    {t('error')}:{' '}
+                    {error instanceof Error ? error.message : 'Failed to load results'}
+                  </span>
+                </>
+              )}
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       }
       emptyMessage={t('noResults')}
     >

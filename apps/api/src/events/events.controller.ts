@@ -29,21 +29,14 @@ export class EventsController {
 
   @Public()
   @Get()
-  async findAll(
-    @Request() req: any,
-    @Query('from') from?: string,
-    @Query('to') to?: string,
-    @Query('includeUnpublished') includeUnpublished?: string
-  ) {
+  async findAll(@Request() req: any, @Query('from') from?: string, @Query('to') to?: string) {
     const fromDate = from ? new Date(from) : undefined;
     const toDate = to ? new Date(to) : undefined;
     const userId = req.user?.sub;
 
-    // Check if request explicitly asks for unpublished events (admin view)
-    // AND verify user has admin or editor role
+    // Automatically determine if user should see unpublished events based on their roles
     const userRoles = req.user?.roles || [];
     const isAdminOrEditor = userRoles.includes(Role.ADMIN) || userRoles.includes(Role.EDITOR);
-    const shouldIncludeUnpublished = includeUnpublished === 'true' && isAdminOrEditor;
 
     // Debug logging
     if (process.env.NODE_ENV === 'development') {
@@ -53,28 +46,22 @@ export class EventsController {
           ? { sub: req.user.sub, email: req.user.email, roles: userRoles }
           : 'not authenticated'
       );
-      console.log('GET /events - includeUnpublished:', shouldIncludeUnpublished);
+      console.log('GET /events - includeUnpublished:', isAdminOrEditor);
     }
 
-    return this.eventsService.findAll(fromDate, toDate, userId, shouldIncludeUnpublished);
+    return this.eventsService.findAll(fromDate, toDate, userId, isAdminOrEditor);
   }
 
   @Public()
   @Get(':id')
-  async findOne(
-    @Param('id') id: string,
-    @Request() req: any,
-    @Query('includeUnpublished') includeUnpublished?: string
-  ) {
+  async findOne(@Param('id') id: string, @Request() req: any) {
     const userId = req.user?.sub;
 
-    // Check if request explicitly asks for unpublished events (admin view)
-    // AND verify user has admin or editor role
+    // Automatically determine if user should see unpublished events based on their roles
     const userRoles = req.user?.roles || [];
     const isAdminOrEditor = userRoles.includes(Role.ADMIN) || userRoles.includes(Role.EDITOR);
-    const shouldIncludeUnpublished = includeUnpublished === 'true' && isAdminOrEditor;
 
-    return this.eventsService.findOne(id, userId, shouldIncludeUnpublished);
+    return this.eventsService.findOne(id, userId, isAdminOrEditor);
   }
 
   @Post()

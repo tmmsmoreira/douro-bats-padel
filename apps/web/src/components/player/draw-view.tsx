@@ -3,7 +3,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
-import { Card, CardContent } from '@/components/ui/card';
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from '@/components/ui/empty';
+import { AlertCircle } from 'lucide-react';
 import { DataStateWrapper } from '@/components/shared';
 import { TierSection, WaitlistSection } from '@/components/shared/draw';
 import type { Draw, Assignment } from '@/components/shared/draw';
@@ -60,17 +67,25 @@ export function DrawView({ eventId }: { eventId: string }) {
       error={error}
       loadingMessage={t('loadingDraw')}
       errorComponent={
-        <Card className="glass-card">
-          <CardContent className="py-8 text-center">
-            <p className="text-lg font-medium">{t('drawNotAvailable')}</p>
-            <p className="text-sm text-muted-foreground mt-2">{t('drawNotAvailableDescription')}</p>
-            {error && (
-              <p className="text-xs text-red-500 mt-2">
-                {t('error')}: {error instanceof Error ? error.message : 'Failed to load draw'}
-              </p>
-            )}
-          </CardContent>
-        </Card>
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <AlertCircle className="size-6" />
+            </EmptyMedia>
+            <EmptyTitle>{t('drawNotAvailable')}</EmptyTitle>
+            <EmptyDescription>
+              {t('drawNotAvailableDescription')}
+              {error && (
+                <>
+                  <br />
+                  <span className="text-xs text-destructive mt-2 block">
+                    {t('error')}: {error instanceof Error ? error.message : 'Failed to load draw'}
+                  </span>
+                </>
+              )}
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       }
       emptyMessage={t('drawNotAvailable')}
     >

@@ -93,7 +93,7 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
     queryKey: ['event', eventId, session?.accessToken],
     queryFn: async () => {
       try {
-        return await authFetch.get(`/events/${eventId}?includeUnpublished=true`);
+        return await authFetch.get(`/events/${eventId}`);
       } catch (error) {
         throw new Error(`API Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }

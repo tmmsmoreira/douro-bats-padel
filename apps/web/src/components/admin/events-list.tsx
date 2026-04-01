@@ -3,9 +3,9 @@
 import { useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
 import { useTranslations, useLocale } from 'next-intl';
-import { Card, CardContent } from '@/components/ui/card';
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { Button } from '@/components/ui/button';
-import { X } from 'lucide-react';
+import { X, FilterX } from 'lucide-react';
 import { CalendarDaysIcon, CalendarDaysIconHandle } from 'lucide-animated';
 import Link from 'next/link';
 import { useState, useMemo } from 'react';
@@ -329,13 +329,22 @@ function EventsListContent({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3 }}
         >
-          <Card className="glass-card group transition-all duration-300 border-border/50">
-            <CardContent className="py-8 text-center text-muted-foreground">
-              {selectedDate || statusFilter !== 'ALL'
-                ? t('noEventsMatchFilters')
-                : t('noEventsFound')}
-            </CardContent>
-          </Card>
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                {selectedDate || statusFilter !== 'ALL' ? (
+                  <FilterX className="size-6" />
+                ) : (
+                  <CalendarDaysIcon className="size-6" />
+                )}
+              </EmptyMedia>
+              <EmptyTitle>
+                {selectedDate || statusFilter !== 'ALL'
+                  ? t('noEventsMatchFilters')
+                  : t('noEventsFound')}
+              </EmptyTitle>
+            </EmptyHeader>
+          </Empty>
         </motion.div>
       ) : (
         <>

@@ -202,6 +202,43 @@
       "ctaSecondary": "View Events",
       "ctaSignIn": "Sign In"
     },
+    "whatIs": {
+      "title": "What is Douro Bats Padel?",
+      "description": "Douro Bats Padel is part of the Douro Bats association, an inclusive community where everyone is welcome. We're your ultimate platform for managing padel game nights, tournaments, and community events - connecting players of all levels and backgrounds.",
+      "mission": "We believe padel is for everyone. It's the place where players come together to share the court, learn from each other, and enjoy the sport we all love. More than just an app, it's a welcoming community built around inclusivity, friendship, and the joy of playing padel together."
+    },
+    "howItWorks": {
+      "title": "How it works",
+      "step1": {
+        "number": "1",
+        "title": "Find",
+        "description": "Discover upcoming game nights and tournaments. Browse available events and see who's playing."
+      },
+      "step2": {
+        "number": "2",
+        "title": "Register",
+        "description": "RSVP to events with automatic waitlist management. Get instant confirmations and updates."
+      },
+      "step3": {
+        "number": "3",
+        "title": "Play & Track",
+        "description": "Join matches, compete in tournaments, and track your progress with our ELO-based ranking system."
+      }
+    },
+    "connectApp": {
+      "title": "Connect with our app",
+      "features": [
+        "Easily connect with other players",
+        "Register for game nights from your phone",
+        "Track your progress and rankings anytime",
+        "View match draws and results",
+        "Get notifications for upcoming events",
+        "Access your profile and stats"
+      ],
+      "installButton": "Install App",
+      "downloadButton": "Download App",
+      "installed": "App Installed"
+    },
     "features": {
       "title": "Everything You Need",
       "subtitle": "Built for players, by players",

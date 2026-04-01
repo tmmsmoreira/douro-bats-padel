@@ -6,8 +6,9 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from '@/i18n/navigation';
 import { useDeletePlayer, useRevokeInvitation, useResendInvitation } from '@/hooks';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Mail, CheckCircle, XCircle, TrendingUp, MoreVertical } from 'lucide-react';
+import { Mail, CheckCircle, XCircle, TrendingUp, MoreVertical, UserX } from 'lucide-react';
 import { DeleteIcon, DeleteIconHandle, CopyIcon, CopyIconHandle } from 'lucide-animated';
 import { Button } from '@/components/ui/button';
 import {
@@ -143,11 +144,14 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
         backButtonHref="/admin/players"
         backButtonLabel={tList('backToPlayers')}
       />
-      <Card>
-        <CardContent className="py-8 text-center text-muted-foreground">
-          {t('profileNotFound')}
-        </CardContent>
-      </Card>
+      <Empty>
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <UserX className="size-6" />
+          </EmptyMedia>
+          <EmptyTitle>{t('profileNotFound')}</EmptyTitle>
+        </EmptyHeader>
+      </Empty>
     </motion.div>
   );
 

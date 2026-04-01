@@ -8,25 +8,24 @@ import { useAuthFetch } from './use-api';
 interface UseEventsOptions {
   from?: string;
   to?: string;
-  includeUnpublished?: boolean;
   queryKey?: string[];
 }
 
 /**
  * Hook to fetch events with optional filters
+ * Note: Backend automatically determines access to unpublished events based on user roles from JWT
  */
 export function useEvents(options: UseEventsOptions = {}) {
   const { data: session } = useSession();
   const authFetch = useAuthFetch();
-  const { from, to, includeUnpublished = false, queryKey = ['events'] } = options;
+  const { from, to, queryKey = ['events'] } = options;
 
   return useQuery<EventWithRSVP[]>({
-    queryKey: [...queryKey, session?.accessToken, from, to, includeUnpublished],
+    queryKey: [...queryKey, session?.accessToken, from, to],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (from) params.append('from', from);
       if (to) params.append('to', to);
-      if (includeUnpublished) params.append('includeUnpublished', 'true');
 
       const path = `/events${params.toString() ? `?${params.toString()}` : ''}`;
       return authFetch.get<EventWithRSVP[]>(path);
@@ -57,24 +56,25 @@ export function usePastEvents(queryKey: string[] = ['past-events']) {
 }
 
 /**
- * Hook to fetch admin events (includes unpublished)
+ * Hook to fetch admin events
+ * Note: Backend automatically includes unpublished events for admin/editor users based on JWT roles
  */
 export function useAdminEvents() {
-  return useEvents({ includeUnpublished: true, queryKey: ['admin-events'] });
+  return useEvents({ queryKey: ['admin-events'] });
 }
 
 /**
  * Hook to fetch a single event by ID
+ * Note: Backend automatically determines access to unpublished events based on user roles from JWT
  */
-export function useEventDetails(eventId: string, includeUnpublished = false) {
+export function useEventDetails(eventId: string) {
   const { data: session } = useSession();
   const authFetch = useAuthFetch();
 
   return useQuery<EventWithRSVP>({
-    queryKey: ['event', eventId, session?.accessToken, includeUnpublished],
+    queryKey: ['event', eventId, session?.accessToken],
     queryFn: async () => {
-      const params = includeUnpublished ? '?includeUnpublished=true' : '';
-      return authFetch.get(`/events/${eventId}${params}`);
+      return authFetch.get(`/events/${eventId}`);
     },
   });
 }

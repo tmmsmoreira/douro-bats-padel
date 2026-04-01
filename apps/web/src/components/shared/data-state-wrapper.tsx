@@ -2,7 +2,8 @@
 
 import { ReactNode } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
+import { MailboxIcon } from '@/components/icons/mailbox-icon';
 import { LoadingState } from './loading-state';
 import { useMinimumLoading } from '@/hooks/use-minimum-loading';
 
@@ -54,10 +55,6 @@ interface DataStateWrapperProps<T> {
    */
   minLoadingDuration?: number;
   /**
-   * Custom className for empty state card
-   */
-  emptyClassName?: string;
-  /**
    * Custom className for error state
    */
   errorClassName?: string;
@@ -91,7 +88,6 @@ export function DataStateWrapper<T>({
   children,
   isEmpty = (data) => !data || (Array.isArray(data) && data.length === 0),
   minLoadingDuration = 500,
-  emptyClassName = 'glass-card',
   errorClassName = 'text-center py-8',
 }: DataStateWrapperProps<T>) {
   // Use minimum loading to prevent jarring flashes
@@ -139,11 +135,14 @@ export function DataStateWrapper<T>({
               transition={{ duration: 0.3 }}
               role="status"
             >
-              <Card className={emptyClassName}>
-                <CardContent className="py-8 text-center text-muted-foreground">
-                  {emptyMessage}
-                </CardContent>
-              </Card>
+              <Empty>
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <MailboxIcon />
+                  </EmptyMedia>
+                  <EmptyTitle>{emptyMessage}</EmptyTitle>
+                </EmptyHeader>
+              </Empty>
             </motion.div>
           )
         ) : (

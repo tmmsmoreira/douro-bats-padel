@@ -184,6 +184,43 @@
       "ctaSecondary": "Ver Eventos",
       "ctaSignIn": "Entrar"
     },
+    "whatIs": {
+      "title": "O que é o Douro Bats Padel?",
+      "description": "Douro Bats Padel faz parte da associação Douro Bats, uma comunidade inclusiva onde todos são bem-vindos. Somos a sua plataforma definitiva para gerir noites de padel, torneios e eventos comunitários - conectando jogadores de todos os níveis e origens.",
+      "mission": "Acreditamos que o padel é para todos. É o lugar onde os jogadores se juntam para partilhar o court, aprender uns com os outros e desfrutar do desporto que todos amamos. Mais do que uma app, é uma comunidade acolhedora construída em torno da inclusão, amizade e da alegria de jogar padel juntos."
+    },
+    "howItWorks": {
+      "title": "Como funciona",
+      "step1": {
+        "number": "1",
+        "title": "Descubra",
+        "description": "Descubra noites de jogo e torneios. Navegue pelos eventos disponíveis e veja quem está a jogar."
+      },
+      "step2": {
+        "number": "2",
+        "title": "Registe-se",
+        "description": "Inscreva-se em eventos com gestão automática de lista de espera. Receba confirmações e atualizações instantâneas."
+      },
+      "step3": {
+        "number": "3",
+        "title": "Jogue e Acompanhe",
+        "description": "Participe em partidas, compita em torneios e acompanhe o seu progresso com o nosso sistema de classificação baseado em ELO."
+      }
+    },
+    "connectApp": {
+      "title": "Conecte-se com a nossa app",
+      "features": [
+        "Conecte-se facilmente com outros jogadores",
+        "Registe-se para noites de jogo do seu telemóvel",
+        "Acompanhe o seu progresso e classificações a qualquer momento",
+        "Veja sorteios e resultados de partidas",
+        "Receba notificações sobre eventos próximos",
+        "Aceda ao seu perfil e estatísticas"
+      ],
+      "installButton": "Instalar App",
+      "downloadButton": "Descarregar App",
+      "installed": "App Instalada"
+    },
     "features": {
       "title": "Tudo o Que Precisa",
       "subtitle": "Feito por jogadores, para jogadores",

@@ -52,8 +52,8 @@ export function EventDetails({ eventId }: { eventId: string }) {
         headers.Authorization = `Bearer ${session.accessToken}`;
       }
 
-      // Add includeUnpublished=true query parameter for admin view
-      const res = await fetch(`${API_URL}/events/${eventId}?includeUnpublished=true`, { headers });
+      // Backend automatically determines access based on user roles from JWT
+      const res = await fetch(`${API_URL}/events/${eventId}`, { headers });
 
       if (!res.ok) {
         throw new Error(`API Error: ${res.statusText}`);

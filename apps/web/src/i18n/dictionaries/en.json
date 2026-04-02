@@ -36,7 +36,11 @@
     "account": "Account",
     "settings": "Settings",
     "language": "Language",
-    "theme": "Theme"
+    "theme": "Theme",
+    "lightMode": "Light mode",
+    "darkMode": "Dark mode",
+    "switchToEnglish": "English",
+    "switchToPortuguese": "Portuguese"
   },
   "auth": {
     "login": {

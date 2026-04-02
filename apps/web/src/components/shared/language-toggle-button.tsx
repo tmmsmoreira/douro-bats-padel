@@ -2,10 +2,12 @@
 
 import * as React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { i18n, type Locale } from '@/i18n';
 import { EnFlagIcon, PtFlagIcon } from '@/components/icons';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 const localeFlagComponents: Record<Locale, React.ComponentType<{ size?: number }>> = {
   en: EnFlagIcon,
@@ -23,7 +25,8 @@ export const LanguageToggleButton = React.forwardRef<HTMLButtonElement>(
     }, []);
 
     const currentLocale = (pathname.split('/')[1] as Locale) || i18n.defaultLocale;
-    const FlagIcon = localeFlagComponents[currentLocale];
+    const otherLocale: Locale = currentLocale === 'en' ? 'pt' : 'en';
+    const FlagIcon = localeFlagComponents[otherLocale];
 
     const toggleLanguage = () => {
       const newLocale: Locale = currentLocale === 'en' ? 'pt' : 'en';
@@ -41,19 +44,28 @@ export const LanguageToggleButton = React.forwardRef<HTMLButtonElement>(
       router.replace(newPath);
     };
 
+    const t = useTranslations('nav');
+    const otherLanguageLabel =
+      otherLocale === 'en' ? t('switchToEnglish') : t('switchToPortuguese');
+
     // Show the same flag during SSR and after hydration to prevent flash
     return (
-      <Button
-        ref={ref}
-        variant="ghost"
-        size="icon"
-        onClick={toggleLanguage}
-        disabled={!mounted}
-        aria-label={`Switch to ${currentLocale === 'en' ? 'Portuguese' : 'English'}`}
-        animate
-      >
-        <FlagIcon size={20} />
-      </Button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            ref={ref}
+            variant="ghost"
+            size="icon"
+            onClick={toggleLanguage}
+            disabled={!mounted}
+            aria-label={otherLanguageLabel}
+            animate
+          >
+            <FlagIcon size={20} />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>{otherLanguageLabel}</TooltipContent>
+      </Tooltip>
     );
   }
 );

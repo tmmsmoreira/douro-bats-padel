@@ -2,6 +2,19 @@
 
 import type React from 'react';
 
+// Suppress React 19 warning caused by next-themes rendering an inline <script> to
+// prevent theme flash. React 19 no longer executes scripts inside components and warns
+// about them. This is a known upstream incompatibility — the warning is harmless because
+// next-themes' script only needs to run during SSR (before hydration).
+// Remove this once next-themes ships a fix using <template> instead of <script>.
+if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
+  const _consoleError = console.error.bind(console);
+  console.error = (...args: unknown[]) => {
+    if (typeof args[0] === 'string' && args[0].includes('Encountered a script tag')) return;
+    _consoleError(...args);
+  };
+}
+
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SessionProvider, useSession, signOut } from 'next-auth/react';
 import { useState, useEffect, useRef } from 'react';

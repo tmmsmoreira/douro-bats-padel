@@ -4,6 +4,7 @@ import { ThemeToggleButton } from '@/components/shared/theme-toggle-button';
 import { LanguageToggleButton } from '@/components/shared/language-toggle-button';
 import Image from 'next/image';
 import Link from 'next/link';
+import { LOGO_BLUR_DATA_URL } from '@/lib/image-blur';
 import { motion } from 'motion/react';
 import { slideUp } from '@/lib/animations';
 import { useLocale } from 'next-intl';
@@ -90,65 +91,89 @@ export function AuthPageLayout({
   );
 
   return (
-    <div className="min-h-screen flex relative">
-      {/* Top-right controls */}
-      <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
-        <ThemeToggleButton />
-        <LanguageToggleButton />
-      </div>
+    <div className="min-h-screen flex flex-col">
+      {/* Mobile header - logo + controls */}
+      <header className="lg:hidden flex items-center justify-between px-4 h-16 border-b border-border/50 bg-background shrink-0">
+        <Link href={`/${locale}`} className="flex items-center gap-3">
+          <Image
+            src="/icons/logo.png"
+            alt="Douro Bats Padel"
+            width={36}
+            height={36}
+            priority
+            placeholder="blur"
+            blurDataURL={LOGO_BLUR_DATA_URL}
+            className="object-contain"
+          />
+          <span className="font-heading gradient-text text-lg font-bold">Douro Bats Padel</span>
+        </Link>
+        <div className="flex items-center gap-2">
+          <ThemeToggleButton />
+          <LanguageToggleButton />
+        </div>
+      </header>
 
-      {/* Left side - Image */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-linear-to-br from-slate-900 via-secondary/80 to-slate-900">
-        <div className="absolute inset-0 bg-black/20" />
-        <Image src={imageUrl} alt={imageAlt} fill className="object-cover opacity-80" priority />
-        <div className="relative z-10 flex flex-col justify-between text-white p-12">
-          {/* Top section - Title */}
-          <div className="relative">
-            {fancyTitle ? (
-              <Link href={`/${locale}`} className="relative inline-block group">
-                {/* Gradient background */}
-                <div className="absolute inset-0 bg-linear-to-r from-primary/30 via-purple-500/30 to-pink-500/30 blur-2xl -z-10 group-hover:blur-3xl transition-all" />
-                {/* Glass container */}
-                <div className="relative bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 shadow-2xl group-hover:border-white/30 transition-all">
-                  <h1 className="text-4xl font-bold mb-2 font-heading gradient-text">{title}</h1>
-                  {subtitle && <p className="text-lg text-white/90">{subtitle}</p>}
+      {/* Main content — original side-by-side layout */}
+      <div className="flex-1 flex relative">
+        {/* Desktop top-right controls */}
+        <div className="absolute top-4 right-4 z-20 hidden lg:flex items-center gap-2">
+          <ThemeToggleButton />
+          <LanguageToggleButton />
+        </div>
+
+        {/* Left side - Image */}
+        <div className="hidden lg:flex lg:w-1/2 relative bg-linear-to-br from-slate-900 via-secondary/80 to-slate-900">
+          <div className="absolute inset-0 bg-black/20" />
+          <Image src={imageUrl} alt={imageAlt} fill className="object-cover opacity-80" priority />
+          <div className="relative z-10 flex flex-col justify-between text-white p-12">
+            {/* Top section - Title */}
+            <div className="relative">
+              {fancyTitle ? (
+                <Link href={`/${locale}`} className="relative inline-block group">
+                  {/* Gradient background */}
+                  <div className="absolute inset-0 bg-linear-to-r from-primary/30 via-purple-500/30 to-pink-500/30 blur-2xl -z-10 group-hover:blur-3xl transition-all" />
+                  {/* Glass container */}
+                  <div className="relative bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 shadow-2xl group-hover:border-white/30 transition-all">
+                    <h1 className="text-4xl font-bold mb-2 font-heading gradient-text">{title}</h1>
+                    {subtitle && <p className="text-lg text-white/90">{subtitle}</p>}
+                  </div>
+                </Link>
+              ) : (
+                <Link href={`/${locale}`} className="inline-block group">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 group-hover:border-white/30 transition-all">
+                    <h1 className="text-4xl font-bold mb-2 font-heading gradient-text">{title}</h1>
+                    {subtitle && <p className="text-lg text-white/90">{subtitle}</p>}
+                  </div>
+                </Link>
+              )}
+            </div>
+
+            {/* Bottom section - Call to action */}
+            {(bottomTitle || bottomDescription) && (
+              <div className="space-y-4">
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                  {bottomDescription && (
+                    <p className="text-sm text-white/80 mb-1">{bottomDescription}</p>
+                  )}
+                  {bottomTitle && <p className="text-2xl font-semibold">{bottomTitle}</p>}
                 </div>
-              </Link>
-            ) : (
-              <Link href={`/${locale}`} className="inline-block group">
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 group-hover:border-white/30 transition-all">
-                  <h1 className="text-4xl font-bold mb-2 font-heading gradient-text">{title}</h1>
-                  {subtitle && <p className="text-lg text-white/90">{subtitle}</p>}
-                </div>
-              </Link>
+              </div>
             )}
           </div>
-
-          {/* Bottom section - Call to action */}
-          {(bottomTitle || bottomDescription) && (
-            <div className="space-y-4">
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                {bottomDescription && (
-                  <p className="text-sm text-white/80 mb-1">{bottomDescription}</p>
-                )}
-                {bottomTitle && <p className="text-2xl font-semibold">{bottomTitle}</p>}
-              </div>
-            </div>
-          )}
         </div>
-      </div>
 
-      {/* Right side - Form */}
-      {animate ? (
-        <motion.div
-          {...slideUp}
-          className="flex-1 flex items-center justify-center bg-background p-8"
-        >
-          {children}
-        </motion.div>
-      ) : (
-        formContent
-      )}
+        {/* Right side - Form */}
+        {animate ? (
+          <motion.div
+            {...slideUp}
+            className="flex-1 flex items-center justify-center bg-background p-8"
+          >
+            {children}
+          </motion.div>
+        ) : (
+          formContent
+        )}
+      </div>
     </div>
   );
 }

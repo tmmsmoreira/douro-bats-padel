@@ -42,7 +42,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-background flex flex-col">
       <SkipLinks />
       <HomeAdaptiveNav />
-      <div ref={containerRef} className="flex-1 pb-20 md:pb-0">
+      <div ref={containerRef} className="flex-1">
         {/* Hero Section with Parallax */}
         <motion.section
           style={{ y: heroY }}
@@ -521,11 +521,11 @@ function CTASection({ t }: { t: (key: string) => string }) {
   const y = useTransform(scrollYProgress, [0, 1], [30, -30]);
 
   return (
-    <section ref={sectionRef} className="py-12 sm:py-16 lg:py-24 relative overflow-hidden">
+    <section ref={sectionRef} className="py-12 overflow-hidden sm:py-16 lg:py-24 relative">
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <motion.div
           style={{ y }}
-          className="absolute inset-0 bg-linear-to-r from-primary/10 via-secondary/10 to-primary/10 pointer-events-none"
+          className="absolute inset-x-0 -inset-y-10 bg-linear-to-r from-primary/10 via-secondary/10 to-primary/10 pointer-events-none"
         />
 
         <motion.div

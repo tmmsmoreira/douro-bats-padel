@@ -79,8 +79,8 @@ export function MobileMenu({
     // Navigate to the new view
     router.push(newHref);
 
-    // Close menu
-    onClose();
+    // Delay closing so the toggle animation is visible before the menu disappears
+    setTimeout(onClose, 300);
   };
 
   return (

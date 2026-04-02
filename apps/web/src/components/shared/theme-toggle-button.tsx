@@ -3,38 +3,46 @@
 import * as React from 'react';
 import { MoonIcon, SunIcon } from 'lucide-animated';
 import { useTheme } from 'next-themes';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 export const ThemeToggleButton = React.forwardRef<HTMLButtonElement>(
   function ThemeToggleButton(_props, ref) {
     const { theme, setTheme } = useTheme();
     const [mounted, setMounted] = React.useState(false);
+    const t = useTranslations('nav');
 
     React.useEffect(() => {
       setMounted(true);
     }, []);
 
+    const isDark = theme === 'dark';
+
     if (!mounted) {
       return (
         <Button ref={ref} variant="ghost" size="icon" disabled>
           <SunIcon size={20} />
-          <span className="sr-only">Toggle theme</span>
+          <span className="sr-only">{t('theme')}</span>
         </Button>
       );
     }
-
-    const isDark = theme === 'dark';
 
     const toggleTheme = () => {
       setTheme(isDark ? 'light' : 'dark');
     };
 
     return (
-      <Button ref={ref} variant="ghost" size="icon" onClick={toggleTheme}>
-        {isDark ? <MoonIcon size={20} /> : <SunIcon size={16} />}
-        <span className="sr-only">Toggle theme</span>
-      </Button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button ref={ref} variant="ghost" size="icon" onClick={toggleTheme}>
+            {isDark ? <SunIcon size={20} /> : <MoonIcon size={20} />}
+            <span className="sr-only">{t('theme')}</span>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>{isDark ? t('lightMode') : t('darkMode')}</TooltipContent>
+      </Tooltip>
     );
   }
 );

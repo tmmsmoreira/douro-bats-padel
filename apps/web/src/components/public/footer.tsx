@@ -15,7 +15,7 @@ export function Footer() {
   return (
     <footer className="hidden sm:block border-t bg-card mt-auto">
       <div className="container mx-auto px-4 py-8 sm:py-12 max-w-4xl">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-6">
           {/* About Section */}
           <div className="space-y-4 sm:col-span-2 lg:col-span-1">
             <h3 className="text-lg font-bold">Douro Bats Padel</h3>

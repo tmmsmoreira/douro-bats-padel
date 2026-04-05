@@ -16,8 +16,6 @@ import {
   XIconHandle,
   ArchiveIcon,
   ArchiveIconHandle,
-  RefreshCwIcon,
-  RefreshCwIconHandle,
 } from 'lucide-animated';
 import {
   DropdownMenu,
@@ -68,8 +66,6 @@ export function EventActionsDropdown({ event, draw, onDeleteSuccess }: EventActi
   const sendIconRef = useRef<SendIconHandle>(null);
   const xIconRef = useRef<XIconHandle>(null);
   const archiveIconRef = useRef<ArchiveIconHandle>(null);
-  const refreshCwIconRef = useRef<RefreshCwIconHandle>(null);
-
   // Event mutations
   const freezeMutation = useFreezeEvent(event.id);
   const unfreezeMutation = useUnfreezeEvent(event.id);
@@ -133,19 +129,6 @@ export function EventActionsDropdown({ event, draw, onDeleteSuccess }: EventActi
                   <span>{freezeMutation.isPending ? t('freezing') : t('freezeRsvps')}</span>
                 </DropdownMenuItem>
               )}
-              {event.state === 'FROZEN' && !draw && (
-                <DropdownMenuItem
-                  asChild
-                  onMouseEnter={() => refreshCwIconRef.current?.startAnimation()}
-                  onMouseLeave={() => refreshCwIconRef.current?.stopAnimation()}
-                >
-                  <Link href={`/admin/events/${event.id}/draw`} className="flex gap-2">
-                    <RefreshCwIcon ref={refreshCwIconRef} className="h-4 w-4" />
-                    <span>{t('generateDraw')}</span>
-                  </Link>
-                </DropdownMenuItem>
-              )}
-
               {draw && <DropdownMenuLabel>{tDraw('draw')}</DropdownMenuLabel>}
 
               {/* Draw Actions - Only show if draw exists and event hasn't passed */}
@@ -203,7 +186,6 @@ export function EventActionsDropdown({ event, draw, onDeleteSuccess }: EventActi
           {/* Secondary Actions */}
           {canEdit && (
             <>
-              <DropdownMenuSeparator />
               {event.state === 'FROZEN' && !draw && (
                 <DropdownMenuItem
                   onClick={() => unfreezeMutation.mutate()}

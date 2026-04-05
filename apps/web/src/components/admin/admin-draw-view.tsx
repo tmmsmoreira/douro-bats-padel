@@ -4,11 +4,24 @@ import { useState } from 'react';
 import { useQuery, UseMutationResult } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
+import { motion } from 'motion/react';
+import { Clock } from 'lucide-react';
+import { BadgeAlertIcon } from 'lucide-animated';
+import { Badge } from '@/components/ui/badge';
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from '@/components/ui/empty';
 import { DataStateWrapper } from '@/components/shared';
-import { WaitlistSection } from '@/components/shared/draw';
+import { WaitlistSection, TierSection, TeamList } from '@/components/shared/draw';
 import type { Draw, Assignment } from '@/components/shared/draw';
 import type { EventWithRSVP } from '@padel/types';
-import { useAuthFetch, useUpdateAssignment } from '@/hooks';
+import { useUpdateAssignment } from '@/hooks';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 import {
   groupByRound,
   getUniqueTeamsCount,
@@ -18,73 +31,7 @@ import {
   hasEventPassed,
 } from '@/lib/draw-utils';
 import { GenerateDraw } from './generate-draw';
-import { TierCollapsibleItem } from './tier-accordion-item';
 import { EditTeamDialog } from './edit-team-dialog';
-
-export function AdminDrawView({ eventId }: { eventId: string }) {
-  const t = useTranslations('adminDrawView');
-  const { data: session } = useSession();
-  const authFetch = useAuthFetch();
-  const [editingTeam, setEditingTeam] = useState<{
-    assignmentIds: string[];
-    assignment: Assignment;
-    teamNumber: number;
-    teamPlayers: { id: string; name: string; rating: number }[];
-  } | null>(null);
-
-  const { data: draw, isLoading } = useQuery<Draw | null>({
-    queryKey: ['draw', eventId, session?.accessToken],
-    queryFn: async () => {
-      try {
-        return await authFetch.get<Draw>(`/draws/events/${eventId}`);
-      } catch {
-        return null;
-      }
-    },
-    enabled: !!session?.accessToken,
-  });
-
-  // Fetch event data to get waitlist
-  const { data: event } = useQuery<EventWithRSVP | null>({
-    queryKey: ['event', eventId, session?.accessToken],
-    queryFn: async () => {
-      try {
-        // Backend automatically determines access based on user roles from JWT
-        return await authFetch.get(`/events/${eventId}`);
-      } catch {
-        return null;
-      }
-    },
-    enabled: !!session?.accessToken,
-  });
-
-  // Use custom hook for mutation
-  const updateAssignmentMutation = useUpdateAssignment(eventId, () => {
-    setEditingTeam(null);
-  });
-
-  return (
-    <DataStateWrapper
-      isLoading={isLoading}
-      data={draw}
-      loadingMessage={t('loading')}
-      emptyMessage={t('noDraw')}
-      emptyComponent={<GenerateDraw eventId={eventId} />}
-      isEmpty={(data) => !data}
-    >
-      {(draw) => (
-        <AdminDrawContent
-          draw={draw}
-          event={event}
-          editingTeam={editingTeam}
-          setEditingTeam={setEditingTeam}
-          updateAssignmentMutation={updateAssignmentMutation}
-          t={t}
-        />
-      )}
-    </DataStateWrapper>
-  );
-}
 
 interface AdminDrawContentProps {
   draw: Draw;
@@ -110,6 +57,93 @@ interface AdminDrawContentProps {
     unknown
   >;
   t: ReturnType<typeof useTranslations>;
+}
+
+export function AdminDrawView({ eventId }: { eventId: string }) {
+  const t = useTranslations('adminDrawView');
+  const { data: session } = useSession();
+  const [editingTeam, setEditingTeam] = useState<{
+    assignmentIds: string[];
+    assignment: Assignment;
+    teamNumber: number;
+    teamPlayers: { id: string; name: string; rating: number }[];
+  } | null>(null);
+
+  const {
+    data: draw,
+    isLoading,
+    error,
+  } = useQuery<Draw | null>({
+    queryKey: ['draw', eventId, session?.accessToken],
+    queryFn: async () => {
+      const headers: HeadersInit = { 'Content-Type': 'application/json' };
+      if (session?.accessToken) {
+        headers.Authorization = `Bearer ${session.accessToken}`;
+      }
+      const res = await fetch(`${API_URL}/draws/events/${eventId}`, { headers });
+      if (res.status === 404) return null; // No draw exists yet
+      if (!res.ok) throw new Error(`API Error: ${res.statusText}`);
+      return res.json();
+    },
+    retry: false,
+    enabled: !!session?.accessToken,
+  });
+
+  // Fetch event data to get waitlist
+  const { data: event } = useQuery<EventWithRSVP | null>({
+    queryKey: ['event', eventId, session?.accessToken],
+    queryFn: async () => {
+      const headers: HeadersInit = { 'Content-Type': 'application/json' };
+      if (session?.accessToken) {
+        headers.Authorization = `Bearer ${session.accessToken}`;
+      }
+      const res = await fetch(`${API_URL}/events/${eventId}`, { headers });
+      if (!res.ok) return null;
+      return res.json();
+    },
+    enabled: !!session?.accessToken,
+  });
+
+  // Use custom hook for mutation
+  const updateAssignmentMutation = useUpdateAssignment(eventId, () => {
+    setEditingTeam(null);
+  });
+
+  return (
+    <DataStateWrapper
+      isLoading={isLoading}
+      data={draw}
+      error={error}
+      loadingMessage={t('loading')}
+      emptyMessage={t('noDraw')}
+      emptyComponent={<GenerateDraw eventId={eventId} />}
+      isEmpty={(data) => !data}
+      errorComponent={
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <BadgeAlertIcon className="size-6" />
+            </EmptyMedia>
+            <EmptyTitle>{t('notAvailable')}</EmptyTitle>
+            <EmptyDescription>
+              {error instanceof Error ? error.message : t('noDraw')}
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      }
+    >
+      {(draw) => (
+        <AdminDrawContent
+          draw={draw}
+          event={event}
+          editingTeam={editingTeam}
+          setEditingTeam={setEditingTeam}
+          updateAssignmentMutation={updateAssignmentMutation}
+          t={t}
+        />
+      )}
+    </DataStateWrapper>
+  );
 }
 
 // Separate component for admin draw content
@@ -159,65 +193,131 @@ function AdminDrawContent({
   };
 
   return (
-    <div className="space-y-6">
-      {/* Tier Sections */}
-      <div className="space-y-4">
-        <TierCollapsibleItem
-          defaultOpen={true}
-          tier="MASTERS"
-          tierName={t('masters')}
-          assignments={masterAssignments}
-          rounds={mastersRounds}
-          timeSlot={draw.event.tierRules?.mastersTimeSlot}
-          eventDate={draw.event.date}
-          teamsCount={mastersTeamsCount}
-          fieldsCount={mastersFieldsCount}
-          canEdit={!eventPassed}
-          onEditTeam={handleEditTeam}
-          tierColor="bg-yellow-500"
-          translations={{
-            tierName: t('masters'),
-            teamListTitle: t('teamListTitle'),
-            teamListDescription: t('teamListDescription'),
-            team: t('team'),
-            avgRating: t('avgRating'),
-            teams: t('teams'),
-            rounds: t('rounds'),
-            fields: t('fields'),
-            timeSlot: t('timeSlot'),
-            round: (round: number) => t('round', { number: round }),
-            courtLabel: (courtId: string) => t('court', { id: courtId }),
-          }}
-        />
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-8"
+    >
+      {/* Masters Tier */}
+      {masterAssignments.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-6 bg-yellow-500 rounded-full" />
+              <h2 className="text-xl font-bold">{t('masters')}</h2>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              {draw.event.tierRules?.mastersTimeSlot && (
+                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                  <Clock className="h-3.5 w-3.5" />
+                  <span className="font-medium">
+                    {draw.event.tierRules.mastersTimeSlot.startsAt} -{' '}
+                    {draw.event.tierRules.mastersTimeSlot.endsAt}
+                  </span>
+                </div>
+              )}
+              <Badge variant="secondary">
+                {mastersTeamsCount} {t('teams')}
+              </Badge>
+              <Badge variant="secondary">
+                {Object.keys(mastersRounds).length} {t('rounds')}
+              </Badge>
+              <Badge variant="secondary">
+                {mastersFieldsCount} {t('fields')}
+              </Badge>
+            </div>
+          </div>
 
-        <TierCollapsibleItem
-          defaultOpen={false}
-          tier="EXPLORERS"
-          tierName={t('explorers')}
-          assignments={explorerAssignments}
-          rounds={explorersRounds}
-          timeSlot={draw.event.tierRules?.explorersTimeSlot}
-          eventDate={draw.event.date}
-          teamsCount={explorersTeamsCount}
-          fieldsCount={explorersFieldsCount}
-          canEdit={!eventPassed}
-          onEditTeam={handleEditTeam}
-          tierColor="bg-green-500"
-          translations={{
-            tierName: t('explorers'),
-            teamListTitle: t('teamListTitle'),
-            teamListDescription: t('teamListDescription'),
-            team: t('team'),
-            avgRating: t('avgRating'),
-            teams: t('teams'),
-            rounds: t('rounds'),
-            fields: t('fields'),
-            timeSlot: t('timeSlot'),
-            round: (round: number) => t('round', { number: round }),
-            courtLabel: (courtId: string) => t('court', { id: courtId }),
-          }}
-        />
-      </div>
+          <TeamList
+            assignments={masterAssignments}
+            onEditTeam={handleEditTeam}
+            canEdit={!eventPassed}
+            translations={{
+              tierName: t('masters'),
+              teamListTitle: t('teamListTitle'),
+              teamListDescription: t('teamListDescription'),
+              team: t('team'),
+              avgRating: t('avgRating'),
+            }}
+          />
+
+          <TierSection
+            tier="MASTERS"
+            rounds={mastersRounds}
+            assignments={masterAssignments}
+            timeSlot={draw.event.tierRules?.mastersTimeSlot}
+            eventDate={draw.event.date}
+            translations={{
+              tierName: '',
+              round: (round: number) => t('round', { number: round }),
+              courtLabel: (courtId: string) => t('court', { id: courtId }),
+              team: t('team'),
+            }}
+            canEdit={false}
+          />
+        </div>
+      )}
+
+      {/* Explorers Tier */}
+      {explorerAssignments.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-6 bg-green-500 rounded-full" />
+              <h2 className="text-xl font-bold">{t('explorers')}</h2>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              {draw.event.tierRules?.explorersTimeSlot && (
+                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                  <Clock className="h-3.5 w-3.5" />
+                  <span className="font-medium">
+                    {draw.event.tierRules.explorersTimeSlot.startsAt} -{' '}
+                    {draw.event.tierRules.explorersTimeSlot.endsAt}
+                  </span>
+                </div>
+              )}
+              <Badge variant="secondary">
+                {explorersTeamsCount} {t('teams')}
+              </Badge>
+              <Badge variant="secondary">
+                {Object.keys(explorersRounds).length} {t('rounds')}
+              </Badge>
+              <Badge variant="secondary">
+                {explorersFieldsCount} {t('fields')}
+              </Badge>
+            </div>
+          </div>
+
+          <TeamList
+            assignments={explorerAssignments}
+            onEditTeam={handleEditTeam}
+            canEdit={!eventPassed}
+            translations={{
+              tierName: t('explorers'),
+              teamListTitle: t('teamListTitle'),
+              teamListDescription: t('teamListDescription'),
+              team: t('team'),
+              avgRating: t('avgRating'),
+            }}
+          />
+
+          <TierSection
+            tier="EXPLORERS"
+            rounds={explorersRounds}
+            assignments={explorerAssignments}
+            timeSlot={draw.event.tierRules?.explorersTimeSlot}
+            eventDate={draw.event.date}
+            translations={{
+              tierName: '',
+              round: (round: number) => t('round', { number: round }),
+              courtLabel: (courtId: string) => t('court', { id: courtId }),
+              team: t('team'),
+            }}
+            canEdit={false}
+          />
+        </div>
+      )}
 
       {/* Waitlist Section */}
       <WaitlistSection
@@ -395,6 +495,6 @@ function AdminDrawContent({
           isSaving={updateAssignmentMutation.isPending}
         />
       )}
-    </div>
+    </motion.div>
   );
 }

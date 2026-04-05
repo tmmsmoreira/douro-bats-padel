@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
+import { motion } from 'motion/react';
 import {
   Empty,
   EmptyHeader,
@@ -123,7 +124,12 @@ function DrawContent({
   const explorerRounds = groupByRound(explorerAssignments);
 
   return (
-    <div className="space-y-8">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-8"
+    >
       {/* Masters Tier Matches */}
       <TierSection
         tier="MASTERS"
@@ -156,6 +162,6 @@ function DrawContent({
 
       {/* Waitlist Section */}
       <WaitlistSection players={[]} title={t('waitlist', { count: event?.waitlistCount || 0 })} />
-    </div>
+    </motion.div>
   );
 }

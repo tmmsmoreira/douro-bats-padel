@@ -4,21 +4,14 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from '@/i18n/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useTranslations, useLocale } from 'next-intl';
-import { AlertTriangle, Info, Lightbulb } from 'lucide-react';
+import { AlertTriangle, Info, Lightbulb, Clock } from 'lucide-react';
 import { useAuthFetch, useGenerateDraw } from '@/hooks';
 import { PlayerListItem } from '@/components/shared/player-list-item';
 import { formatTimeSlot } from '@/lib/utils';
@@ -173,43 +166,83 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
 
   const confirmedCount = event.confirmedCount || 0;
 
-  // Since MASTERS and EXPLORERS play at different times, capacity is additive
-  // Even if the same courts are used, they can accommodate different players at different times
-  // Use SELECTED courts for capacity calculation
   const mastersCapacity = selectedMastersCourts.length * 4;
   const explorersCapacity = selectedExplorersCourts.length * 4;
   const maxPlayers = mastersCapacity + explorersCapacity;
 
-  // Get unique courts for display purposes
   const allAvailableCourts = [...new Set([...mastersCourts, ...explorersCourts])];
   const maxPlayersPerCourt = 4;
 
-  // Adjust player count to nearest multiple of 4 (round down)
   const adjustedPlayerCount = Math.floor(confirmedCount / 4) * 4;
 
-  // Determine actual players in draw (limited by court capacity)
   const hasExcessPlayers = adjustedPlayerCount > maxPlayers;
   const playersInDraw = hasExcessPlayers ? Math.floor(maxPlayers / 4) * 4 : adjustedPlayerCount;
   const waitlistedPlayers = confirmedCount - playersInDraw;
 
-  // Check if we'll have unused courts
   const courtsNeeded = Math.ceil(playersInDraw / maxPlayersPerCourt);
   const unusedCourts = playersInDraw > 0 ? allAvailableCourts.length - courtsNeeded : 0;
 
-  // Check if we have insufficient players
   const hasInsufficientPlayers =
     confirmedCount > 0 && playersInDraw < confirmedCount && !hasExcessPlayers;
 
-  // Get all courts with details
   const allCourts = event.eventCourts?.map((ec: EventCourt) => ec.court) || [];
   const availableCourts = allCourts.filter((court: Court) => allAvailableCourts.includes(court.id));
 
+  const mastersPlayerCount = Math.floor((playersInDraw * (tierRules.masterPercentage || 50)) / 100);
+  const explorersPlayerCount = playersInDraw - mastersPlayerCount;
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">{t('title')}</h1>
-        <p className="text-muted-foreground">{t('description')}</p>
-      </div>
+      {/* ── Action card ────────────────────────────────────────────────── */}
+      <Card className="glass-card">
+        <CardHeader>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-2">
+              <CardTitle>{t('title')}</CardTitle>
+              <p className="text-sm text-muted-foreground">{t('description')}</p>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">{t('splitMethod')}:</span>
+                {tierRules.masterCount !== undefined ? (
+                  <Badge variant="outline" className="text-xs">
+                    {t('fixedCount')}: {tierRules.masterCount} {t('masters')}
+                  </Badge>
+                ) : tierRules.masterPercentage !== undefined ? (
+                  <Badge variant="outline" className="text-xs">
+                    {tierRules.masterPercentage}% {t('masters')} /{' '}
+                    {100 - tierRules.masterPercentage}% {t('explorers')}
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="text-xs">
+                    {t('defaultSplit')}
+                  </Badge>
+                )}
+              </div>
+            </div>
+            <Button
+              onClick={() =>
+                generateDrawMutation.mutate({
+                  constraints,
+                  selectedCourts: {
+                    masters: selectedMastersCourts,
+                    explorers: selectedExplorersCourts,
+                  },
+                })
+              }
+              disabled={
+                generateDrawMutation.isPending || playersInDraw < 4 || event.state !== 'FROZEN'
+              }
+            >
+              {generateDrawMutation.isPending
+                ? t('generating')
+                : existingDraw
+                  ? t('generateNewDraw')
+                  : t('generateDraw')}
+            </Button>
+          </div>
+        </CardHeader>
+      </Card>
+
+      {/* ── Alerts ─────────────────────────────────────────────────────── */}
 
       {existingDraw && (
         <Card
@@ -246,15 +279,14 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
               </div>
             )}
           </CardContent>
-          <CardFooter>
+          <CardContent>
             <Button variant="outline" onClick={() => router.push(`/admin/events/${eventId}/draw`)}>
               {t('viewManageDraw')}
             </Button>
-          </CardFooter>
+          </CardContent>
         </Card>
       )}
 
-      {/* Minimum Players Warning (less than 4 players) */}
       {confirmedCount < 4 && (
         <Card className="glass-card border-red-500 bg-red-50 dark:bg-red-950/20">
           <CardHeader>
@@ -269,44 +301,6 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
         </Card>
       )}
 
-      {/* Insufficient Players Warning (not enough to fill all courts) */}
-      {hasInsufficientPlayers && confirmedCount >= 4 && (
-        <Card className="glass-card border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20">
-          <CardHeader>
-            <CardTitle className="text-yellow-800 dark:text-yellow-200 flex items-center gap-2">
-              <Info className="h-5 w-5" />
-              {t('insufficientPlayers')}
-            </CardTitle>
-            <div className="text-sm text-yellow-700 dark:text-yellow-300 space-y-1">
-              <p>
-                {t('insufficientPlayersDescription', {
-                  confirmedCount,
-                  playersInDraw,
-                })}
-              </p>
-              {waitlistedPlayers > 0 && (
-                <p>
-                  {t.rich('playersWaitlisted', {
-                    count: waitlistedPlayers,
-                    strong: (c) => <strong>{c}</strong>,
-                  })}
-                </p>
-              )}
-              <p>
-                {t('courtCapacityInfo', {
-                  maxPlayers,
-                  mastersCourts: mastersCourts.length,
-                  explorersCourts: explorersCourts.length,
-                  courtsNeeded,
-                })}
-              </p>
-              <p className="font-semibold">{t('considerReducingCourts')}</p>
-            </div>
-          </CardHeader>
-        </Card>
-      )}
-
-      {/* Excess Players Warning (more players than court capacity) */}
       {hasExcessPlayers && (
         <Card className="glass-card border-orange-500 bg-orange-50 dark:bg-orange-950/20">
           <CardHeader>
@@ -336,9 +330,39 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
         </Card>
       )}
 
-      {/* Unused Courts Warning (have players but not using all courts) */}
+      {hasInsufficientPlayers && confirmedCount >= 4 && (
+        <Card className="glass-card border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20">
+          <CardHeader>
+            <CardTitle className="text-yellow-800 dark:text-yellow-200 flex items-center gap-2">
+              <Info className="h-5 w-5" />
+              {t('insufficientPlayers')}
+            </CardTitle>
+            <div className="text-sm text-yellow-700 dark:text-yellow-300 space-y-1">
+              <p>{t('insufficientPlayersDescription', { confirmedCount, playersInDraw })}</p>
+              {waitlistedPlayers > 0 && (
+                <p>
+                  {t.rich('playersWaitlisted', {
+                    count: waitlistedPlayers,
+                    strong: (c) => <strong>{c}</strong>,
+                  })}
+                </p>
+              )}
+              <p>
+                {t('courtCapacityInfo', {
+                  maxPlayers,
+                  mastersCourts: mastersCourts.length,
+                  explorersCourts: explorersCourts.length,
+                  courtsNeeded,
+                })}
+              </p>
+              <p className="font-semibold">{t('considerReducingCourts')}</p>
+            </div>
+          </CardHeader>
+        </Card>
+      )}
+
       {!hasExcessPlayers && unusedCourts > 0 && playersInDraw > 0 && (
-        <Card className="glass-card border-blue-500 bg-blue-50 dark:bg-blue-950/20">
+        <Card className="glass-card border-blue-500">
           <CardHeader>
             <CardTitle className="text-blue-800 dark:text-blue-200 flex items-center gap-2">
               <Lightbulb className="h-5 w-5" />
@@ -346,13 +370,8 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-              <p>
-                {t('courtOptimizationDescription', {
-                  playersInDraw,
-                  courtsNeeded,
-                })}
-              </p>
+            <div className="text-sm space-y-1">
+              <p>{t('courtOptimizationDescription', { playersInDraw, courtsNeeded })}</p>
               <p>
                 {t('courtAllocationInfo', {
                   mastersCourts: mastersCourts.length,
@@ -366,255 +385,163 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
         </Card>
       )}
 
-      {/* Tier Configuration Card */}
-      <Card className="glass-card">
-        <CardHeader>
-          <CardTitle>{t('tierConfiguration')}</CardTitle>
-          <CardDescription>{t('tierConfigurationDescription')}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Tier Split Method */}
-          <div>
-            <span className="font-medium">{t('splitMethod')}:</span>{' '}
-            {tierRules.masterCount !== undefined ? (
-              <Badge variant="outline">
-                {t('fixedCount')}: {tierRules.masterCount} {t('masters')}
-              </Badge>
-            ) : tierRules.masterPercentage !== undefined ? (
-              <Badge variant="outline">
-                {tierRules.masterPercentage}% {t('masters')} / {100 - tierRules.masterPercentage}%{' '}
-                {t('explorers')}
-              </Badge>
-            ) : (
-              <Badge variant="outline">{t('defaultSplit')}</Badge>
-            )}
-          </div>
+      {/* ── Tier Setup + Players preview ───────────────────────────────── */}
 
-          {/* Expected Distribution */}
-          <div className="grid grid-cols-2 gap-4 p-3 bg-muted/50 rounded-lg">
-            <div>
-              <div className="text-sm font-medium text-yellow-700 dark:text-yellow-400">
-                {t('masters')}
+      <div className="grid gap-4 md:grid-cols-2">
+        {/* MASTERS */}
+        {mastersCourts.length > 0 && (
+          <Card className="glass-card">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-6 bg-yellow-500 rounded-full" />
+                <CardTitle>
+                  {t('masters')} ({mastersPlayerCount})
+                </CardTitle>
               </div>
-              <div className="text-2xl font-bold">
-                {Math.floor((playersInDraw * (tierRules.masterPercentage || 50)) / 100)}
-              </div>
-              <div className="text-xs text-muted-foreground">{t('playersExpected')}</div>
-            </div>
-            <div>
-              <div className="text-sm font-medium text-green-700 dark:text-green-400">
-                {t('explorers')}
-              </div>
-              <div className="text-2xl font-bold">
-                {playersInDraw -
-                  Math.floor((playersInDraw * (tierRules.masterPercentage || 50)) / 100)}
-              </div>
-              <div className="text-xs text-muted-foreground">{t('playersExpected')}</div>
-            </div>
-          </div>
-
-          {/* Time Slots */}
-          <div className="grid grid-cols-2 gap-4">
-            {tierRules.mastersTimeSlot && (
-              <div className="p-3 bg-muted/50 rounded-lg border">
-                <div className="text-sm font-medium text-yellow-600 dark:text-yellow-400 mb-1">
-                  {t('masters')} Time Slot
-                </div>
-                <div className="text-sm">
-                  {formatTimeSlot(tierRules.mastersTimeSlot.startsAt, event.date, locale)} -{' '}
-                  {formatTimeSlot(tierRules.mastersTimeSlot.endsAt, event.date, locale)}
-                </div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  {mastersCourts.length} {t('courtPlural', { count: mastersCourts.length })} (
-                  {t('mastersCourts')}: {mastersCapacity} {t('playersExpected')})
-                </div>
-              </div>
-            )}
-            {tierRules.explorersTimeSlot && (
-              <div className="p-3 bg-muted/50 rounded-lg border">
-                <div className="text-sm font-medium text-green-600 dark:text-green-400 mb-1">
-                  {t('explorers')} Time Slot
-                </div>
-                <div className="text-sm">
-                  {formatTimeSlot(tierRules.explorersTimeSlot.startsAt, event.date, locale)} -{' '}
-                  {formatTimeSlot(tierRules.explorersTimeSlot.endsAt, event.date, locale)}
-                </div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  {explorersCourts.length} {t('courtPlural', { count: explorersCourts.length })} (
-                  {t('explorersCourts')}: {explorersCapacity} {t('playersExpected')})
-                </div>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card className="glass-card">
-          <CardHeader>
-            <CardTitle>{t('courtSelection')}</CardTitle>
-            <CardDescription>
-              {t('courtSelectionDescription', {
-                selectedMasters: selectedMastersCourts.length,
-                selectedExplorers: selectedExplorersCourts.length,
-                maxPlayers,
-              })}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              {mastersCourts.length > 0 && (
-                <div>
-                  <div className="text-sm font-medium mb-2 text-yellow-800 dark:text-yellow-200">
-                    {t('masters')} {t('courtPlural', { count: 2 })}:
-                  </div>
-                  <div className="space-y-2">
-                    {availableCourts
-                      .filter((court: Court) => mastersCourts.includes(court.id))
-                      .map((court: Court) => {
-                        const isSelected = selectedMastersCourts.includes(court.id);
-                        return (
-                          <div key={court.id} className="flex items-center space-x-2">
-                            <Checkbox
-                              id={`masters-${court.id}`}
-                              checked={isSelected}
-                              onCheckedChange={(checked) => {
-                                if (checked) {
-                                  setSelectedMastersCourts([...selectedMastersCourts, court.id]);
-                                } else {
-                                  setSelectedMastersCourts(
-                                    selectedMastersCourts.filter((id) => id !== court.id)
-                                  );
-                                }
-                              }}
-                            />
-                            <label
-                              htmlFor={`masters-${court.id}`}
-                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                            >
-                              {court.label}
-                            </label>
-                          </div>
-                        );
-                      })}
-                  </div>
+              {tierRules.mastersTimeSlot && (
+                <div className="flex items-center gap-1.5 text-sm text-muted-foreground pl-5">
+                  <Clock className="h-3.5 w-3.5" />
+                  <span>
+                    {formatTimeSlot(tierRules.mastersTimeSlot.startsAt, event.date, locale)} –{' '}
+                    {formatTimeSlot(tierRules.mastersTimeSlot.endsAt, event.date, locale)}
+                  </span>
                 </div>
               )}
-              {explorersCourts.length > 0 && (
-                <div>
-                  <div className="text-sm font-medium mb-2 text-green-800 dark:text-green-200">
-                    {t('explorers')} {t('courtPlural', { count: 2 })}:
-                  </div>
-                  <div className="space-y-2">
-                    {availableCourts
-                      .filter((court: Court) => explorersCourts.includes(court.id))
-                      .map((court: Court) => {
-                        const isSelected = selectedExplorersCourts.includes(court.id);
-                        return (
-                          <div key={court.id} className="flex items-center space-x-2">
-                            <Checkbox
-                              id={`explorers-${court.id}`}
-                              checked={isSelected}
-                              onCheckedChange={(checked) => {
-                                if (checked) {
-                                  setSelectedExplorersCourts([
-                                    ...selectedExplorersCourts,
-                                    court.id,
-                                  ]);
-                                } else {
-                                  setSelectedExplorersCourts(
-                                    selectedExplorersCourts.filter((id) => id !== court.id)
-                                  );
-                                }
-                              }}
-                            />
-                            <label
-                              htmlFor={`explorers-${court.id}`}
-                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                            >
-                              {court.label}
-                            </label>
-                          </div>
-                        );
-                      })}
-                  </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Players preview */}
+              {mastersPlayerCount > 0 && (
+                <div className="space-y-2">
+                  {event.confirmedPlayers
+                    ?.slice(0, mastersPlayerCount)
+                    .map((player: Player, index: number) => (
+                      <PlayerListItem
+                        key={player.id}
+                        id={player.id}
+                        name={player.name}
+                        rating={player.rating}
+                        rank={index + 1}
+                        variant="leaderboard"
+                      />
+                    ))}
                 </div>
               )}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="glass-card">
-          <CardHeader>
-            <CardTitle>{t('drawOptions')}</CardTitle>
-            <CardDescription>{t('drawOptionsDescription')}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-0">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="balance-strength">{t('balanceTeamStrength')}</Label>
-                <p className="text-sm text-muted-foreground">
-                  {t('balanceTeamStrengthDescription')}
+              {/* Court selection */}
+              <div className="border-t pt-4">
+                <p className="text-sm font-medium mb-2">{t('courtSelection')}</p>
+                <div className="space-y-2">
+                  {availableCourts
+                    .filter((court: Court) => mastersCourts.includes(court.id))
+                    .map((court: Court) => (
+                      <div key={court.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`masters-${court.id}`}
+                          checked={selectedMastersCourts.includes(court.id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedMastersCourts([...selectedMastersCourts, court.id]);
+                            } else {
+                              setSelectedMastersCourts(
+                                selectedMastersCourts.filter((id) => id !== court.id)
+                              );
+                            }
+                          }}
+                        />
+                        <label
+                          htmlFor={`masters-${court.id}`}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                        >
+                          {court.label}
+                        </label>
+                      </div>
+                    ))}
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {t('mastersCourts')}: {mastersCapacity} {t('playersExpected')}
                 </p>
               </div>
-              <Switch
-                id="balance-strength"
-                checked={constraints.balanceStrength}
-                onCheckedChange={(checked) =>
-                  setConstraints({ ...constraints, balanceStrength: checked })
-                }
-              />
-            </div>
+            </CardContent>
+          </Card>
+        )}
 
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="tier-mixing">{t('allowTierMixing')}</Label>
-                <p className="text-sm text-muted-foreground">{t('allowTierMixingDescription')}</p>
+        {/* EXPLORERS */}
+        {explorersCourts.length > 0 && (
+          <Card className="glass-card">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-6 bg-green-500 rounded-full" />
+                <CardTitle>
+                  {t('explorers')} ({explorersPlayerCount})
+                </CardTitle>
               </div>
-              <Switch
-                id="tier-mixing"
-                checked={constraints.allowTierMixing}
-                onCheckedChange={(checked) =>
-                  setConstraints({ ...constraints, allowTierMixing: checked })
-                }
-              />
-            </div>
-          </CardContent>
-        </Card>
+              {tierRules.explorersTimeSlot && (
+                <div className="flex items-center gap-1.5 text-sm text-muted-foreground pl-5">
+                  <Clock className="h-3.5 w-3.5" />
+                  <span>
+                    {formatTimeSlot(tierRules.explorersTimeSlot.startsAt, event.date, locale)} –{' '}
+                    {formatTimeSlot(tierRules.explorersTimeSlot.endsAt, event.date, locale)}
+                  </span>
+                </div>
+              )}
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Players preview */}
+              {explorersPlayerCount > 0 && (
+                <div className="space-y-2">
+                  {event.confirmedPlayers
+                    ?.slice(mastersPlayerCount, mastersPlayerCount + explorersPlayerCount)
+                    .map((player: Player, index: number) => (
+                      <PlayerListItem
+                        key={player.id}
+                        id={player.id}
+                        name={player.name}
+                        rating={player.rating}
+                        rank={mastersPlayerCount + index + 1}
+                        variant="leaderboard"
+                      />
+                    ))}
+                </div>
+              )}
+              {/* Court selection */}
+              <div className="border-t pt-4">
+                <p className="text-sm font-medium mb-2">{t('courtSelection')}</p>
+                <div className="space-y-2">
+                  {availableCourts
+                    .filter((court: Court) => explorersCourts.includes(court.id))
+                    .map((court: Court) => (
+                      <div key={court.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`explorers-${court.id}`}
+                          checked={selectedExplorersCourts.includes(court.id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedExplorersCourts([...selectedExplorersCourts, court.id]);
+                            } else {
+                              setSelectedExplorersCourts(
+                                selectedExplorersCourts.filter((id) => id !== court.id)
+                              );
+                            }
+                          }}
+                        />
+                        <label
+                          htmlFor={`explorers-${court.id}`}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                        >
+                          {court.label}
+                        </label>
+                      </div>
+                    ))}
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {t('explorersCourts')}: {explorersCapacity} {t('playersExpected')}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
-      {/* Players in Draw */}
-      <Card className="glass-card">
-        <CardHeader>
-          <CardTitle>
-            {t('confirmedPlayersList')} ({playersInDraw})
-          </CardTitle>
-          <CardDescription>
-            {hasExcessPlayers
-              ? t('topRatedPlayersIncluded', { count: playersInDraw })
-              : t('allPlayersIncluded')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {event.confirmedPlayers
-              ?.slice(0, playersInDraw)
-              .map((player: Player, index: number) => (
-                <PlayerListItem
-                  key={player.id}
-                  id={player.id}
-                  name={player.name}
-                  rating={player.rating}
-                  rank={index + 1}
-                  subtitle={player.tier}
-                  variant="leaderboard"
-                />
-              ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Waitlisted Players */}
+      {/* Waitlisted players */}
       {waitlistedPlayers > 0 && (
         <Card className="glass-card border-orange-500">
           <CardHeader>
@@ -624,7 +551,7 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
             <CardDescription>{t('waitlistedPlayersDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="space-y-2">
               {event.confirmedPlayers?.slice(playersInDraw).map((player: Player, index: number) => (
                 <PlayerListItem
                   key={player.id}
@@ -632,7 +559,6 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
                   name={player.name}
                   rating={player.rating}
                   rank={playersInDraw + index + 1}
-                  subtitle={player.tier}
                   variant="leaderboard"
                 />
               ))}
@@ -641,29 +567,43 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
         </Card>
       )}
 
-      <div className="flex justify-end gap-4">
-        <Button variant="outline" onClick={() => router.back()}>
-          {t('cancel')}
-        </Button>
-        <Button
-          onClick={() =>
-            generateDrawMutation.mutate({
-              constraints,
-              selectedCourts: {
-                masters: selectedMastersCourts,
-                explorers: selectedExplorersCourts,
-              },
-            })
-          }
-          disabled={generateDrawMutation.isPending || playersInDraw < 4 || event.state !== 'FROZEN'}
-        >
-          {generateDrawMutation.isPending
-            ? t('generating')
-            : existingDraw
-              ? t('generateNewDraw')
-              : t('generateDraw')}
-        </Button>
-      </div>
+      {/* ── Draw Options ───────────────────────────────────────────────── */}
+
+      <Card className="glass-card">
+        <CardHeader>
+          <CardTitle>{t('drawOptions')}</CardTitle>
+          <CardDescription>{t('drawOptionsDescription')}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4 pt-0">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="balance-strength">{t('balanceTeamStrength')}</Label>
+              <p className="text-sm text-muted-foreground">{t('balanceTeamStrengthDescription')}</p>
+            </div>
+            <Switch
+              id="balance-strength"
+              checked={constraints.balanceStrength}
+              onCheckedChange={(checked) =>
+                setConstraints({ ...constraints, balanceStrength: checked })
+              }
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="tier-mixing">{t('allowTierMixing')}</Label>
+              <p className="text-sm text-muted-foreground">{t('allowTierMixingDescription')}</p>
+            </div>
+            <Switch
+              id="tier-mixing"
+              checked={constraints.allowTierMixing}
+              onCheckedChange={(checked) =>
+                setConstraints({ ...constraints, allowTierMixing: checked })
+              }
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       {generateDrawMutation.isError && (
         <Card className="glass-card border-destructive">

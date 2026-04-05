@@ -812,8 +812,8 @@
     "description": "You will be redirected to the home page."
   },
   "generateDraw": {
-    "title": "Generate Draw",
-    "description": "Configure and generate the tournament draw",
+    "title": "Draw not generated",
+    "description": "Configure the options below and generate the draw.",
     "loading": "Loading event...",
     "eventNotFound": "Event not found",
     "redirecting": "Redirecting...",

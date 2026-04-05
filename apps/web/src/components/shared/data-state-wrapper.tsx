@@ -126,7 +126,17 @@ export function DataStateWrapper<T>({
             </motion.div>
           )
         ) : isEmpty(data as T) ? (
-          emptyComponent || (
+          emptyComponent ? (
+            <motion.div
+              key="empty"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              {emptyComponent}
+            </motion.div>
+          ) : (
             <motion.div
               key="empty"
               initial={{ opacity: 0, scale: 0.95 }}

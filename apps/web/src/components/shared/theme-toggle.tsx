@@ -28,6 +28,7 @@ export function ThemeToggle() {
       disabled={!mounted}
       onMouseEnter={() => iconRef.current?.startAnimation()}
       onSelect={(e) => e.preventDefault()}
+      onClick={handleToggle}
       className="flex items-center justify-between"
     >
       <div className="flex items-center gap-2 pointer-events-none">
@@ -40,9 +41,8 @@ export function ThemeToggle() {
       </div>
       <Switch
         checked={mounted ? isDark : false}
-        onCheckedChange={handleToggle}
-        onClick={(e) => e.stopPropagation()}
         disabled={!mounted}
+        className="pointer-events-none"
       />
     </DropdownMenuItem>
   );

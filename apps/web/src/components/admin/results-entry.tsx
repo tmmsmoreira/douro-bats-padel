@@ -264,7 +264,7 @@ function ResultsTierSection({
   t: ReturnType<typeof useTranslations>;
 }) {
   const tierIndicatorClass =
-    tier === 'MASTERS' ? 'w-2 h-6 bg-yellow-500 rounded-full' : 'w-2 h-6 bg-blue-500 rounded-full';
+    tier === 'MASTERS' ? 'w-2 h-6 bg-yellow-500 rounded-full' : 'w-2 h-6 bg-green-500 rounded-full';
 
   if (Object.keys(rounds).length === 0) {
     return null;

@@ -794,8 +794,8 @@
     "description": "Será redirecionado para a página inicial."
   },
   "generateDraw": {
-    "title": "Gerar Sorteio",
-    "description": "Configurar e gerar o sorteio do torneio",
+    "title": "Sorteio não gerado",
+    "description": "Configura as opções abaixo e gera o sorteio.",
     "loading": "A carregar evento...",
     "eventNotFound": "Evento não encontrado",
     "redirecting": "A redirecionar...",

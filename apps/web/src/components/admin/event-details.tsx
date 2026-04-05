@@ -138,28 +138,24 @@ function EventDetailsContent({
         {/* Tier Time Slots */}
         {event.tierRules &&
           (event.tierRules.mastersTimeSlot || event.tierRules.explorersTimeSlot) && (
-            <div className="flex items-center justify-center gap-2 flex-wrap">
+            <div className="flex items-center justify-center gap-2 flex-wrap md:py-4">
               {event.tierRules.mastersTimeSlot && (
-                <Badge
-                  variant="outline"
-                  className="text-sm px-3 py-1 bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800"
-                >
-                  <Clock className="mr-2 h-3 w-3" />
-                  <span className="font-semibold">{t('masters')}</span>
-                  <span className="ml-1">
+                <Badge variant="outline" className="text-sm px-3 py-1 bg-white dark:bg-white/5">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full mr-1" />
+                  <span className="font-semibold font-heading uppercase">{t('masters')}</span>
+                  <Clock className="ml-1.5 h-3 w-3 text-muted-foreground" />
+                  <span>
                     {formatTimeSlot(event.tierRules.mastersTimeSlot.startsAt, event.date, locale)} -{' '}
                     {formatTimeSlot(event.tierRules.mastersTimeSlot.endsAt, event.date, locale)}
                   </span>
                 </Badge>
               )}
               {event.tierRules.explorersTimeSlot && (
-                <Badge
-                  variant="outline"
-                  className="text-sm px-3 py-1 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800"
-                >
-                  <Clock className="mr-2 h-3 w-3" />
-                  <span className="font-semibold">{t('explorers')}</span>
-                  <span className="ml-1">
+                <Badge variant="outline" className="text-sm px-3 py-1 bg-white dark:bg-white/5">
+                  <div className="w-2 h-2 bg-green-500 rounded-full mr-1" />
+                  <span className="font-semibold font-heading uppercase">{t('explorers')}</span>
+                  <Clock className="ml-1.5 h-3 w-3 text-muted-foreground" />
+                  <span>
                     {formatTimeSlot(event.tierRules.explorersTimeSlot.startsAt, event.date, locale)}{' '}
                     - {formatTimeSlot(event.tierRules.explorersTimeSlot.endsAt, event.date, locale)}
                   </span>

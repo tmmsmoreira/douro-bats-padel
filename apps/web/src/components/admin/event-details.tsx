@@ -2,18 +2,26 @@
 
 import { useQuery, UseMutationResult } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useState } from 'react';
 import { motion } from 'motion/react';
+import { Clock } from 'lucide-react';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
 import { DataStateWrapper } from '../shared';
 import { ConfirmedPlayersSection } from '../shared/event';
 import { WaitlistSection } from '@/components/shared/draw';
 import type { Player, WaitlistedPlayer } from '@/components/shared/draw';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { formatTimeSlot } from '@/lib/utils';
 import { useRemovePlayerFromEvent } from '@/hooks/use-events';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+interface TierTimeSlot {
+  startsAt: string;
+  endsAt: string;
+}
 
 interface EventDetails {
   id: string;
@@ -26,6 +34,10 @@ interface EventDetails {
   venue?: {
     id: string;
     name: string;
+  };
+  tierRules?: {
+    mastersTimeSlot?: TierTimeSlot;
+    explorersTimeSlot?: TierTimeSlot;
   };
   confirmedCount: number;
   waitlistCount: number;
@@ -96,6 +108,7 @@ function EventDetailsContent({
   removePlayerMutation: UseMutationResult<unknown, Error, string, unknown>;
   t: ReturnType<typeof useTranslations>;
 }) {
+  const locale = useLocale();
   const [playerToRemove, setPlayerToRemove] = useState<{ id: string; name: string } | null>(null);
 
   const handleRemovePlayer = (playerId: string) => {
@@ -122,6 +135,39 @@ function EventDetailsContent({
       className="space-y-8"
     >
       <div className="space-y-4">
+        {/* Tier Time Slots */}
+        {event.tierRules &&
+          (event.tierRules.mastersTimeSlot || event.tierRules.explorersTimeSlot) && (
+            <div className="flex items-center justify-center gap-2 flex-wrap">
+              {event.tierRules.mastersTimeSlot && (
+                <Badge
+                  variant="outline"
+                  className="text-sm px-3 py-1 bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800"
+                >
+                  <Clock className="mr-2 h-3 w-3" />
+                  <span className="font-semibold">{t('masters')}</span>
+                  <span className="ml-1">
+                    {formatTimeSlot(event.tierRules.mastersTimeSlot.startsAt, event.date, locale)} -{' '}
+                    {formatTimeSlot(event.tierRules.mastersTimeSlot.endsAt, event.date, locale)}
+                  </span>
+                </Badge>
+              )}
+              {event.tierRules.explorersTimeSlot && (
+                <Badge
+                  variant="outline"
+                  className="text-sm px-3 py-1 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800"
+                >
+                  <Clock className="mr-2 h-3 w-3" />
+                  <span className="font-semibold">{t('explorers')}</span>
+                  <span className="ml-1">
+                    {formatTimeSlot(event.tierRules.explorersTimeSlot.startsAt, event.date, locale)}{' '}
+                    - {formatTimeSlot(event.tierRules.explorersTimeSlot.endsAt, event.date, locale)}
+                  </span>
+                </Badge>
+              )}
+            </div>
+          )}
+
         {/* Always show confirmed players and waitlist in the Details tab */}
         <div
           className={cn('grid gap-6', `md:grid-cols-${event.waitlistedPlayers?.length ? 2 : 1}`)}

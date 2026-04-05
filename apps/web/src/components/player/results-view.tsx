@@ -13,8 +13,8 @@ import {
 } from '@/components/ui/empty';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { AlertCircle } from 'lucide-react';
 import { DataStateWrapper } from '@/components/shared';
+import { BadgeAlertIcon } from 'lucide-animated';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -75,7 +75,7 @@ export function ResultsView({ eventId }: { eventId: string }) {
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
-              <AlertCircle className="size-6" />
+              <BadgeAlertIcon className="size-6" />
             </EmptyMedia>
             <EmptyTitle>{t('resultsNotAvailable')}</EmptyTitle>
             <EmptyDescription>

@@ -10,11 +10,11 @@ import {
   EmptyTitle,
   EmptyDescription,
 } from '@/components/ui/empty';
-import { AlertCircle } from 'lucide-react';
 import { DataStateWrapper } from '@/components/shared';
 import { TierSection, WaitlistSection } from '@/components/shared/draw';
 import type { Draw, Assignment } from '@/components/shared/draw';
 import type { EventWithRSVP } from '@padel/types';
+import { BadgeAlertIcon } from 'lucide-animated';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -70,7 +70,7 @@ export function DrawView({ eventId }: { eventId: string }) {
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
-              <AlertCircle className="size-6" />
+              <BadgeAlertIcon className="size-6" />
             </EmptyMedia>
             <EmptyTitle>{t('drawNotAvailable')}</EmptyTitle>
             <EmptyDescription>

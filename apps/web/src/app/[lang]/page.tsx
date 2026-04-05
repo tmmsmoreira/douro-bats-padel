@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from '@/i18n/navigation';
 import { Trophy, Users, TrendingUp, Calendar, ArrowRight, Smartphone, Check } from 'lucide-react';
 import { useRef, useEffect } from 'react';
+import { cn } from '@/lib/utils';
 import { HomeUpcomingEvents } from '@/components/home/home-upcoming-events';
 import { usePWAInstall } from '@/hooks/use-pwa-install';
 import Image from 'next/image';
@@ -39,7 +40,7 @@ export default function HomePage() {
   const heroY = useTransform(scrollYProgress, [0, 0.3], [0, -50]);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className={cn('min-h-screen bg-background flex flex-col', session && 'pb-20 md:pb-0')}>
       <SkipLinks />
       <HomeAdaptiveNav />
       <div ref={containerRef} className="flex-1">

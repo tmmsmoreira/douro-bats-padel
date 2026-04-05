@@ -18,9 +18,9 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useTranslations, useLocale } from 'next-intl';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Info, Lightbulb } from 'lucide-react';
 import { useAuthFetch, useGenerateDraw } from '@/hooks';
-import { StatusBadge } from '../shared';
+import { PlayerListItem } from '@/components/shared/player-list-item';
 import { formatTimeSlot } from '@/lib/utils';
 
 interface Court {
@@ -215,8 +215,8 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
         <Card
           className={
             event.state === 'PUBLISHED'
-              ? 'border-red-500 bg-red-50 dark:bg-red-950/20'
-              : 'border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20'
+              ? 'glass-card border-red-500 bg-red-50 dark:bg-red-950/20'
+              : 'glass-card border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20'
           }
         >
           <CardHeader>
@@ -224,39 +224,33 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
               className={
                 event.state === 'PUBLISHED'
                   ? 'text-red-800 dark:text-red-200 flex items-center gap-2'
-                  : 'text-yellow-800 dark:text-yellow-200'
+                  : 'text-yellow-800 dark:text-yellow-200 flex items-center gap-2'
               }
             >
-              {event.state === 'PUBLISHED' && <AlertTriangle className="h-5 w-5" />}
+              <AlertTriangle className="h-5 w-5" />
               {t('drawAlreadyExists')}
             </CardTitle>
-            <div
-              className={
-                event.state === 'PUBLISHED'
-                  ? 'text-sm text-red-700 dark:text-red-300'
-                  : 'text-sm text-yellow-700 dark:text-yellow-300'
-              }
-            >
-              {event.state === 'PUBLISHED' ? (
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: `${t('drawPublishedWarning')}<br />${t('drawPublishedInstructions')}`,
-                  }}
-                />
-              ) : (
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: `${t('drawExistsWarning')}<br />${t('drawExistsInstructions')}`,
-                  }}
-                />
-              )}
-            </div>
           </CardHeader>
           <CardContent>
+            {event.state === 'PUBLISHED' ? (
+              <div className="text-sm text-red-700 dark:text-red-300 space-y-1">
+                <p>{t.rich('drawPublishedWarning', { strong: (c) => <strong>{c}</strong> })}</p>
+                <p>
+                  {t.rich('drawPublishedInstructions', { strong: (c) => <strong>{c}</strong> })}
+                </p>
+              </div>
+            ) : (
+              <div className="text-sm text-yellow-700 dark:text-yellow-300 space-y-1">
+                <p>{t('drawExistsWarning')}</p>
+                <p>{t.rich('drawExistsInstructions', { strong: (c) => <strong>{c}</strong> })}</p>
+              </div>
+            )}
+          </CardContent>
+          <CardFooter>
             <Button variant="outline" onClick={() => router.push(`/admin/events/${eventId}/draw`)}>
               {t('viewManageDraw')}
             </Button>
-          </CardContent>
+          </CardFooter>
         </Card>
       )}
 
@@ -279,43 +273,34 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
       {hasInsufficientPlayers && confirmedCount >= 4 && (
         <Card className="glass-card border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20">
           <CardHeader>
-            <CardTitle className="text-yellow-800 dark:text-yellow-200">
-              ℹ️ {t('insufficientPlayers')}
+            <CardTitle className="text-yellow-800 dark:text-yellow-200 flex items-center gap-2">
+              <Info className="h-5 w-5" />
+              {t('insufficientPlayers')}
             </CardTitle>
-            <div className="text-sm text-yellow-700 dark:text-yellow-300">
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: t('insufficientPlayersDescription', {
-                    confirmedCount,
-                    playersInDraw,
-                  }),
-                }}
-              />
-              <br />
+            <div className="text-sm text-yellow-700 dark:text-yellow-300 space-y-1">
+              <p>
+                {t('insufficientPlayersDescription', {
+                  confirmedCount,
+                  playersInDraw,
+                })}
+              </p>
               {waitlistedPlayers > 0 && (
-                <>
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: t('playersWaitlisted', {
-                        count: waitlistedPlayers,
-                      }),
-                    }}
-                  />
-                  <br />
-                </>
+                <p>
+                  {t.rich('playersWaitlisted', {
+                    count: waitlistedPlayers,
+                    strong: (c) => <strong>{c}</strong>,
+                  })}
+                </p>
               )}
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: t('courtCapacityInfo', {
-                    maxPlayers,
-                    mastersCourts: mastersCourts.length,
-                    explorersCourts: explorersCourts.length,
-                    courtsNeeded,
-                  }),
-                }}
-              />
-              <br />
-              <strong>{t('considerReducingCourts')}</strong>
+              <p>
+                {t('courtCapacityInfo', {
+                  maxPlayers,
+                  mastersCourts: mastersCourts.length,
+                  explorersCourts: explorersCourts.length,
+                  courtsNeeded,
+                })}
+              </p>
+              <p className="font-semibold">{t('considerReducingCourts')}</p>
             </div>
           </CardHeader>
         </Card>
@@ -329,28 +314,23 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
               <AlertTriangle className="h-5 w-5" />
               {t('excessPlayersDetected')}
             </CardTitle>
-            <div className="text-sm text-orange-700 dark:text-orange-300">
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: t('excessPlayersDescription', {
-                    confirmedCount,
-                    mastersCourts: mastersCourts.length,
-                    explorersCourts: explorersCourts.length,
-                    maxPlayers,
-                  }),
-                }}
-              />
-              <br />
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: t('playersInDrawInfo', {
-                    playersInDraw,
-                    waitlistedPlayers,
-                  }),
-                }}
-              />
-              <br />
-              {t('allCourtsUsed')}
+            <div className="text-sm text-orange-700 dark:text-orange-300 space-y-1">
+              <p>
+                {t('excessPlayersDescription', {
+                  confirmedCount,
+                  mastersCourts: mastersCourts.length,
+                  explorersCourts: explorersCourts.length,
+                  maxPlayers,
+                })}
+              </p>
+              <p>
+                {t.rich('playersInDrawInfo', {
+                  playersInDraw,
+                  waitlistedPlayers,
+                  strong: (c) => <strong>{c}</strong>,
+                })}
+              </p>
+              <p>{t('allCourtsUsed')}</p>
             </div>
           </CardHeader>
         </Card>
@@ -360,43 +340,37 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
       {!hasExcessPlayers && unusedCourts > 0 && playersInDraw > 0 && (
         <Card className="glass-card border-blue-500 bg-blue-50 dark:bg-blue-950/20">
           <CardHeader>
-            <CardTitle className="text-blue-800 dark:text-blue-200">
-              💡 {t('courtOptimization')}
+            <CardTitle className="text-blue-800 dark:text-blue-200 flex items-center gap-2">
+              <Lightbulb className="h-5 w-5" />
+              {t('courtOptimization')}
             </CardTitle>
-            <div className="text-sm text-blue-700 dark:text-blue-300">
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: t('courtOptimizationDescription', {
-                    playersInDraw,
-                    courtsNeeded,
-                  }),
-                }}
-              />
-              <br />
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: t('courtAllocationInfo', {
-                    mastersCourts: mastersCourts.length,
-                    explorersCourts: explorersCourts.length,
-                  }),
-                }}
-              />
-              <br />
-              <strong>{t('considerReducingCourts')}</strong>
-            </div>
           </CardHeader>
+          <CardContent className="pt-0">
+            <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+              <p>
+                {t('courtOptimizationDescription', {
+                  playersInDraw,
+                  courtsNeeded,
+                })}
+              </p>
+              <p>
+                {t('courtAllocationInfo', {
+                  mastersCourts: mastersCourts.length,
+                  explorersCourts: explorersCourts.length,
+                })}
+              </p>
+              <br />
+              <p className="font-semibold">{t('considerReducingCourts')}</p>
+            </div>
+          </CardContent>
         </Card>
       )}
 
       {/* Tier Configuration Card */}
-      <Card className="glass-card border-blue-500 bg-blue-50 dark:bg-blue-950/20">
+      <Card className="glass-card">
         <CardHeader>
-          <CardTitle className="text-blue-800 dark:text-blue-200">
-            {t('tierConfiguration')}
-          </CardTitle>
-          <CardDescription className="text-blue-700 dark:text-blue-300">
-            {t('tierConfigurationDescription')}
-          </CardDescription>
+          <CardTitle>{t('tierConfiguration')}</CardTitle>
+          <CardDescription>{t('tierConfigurationDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Tier Split Method */}
@@ -417,7 +391,7 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
           </div>
 
           {/* Expected Distribution */}
-          <div className="grid grid-cols-2 gap-4 p-3 bg-white dark:bg-gray-900 rounded-lg border">
+          <div className="grid grid-cols-2 gap-4 p-3 bg-muted/50 rounded-lg">
             <div>
               <div className="text-sm font-medium text-yellow-700 dark:text-yellow-400">
                 {t('masters')}
@@ -442,8 +416,8 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
           {/* Time Slots */}
           <div className="grid grid-cols-2 gap-4">
             {tierRules.mastersTimeSlot && (
-              <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
-                <div className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-1">
+              <div className="p-3 bg-muted/50 rounded-lg border">
+                <div className="text-sm font-medium text-yellow-600 dark:text-yellow-400 mb-1">
                   {t('masters')} Time Slot
                 </div>
                 <div className="text-sm">
@@ -457,8 +431,8 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
               </div>
             )}
             {tierRules.explorersTimeSlot && (
-              <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                <div className="text-sm font-medium text-green-800 dark:text-green-200 mb-1">
+              <div className="p-3 bg-muted/50 rounded-lg border">
+                <div className="text-sm font-medium text-green-600 dark:text-green-400 mb-1">
                   {t('explorers')} Time Slot
                 </div>
                 <div className="text-sm">
@@ -476,56 +450,6 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
       </Card>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <Card className="glass-card">
-          <CardHeader>
-            <CardTitle>{t('eventSummary')}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 pt-0">
-            <div className="flex items-center">
-              <span className="font-medium">{t('title_field')}:</span>{' '}
-              <span className="ml-2">{event.title || t('untitledEvent')}</span>
-            </div>
-            <div className="flex items-center">
-              <span className="font-medium">{t('confirmedPlayers')}:</span>
-              <span className="ml-2">{confirmedCount}</span>
-            </div>
-            <div className="flex items-center">
-              <span className="font-medium mr-2">{t('playersInDraw')}:</span>
-              <span className={hasExcessPlayers ? 'text-destructive' : ''}>{playersInDraw}</span>
-            </div>
-            {waitlistedPlayers > 0 && (
-              <div>
-                <span className="font-medium">{t('waitlistedPlayers')}:</span>{' '}
-                <Badge variant="secondary">{waitlistedPlayers}</Badge>
-              </div>
-            )}
-            <div className="flex items-center">
-              <span className="font-medium mr-2">{t('status')}:</span>{' '}
-              <StatusBadge status={event.state} />
-            </div>
-          </CardContent>
-          <CardFooter className="pt-0 text-sm text-destructive flex items-center gap-1">
-            {event.state !== 'FROZEN' && event.state !== 'DRAWN' && event.state !== 'PUBLISHED' && (
-              <>
-                <AlertTriangle className="h-4 w-4" />
-                {t('eventNotFrozen')}
-              </>
-            )}
-            {playersInDraw < 4 && confirmedCount >= 4 && (
-              <>
-                <AlertTriangle className="h-4 w-4" />
-                {t('excessPlayersWarning')}
-              </>
-            )}
-            {confirmedCount < 4 && (
-              <>
-                <AlertTriangle className="h-4 w-4" />
-                {t('insufficientPlayersWarning')}
-              </>
-            )}
-          </CardFooter>
-        </Card>
-
         <Card className="glass-card">
           <CardHeader>
             <CardTitle>{t('courtSelection')}</CardTitle>
@@ -671,26 +595,20 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
               : t('allPlayersIncluded')}
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+        <CardContent className="pt-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {event.confirmedPlayers
               ?.slice(0, playersInDraw)
               .map((player: Player, index: number) => (
-                <div
+                <PlayerListItem
                   key={player.id}
-                  className="flex items-center justify-between p-2 border rounded"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">#{index + 1}</span>
-                    <span className="text-sm">{player.name}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-xs">
-                      {player.tier}
-                    </Badge>
-                    <span className="text-xs text-muted-foreground">{player.rating}</span>
-                  </div>
-                </div>
+                  id={player.id}
+                  name={player.name}
+                  rating={player.rating}
+                  rank={index + 1}
+                  subtitle={player.tier}
+                  variant="leaderboard"
+                />
               ))}
           </div>
         </CardContent>
@@ -705,26 +623,18 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
             </CardTitle>
             <CardDescription>{t('waitlistedPlayersDescription')}</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+          <CardContent className="pt-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {event.confirmedPlayers?.slice(playersInDraw).map((player: Player, index: number) => (
-                <div
+                <PlayerListItem
                   key={player.id}
-                  className="flex items-center justify-between p-2 border rounded bg-orange-50 dark:bg-orange-950/20"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">
-                      #{playersInDraw + index + 1}
-                    </span>
-                    <span className="text-sm">{player.name}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-xs">
-                      {player.tier}
-                    </Badge>
-                    <span className="text-xs text-muted-foreground">{player.rating}</span>
-                  </div>
-                </div>
+                  id={player.id}
+                  name={player.name}
+                  rating={player.rating}
+                  rank={playersInDraw + index + 1}
+                  subtitle={player.tier}
+                  variant="leaderboard"
+                />
               ))}
             </div>
           </CardContent>

@@ -3,7 +3,9 @@
 import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
-import { CheckCircle2, XCircle, AlertCircle, Info, X } from 'lucide-react';
+import { XCircle, Info, X } from 'lucide-react';
+import { BadgeAlertIcon } from 'lucide-animated';
+import { MessageCircleCheckIcon } from '../icons/message-circle-check-icon';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
@@ -43,9 +45,9 @@ interface ToastNativeProps {
 }
 
 const toastIcons = {
-  success: CheckCircle2,
+  success: MessageCircleCheckIcon,
   error: XCircle,
-  warning: AlertCircle,
+  warning: BadgeAlertIcon,
   info: Info,
 };
 

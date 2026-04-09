@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
+import { motion } from 'motion/react';
 
 interface EventTab {
   label: string;
@@ -49,7 +50,7 @@ export function EventTabs({ eventId, basePath, tabs, className }: EventTabsProps
 
   return (
     <div className={cn('border-b border-border', className)}>
-      <nav className="flex space-x-8" aria-label="Event navigation">
+      <nav className="flex space-x-8 md:space-x-8" aria-label="Event navigation">
         {visibleTabs.map((tab) => {
           const isActive = tab.match(pathname);
           return (
@@ -57,13 +58,18 @@ export function EventTabs({ eventId, basePath, tabs, className }: EventTabsProps
               key={tab.href}
               href={tab.href}
               className={cn(
-                'border-b-2 py-4 px-1 text-sm font-medium transition-colors',
-                isActive
-                  ? 'border-primary text-foreground'
-                  : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
+                'relative flex-1 md:flex-none text-center md:text-left py-4 px-1 text-sm font-medium transition-colors',
+                isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
               )}
             >
               {tab.label}
+              {isActive && (
+                <motion.div
+                  layoutId="active-tab-indicator"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
+                  transition={{ type: 'spring', stiffness: 500, damping: 40 }}
+                />
+              )}
             </Link>
           );
         })}

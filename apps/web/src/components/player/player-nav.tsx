@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { signOut, useSession } from 'next-auth/react';
+import { motion } from 'motion/react';
 import {
   UserIcon,
   LogoutIcon,
@@ -175,13 +176,20 @@ export function PlayerNav() {
                       key={item.href}
                       href={item.href}
                       className={cn(
-                        'px-4 py-2 text-sm font-medium rounded-[999px]  transition-colors',
+                        'relative px-4 py-2 text-sm font-medium rounded-[999px] transition-colors',
                         isNavItemActive(item.href)
-                          ? 'bg-primary text-primary-foreground'
+                          ? 'text-primary-foreground'
                           : 'text-muted-foreground hover:text-muted-foreground/60'
                       )}
                     >
-                      {item.label}
+                      {isNavItemActive(item.href) && (
+                        <motion.div
+                          layoutId="player-nav-active"
+                          className="absolute inset-0 bg-primary rounded-[999px]"
+                          transition={{ type: 'spring', stiffness: 500, damping: 40 }}
+                        />
+                      )}
+                      <span className="relative z-10">{item.label}</span>
                     </Link>
                   ))}
                 </div>

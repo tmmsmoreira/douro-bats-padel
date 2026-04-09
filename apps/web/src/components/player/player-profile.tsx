@@ -1,9 +1,8 @@
 'use client';
 
 import { useSession, signOut } from 'next-auth/react';
-import { useQuery } from '@tanstack/react-query';
 import { useTranslations, useLocale } from 'next-intl';
-import { useUpdateProfile } from '@/hooks';
+import { useUpdateProfile, useProfile } from '@/hooks';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -23,8 +22,6 @@ import { StatusBadge } from '@/components/shared/status-badge';
 import type { PlayerProfileStatus } from '@/components/shared/status-badge';
 import type { UserWithPlayer } from '@padel/types';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-
 export function PlayerProfile() {
   const { data: session, status } = useSession();
   const t = useTranslations('profile');
@@ -43,37 +40,7 @@ export function PlayerProfile() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const {
-    data: profile,
-    isLoading,
-    error,
-  } = useQuery<UserWithPlayer>({
-    queryKey: ['profile', session?.accessToken],
-    queryFn: async () => {
-      if (!session?.accessToken) {
-        throw new Error('No access token');
-      }
-
-      console.log('Fetching profile with token:', session.accessToken.substring(0, 20) + '...');
-
-      const res = await fetch(`${API_URL}/auth/me`, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.accessToken}`,
-        },
-      });
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error('API Error:', res.status, errorText);
-        throw new Error(`API Error: ${res.statusText}`);
-      }
-
-      const data: UserWithPlayer = await res.json();
-      return data;
-    },
-    enabled: !!session?.accessToken,
-  });
+  const { data: profile, isLoading, error } = useProfile();
 
   // Handle unauthorized errors by signing out and redirecting to login
   useEffect(() => {

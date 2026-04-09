@@ -775,6 +775,8 @@
     "publishResults": "Publish Results",
     "masters": "Masters",
     "explorers": "Explorers",
+    "rounds": "Rounds",
+    "matches": "Matches",
     "round": "Round {round}",
     "court": "Court {court}",
     "saved": "Saved",

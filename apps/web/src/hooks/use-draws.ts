@@ -1,6 +1,7 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useAuthFetch } from './use-api';
+import type { Draw } from '@/components/shared/draw';
 
 /**
  * Hook to generate a draw for an event
@@ -124,5 +125,25 @@ export function useDeleteDraw(eventId: string, onSuccessCallback?: () => void) {
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to delete draw');
     },
+  });
+}
+
+/**
+ * Hook to fetch a draw for an event
+ */
+export function useDraw(eventId: string) {
+  const authFetch = useAuthFetch();
+
+  return useQuery<Draw | null>({
+    queryKey: ['draw', eventId],
+    queryFn: async () => {
+      try {
+        return await authFetch.get(`/draws/events/${eventId}`);
+      } catch (e: unknown) {
+        if (e instanceof Error && e.message.includes('404')) return null;
+        throw e;
+      }
+    },
+    retry: false,
   });
 }

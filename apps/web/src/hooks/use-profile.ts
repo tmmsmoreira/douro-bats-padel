@@ -1,8 +1,42 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
+import { useAuthFetch } from './use-api';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+interface UserProfile {
+  id: string;
+  email: string;
+  name: string | null;
+  dateOfBirth?: string | null;
+  phoneNumber?: string | null;
+  profilePhoto: string | null;
+  roles: string[];
+  emailVerified: boolean;
+  createdAt: string;
+  player: {
+    id: string;
+    rating: number;
+    tier: string;
+    status: string;
+    createdAt: string;
+  } | null;
+}
+
+/**
+ * Hook to fetch the current user's profile
+ */
+export function useProfile() {
+  const { data: session } = useSession();
+  const authFetch = useAuthFetch();
+
+  return useQuery<UserProfile>({
+    queryKey: ['profile', session?.accessToken],
+    queryFn: () => authFetch.get('/auth/me'),
+    enabled: !!session?.accessToken,
+  });
+}
 
 interface UpdateProfileData {
   name?: string;

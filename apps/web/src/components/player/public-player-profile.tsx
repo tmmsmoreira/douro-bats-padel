@@ -1,10 +1,10 @@
 'use client';
 
-import { useQuery, UseMutationResult } from '@tanstack/react-query';
+import { UseMutationResult } from '@tanstack/react-query';
 import { useTranslations, useLocale } from 'next-intl';
 import { useSession } from 'next-auth/react';
 import { useRouter } from '@/i18n/navigation';
-import { useDeletePlayer, useRevokeInvitation, useResendInvitation } from '@/hooks';
+import { useDeletePlayer, useRevokeInvitation, useResendInvitation, usePlayer } from '@/hooks';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -29,8 +29,6 @@ import { SendIcon, SendIconHandle } from '../icons/send-icon';
 import { Spinner } from '../ui/spinner';
 import { Invitation } from '@padel/types';
 import { useIsMobile } from '@/hooks/use-media-query';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 interface PlayerData {
   id: string;
@@ -92,18 +90,7 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
     data: player,
     isLoading,
     error,
-  } = useQuery<PlayerData>({
-    queryKey: ['player', playerId],
-    queryFn: async () => {
-      const res = await fetch(`${API_URL}/players/${playerId}`);
-
-      if (!res.ok) {
-        throw new Error(`API Error: ${res.statusText}`);
-      }
-
-      return res.json();
-    },
-  });
+  } = usePlayer(playerId) as ReturnType<typeof usePlayer> & { data: PlayerData | undefined };
 
   // Use custom hooks for mutations
   const deleteMutation = useDeletePlayer(playerId, () => {

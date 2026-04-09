@@ -78,16 +78,8 @@ export function TierSection({
     return null;
   }
 
-  const tierColor = tier === 'MASTERS' ? 'bg-yellow-500' : 'bg-green-500';
-
   return (
     <div className="space-y-4">
-      {translations.tierName && (
-        <div className="flex items-center gap-3">
-          <div className={`w-2 h-6 ${tierColor} rounded-full`} />
-          <h2 className="text-xl font-bold">{translations.tierName}</h2>
-        </div>
-      )}
       {Object.entries(rounds)
         .sort(([a], [b]) => Number(a) - Number(b))
         .map(([round, assignments]) => (

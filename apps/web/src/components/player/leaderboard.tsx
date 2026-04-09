@@ -1,27 +1,20 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { LeaderboardEntry } from '@padel/types';
 import { Trophy } from 'lucide-react';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { DataStateWrapper } from '@/components/shared';
-import { useAuthFetch } from '@/hooks/use-api';
 import { PlayerListItem } from '@/components/shared/player-list-item';
 import { useIsMobile } from '@/hooks/use-media-query';
+import { useLeaderboard } from '@/hooks/use-rankings';
+import type { LeaderboardEntry } from '@padel/types';
 
 export function Leaderboard() {
   const t = useTranslations('leaderboard');
-  const authFetch = useAuthFetch();
 
-  const { data: leaderboard, isLoading } = useQuery<LeaderboardEntry[]>({
-    queryKey: ['leaderboard'],
-    queryFn: async () => {
-      return authFetch.get<LeaderboardEntry[]>('/rankings/leaderboard');
-    },
-  });
+  const { data: leaderboard, isLoading } = useLeaderboard();
 
   return (
     <DataStateWrapper

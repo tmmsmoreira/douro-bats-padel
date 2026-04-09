@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { useQuery, UseMutationResult } from '@tanstack/react-query';
+import { useEffect, useRef, useState } from 'react';
+import { UseMutationResult } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -16,45 +16,20 @@ import { Badge } from '@/components/ui/badge';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
 import { Lock, Calendar, ClipboardList } from 'lucide-react';
 import { BadgeAlertIcon, LockIcon, LockIconHandle } from 'lucide-animated';
-import { useAuthFetch, usePublishMatches, useSaveMatchResults } from '@/hooks';
-import type { MatchResultData } from '@/hooks/use-matches';
+import {
+  usePublishMatches,
+  useSaveMatchResults,
+  useEventDetails,
+  useDraw,
+  useEventMatches,
+} from '@/hooks';
+import type { MatchResultData, Match } from '@/hooks/use-matches';
 import { useTranslations } from 'next-intl';
 import { MatchResultEntry } from '../shared/draw';
+import type { Draw } from '../shared/draw';
 import { DataStateWrapper } from '@/components/shared';
 import type { Assignment as DrawAssignment } from '../shared/draw/types';
-
-interface Match {
-  id: string;
-  eventId: string;
-  courtId: string;
-  court?: { label: string };
-  round: number;
-  setsA: number;
-  setsB: number;
-  tier: string;
-  publishedAt: string | null;
-  teamA?: Array<{ id: string; name: string }>;
-  teamB?: Array<{ id: string; name: string }>;
-}
-
-interface Event {
-  id: string;
-  title: string | null;
-  date: string;
-  state: 'DRAFT' | 'OPEN' | 'FROZEN' | 'DRAWN' | 'PUBLISHED';
-  endsAt: string;
-  startsAt: string;
-  venue?: {
-    id: string;
-    name: string;
-  };
-}
-
-interface Draw {
-  id: string;
-  eventId: string;
-  assignments: DrawAssignment[];
-}
+import { TierCollapsibleItem } from './tier-accordion-item';
 
 interface ResultsEntryProps {
   eventId: string;
@@ -62,7 +37,6 @@ interface ResultsEntryProps {
 
 export function ResultsEntry({ eventId }: ResultsEntryProps) {
   const t = useTranslations('resultsEntry');
-  const authFetch = useAuthFetch();
   const [showPublishDialog, setShowPublishDialog] = useState(false);
   const [matchResults, setMatchResults] = useState<
     Record<string, { setsA: number; setsB: number }>
@@ -70,22 +44,13 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
   const lockIconRef = useRef<LockIconHandle>(null);
 
   // Fetch event data to check state and date
-  const { data: event, isLoading: isLoadingEvent } = useQuery<Event>({
-    queryKey: ['event', eventId],
-    queryFn: () => authFetch.get(`/events/${eventId}`),
-  });
+  const { data: event, isLoading: isLoadingEvent } = useEventDetails(eventId);
 
   // Fetch draw assignments
-  const { data: draw } = useQuery<Draw>({
-    queryKey: ['draw', eventId],
-    queryFn: () => authFetch.get(`/draws/events/${eventId}`),
-  });
+  const { data: draw } = useDraw(eventId);
 
   // Fetch existing matches
-  const { data: matches, isLoading } = useQuery<Match[]>({
-    queryKey: ['matches', eventId],
-    queryFn: () => authFetch.get(`/matches/events/${eventId}`),
-  });
+  const { data: matches, isLoading } = useEventMatches(eventId);
 
   // Initialize match results from existing matches
   useEffect(() => {
@@ -254,6 +219,7 @@ function ResultsTierSection({
   matchResults,
   matches,
   handleScoreChange,
+  defaultOpen = true,
   t,
 }: {
   tier: 'MASTERS' | 'EXPLORERS';
@@ -261,68 +227,69 @@ function ResultsTierSection({
   matchResults: Record<string, { setsA: number; setsB: number }>;
   matches: Match[] | undefined;
   handleScoreChange: (courtId: string, round: number, team: 'A' | 'B', value: string) => void;
+  defaultOpen?: boolean;
   t: ReturnType<typeof useTranslations>;
 }) {
-  const tierIndicatorClass =
-    tier === 'MASTERS' ? 'w-2 h-6 bg-yellow-500 rounded-full' : 'w-2 h-6 bg-green-500 rounded-full';
+  if (Object.keys(rounds).length === 0) return null;
 
-  if (Object.keys(rounds).length === 0) {
-    return null;
-  }
+  const roundCount = Object.keys(rounds).length;
+  const matchCount = Object.values(rounds).reduce((sum, a) => sum + a.length, 0);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <div className={tierIndicatorClass}></div>
-        <h2 className="text-2xl font-bold">{tier === 'MASTERS' ? t('masters') : t('explorers')}</h2>
+    <TierCollapsibleItem
+      defaultOpen={defaultOpen}
+      tierName={tier === 'MASTERS' ? t('masters') : t('explorers')}
+      tierColor={tier === 'MASTERS' ? 'bg-yellow-500' : 'bg-green-500'}
+      badges={[`${roundCount} ${t('rounds')}`, `${matchCount} ${t('matches')}`]}
+    >
+      <div className="space-y-4">
+        {Object.entries(rounds)
+          .sort(([a], [b]) => Number(a) - Number(b))
+          .map(([round, assignments]) => (
+            <Card key={`${tier}-${round}`} className="shadow-none">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-lg">{t('round', { round })}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 pt-0">
+                <div className="grid grid-cols-1 gap-2">
+                  {assignments.map((assignment) => {
+                    const key = `${assignment.courtId}-${assignment.round}`;
+                    const result = matchResults[key] || { setsA: 0, setsB: 0 };
+                    const existingMatch = matches?.find(
+                      (m) => m.courtId === assignment.courtId && m.round === assignment.round
+                    );
+                    const isPublished = existingMatch ? existingMatch.publishedAt !== null : false;
+                    const isSaved = !!existingMatch;
+
+                    return (
+                      <MatchResultEntry
+                        key={assignment.id}
+                        assignment={assignment}
+                        courtLabel={(courtId: string) => t('court', { id: courtId })}
+                        result={result}
+                        onScoreChange={(team: 'A' | 'B', value: string) =>
+                          handleScoreChange(assignment.courtId, assignment.round, team, value)
+                        }
+                        isSaved={isSaved}
+                        isPublished={isPublished}
+                        showSaveButton={false}
+                        translations={{
+                          teamA: t('teamA'),
+                          teamB: t('teamB'),
+                          teamASets: t('teamASets'),
+                          teamBSets: t('teamBSets'),
+                          saved: t('saved'),
+                          published: t('published'),
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
       </div>
-
-      {Object.entries(rounds)
-        .sort(([a], [b]) => Number(a) - Number(b))
-        .map(([round, assignments]) => (
-          <Card key={`${tier}-${round}`} className="glass-card">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg">{t('round', { round })}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 pt-0">
-              <div className="grid grid-cols-1 gap-2">
-                {assignments.map((assignment) => {
-                  const key = `${assignment.courtId}-${assignment.round}`;
-                  const result = matchResults[key] || { setsA: 0, setsB: 0 };
-                  const existingMatch = matches?.find(
-                    (m) => m.courtId === assignment.courtId && m.round === assignment.round
-                  );
-                  const isPublished = existingMatch ? existingMatch.publishedAt !== null : false;
-                  const isSaved = !!existingMatch;
-
-                  return (
-                    <MatchResultEntry
-                      key={assignment.id}
-                      assignment={assignment}
-                      courtLabel={(courtId: string) => t('court', { id: courtId })}
-                      result={result}
-                      onScoreChange={(team: 'A' | 'B', value: string) =>
-                        handleScoreChange(assignment.courtId, assignment.round, team, value)
-                      }
-                      isSaved={isSaved}
-                      isPublished={isPublished}
-                      showSaveButton={false}
-                      translations={{
-                        teamA: t('teamA'),
-                        teamB: t('teamB'),
-                        teamASets: t('teamASets'),
-                        teamBSets: t('teamBSets'),
-                        saved: t('saved'),
-                        published: t('published'),
-                      }}
-                    />
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-    </div>
+    </TierCollapsibleItem>
   );
 }
 
@@ -381,7 +348,7 @@ function ResultsEntryContent({
   const hasPublishedMatches = matches?.some((m) => m.publishedAt !== null);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       {/* Header with stats */}
       <Card className="glass-card">
         <CardHeader>
@@ -427,29 +394,25 @@ function ResultsEntryContent({
         </CardHeader>
       </Card>
 
-      {/* Masters Results - Using TierSection with custom render */}
-      {Object.keys(mastersRounds).length > 0 && (
-        <ResultsTierSection
-          tier="MASTERS"
-          rounds={mastersRounds}
-          matchResults={matchResults}
-          matches={matches}
-          handleScoreChange={handleScoreChange}
-          t={t}
-        />
-      )}
+      <ResultsTierSection
+        tier="MASTERS"
+        rounds={mastersRounds}
+        matchResults={matchResults}
+        matches={matches}
+        handleScoreChange={handleScoreChange}
+        defaultOpen={false}
+        t={t}
+      />
 
-      {/* Explorers Results - Using TierSection with custom render */}
-      {Object.keys(explorersRounds).length > 0 && (
-        <ResultsTierSection
-          tier="EXPLORERS"
-          rounds={explorersRounds}
-          matchResults={matchResults}
-          matches={matches}
-          handleScoreChange={handleScoreChange}
-          t={t}
-        />
-      )}
+      <ResultsTierSection
+        tier="EXPLORERS"
+        rounds={explorersRounds}
+        matchResults={matchResults}
+        matches={matches}
+        handleScoreChange={handleScoreChange}
+        defaultOpen={false}
+        t={t}
+      />
 
       {/* Publish confirmation dialog */}
       <ConfirmationDialog

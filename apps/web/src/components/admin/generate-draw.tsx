@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from '@/i18n/navigation';
-import { useQuery } from '@tanstack/react-query';
-import { useSession } from 'next-auth/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,7 +10,7 @@ import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useTranslations, useLocale } from 'next-intl';
 import { AlertTriangle, Info, Lightbulb, Clock } from 'lucide-react';
-import { useAuthFetch, useGenerateDraw } from '@/hooks';
+import { useGenerateDraw, useEventDetails, useDraw } from '@/hooks';
 import { PlayerListItem } from '@/components/shared/player-list-item';
 import { formatTimeSlot } from '@/lib/utils';
 
@@ -65,11 +63,9 @@ interface GenerateDrawProps {
 }
 
 export function GenerateDraw({ eventId }: GenerateDrawProps) {
-  const { data: session } = useSession();
   const router = useRouter();
   const t = useTranslations('generateDraw');
   const locale = useLocale();
-  const authFetch = useAuthFetch();
 
   const [constraints, setConstraints] = useState({
     avoidRecentSessions: 4,
@@ -82,30 +78,11 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
   const [selectedExplorersCourts, setSelectedExplorersCourts] = useState<string[]>([]);
 
   // Fetch event details
-  const { data: event, isLoading: eventLoading } = useQuery<EventDetails>({
-    queryKey: ['event', eventId, session?.accessToken],
-    queryFn: async () => {
-      try {
-        return await authFetch.get(`/events/${eventId}`);
-      } catch (error) {
-        throw new Error(`API Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      }
-    },
-    enabled: !!session?.accessToken,
-  });
+  const { data: eventData, isLoading: eventLoading } = useEventDetails(eventId);
+  const event = eventData as EventDetails | undefined;
 
   // Check if draw already exists
-  const { data: existingDraw } = useQuery<{ id: string } | null>({
-    queryKey: ['draw', eventId, session?.accessToken],
-    queryFn: async () => {
-      try {
-        return await authFetch.get(`/draws/events/${eventId}`);
-      } catch {
-        return null;
-      }
-    },
-    enabled: !!session?.accessToken,
-  });
+  const { data: existingDraw } = useDraw(eventId);
 
   // Get available courts from tierRules (must be before useEffect)
   const tierRules = event?.tierRules || {};

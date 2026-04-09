@@ -1,7 +1,5 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
-import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -15,55 +13,12 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { DataStateWrapper } from '@/components/shared';
 import { BadgeAlertIcon } from 'lucide-animated';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-
-interface Player {
-  id: string;
-  name: string;
-  rating: number;
-  profilePhoto?: string | null;
-}
-
-interface Court {
-  id: string;
-  label: string;
-}
-
-interface Match {
-  id: string;
-  round: number;
-  setsA: number;
-  setsB: number;
-  teamA: Player[];
-  teamB: Player[];
-  court?: Court;
-  courtId?: string;
-  tier?: string;
-}
+import { useEventMatches, type Match } from '@/hooks/use-matches';
 
 export function ResultsView({ eventId }: { eventId: string }) {
-  const { data: session } = useSession();
   const t = useTranslations('resultsView');
 
-  const {
-    data: matches,
-    isLoading,
-    error,
-  } = useQuery<Match[]>({
-    queryKey: ['matches', eventId],
-    queryFn: async () => {
-      const headers: HeadersInit = { 'Content-Type': 'application/json' };
-      if (session?.accessToken) {
-        headers.Authorization = `Bearer ${session.accessToken}`;
-      }
-      const res = await fetch(`${API_URL}/matches/events/${eventId}`, { headers });
-      if (!res.ok) throw new Error('Failed to fetch matches');
-      return res.json();
-    },
-    retry: false, // Don't retry if results don't exist
-    enabled: !!session,
-  });
+  const { data: matches, isLoading, error } = useEventMatches(eventId);
 
   return (
     <DataStateWrapper

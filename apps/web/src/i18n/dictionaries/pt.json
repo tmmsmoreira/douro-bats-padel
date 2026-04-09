@@ -757,6 +757,8 @@
     "publishResults": "Publicar Resultados",
     "masters": "Masters",
     "explorers": "Explorers",
+    "rounds": "Rondas",
+    "matches": "Jogos",
     "round": "Ronda {round}",
     "court": "Campo {court}",
     "saved": "Guardado",

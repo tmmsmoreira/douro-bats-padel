@@ -1,9 +1,9 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { useQuery, UseMutationResult } from '@tanstack/react-query';
+import { UseMutationResult } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { useDeleteVenue } from '@/hooks/use-venues';
+import { useDeleteVenue, useVenues } from '@/hooks/use-venues';
 import Image from 'next/image';
 import { motion } from 'motion/react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -32,8 +32,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 
 import type { Venue } from '@padel/types';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-
 export function VenuesList() {
   const router = useRouter();
   const t = useTranslations('venuesList');
@@ -41,14 +39,7 @@ export function VenuesList() {
   const deleteIconRef = useRef<DeleteIconHandle>(null);
   const squarePenIconRef = useRef<SquarePenIconHandle>(null);
 
-  const { data: venues, isLoading } = useQuery<Venue[]>({
-    queryKey: ['venues'],
-    queryFn: async () => {
-      const res = await fetch(`${API_URL}/venues`);
-      if (!res.ok) throw new Error('Failed to fetch venues');
-      return res.json();
-    },
-  });
+  const { data: venues, isLoading } = useVenues();
 
   // Use dedicated hook for deletion
   const deleteMutation = useDeleteVenue();

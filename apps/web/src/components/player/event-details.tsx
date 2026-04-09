@@ -1,7 +1,5 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
-import { useSession } from 'next-auth/react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Clock } from 'lucide-react';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,31 +9,16 @@ import { Spinner } from '@/components/ui/spinner';
 import { StatusBadge } from '@/components/shared';
 import { ConfirmedPlayersSection } from '@/components/shared/event';
 import { WaitlistSection } from '@/components/shared/draw';
-import { useRSVP } from '@/hooks';
+import { useSession } from 'next-auth/react';
+import { useRSVP, useEventDetails } from '@/hooks';
 import { formatTimeSlot } from '@/lib/utils';
 import type { EventWithPlayersSerialized } from '@padel/types';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-
 export function EventDetails({ eventId }: { eventId: string }) {
-  const { data: session } = useSession();
   const t = useTranslations('eventDetails');
   const locale = useLocale();
 
-  const { data: event, isLoading } = useQuery<EventWithPlayersSerialized>({
-    queryKey: ['event', eventId],
-    queryFn: async () => {
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-      };
-      if (session?.accessToken) {
-        headers.Authorization = `Bearer ${session.accessToken}`;
-      }
-      const res = await fetch(`${API_URL}/events/${eventId}`, { headers });
-      if (!res.ok) throw new Error('Failed to fetch event');
-      return res.json();
-    },
-  });
+  const { data: event, isLoading } = useEventDetails(eventId);
 
   if (isLoading) {
     return (

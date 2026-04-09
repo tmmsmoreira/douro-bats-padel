@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useAuthFetch } from './use-api';
 
@@ -34,6 +34,33 @@ export function useSaveMatchResults(eventId: string) {
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to save results');
     },
+  });
+}
+
+export interface Match {
+  id: string;
+  eventId?: string;
+  courtId: string;
+  court?: { label: string };
+  round: number;
+  setsA: number;
+  setsB: number;
+  tier: string;
+  publishedAt?: string | null;
+  teamA?: Array<{ id: string; name: string; rating?: number; profilePhoto?: string | null }>;
+  teamB?: Array<{ id: string; name: string; rating?: number; profilePhoto?: string | null }>;
+}
+
+/**
+ * Hook to fetch matches for an event
+ */
+export function useEventMatches(eventId: string) {
+  const authFetch = useAuthFetch();
+
+  return useQuery<Match[]>({
+    queryKey: ['matches', eventId],
+    queryFn: () => authFetch.get(`/matches/events/${eventId}`),
+    retry: false,
   });
 }
 

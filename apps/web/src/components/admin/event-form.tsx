@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useVenues } from '@/hooks/use-venues';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
@@ -25,21 +25,6 @@ import { DateTimePicker } from '@/components/shared/datetime-picker';
 import type { CreateEventDto, TierRules } from '@padel/types';
 import { EventFormat } from '@padel/types';
 import { useCreateEvent, useUpdateEvent } from '@/hooks/use-events';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-
-interface Venue {
-  id: string;
-  name: string;
-  address?: string;
-  courts: Court[];
-}
-
-interface Court {
-  id: string;
-  label: string;
-  venueId: string;
-}
 
 interface EventFormData {
   title?: string;
@@ -99,14 +84,7 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
   });
 
   // Fetch venues with courts
-  const { data: venues, isLoading: venuesLoading } = useQuery<Venue[]>({
-    queryKey: ['venues'],
-    queryFn: async () => {
-      const res = await fetch(`${API_URL}/venues`);
-      if (!res.ok) throw new Error('Failed to fetch venues');
-      return res.json();
-    },
-  });
+  const { data: venues, isLoading: venuesLoading } = useVenues();
 
   const selectedVenue = venues?.find((v) => v.id === formData.venueId);
 
@@ -651,7 +629,7 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
                     <FieldDescription>Format: HH:MM (24h)</FieldDescription>
                   </Field>
 
-                  {selectedVenue && selectedVenue.courts.length > 0 && (
+                  {selectedVenue && selectedVenue.courts && selectedVenue.courts.length > 0 && (
                     <div className="space-y-2">
                       <FieldLabel className="text-xs text-muted-foreground">
                         {t('courtsAvailable')}
@@ -705,7 +683,7 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
                     <FieldDescription>Format: HH:MM (24h)</FieldDescription>
                   </Field>
 
-                  {selectedVenue && selectedVenue.courts.length > 0 && (
+                  {selectedVenue && selectedVenue.courts && selectedVenue.courts.length > 0 && (
                     <div className="space-y-2">
                       <FieldLabel className="text-xs text-muted-foreground">
                         {t('courtsAvailable')}

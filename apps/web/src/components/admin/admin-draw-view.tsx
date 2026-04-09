@@ -1,13 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, UseMutationResult } from '@tanstack/react-query';
-import { useSession } from 'next-auth/react';
+import { UseMutationResult } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { motion } from 'motion/react';
-import { Clock } from 'lucide-react';
 import { BadgeAlertIcon } from 'lucide-animated';
-import { Badge } from '@/components/ui/badge';
 import {
   Empty,
   EmptyHeader,
@@ -16,12 +13,11 @@ import {
   EmptyDescription,
 } from '@/components/ui/empty';
 import { DataStateWrapper } from '@/components/shared';
-import { WaitlistSection, TierSection, TeamList } from '@/components/shared/draw';
+import { WaitlistSection, TeamList, TierSection } from '@/components/shared/draw';
 import type { Draw, Assignment } from '@/components/shared/draw';
-import type { EventWithRSVP } from '@padel/types';
-import { useUpdateAssignment } from '@/hooks';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+import { TierCollapsibleItem } from './tier-accordion-item';
+import type { EventWithPlayersSerialized } from '@padel/types';
+import { useDraw, useEventDetails, useUpdateAssignment } from '@/hooks';
 import {
   groupByRound,
   getUniqueTeamsCount,
@@ -35,7 +31,7 @@ import { EditTeamDialog } from './edit-team-dialog';
 
 interface AdminDrawContentProps {
   draw: Draw;
-  event: EventWithRSVP | null | undefined;
+  event: EventWithPlayersSerialized | null | undefined;
   editingTeam: {
     assignmentIds: string[];
     assignment: Assignment;
@@ -61,7 +57,6 @@ interface AdminDrawContentProps {
 
 export function AdminDrawView({ eventId }: { eventId: string }) {
   const t = useTranslations('adminDrawView');
-  const { data: session } = useSession();
   const [editingTeam, setEditingTeam] = useState<{
     assignmentIds: string[];
     assignment: Assignment;
@@ -69,40 +64,10 @@ export function AdminDrawView({ eventId }: { eventId: string }) {
     teamPlayers: { id: string; name: string; rating: number }[];
   } | null>(null);
 
-  const {
-    data: draw,
-    isLoading,
-    error,
-  } = useQuery<Draw | null>({
-    queryKey: ['draw', eventId, session?.accessToken],
-    queryFn: async () => {
-      const headers: HeadersInit = { 'Content-Type': 'application/json' };
-      if (session?.accessToken) {
-        headers.Authorization = `Bearer ${session.accessToken}`;
-      }
-      const res = await fetch(`${API_URL}/draws/events/${eventId}`, { headers });
-      if (res.status === 404) return null; // No draw exists yet
-      if (!res.ok) throw new Error(`API Error: ${res.statusText}`);
-      return res.json();
-    },
-    retry: false,
-    enabled: !!session?.accessToken,
-  });
+  const { data: draw, isLoading, error } = useDraw(eventId);
 
   // Fetch event data to get waitlist
-  const { data: event } = useQuery<EventWithRSVP | null>({
-    queryKey: ['event', eventId, session?.accessToken],
-    queryFn: async () => {
-      const headers: HeadersInit = { 'Content-Type': 'application/json' };
-      if (session?.accessToken) {
-        headers.Authorization = `Bearer ${session.accessToken}`;
-      }
-      const res = await fetch(`${API_URL}/events/${eventId}`, { headers });
-      if (!res.ok) return null;
-      return res.json();
-    },
-    enabled: !!session?.accessToken,
-  });
+  const { data: event } = useEventDetails(eventId);
 
   // Use custom hook for mutation
   const updateAssignmentMutation = useUpdateAssignment(eventId, () => {
@@ -197,38 +162,20 @@ function AdminDrawContent({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="space-y-8"
+      className="space-y-4"
     >
-      {/* Masters Tier */}
-      {masterAssignments.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-6 bg-yellow-500 rounded-full" />
-              <h2 className="text-xl font-bold">{t('masters')}</h2>
-            </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              {draw.event.tierRules?.mastersTimeSlot && (
-                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                  <Clock className="h-3.5 w-3.5" />
-                  <span className="font-medium">
-                    {draw.event.tierRules.mastersTimeSlot.startsAt} -{' '}
-                    {draw.event.tierRules.mastersTimeSlot.endsAt}
-                  </span>
-                </div>
-              )}
-              <Badge variant="secondary">
-                {mastersTeamsCount} {t('teams')}
-              </Badge>
-              <Badge variant="secondary">
-                {Object.keys(mastersRounds).length} {t('rounds')}
-              </Badge>
-              <Badge variant="secondary">
-                {mastersFieldsCount} {t('fields')}
-              </Badge>
-            </div>
-          </div>
-
+      <TierCollapsibleItem
+        defaultOpen={false}
+        tierName={t('masters')}
+        tierColor="bg-yellow-500"
+        timeSlot={draw.event.tierRules?.mastersTimeSlot}
+        badges={[
+          `${mastersTeamsCount} ${t('teams')}`,
+          `${Object.keys(mastersRounds).length} ${t('rounds')}`,
+          `${mastersFieldsCount} ${t('fields')}`,
+        ]}
+      >
+        <div className="space-y-6">
           <TeamList
             assignments={masterAssignments}
             onEditTeam={handleEditTeam}
@@ -241,7 +188,6 @@ function AdminDrawContent({
               avgRating: t('avgRating'),
             }}
           />
-
           <TierSection
             tier="MASTERS"
             rounds={mastersRounds}
@@ -249,7 +195,7 @@ function AdminDrawContent({
             timeSlot={draw.event.tierRules?.mastersTimeSlot}
             eventDate={draw.event.date}
             translations={{
-              tierName: '',
+              tierName: t('masters'),
               round: (round: number) => t('round', { number: round }),
               courtLabel: (courtId: string) => t('court', { id: courtId }),
               team: t('team'),
@@ -257,38 +203,20 @@ function AdminDrawContent({
             canEdit={false}
           />
         </div>
-      )}
+      </TierCollapsibleItem>
 
-      {/* Explorers Tier */}
-      {explorerAssignments.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-6 bg-green-500 rounded-full" />
-              <h2 className="text-xl font-bold">{t('explorers')}</h2>
-            </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              {draw.event.tierRules?.explorersTimeSlot && (
-                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                  <Clock className="h-3.5 w-3.5" />
-                  <span className="font-medium">
-                    {draw.event.tierRules.explorersTimeSlot.startsAt} -{' '}
-                    {draw.event.tierRules.explorersTimeSlot.endsAt}
-                  </span>
-                </div>
-              )}
-              <Badge variant="secondary">
-                {explorersTeamsCount} {t('teams')}
-              </Badge>
-              <Badge variant="secondary">
-                {Object.keys(explorersRounds).length} {t('rounds')}
-              </Badge>
-              <Badge variant="secondary">
-                {explorersFieldsCount} {t('fields')}
-              </Badge>
-            </div>
-          </div>
-
+      <TierCollapsibleItem
+        defaultOpen={false}
+        tierName={t('explorers')}
+        tierColor="bg-green-500"
+        timeSlot={draw.event.tierRules?.explorersTimeSlot}
+        badges={[
+          `${explorersTeamsCount} ${t('teams')}`,
+          `${Object.keys(explorersRounds).length} ${t('rounds')}`,
+          `${explorersFieldsCount} ${t('fields')}`,
+        ]}
+      >
+        <div className="space-y-6">
           <TeamList
             assignments={explorerAssignments}
             onEditTeam={handleEditTeam}
@@ -301,7 +229,6 @@ function AdminDrawContent({
               avgRating: t('avgRating'),
             }}
           />
-
           <TierSection
             tier="EXPLORERS"
             rounds={explorersRounds}
@@ -309,7 +236,7 @@ function AdminDrawContent({
             timeSlot={draw.event.tierRules?.explorersTimeSlot}
             eventDate={draw.event.date}
             translations={{
-              tierName: '',
+              tierName: t('explorers'),
               round: (round: number) => t('round', { number: round }),
               courtLabel: (courtId: string) => t('court', { id: courtId }),
               team: t('team'),
@@ -317,7 +244,7 @@ function AdminDrawContent({
             canEdit={false}
           />
         </div>
-      )}
+      </TierCollapsibleItem>
 
       {/* Waitlist Section */}
       <WaitlistSection

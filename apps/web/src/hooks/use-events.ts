@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import type { EventWithRSVP, CreateEventDto } from '@padel/types';
+import type { EventWithRSVP, EventWithPlayersSerialized, CreateEventDto } from '@padel/types';
 import { useAuthFetch } from './use-api';
 
 interface UseEventsOptions {
@@ -71,7 +71,7 @@ export function useEventDetails(eventId: string) {
   const { data: session } = useSession();
   const authFetch = useAuthFetch();
 
-  return useQuery<EventWithRSVP>({
+  return useQuery<EventWithPlayersSerialized>({
     queryKey: ['event', eventId, session?.accessToken],
     queryFn: async () => {
       return authFetch.get(`/events/${eventId}`);

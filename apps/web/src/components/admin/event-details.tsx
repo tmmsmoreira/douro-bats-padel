@@ -1,7 +1,6 @@
 'use client';
 
-import { useQuery, UseMutationResult } from '@tanstack/react-query';
-import { useSession } from 'next-auth/react';
+import { UseMutationResult } from '@tanstack/react-query';
 import { useTranslations, useLocale } from 'next-intl';
 import { useState } from 'react';
 import { motion } from 'motion/react';
@@ -10,74 +9,17 @@ import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
 import { DataStateWrapper } from '../shared';
 import { ConfirmedPlayersSection } from '../shared/event';
 import { WaitlistSection } from '@/components/shared/draw';
-import type { Player, WaitlistedPlayer } from '@/components/shared/draw';
+
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { formatTimeSlot } from '@/lib/utils';
-import { useRemovePlayerFromEvent } from '@/hooks/use-events';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-
-interface TierTimeSlot {
-  startsAt: string;
-  endsAt: string;
-}
-
-interface EventDetails {
-  id: string;
-  title: string | null;
-  date: string;
-  startsAt: string;
-  endsAt: string;
-  capacity: number;
-  state: 'DRAFT' | 'OPEN' | 'FROZEN' | 'DRAWN' | 'PUBLISHED';
-  venue?: {
-    id: string;
-    name: string;
-  };
-  tierRules?: {
-    mastersTimeSlot?: TierTimeSlot;
-    explorersTimeSlot?: TierTimeSlot;
-  };
-  confirmedCount: number;
-  waitlistCount: number;
-  confirmedPlayers?: Player[];
-  waitlistedPlayers?: WaitlistedPlayer[];
-}
+import { useRemovePlayerFromEvent, useEventDetails } from '@/hooks/use-events';
+import type { EventWithPlayersSerialized } from '@padel/types';
 
 export function EventDetails({ eventId }: { eventId: string }) {
-  const { data: session } = useSession();
   const t = useTranslations('eventDetails');
 
-  const {
-    data: event,
-    isLoading,
-    error,
-  } = useQuery<EventDetails>({
-    queryKey: ['event', eventId, session?.accessToken],
-    queryFn: async () => {
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-      };
-
-      if (session?.accessToken) {
-        headers.Authorization = `Bearer ${session.accessToken}`;
-      }
-
-      // Backend automatically determines access based on user roles from JWT
-      const res = await fetch(`${API_URL}/events/${eventId}`, { headers });
-
-      if (!res.ok) {
-        throw new Error(`API Error: ${res.statusText}`);
-      }
-
-      return res.json();
-    },
-    // Retry a few times with exponential backoff to handle transient errors
-    // (e.g., database replication lag after event creation)
-    retry: 2,
-    retryDelay: (attemptIndex) => Math.min(300 * 2 ** attemptIndex, 1000),
-  });
+  const { data: event, isLoading, error } = useEventDetails(eventId);
 
   // Use custom hook for removing players
   const removePlayerMutation = useRemovePlayerFromEvent(eventId);
@@ -104,7 +46,7 @@ function EventDetailsContent({
   removePlayerMutation,
   t,
 }: {
-  event: EventDetails;
+  event: EventWithPlayersSerialized;
   removePlayerMutation: UseMutationResult<unknown, Error, string, unknown>;
   t: ReturnType<typeof useTranslations>;
 }) {
@@ -138,7 +80,7 @@ function EventDetailsContent({
         {/* Tier Time Slots */}
         {event.tierRules &&
           (event.tierRules.mastersTimeSlot || event.tierRules.explorersTimeSlot) && (
-            <div className="flex items-center justify-center gap-2 flex-wrap md:py-4">
+            <div className="flex items-center justify-center gap-2 flex-wrap">
               {event.tierRules.mastersTimeSlot && (
                 <Badge variant="outline" className="text-sm px-3 py-1 bg-white dark:bg-white/5">
                   <div className="w-2 h-2 bg-yellow-500 rounded-full mr-1" />

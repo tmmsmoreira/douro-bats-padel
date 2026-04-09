@@ -1,7 +1,7 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import type { CreateVenueDto, UpdateVenueDto } from '@padel/types';
+import type { CreateVenueDto, UpdateVenueDto, Venue } from '@padel/types';
 import { useAuthFetch } from './use-api';
 
 /**
@@ -54,6 +54,18 @@ export function useUpdateVenue(venueId: string) {
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to update venue');
     },
+  });
+}
+
+/**
+ * Hook to fetch all venues
+ */
+export function useVenues() {
+  const authFetch = useAuthFetch();
+
+  return useQuery<Venue[]>({
+    queryKey: ['venues'],
+    queryFn: () => authFetch.get('/venues'),
   });
 }
 

@@ -1,7 +1,5 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
-import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { motion } from 'motion/react';
 import {
@@ -14,52 +12,15 @@ import {
 import { DataStateWrapper } from '@/components/shared';
 import { TierSection, WaitlistSection } from '@/components/shared/draw';
 import type { Draw, Assignment } from '@/components/shared/draw';
-import type { EventWithRSVP } from '@padel/types';
+import type { EventWithPlayersSerialized } from '@padel/types';
 import { BadgeAlertIcon } from 'lucide-animated';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+import { useDraw, useEventDetails } from '@/hooks';
 
 export function DrawView({ eventId }: { eventId: string }) {
-  const { data: session } = useSession();
   const t = useTranslations('drawView');
 
-  const {
-    data: draw,
-    isLoading,
-    error,
-  } = useQuery<Draw>({
-    queryKey: ['draw', eventId],
-    queryFn: async () => {
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-      };
-      if (session?.accessToken) {
-        headers.Authorization = `Bearer ${session.accessToken}`;
-      }
-      const res = await fetch(`${API_URL}/draws/events/${eventId}`, { headers });
-      if (!res.ok) throw new Error('Failed to fetch draw');
-      return res.json();
-    },
-    retry: false, // Don't retry if draw doesn't exist
-    enabled: !!session, // Only run query when session is available
-  });
-
-  // Fetch event data to get waitlist
-  const { data: event } = useQuery<EventWithRSVP | null>({
-    queryKey: ['event', eventId],
-    queryFn: async () => {
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-      };
-      if (session?.accessToken) {
-        headers.Authorization = `Bearer ${session.accessToken}`;
-      }
-      const res = await fetch(`${API_URL}/events/${eventId}`, { headers });
-      if (!res.ok) return null;
-      return res.json();
-    },
-    enabled: !!session,
-  });
+  const { data: draw, isLoading, error } = useDraw(eventId);
+  const { data: event } = useEventDetails(eventId);
 
   return (
     <DataStateWrapper
@@ -102,7 +63,7 @@ function DrawContent({
   t,
 }: {
   draw: Draw;
-  event: EventWithRSVP | null | undefined;
+  event: EventWithPlayersSerialized | null | undefined;
   t: ReturnType<typeof useTranslations>;
 }) {
   // Group assignments by tier and round

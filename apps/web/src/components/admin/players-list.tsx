@@ -1,6 +1,7 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { usePlayers } from '@/hooks/use-players';
+import type { PlayerRecord } from '@/hooks/use-players';
 import { motion } from 'motion/react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
@@ -24,40 +25,11 @@ import { ScrollableFadeContainer, Pagination } from '@/components/shared';
 import { StatusBadge } from '@/components/shared/status-badge';
 import type { PlayerProfileStatus } from '@/components/shared/status-badge';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-
 const PLAYERS_PER_PAGE = 10;
 
 type PlayerState = 'ALL' | 'ACTIVE' | 'INACTIVE' | 'INVITED';
 
-interface Player {
-  id: string;
-  email: string;
-  name: string | null;
-  profilePhoto: string | null;
-  emailVerified: boolean;
-  createdAt: string;
-  player: {
-    id: string;
-    rating: number;
-    tier: string; // Still exists in DB but not displayed (used only for event organization)
-    status: string;
-    createdAt: string;
-  } | null;
-  invitation?: {
-    id: string;
-    status: string;
-    expiresAt: string;
-    invitedBy: string;
-    invitedByUser?: {
-      id: string;
-      name: string | null;
-      email: string;
-    };
-    token: string;
-    usedAt: string | null;
-  } | null;
-}
+type Player = PlayerRecord;
 
 export function PlayersList() {
   const t = useTranslations('playersList');
@@ -68,14 +40,7 @@ export function PlayersList() {
   const searchIconRef = useRef<SearchIconHandle>(null);
   const xIconRef = useRef<XIconHandle>(null);
 
-  const { data: players, isLoading } = useQuery<Player[]>({
-    queryKey: ['players'],
-    queryFn: async () => {
-      const res = await fetch(`${API_URL}/players`);
-      if (!res.ok) throw new Error('Failed to fetch players');
-      return res.json();
-    },
-  });
+  const { data: players, isLoading } = usePlayers();
 
   // Helper function to get player status
   const getPlayerStatus = (player: Player): PlayerState => {

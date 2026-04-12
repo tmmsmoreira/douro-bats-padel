@@ -45,6 +45,37 @@ export function PlayerNav() {
   const signOutIconRef = useRef<{ startAnimation: () => void; stopAnimation: () => void }>(null);
   const eyeIconRef = useRef<EyeIconHandle>(null);
 
+  // Determine active tab based on current pathname
+  // This ensures child routes also highlight their parent tab
+  const getActiveTab = () => {
+    if (pathname === '/') return '/';
+    if (pathname === '/events') return '/events';
+    if (pathname === '/leaderboard') return '/leaderboard';
+    if (pathname === '/profile') return '/profile';
+    if (pathname.startsWith('/events/')) return '/events';
+    return pathname;
+  };
+
+  const activeTab = getActiveTab();
+  const prevActiveTabRef = useRef(activeTab);
+  const animatingRef = useRef(false);
+
+  if (prevActiveTabRef.current !== activeTab) {
+    animatingRef.current = true;
+    prevActiveTabRef.current = activeTab;
+  }
+
+  const navTransition = animatingRef.current
+    ? {
+        type: 'spring' as const,
+        stiffness: 500,
+        damping: 40,
+        onComplete: () => {
+          animatingRef.current = false;
+        },
+      }
+    : { duration: 0 };
+
   // Lock body scroll when mobile menu is open
   useEffect(() => {
     if (mobileMenuOpen) {
@@ -89,24 +120,9 @@ export function PlayerNav() {
     },
   ];
 
-  // Determine active tab based on current pathname
-  // This ensures child routes also highlight their parent tab
-  const getActiveTab = () => {
-    // Check for exact matches first
-    if (pathname === '/') return '/';
-    if (pathname === '/events') return '/events';
-    if (pathname === '/leaderboard') return '/leaderboard';
-    if (pathname === '/profile') return '/profile';
-
-    // Check for child routes - event detail pages should highlight events tab
-    if (pathname.startsWith('/events/')) return '/events';
-
-    return pathname;
-  };
-
   // Helper function to check if a nav item is active (for desktop links)
   const isNavItemActive = (href: string) => {
-    return getActiveTab() === href;
+    return activeTab === href;
   };
 
   // Show loading skeleton while session is loading
@@ -186,7 +202,7 @@ export function PlayerNav() {
                         <motion.div
                           layoutId="player-nav-active"
                           className="absolute inset-0 bg-primary rounded-[999px]"
-                          transition={{ type: 'spring', stiffness: 500, damping: 40 }}
+                          transition={navTransition}
                         />
                       )}
                       <span className="relative z-10">{item.label}</span>
@@ -314,7 +330,7 @@ export function PlayerNav() {
       />
 
       {/* Mobile Tab Bar - Only visible on mobile */}
-      <TabBar items={tabBarItems} activeTab={getActiveTab()} className="md:hidden" variant="ios" />
+      <TabBar items={tabBarItems} activeTab={activeTab} className="md:hidden" variant="ios" />
     </>
   );
 }

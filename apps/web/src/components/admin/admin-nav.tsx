@@ -49,6 +49,41 @@ export function AdminNav() {
   const userIconRef = useRef<UserIconHandle>(null);
   const eyeIconRef = useRef<EyeIconHandle>(null);
 
+  // Determine active tab based on current pathname
+  // This ensures child routes also highlight their parent tab
+  const getActiveTab = () => {
+    if (pathname === '/admin/events') return '/admin/events';
+    if (pathname === '/leaderboard') return '/leaderboard';
+    if (pathname.startsWith('/admin/players')) return '/admin/players';
+    if (pathname.startsWith('/players/')) return '/admin/players';
+    if (pathname.startsWith('/admin/venues')) return '/admin/venues';
+    if (pathname.startsWith('/venues/')) return '/admin/venues';
+    if (pathname.startsWith('/admin/events')) return '/admin/events';
+    if (pathname.startsWith('/events/')) return '/admin/events';
+    if (pathname.startsWith('/admin')) return '/admin/events';
+    return pathname;
+  };
+
+  const activeTab = getActiveTab();
+  const prevActiveTabRef = useRef(activeTab);
+  const animatingRef = useRef(false);
+
+  if (prevActiveTabRef.current !== activeTab) {
+    animatingRef.current = true;
+    prevActiveTabRef.current = activeTab;
+  }
+
+  const navTransition = animatingRef.current
+    ? {
+        type: 'spring' as const,
+        stiffness: 500,
+        damping: 40,
+        onComplete: () => {
+          animatingRef.current = false;
+        },
+      }
+    : { duration: 0 };
+
   // Lock body scroll when mobile menu is open
   useEffect(() => {
     if (mobileMenuOpen) {
@@ -98,30 +133,9 @@ export function AdminNav() {
     },
   ];
 
-  // Determine active tab based on current pathname
-  // This ensures child routes also highlight their parent tab
-  const getActiveTab = () => {
-    // Check for exact matches first
-    if (pathname === '/admin/events') return '/admin/events';
-    if (pathname === '/leaderboard') return '/leaderboard';
-
-    // Check for child routes
-    if (pathname.startsWith('/admin/players')) return '/admin/players';
-    if (pathname.startsWith('/players/')) return '/admin/players'; // Player detail pages
-    if (pathname.startsWith('/admin/venues')) return '/admin/venues';
-    if (pathname.startsWith('/venues/')) return '/admin/venues'; // Venue detail pages
-    if (pathname.startsWith('/admin/events')) return '/admin/events';
-    if (pathname.startsWith('/events/')) return '/admin/events'; // Event detail pages
-
-    // Default to events tab for any other /admin/* routes
-    if (pathname.startsWith('/admin')) return '/admin/events';
-
-    return pathname;
-  };
-
   // Helper function to check if a nav item is active (for desktop links)
   const isNavItemActive = (href: string) => {
-    return getActiveTab() === href;
+    return activeTab === href;
   };
 
   // Show loading skeleton while session is loading
@@ -215,7 +229,7 @@ export function AdminNav() {
                         <motion.div
                           layoutId="admin-nav-active"
                           className="absolute inset-0 bg-primary rounded-[999px]"
-                          transition={{ type: 'spring', stiffness: 500, damping: 40 }}
+                          transition={navTransition}
                         />
                       )}
                       <span className="relative z-10">{item.label}</span>
@@ -338,7 +352,7 @@ export function AdminNav() {
       />
 
       {/* Mobile Tab Bar - Only visible on mobile */}
-      <TabBar items={tabBarItems} activeTab={getActiveTab()} className="md:hidden" variant="ios" />
+      <TabBar items={tabBarItems} activeTab={activeTab} className="md:hidden" variant="ios" />
     </>
   );
 }

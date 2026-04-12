@@ -1,7 +1,7 @@
-import { ResultsEntry } from '@/components/admin/results-entry';
+import { ResultsView } from '@/components/admin/results-view';
 
 export default async function AdminResultsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
-  return <ResultsEntry eventId={id} />;
+  return <ResultsView eventId={id} />;
 }

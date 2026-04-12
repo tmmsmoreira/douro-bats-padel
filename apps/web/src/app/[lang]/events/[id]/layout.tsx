@@ -39,7 +39,7 @@ export default function EventLayout({
   });
 
   return (
-    <PageLayout nav={<HomeAdaptiveNav />} showFooter={false}>
+    <PageLayout nav={<HomeAdaptiveNav />}>
       <DataStateWrapper
         isLoading={isLoading}
         data={event}

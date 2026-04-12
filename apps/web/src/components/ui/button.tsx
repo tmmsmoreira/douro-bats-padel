@@ -83,12 +83,12 @@ function Button({
   return (
     <motion.span
       style={{ display: hasWidthClass ? 'flex' : 'inline-flex' }}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.95 }}
+      whileHover={{ scale: 1.01 }}
+      whileTap={{ scale: 0.97 }}
       transition={{
         type: 'spring',
         stiffness: 400,
-        damping: 17,
+        damping: 25,
       }}
     >
       {button}

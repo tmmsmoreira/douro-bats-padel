@@ -36,10 +36,10 @@ export function PageHeader({
       {/* Back Button */}
       {showBackButton && !isMobile && (
         <motion.div
-          initial={{ opacity: 0, x: -20 }}
+          initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.3 }}
-          whileTap={{ scale: 0.95 }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
+          whileTap={{ scale: 0.97 }}
           onMouseEnter={() => arrowLeftIconRef.current?.startAnimation()}
           onMouseLeave={() => arrowLeftIconRef.current?.stopAnimation()}
           style={{ display: 'inline-block' }}
@@ -55,9 +55,9 @@ export function PageHeader({
 
       {/* Header Content */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
+        transition={{ duration: 0.3, ease: 'easeOut' }}
         className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4"
       >
         <div className="flex-1">

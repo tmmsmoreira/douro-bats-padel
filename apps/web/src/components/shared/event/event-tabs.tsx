@@ -1,7 +1,8 @@
 'use client';
 
+import { useState, useTransition, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { Link } from '@/i18n/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 import { motion } from 'motion/react';
@@ -21,7 +22,15 @@ interface EventTabsProps {
 
 export function EventTabs({ eventId, basePath, tabs, className }: EventTabsProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const t = useTranslations('eventTabs');
+  const [, startTransition] = useTransition();
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
+
+  // Clear pending state once navigation completes
+  useEffect(() => {
+    setPendingHref(null);
+  }, [pathname]);
 
   const tabConfig: Record<string, EventTab> = {
     details: {
@@ -52,13 +61,21 @@ export function EventTabs({ eventId, basePath, tabs, className }: EventTabsProps
     <div className={cn('border-b border-border', className)}>
       <nav className="flex space-x-8 md:space-x-8" aria-label="Event navigation">
         {visibleTabs.map((tab) => {
-          const isActive = tab.match(pathname);
+          const isActive = pendingHref ? tab.href === pendingHref : tab.match(pathname);
           return (
-            <Link
+            <button
               key={tab.href}
-              href={tab.href}
+              type="button"
+              onClick={() => {
+                if (!isActive) {
+                  setPendingHref(tab.href);
+                  startTransition(() => {
+                    router.push(tab.href);
+                  });
+                }
+              }}
               className={cn(
-                'relative flex-1 md:flex-none text-center md:text-left py-4 px-1 text-sm font-medium transition-colors',
+                'relative flex-1 md:flex-none text-center md:text-left py-4 px-1 text-sm font-medium transition-colors cursor-pointer',
                 isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
               )}
             >
@@ -70,7 +87,7 @@ export function EventTabs({ eventId, basePath, tabs, className }: EventTabsProps
                   transition={{ type: 'spring', stiffness: 500, damping: 40 }}
                 />
               )}
-            </Link>
+            </button>
           );
         })}
       </nav>

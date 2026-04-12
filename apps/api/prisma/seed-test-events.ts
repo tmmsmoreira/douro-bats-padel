@@ -167,32 +167,94 @@ async function main() {
     },
   });
 
-  // Create assignments
+  // Create assignments (16 players, 4 courts, 3 rounds)
+  // Teams are fixed pairs; round-robin rotates matchups (4 teams per tier → 3 rounds)
+  // MASTERS teams: T1(P0,P1) T2(P2,P3) T3(P4,P5) T4(P6,P7)
+  // EXPLORERS teams: T1(P8,P9) T2(P10,P11) T3(P12,P13) T4(P14,P15)
   const pastAssignments = [
+    // Round 1: T1vT4, T2vT3
     {
       courtIndex: 0,
       round: 1,
       teamA: [players[0].id, players[1].id],
-      teamB: [players[2].id, players[3].id],
+      teamB: [players[6].id, players[7].id],
       tier: 'MASTERS',
     },
     {
       courtIndex: 1,
       round: 1,
-      teamA: [players[4].id, players[5].id],
-      teamB: [players[6].id, players[7].id],
+      teamA: [players[2].id, players[3].id],
+      teamB: [players[4].id, players[5].id],
       tier: 'MASTERS',
     },
     {
       courtIndex: 2,
       round: 1,
       teamA: [players[8].id, players[9].id],
-      teamB: [players[10].id, players[11].id],
+      teamB: [players[14].id, players[15].id],
       tier: 'EXPLORERS',
     },
     {
       courtIndex: 3,
       round: 1,
+      teamA: [players[10].id, players[11].id],
+      teamB: [players[12].id, players[13].id],
+      tier: 'EXPLORERS',
+    },
+    // Round 2: T1vT3, T2vT4
+    {
+      courtIndex: 0,
+      round: 2,
+      teamA: [players[0].id, players[1].id],
+      teamB: [players[4].id, players[5].id],
+      tier: 'MASTERS',
+    },
+    {
+      courtIndex: 1,
+      round: 2,
+      teamA: [players[2].id, players[3].id],
+      teamB: [players[6].id, players[7].id],
+      tier: 'MASTERS',
+    },
+    {
+      courtIndex: 2,
+      round: 2,
+      teamA: [players[8].id, players[9].id],
+      teamB: [players[12].id, players[13].id],
+      tier: 'EXPLORERS',
+    },
+    {
+      courtIndex: 3,
+      round: 2,
+      teamA: [players[10].id, players[11].id],
+      teamB: [players[14].id, players[15].id],
+      tier: 'EXPLORERS',
+    },
+    // Round 3: T1vT2, T3vT4
+    {
+      courtIndex: 0,
+      round: 3,
+      teamA: [players[0].id, players[1].id],
+      teamB: [players[2].id, players[3].id],
+      tier: 'MASTERS',
+    },
+    {
+      courtIndex: 1,
+      round: 3,
+      teamA: [players[4].id, players[5].id],
+      teamB: [players[6].id, players[7].id],
+      tier: 'MASTERS',
+    },
+    {
+      courtIndex: 2,
+      round: 3,
+      teamA: [players[8].id, players[9].id],
+      teamB: [players[10].id, players[11].id],
+      tier: 'EXPLORERS',
+    },
+    {
+      courtIndex: 3,
+      round: 3,
       teamA: [players[12].id, players[13].id],
       teamB: [players[14].id, players[15].id],
       tier: 'EXPLORERS',
@@ -244,8 +306,11 @@ async function main() {
     },
   });
 
-  // Create assignments (3 courts, 12 players)
+  // Create assignments (12 players: 4 MASTERS + 8 EXPLORERS)
+  // MASTERS: 2 teams on 1 court → 1 round
+  // EXPLORERS: 4 teams on 2 courts → 3 rounds
   const lastWeekAssignments = [
+    // MASTERS Round 1 (2 teams → 1 match only)
     {
       courtIndex: 0,
       round: 1,
@@ -253,16 +318,47 @@ async function main() {
       teamB: [players[2].id, players[3].id],
       tier: 'MASTERS',
     },
+    // EXPLORERS Round 1: T1vT4, T2vT3
     {
-      courtIndex: 1,
+      courtIndex: 2,
       round: 1,
+      teamA: [players[4].id, players[5].id],
+      teamB: [players[10].id, players[11].id],
+      tier: 'EXPLORERS',
+    },
+    {
+      courtIndex: 3,
+      round: 1,
+      teamA: [players[6].id, players[7].id],
+      teamB: [players[8].id, players[9].id],
+      tier: 'EXPLORERS',
+    },
+    // EXPLORERS Round 2: T1vT3, T2vT4
+    {
+      courtIndex: 2,
+      round: 2,
+      teamA: [players[4].id, players[5].id],
+      teamB: [players[8].id, players[9].id],
+      tier: 'EXPLORERS',
+    },
+    {
+      courtIndex: 3,
+      round: 2,
+      teamA: [players[6].id, players[7].id],
+      teamB: [players[10].id, players[11].id],
+      tier: 'EXPLORERS',
+    },
+    // EXPLORERS Round 3: T1vT2, T3vT4
+    {
+      courtIndex: 2,
+      round: 3,
       teamA: [players[4].id, players[5].id],
       teamB: [players[6].id, players[7].id],
       tier: 'EXPLORERS',
     },
     {
-      courtIndex: 2,
-      round: 1,
+      courtIndex: 3,
+      round: 3,
       teamA: [players[8].id, players[9].id],
       teamB: [players[10].id, players[11].id],
       tier: 'EXPLORERS',
@@ -314,32 +410,91 @@ async function main() {
     },
   });
 
-  // Create assignments for the draw
+  // Create assignments for the draw (16 players, 4 courts, 3 rounds — same structure as Feb 16)
   const thisWeekAssignments = [
+    // Round 1: T1vT4, T2vT3
     {
       courtIndex: 0,
       round: 1,
       teamA: [players[0].id, players[1].id],
-      teamB: [players[2].id, players[3].id],
+      teamB: [players[6].id, players[7].id],
       tier: 'MASTERS',
     },
     {
       courtIndex: 1,
       round: 1,
-      teamA: [players[4].id, players[5].id],
-      teamB: [players[6].id, players[7].id],
+      teamA: [players[2].id, players[3].id],
+      teamB: [players[4].id, players[5].id],
       tier: 'MASTERS',
     },
     {
       courtIndex: 2,
       round: 1,
       teamA: [players[8].id, players[9].id],
-      teamB: [players[10].id, players[11].id],
+      teamB: [players[14].id, players[15].id],
       tier: 'EXPLORERS',
     },
     {
       courtIndex: 3,
       round: 1,
+      teamA: [players[10].id, players[11].id],
+      teamB: [players[12].id, players[13].id],
+      tier: 'EXPLORERS',
+    },
+    // Round 2: T1vT3, T2vT4
+    {
+      courtIndex: 0,
+      round: 2,
+      teamA: [players[0].id, players[1].id],
+      teamB: [players[4].id, players[5].id],
+      tier: 'MASTERS',
+    },
+    {
+      courtIndex: 1,
+      round: 2,
+      teamA: [players[2].id, players[3].id],
+      teamB: [players[6].id, players[7].id],
+      tier: 'MASTERS',
+    },
+    {
+      courtIndex: 2,
+      round: 2,
+      teamA: [players[8].id, players[9].id],
+      teamB: [players[12].id, players[13].id],
+      tier: 'EXPLORERS',
+    },
+    {
+      courtIndex: 3,
+      round: 2,
+      teamA: [players[10].id, players[11].id],
+      teamB: [players[14].id, players[15].id],
+      tier: 'EXPLORERS',
+    },
+    // Round 3: T1vT2, T3vT4
+    {
+      courtIndex: 0,
+      round: 3,
+      teamA: [players[0].id, players[1].id],
+      teamB: [players[2].id, players[3].id],
+      tier: 'MASTERS',
+    },
+    {
+      courtIndex: 1,
+      round: 3,
+      teamA: [players[4].id, players[5].id],
+      teamB: [players[6].id, players[7].id],
+      tier: 'MASTERS',
+    },
+    {
+      courtIndex: 2,
+      round: 3,
+      teamA: [players[8].id, players[9].id],
+      teamB: [players[10].id, players[11].id],
+      tier: 'EXPLORERS',
+    },
+    {
+      courtIndex: 3,
+      round: 3,
       teamA: [players[12].id, players[13].id],
       teamB: [players[14].id, players[15].id],
       tier: 'EXPLORERS',

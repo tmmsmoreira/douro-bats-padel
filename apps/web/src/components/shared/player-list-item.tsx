@@ -198,8 +198,8 @@ export function PlayerListItem({
         <motion.div
           key={id}
           variants={{
-            hidden: { opacity: 0, y: 10 },
-            show: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+            hidden: { opacity: 0, y: 6 },
+            show: { opacity: 1, y: 0, transition: { duration: 0.25, ease: 'easeOut' } },
           }}
           className="flex items-center justify-between py-3 px-4 rounded-lg border border-border/50 hover:bg-accent/50 hover:border-primary/30 transition-all duration-300"
         >

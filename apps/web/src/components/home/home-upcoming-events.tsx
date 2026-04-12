@@ -20,10 +20,10 @@ export function HomeUpcomingEvents() {
     <div className="space-y-8">
       {/* Section Header */}
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 10 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-100px' }}
-        transition={{ duration: 0.6 }}
+        transition={{ duration: 0.35, ease: 'easeOut' }}
         className="text-center space-y-3 sm:space-y-4"
       >
         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold font-heading">
@@ -51,28 +51,30 @@ export function HomeUpcomingEvents() {
                 show: {
                   opacity: 1,
                   transition: {
-                    delay: isFromBfcache ? 0 : 0.2,
-                    staggerChildren: isFromBfcache ? 0 : 0.15,
+                    delay: isFromBfcache ? 0 : 0.1,
+                    staggerChildren: isFromBfcache ? 0 : 0.06,
                   },
                 },
               }}
               className="grid gap-6"
             >
-              {events.map((event, index) => (
+              {events.map((event) => (
                 <motion.div
                   key={event.id}
                   variants={{
-                    hidden: { opacity: 0, y: 30, scale: 0.95 },
+                    hidden: { opacity: 0, y: 10 },
                     show: {
                       opacity: 1,
                       y: 0,
-                      scale: 1,
-                      transition: { duration: isFromBfcache ? 0 : 0.5 },
+                      transition: {
+                        duration: isFromBfcache ? 0 : 0.3,
+                        ease: 'easeOut',
+                      },
                     },
                   }}
-                  whileHover={{ scale: 1.02, y: -5 }}
-                  whileTap={{ scale: 0.98 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                 >
                   <Link href={`/events/${event.id}`} className="block">
                     <EventCard
@@ -103,10 +105,10 @@ export function HomeUpcomingEvents() {
             {/* View All Button - only show if there are more than 3 events */}
             {events && events.length >= 3 && (
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 8 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.3 }}
+                transition={{ duration: 0.3, ease: 'easeOut', delay: 0.1 }}
                 className="text-center pt-4"
               >
                 <Link href="/events">

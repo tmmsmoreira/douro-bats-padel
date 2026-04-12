@@ -23,10 +23,10 @@ export function OfflineIndicator() {
     <AnimatePresence>
       {!isOnline && (
         <motion.div
-          initial={{ y: -100, opacity: 0 }}
+          initial={{ y: -50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -100, opacity: 0 }}
-          transition={{ duration: 0.3 }}
+          exit={{ y: -50, opacity: 0 }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
           className="fixed top-0 left-0 right-0 z-50 bg-destructive text-destructive-foreground shadow-lg"
         >
           <div className="container mx-auto px-4 py-3">
@@ -41,10 +41,10 @@ export function OfflineIndicator() {
       )}
       {wasOffline && isOnline && (
         <motion.div
-          initial={{ y: -100, opacity: 0 }}
+          initial={{ y: -50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -100, opacity: 0 }}
-          transition={{ duration: 0.3 }}
+          exit={{ y: -50, opacity: 0 }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
           className="fixed top-0 left-0 right-0 z-50 bg-green-600 text-white shadow-lg"
         >
           <div className="container mx-auto px-4 py-3">

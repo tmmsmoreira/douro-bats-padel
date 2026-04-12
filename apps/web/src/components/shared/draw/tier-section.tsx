@@ -83,8 +83,8 @@ export function TierSection({
       {Object.entries(rounds)
         .sort(([a], [b]) => Number(a) - Number(b))
         .map(([round, assignments]) => (
-          <Card key={`${tier}-${round}`} className="shadow-none">
-            <CardHeader className="pb-4">
+          <Card key={`${tier}-${round}`} className="shadow-none border-0">
+            <CardHeader className="pb-4 ">
               <CardTitle className="text-lg">{translations.round(Number(round))}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 pt-0">

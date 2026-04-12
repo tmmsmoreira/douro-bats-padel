@@ -29,17 +29,17 @@ import { MatchResultEntry } from '../shared/draw';
 import type { Draw } from '../shared/draw';
 import { DataStateWrapper } from '@/components/shared';
 import type { Assignment as DrawAssignment } from '../shared/draw/types';
-import { TierCollapsibleItem } from './tier-accordion-item';
+import { TierCollapsibleItem } from '@/components/shared/tier-collapsible-item';
 
-interface ResultsEntryProps {
+interface ResultsViewProps {
   eventId: string;
 }
 
-export function ResultsEntry({ eventId }: ResultsEntryProps) {
+export function ResultsView({ eventId }: ResultsViewProps) {
   const t = useTranslations('resultsEntry');
   const [showPublishDialog, setShowPublishDialog] = useState(false);
   const [matchResults, setMatchResults] = useState<
-    Record<string, { setsA: number; setsB: number }>
+    Record<string, { setsA: number | ''; setsB: number | '' }>
   >({});
   const lockIconRef = useRef<LockIconHandle>(null);
 
@@ -72,13 +72,29 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
 
   const handleScoreChange = (courtId: string, round: number, team: 'A' | 'B', value: string) => {
     const key = `${courtId}-${round}`;
-    const numValue = parseInt(value) || 0;
+    const defaultResult = { setsA: '' as number | '', setsB: '' as number | '' };
+
+    if (value === '') {
+      setMatchResults((prev) => ({
+        ...prev,
+        [key]: {
+          ...defaultResult,
+          ...prev[key],
+          [`sets${team}`]: '',
+        },
+      }));
+      return;
+    }
+
+    const numValue = parseInt(value);
+    if (isNaN(numValue)) return;
 
     setMatchResults((prev) => ({
       ...prev,
       [key]: {
+        ...defaultResult,
         ...prev[key],
-        [`sets${team}`]: Math.max(0, Math.min(6, numValue)), // Clamp between 0-6
+        [`sets${team}`]: Math.max(0, Math.min(20, numValue)),
       },
     }));
   };
@@ -92,7 +108,10 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
         const key = `${assignment.courtId}-${assignment.round}`;
         const result = matchResults[key];
 
-        if (!result || (result.setsA === 0 && result.setsB === 0)) {
+        const setsA = result?.setsA === '' ? 0 : (result?.setsA ?? 0);
+        const setsB = result?.setsB === '' ? 0 : (result?.setsB ?? 0);
+
+        if (!result || (setsA === 0 && setsB === 0)) {
           return null;
         }
 
@@ -102,8 +121,7 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
         );
 
         if (existingMatch) {
-          const hasChanges =
-            existingMatch.setsA !== result.setsA || existingMatch.setsB !== result.setsB;
+          const hasChanges = existingMatch.setsA !== setsA || existingMatch.setsB !== setsB;
 
           if (!hasChanges) {
             return null; // No changes, skip this match
@@ -114,8 +132,8 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
           eventId,
           courtId: assignment.courtId,
           round: assignment.round,
-          setsA: result.setsA,
-          setsB: result.setsB,
+          setsA,
+          setsB,
           tier: assignment.tier,
         };
       })
@@ -194,7 +212,7 @@ export function ResultsEntry({ eventId }: ResultsEntryProps) {
         validationMessage ? (
           validationMessage
         ) : draw ? (
-          <ResultsEntryContent
+          <ResultsViewContent
             draw={draw}
             matches={matches}
             matchResults={matchResults}
@@ -224,12 +242,14 @@ function ResultsTierSection({
 }: {
   tier: 'MASTERS' | 'EXPLORERS';
   rounds: Record<number, DrawAssignment[]>;
-  matchResults: Record<string, { setsA: number; setsB: number }>;
+  matchResults: Record<string, { setsA: number | ''; setsB: number | '' }>;
   matches: Match[] | undefined;
   handleScoreChange: (courtId: string, round: number, team: 'A' | 'B', value: string) => void;
   defaultOpen?: boolean;
   t: ReturnType<typeof useTranslations>;
 }) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+
   if (Object.keys(rounds).length === 0) return null;
 
   const roundCount = Object.keys(rounds).length;
@@ -237,7 +257,8 @@ function ResultsTierSection({
 
   return (
     <TierCollapsibleItem
-      defaultOpen={defaultOpen}
+      open={isOpen}
+      onOpenChange={setIsOpen}
       tierName={tier === 'MASTERS' ? t('masters') : t('explorers')}
       tierColor={tier === 'MASTERS' ? 'bg-yellow-500' : 'bg-green-500'}
       badges={[`${roundCount} ${t('rounds')}`, `${matchCount} ${t('matches')}`]}
@@ -254,7 +275,7 @@ function ResultsTierSection({
                 <div className="grid grid-cols-1 gap-2">
                   {assignments.map((assignment) => {
                     const key = `${assignment.courtId}-${assignment.round}`;
-                    const result = matchResults[key] || { setsA: 0, setsB: 0 };
+                    const result = matchResults[key] || { setsA: '', setsB: '' };
                     const existingMatch = matches?.find(
                       (m) => m.courtId === assignment.courtId && m.round === assignment.round
                     );
@@ -294,7 +315,7 @@ function ResultsTierSection({
 }
 
 // Separate component for results entry content
-function ResultsEntryContent({
+function ResultsViewContent({
   draw,
   matches,
   matchResults,
@@ -308,7 +329,7 @@ function ResultsEntryContent({
 }: {
   draw: Draw;
   matches: Match[] | undefined;
-  matchResults: Record<string, { setsA: number; setsB: number }>;
+  matchResults: Record<string, { setsA: number | ''; setsB: number | '' }>;
   handleScoreChange: (courtId: string, round: number, team: 'A' | 'B', value: string) => void;
   handleSaveAllResults: () => void;
   publishMutation: UseMutationResult<unknown, Error, void, unknown>;
@@ -340,12 +361,31 @@ function ResultsEntryContent({
   // Check if all matches have been entered
   const totalMatches = draw.assignments.length;
   const enteredMatches = Object.values(matchResults).filter(
-    (r) => r.setsA > 0 || r.setsB > 0
+    (r) => (r.setsA || 0) > 0 || (r.setsB || 0) > 0
   ).length;
   const allMatchesEntered = enteredMatches === totalMatches;
 
   // Check if any matches are published
   const hasPublishedMatches = matches?.some((m) => m.publishedAt !== null);
+
+  // Check if there are unsaved changes
+  const hasUnsavedChanges = draw.assignments.some((assignment) => {
+    const key = `${assignment.courtId}-${assignment.round}`;
+    const result = matchResults[key];
+    const setsA = result?.setsA === '' ? 0 : (result?.setsA ?? 0);
+    const setsB = result?.setsB === '' ? 0 : (result?.setsB ?? 0);
+
+    if (setsA === 0 && setsB === 0) {
+      return false;
+    }
+
+    const existingMatch = matches?.find(
+      (m) => m.courtId === assignment.courtId && m.round === assignment.round
+    );
+
+    if (!existingMatch) return true;
+    return existingMatch.setsA !== setsA || existingMatch.setsB !== setsB;
+  });
 
   return (
     <div className="space-y-4">
@@ -370,6 +410,7 @@ function ResultsEntryContent({
                 <>
                   <Button
                     onClick={handleSaveAllResults}
+                    disabled={!hasUnsavedChanges}
                     variant="outline"
                     className="gap-2"
                     animate

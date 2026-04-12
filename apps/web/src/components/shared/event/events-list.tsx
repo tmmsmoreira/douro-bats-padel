@@ -31,8 +31,8 @@ export function EventsList() {
               show: {
                 opacity: 1,
                 transition: {
-                  delay: isFromBfcache ? 0 : 0.2,
-                  staggerChildren: isFromBfcache ? 0 : 0.1,
+                  delay: isFromBfcache ? 0 : 0.1,
+                  staggerChildren: isFromBfcache ? 0 : 0.05,
                 },
               },
             }}
@@ -42,11 +42,16 @@ export function EventsList() {
               <motion.div
                 key={event.id}
                 variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  show: { opacity: 1, y: 0, transition: { duration: isFromBfcache ? 0 : 0.4 } },
+                  hidden: { opacity: 0, y: 8 },
+                  show: {
+                    opacity: 1,
+                    y: 0,
+                    transition: {
+                      duration: isFromBfcache ? 0 : 0.3,
+                      ease: 'easeOut',
+                    },
+                  },
                 }}
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
               >
                 <Link href={`/events/${event.id}`} className="block">
                   <EventCard

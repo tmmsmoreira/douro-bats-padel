@@ -33,8 +33,8 @@ export class MatchesService {
       throw new BadRequestException('Sets cannot be negative');
     }
 
-    if (dto.setsA > 6 || dto.setsB > 6) {
-      throw new BadRequestException('Sets cannot exceed 6');
+    if (dto.setsA > 20 || dto.setsB > 20) {
+      throw new BadRequestException('Sets cannot exceed 20');
     }
 
     // Check if match already exists

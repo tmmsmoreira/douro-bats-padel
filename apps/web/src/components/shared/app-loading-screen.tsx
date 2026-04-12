@@ -95,9 +95,9 @@ export function AppLoadingScreen({ minDuration = 1000, show = true }: AppLoading
           <div className="flex flex-col items-center gap-6">
             {/* Logo */}
             <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
+              initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 0.4, ease: 'easeOut' }}
               className="relative"
             >
               <div className="w-32 h-32 relative">
@@ -114,9 +114,9 @@ export function AppLoadingScreen({ minDuration = 1000, show = true }: AppLoading
 
             {/* App Name */}
             <motion.div
-              initial={{ y: 10, opacity: 0 }}
+              initial={{ y: 6, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
+              transition={{ duration: 0.4, ease: 'easeOut', delay: 0.1 }}
               className="text-center"
             >
               <h1 className="text-2xl font-bold text-foreground">Douro Bats Padel</h1>
@@ -127,7 +127,7 @@ export function AppLoadingScreen({ minDuration = 1000, show = true }: AppLoading
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
+              transition={{ duration: 0.3, ease: 'easeOut', delay: 0.15 }}
               className="flex gap-2"
             >
               <motion.div

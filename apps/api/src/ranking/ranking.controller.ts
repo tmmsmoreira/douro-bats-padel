@@ -19,6 +19,7 @@ export class RankingController {
     return this.rankingService.computeRankingsForEvent(eventId);
   }
 
+  @Public()
   @Get('leaderboard')
   async getLeaderboard(@Query('limit') limit?: string) {
     const limitNum = limit ? Number.parseInt(limit, 10) : 50;

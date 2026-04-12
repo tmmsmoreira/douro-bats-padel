@@ -12,7 +12,7 @@ interface MatchResultEntryProps {
   assignment: Assignment;
   courtLabel: (courtId: string) => string;
   tierBadgeClass?: string;
-  result: { setsA: number; setsB: number };
+  result: { setsA: number | ''; setsB: number | '' };
   onScoreChange: (team: 'A' | 'B', value: string) => void;
   onSave?: () => void;
   isSaving?: boolean;
@@ -112,11 +112,11 @@ export function MatchResultEntry({
               id={`${key}-setsA`}
               type="number"
               min="0"
-              max="6"
-              value={result.setsA ?? 0}
+              max="20"
+              value={result.setsA}
               onChange={(e) => onScoreChange('A', e.target.value)}
               disabled={isPublished}
-              className="w-20 text-center text-lg font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              className="w-12 text-center text-lg font-bold bg-white dark:bg-white dark:text-foreground [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
           </div>
           <span className="text-2xl font-bold">-</span>
@@ -128,11 +128,11 @@ export function MatchResultEntry({
               id={`${key}-setsB`}
               type="number"
               min="0"
-              max="6"
-              value={result.setsB ?? 0}
+              max="20"
+              value={result.setsB}
               onChange={(e) => onScoreChange('B', e.target.value)}
               disabled={isPublished}
-              className="w-20 text-center text-lg font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              className="w-12 text-center text-lg font-bold bg-white dark:bg-white dark:text-foreground [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
           </div>
         </div>

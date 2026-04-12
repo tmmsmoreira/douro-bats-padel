@@ -14,12 +14,13 @@ import type { LeaderboardEntry } from '@padel/types';
 export function Leaderboard() {
   const t = useTranslations('leaderboard');
 
-  const { data: leaderboard, isLoading } = useLeaderboard();
+  const { data: leaderboard, isLoading, error } = useLeaderboard();
 
   return (
     <DataStateWrapper
       isLoading={isLoading}
       data={leaderboard}
+      error={error}
       loadingMessage={t('loadingRankings')}
       emptyMessage={t('noRankingsAvailable')}
     >
@@ -80,9 +81,9 @@ function LeaderboardContent({
       {/* Top 3 Podium */}
       {topThree.length > 0 && (
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
         >
           <div className="grid grid-cols-3 gap-4">
             {/* Reorder: 2nd, 1st, 3rd */}
@@ -95,9 +96,9 @@ function LeaderboardContent({
               return (
                 <motion.div
                   key={entry.playerId}
-                  initial={{ opacity: 0, scale: 0.9 }}
+                  initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.4, delay: displayIndex * 0.1 }}
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
                 >
                   <Card className="glass-card border-border/50 transition-all duration-300 hover:shadow-lg relative overflow-hidden">
                     {/* Top colored border */}
@@ -156,9 +157,9 @@ function LeaderboardContent({
       {/* Full Leaderboard */}
       {fullLeaderboard.length > 0 && (
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
+          transition={{ duration: 0.3, ease: 'easeOut', delay: 0.1 }}
         >
           <Card className="glass-card border-border/50">
             <CardHeader>

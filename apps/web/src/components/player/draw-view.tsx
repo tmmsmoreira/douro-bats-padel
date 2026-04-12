@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { motion } from 'motion/react';
 import {
@@ -10,11 +11,13 @@ import {
   EmptyDescription,
 } from '@/components/ui/empty';
 import { DataStateWrapper } from '@/components/shared';
-import { TierSection, WaitlistSection } from '@/components/shared/draw';
-import type { Draw, Assignment } from '@/components/shared/draw';
+import { TierSection, TeamList, WaitlistSection } from '@/components/shared/draw';
+import type { Draw } from '@/components/shared/draw';
 import type { EventWithPlayersSerialized } from '@padel/types';
 import { BadgeAlertIcon } from 'lucide-animated';
 import { useDraw, useEventDetails } from '@/hooks';
+import { TierCollapsibleItem } from '@/components/shared/tier-collapsible-item';
+import { groupByRound, getUniqueTeamsCount, getFieldsCount, filterByTier } from '@/lib/draw-utils';
 
 export function DrawView({ eventId }: { eventId: string }) {
   const t = useTranslations('drawView');
@@ -66,60 +69,109 @@ function DrawContent({
   event: EventWithPlayersSerialized | null | undefined;
   t: ReturnType<typeof useTranslations>;
 }) {
-  // Group assignments by tier and round
-  const masterAssignments = draw.assignments.filter((a) => a.tier === 'MASTERS');
-  const explorerAssignments = draw.assignments.filter((a) => a.tier === 'EXPLORERS');
+  const [openTier, setOpenTier] = useState<string | null>(null);
 
-  // Group by round
-  const groupByRound = (assignments: Assignment[]) => {
-    return assignments.reduce((acc: Record<number, Assignment[]>, assignment) => {
-      if (!acc[assignment.round]) {
-        acc[assignment.round] = [];
-      }
-      acc[assignment.round].push(assignment);
-      return acc;
-    }, {});
-  };
+  const masterAssignments = filterByTier(draw.assignments, 'MASTERS');
+  const explorerAssignments = filterByTier(draw.assignments, 'EXPLORERS');
 
-  const masterRounds = groupByRound(masterAssignments);
-  const explorerRounds = groupByRound(explorerAssignments);
+  const mastersRounds = groupByRound(masterAssignments);
+  const explorersRounds = groupByRound(explorerAssignments);
+
+  const mastersTeamsCount = getUniqueTeamsCount(masterAssignments);
+  const explorersTeamsCount = getUniqueTeamsCount(explorerAssignments);
+  const mastersFieldsCount = getFieldsCount(masterAssignments);
+  const explorersFieldsCount = getFieldsCount(explorerAssignments);
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="space-y-8"
+      className="space-y-4"
     >
-      {/* Masters Tier Matches */}
-      <TierSection
-        tier="MASTERS"
-        rounds={masterRounds}
-        assignments={masterAssignments}
-        timeSlot={draw.event.tierRules?.mastersTimeSlot}
-        eventDate={draw.event.date}
-        translations={{
-          tierName: t('mastersTier'),
-          round: (round) => t('round', { round }),
-          courtLabel: (courtId) => t('courtLabel', { courtId }),
-          team: t('team'),
-        }}
-      />
+      {masterAssignments.length > 0 && (
+        <TierCollapsibleItem
+          open={openTier === 'masters'}
+          onOpenChange={(open) => setOpenTier(open ? 'masters' : null)}
+          tierName={t('mastersTier')}
+          tierColor="bg-yellow-500"
+          timeSlot={draw.event.tierRules?.mastersTimeSlot}
+          badges={[
+            `${mastersTeamsCount} ${t('teams')}`,
+            `${Object.keys(mastersRounds).length} ${t('rounds')}`,
+            `${mastersFieldsCount} ${t('fields')}`,
+          ]}
+        >
+          <div className="space-y-6">
+            <TeamList
+              assignments={masterAssignments}
+              canEdit={false}
+              translations={{
+                tierName: t('mastersTier'),
+                teamListTitle: t('teamListTitle'),
+                teamListDescription: t('teamListDescription'),
+                team: t('team'),
+                avgRating: t('avgRating'),
+              }}
+            />
+            <TierSection
+              tier="MASTERS"
+              rounds={mastersRounds}
+              assignments={masterAssignments}
+              timeSlot={draw.event.tierRules?.mastersTimeSlot}
+              eventDate={draw.event.date}
+              translations={{
+                tierName: t('mastersTier'),
+                round: (round) => t('round', { round }),
+                courtLabel: (courtId) => t('courtLabel', { courtId }),
+                team: t('team'),
+              }}
+            />
+          </div>
+        </TierCollapsibleItem>
+      )}
 
-      {/* Explorers Tier Matches */}
-      <TierSection
-        tier="EXPLORERS"
-        rounds={explorerRounds}
-        assignments={explorerAssignments}
-        timeSlot={draw.event.tierRules?.explorersTimeSlot}
-        eventDate={draw.event.date}
-        translations={{
-          tierName: t('explorersTier'),
-          round: (round) => t('round', { round }),
-          courtLabel: (courtId) => t('courtLabel', { courtId }),
-          team: t('team'),
-        }}
-      />
+      {explorerAssignments.length > 0 && (
+        <TierCollapsibleItem
+          open={openTier === 'explorers'}
+          onOpenChange={(open) => setOpenTier(open ? 'explorers' : null)}
+          tierName={t('explorersTier')}
+          tierColor="bg-green-500"
+          timeSlot={draw.event.tierRules?.explorersTimeSlot}
+          badges={[
+            `${explorersTeamsCount} ${t('teams')}`,
+            `${Object.keys(explorersRounds).length} ${t('rounds')}`,
+            `${explorersFieldsCount} ${t('fields')}`,
+          ]}
+        >
+          <div className="space-y-6">
+            <TeamList
+              assignments={explorerAssignments}
+              canEdit={false}
+              translations={{
+                tierName: t('explorersTier'),
+                teamListTitle: t('teamListTitle'),
+                teamListDescription: t('teamListDescription'),
+                team: t('team'),
+                avgRating: t('avgRating'),
+              }}
+            />
+            <TierSection
+              tier="EXPLORERS"
+              rounds={explorersRounds}
+              assignments={explorerAssignments}
+              timeSlot={draw.event.tierRules?.explorersTimeSlot}
+              eventDate={draw.event.date}
+              translations={{
+                tierName: t('explorersTier'),
+                round: (round) => t('round', { round }),
+                courtLabel: (courtId) => t('courtLabel', { courtId }),
+                team: t('team'),
+              }}
+            />
+          </div>
+        </TierCollapsibleItem>
+      )}
 
       {/* Waitlist Section */}
       <WaitlistSection players={[]} title={t('waitlist', { count: event?.waitlistCount || 0 })} />

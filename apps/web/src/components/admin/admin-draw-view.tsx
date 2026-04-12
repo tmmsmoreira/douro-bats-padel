@@ -15,7 +15,7 @@ import {
 import { DataStateWrapper } from '@/components/shared';
 import { WaitlistSection, TeamList, TierSection } from '@/components/shared/draw';
 import type { Draw, Assignment } from '@/components/shared/draw';
-import { TierCollapsibleItem } from './tier-accordion-item';
+import { TierCollapsibleItem } from '@/components/shared/tier-collapsible-item';
 import type { EventWithPlayersSerialized } from '@padel/types';
 import { useDraw, useEventDetails, useUpdateAssignment } from '@/hooks';
 import {
@@ -120,6 +120,7 @@ function AdminDrawContent({
   updateAssignmentMutation,
   t,
 }: AdminDrawContentProps) {
+  const [openTier, setOpenTier] = useState<string | null>(null);
   // Filter assignments by tier
   const masterAssignments = filterByTier(draw.assignments, 'MASTERS');
   const explorerAssignments = filterByTier(draw.assignments, 'EXPLORERS');
@@ -165,7 +166,8 @@ function AdminDrawContent({
       className="space-y-4"
     >
       <TierCollapsibleItem
-        defaultOpen={false}
+        open={openTier === 'masters'}
+        onOpenChange={(open) => setOpenTier(open ? 'masters' : null)}
         tierName={t('masters')}
         tierColor="bg-yellow-500"
         timeSlot={draw.event.tierRules?.mastersTimeSlot}
@@ -206,7 +208,8 @@ function AdminDrawContent({
       </TierCollapsibleItem>
 
       <TierCollapsibleItem
-        defaultOpen={false}
+        open={openTier === 'explorers'}
+        onOpenChange={(open) => setOpenTier(open ? 'explorers' : null)}
         tierName={t('explorers')}
         tierColor="bg-green-500"
         timeSlot={draw.event.tierRules?.explorersTimeSlot}

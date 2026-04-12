@@ -183,7 +183,7 @@ export class RankingService {
   async getLeaderboard(limit = 50): Promise<LeaderboardEntry[]> {
     const players = await this.prisma.playerProfile.findMany({
       where: {
-        status: 'ACTIVE',
+        status: { in: ['ACTIVE', 'INACTIVE'] },
       },
       include: {
         user: true,

@@ -47,8 +47,20 @@ export interface Match {
   setsB: number;
   tier: string;
   publishedAt?: string | null;
-  teamA?: Array<{ id: string; name: string; rating?: number; profilePhoto?: string | null }>;
-  teamB?: Array<{ id: string; name: string; rating?: number; profilePhoto?: string | null }>;
+  teamA?: Array<{
+    id: string;
+    name: string;
+    rating?: number;
+    ratingDelta?: number;
+    profilePhoto?: string | null;
+  }>;
+  teamB?: Array<{
+    id: string;
+    name: string;
+    rating?: number;
+    ratingDelta?: number;
+    profilePhoto?: string | null;
+  }>;
 }
 
 /**

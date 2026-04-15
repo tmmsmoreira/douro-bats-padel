@@ -1,5 +1,7 @@
 export * from './types';
 export { DrawHeader } from './draw-header';
+export { MatchCard } from './match-card';
+export type { MatchCardPlayer } from './match-card';
 export { MatchAssignment } from './match-assignment';
 export { MatchResultEntry } from './match-result-entry';
 export { TierSection } from './tier-section';

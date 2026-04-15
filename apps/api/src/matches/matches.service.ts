@@ -147,6 +147,12 @@ export class MatchesService {
       include: { user: true },
     });
 
+    // Fetch rating snapshots for this event to show rating deltas
+    const snapshots = await this.prisma.rankingSnapshot.findMany({
+      where: { eventId, playerId: { in: Array.from(playerIds) } },
+    });
+    const snapshotMap = new Map(snapshots.map((s) => [s.playerId, s]));
+
     type PlayerWithUser = (typeof players)[0];
     const playerMap = new Map<string, PlayerWithUser>(players.map((p) => [p.id, p]));
 
@@ -155,18 +161,21 @@ export class MatchesService {
         (a) => a.round === match.round && a.courtId === match.courtId
       );
 
+      const mapPlayer = (id: string) => {
+        const snapshot = snapshotMap.get(id);
+        return {
+          id,
+          name: playerMap.get(id)?.user.name,
+          rating: playerMap.get(id)?.rating,
+          profilePhoto: playerMap.get(id)?.user.profilePhoto,
+          ratingDelta: snapshot ? snapshot.after - snapshot.before : undefined,
+        };
+      };
+
       return {
         ...match,
-        teamA: assignment?.teamA.map((id) => ({
-          id,
-          name: playerMap.get(id)?.user.name,
-          profilePhoto: playerMap.get(id)?.user.profilePhoto,
-        })),
-        teamB: assignment?.teamB.map((id) => ({
-          id,
-          name: playerMap.get(id)?.user.name,
-          profilePhoto: playerMap.get(id)?.user.profilePhoto,
-        })),
+        teamA: assignment?.teamA.map(mapPlayer),
+        teamB: assignment?.teamB.map(mapPlayer),
       };
     });
   }

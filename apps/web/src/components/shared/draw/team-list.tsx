@@ -1,6 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Users } from 'lucide-react';
 import type { Assignment } from './types';
 import { SquarePenIcon, SquarePenIconHandle } from 'lucide-animated';
 import { useMemo } from 'react';
@@ -95,14 +96,16 @@ export function TeamList({ assignments, onEditTeam, canEdit, translations }: Tea
   return (
     <div className="space-y-4">
       <Card className="shadow-none">
-        <CardHeader>
-          <CardTitle>{translations.teamListTitle}</CardTitle>
-          <CardDescription>{translations.teamListDescription}</CardDescription>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Users className="h-5 w-5" />
+            {translations.teamListTitle}
+          </CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {teams.map(({ team, assignmentIds }, index) => (
-              <div key={team.id} className="bg-background/80 rounded-lg p-4 space-y-3 border">
+              <div key={team.id} className="bg-muted/50 rounded-lg p-4 space-y-3 border">
                 <div className="flex items-center justify-between">
                   <div className="text-xs text-muted-foreground text-center uppercase font-semibold">
                     {translations.team} {index + 1}

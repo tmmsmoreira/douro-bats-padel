@@ -2,10 +2,10 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Lock, Save } from 'lucide-react';
+import { MatchCard } from './match-card';
 import type { Assignment } from './types';
 
 interface MatchResultEntryProps {
@@ -43,25 +43,18 @@ export function MatchResultEntry({
   showSaveButton = true,
   translations,
 }: MatchResultEntryProps) {
-  const getPlayerInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   const key = `${assignment.courtId}-${assignment.round}`;
 
   return (
-    <div className={`bg-muted/50 rounded-lg p-4 space-y-3 ${isPublished ? 'opacity-75' : ''}`}>
-      {/* Court Label and Status */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Badge variant="outline">
-            {assignment.court?.label || courtLabel(assignment.courtId)}
-          </Badge>
+    <MatchCard
+      courtLabel={assignment.court?.label || courtLabel(assignment.courtId)}
+      teamA={assignment.teamA}
+      teamB={assignment.teamB}
+      teamALabel={translations.teamA}
+      teamBLabel={translations.teamB}
+      className={isPublished ? 'opacity-75' : ''}
+      headerExtra={
+        <>
           {isSaved && !isPublished && (
             <Badge variant="outline" className="bg-blue-50 dark:bg-blue-950">
               {translations.saved}
@@ -73,37 +66,10 @@ export function MatchResultEntry({
               {translations.published}
             </Badge>
           )}
-        </div>
-      </div>
-
-      {/* Match Display with Score Inputs */}
-      <div className="flex flex-col md:grid md:grid-cols-[1fr_auto_1fr] gap-4 md:items-center">
-        {/* Team A */}
-        <div className="flex flex-col gap-2">
-          <div className="text-xs text-muted-foreground text-center font-semibold order-2 md:order-1">
-            {translations.teamA}
-          </div>
-          <div className="space-y-1 flex flex-col items-center order-1 md:order-2">
-            {assignment.teamA.map((player) => (
-              <div key={player.id} className="flex items-center gap-2 w-full">
-                <Avatar className="h-6 w-6">
-                  <AvatarImage
-                    src={player.profilePhoto || undefined}
-                    alt={player.name || 'Player'}
-                  />
-                  <AvatarFallback className="gradient-primary text-xs">
-                    {player.name ? getPlayerInitials(player.name) : '?'}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="font-medium flex-1 min-w-0">{player.name}</span>
-                <span className="text-sm text-muted-foreground ml-auto">{player.rating}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Score Input */}
-        <div className="flex items-center justify-center gap-4">
+        </>
+      }
+      centerContent={
+        <div className="flex items-center gap-4">
           <div className="space-y-2">
             <Label htmlFor={`${key}-setsA`} className="sr-only">
               {translations.teamASets}
@@ -136,47 +102,23 @@ export function MatchResultEntry({
             />
           </div>
         </div>
-
-        {/* Team B */}
-        <div className="flex flex-col gap-2">
-          <div className="text-xs text-muted-foreground text-center font-semibold order-1 md:order-1">
-            {translations.teamB}
+      }
+      footer={
+        showSaveButton && !isPublished && onSave ? (
+          <div className="flex justify-end pt-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={onSave}
+              disabled={isSaving}
+              className="gap-2"
+            >
+              <Save className="h-4 w-4" />
+              {isSaved ? translations.update : translations.save}
+            </Button>
           </div>
-          <div className="space-y-1 flex flex-col items-center order-2 md:order-2">
-            {assignment.teamB.map((player) => (
-              <div key={player.id} className="flex items-center gap-2 w-full">
-                <Avatar className="h-6 w-6">
-                  <AvatarImage
-                    src={player.profilePhoto || undefined}
-                    alt={player.name || 'Player'}
-                  />
-                  <AvatarFallback className="gradient-primary text-xs">
-                    {player.name ? getPlayerInitials(player.name) : '?'}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="font-medium flex-1 min-w-0">{player.name}</span>
-                <span className="text-sm text-muted-foreground ml-auto">{player.rating}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Save button */}
-      {showSaveButton && !isPublished && onSave && (
-        <div className="flex justify-end pt-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={onSave}
-            disabled={isSaving}
-            className="gap-2"
-          >
-            <Save className="h-4 w-4" />
-            {isSaved ? translations.update : translations.save}
-          </Button>
-        </div>
-      )}
-    </div>
+        ) : undefined
+      }
+    />
   );
 }

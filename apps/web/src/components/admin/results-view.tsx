@@ -267,12 +267,12 @@ function ResultsTierSection({
         {Object.entries(rounds)
           .sort(([a], [b]) => Number(a) - Number(b))
           .map(([round, assignments]) => (
-            <Card key={`${tier}-${round}`} className="shadow-none">
+            <Card key={`${tier}-${round}`} className="shadow-none border-0">
               <CardHeader className="pb-4">
                 <CardTitle className="text-lg">{t('round', { round })}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 pt-0">
-                <div className="grid grid-cols-1 gap-2">
+                <div className="grid grid-cols-1 gap-4">
                   {assignments.map((assignment) => {
                     const key = `${assignment.courtId}-${assignment.round}`;
                     const result = matchResults[key] || { setsA: '', setsB: '' };

@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'motion/react';
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Check } from 'lucide-react';
 
 interface PullToRefreshProps {
   /**
@@ -41,7 +41,7 @@ export function PullToRefresh({
   onRefresh,
   enabled = true,
 }: PullToRefreshProps) {
-  const { isPulling, pullDistance, isRefreshing } = usePullToRefresh({
+  const { isPulling, pullDistance, isRefreshing, isDone } = usePullToRefresh({
     threshold,
     maxPullDistance,
     onRefresh,
@@ -51,10 +51,11 @@ export function PullToRefresh({
   // Calculate progress percentage
   const progress = Math.min((pullDistance / threshold) * 100, 100);
   const shouldTrigger = pullDistance >= threshold;
+  const isVisible = isPulling || isRefreshing || isDone;
 
   return (
     <AnimatePresence>
-      {(isPulling || isRefreshing) && (
+      {isVisible && (
         <motion.div
           initial={{ opacity: 0, y: -60 }}
           animate={{ opacity: 1, y: 0 }}
@@ -67,39 +68,51 @@ export function PullToRefresh({
           }}
         >
           <div className="bg-background/95 backdrop-blur-sm border border-border rounded-full px-4 py-2 shadow-lg flex items-center gap-2">
-            {/* Refresh Icon */}
-            <motion.div
-              animate={{
-                rotate: isRefreshing ? 360 : shouldTrigger ? 180 : 0,
-              }}
-              transition={{
-                duration: isRefreshing ? 1 : 0.3,
-                repeat: isRefreshing ? Infinity : 0,
-                ease: isRefreshing ? 'linear' : 'easeOut',
-              }}
-            >
-              <RefreshCw
-                className={`w-5 h-5 ${
-                  shouldTrigger || isRefreshing ? 'text-primary' : 'text-muted-foreground'
-                }`}
-              />
-            </motion.div>
+            {/* Icon */}
+            {isDone ? (
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+              >
+                <Check className="w-5 h-5 text-primary" />
+              </motion.div>
+            ) : (
+              <motion.div
+                animate={{
+                  rotate: isRefreshing ? 360 : shouldTrigger ? 180 : 0,
+                }}
+                transition={{
+                  duration: isRefreshing ? 1 : 0.3,
+                  repeat: isRefreshing ? Infinity : 0,
+                  ease: isRefreshing ? 'linear' : 'easeOut',
+                }}
+              >
+                <RefreshCw
+                  className={`w-5 h-5 ${
+                    shouldTrigger || isRefreshing ? 'text-primary' : 'text-muted-foreground'
+                  }`}
+                />
+              </motion.div>
+            )}
 
-            {/* Progress Text */}
+            {/* Status Text */}
             <span
               className={`text-sm font-medium ${
-                shouldTrigger || isRefreshing ? 'text-primary' : 'text-muted-foreground'
+                shouldTrigger || isRefreshing || isDone ? 'text-primary' : 'text-muted-foreground'
               }`}
             >
-              {isRefreshing
-                ? 'Refreshing...'
-                : shouldTrigger
-                  ? 'Release to refresh'
-                  : 'Pull to refresh'}
+              {isDone
+                ? 'Updated'
+                : isRefreshing
+                  ? 'Refreshing...'
+                  : shouldTrigger
+                    ? 'Release to refresh'
+                    : 'Pull to refresh'}
             </span>
 
             {/* Progress Bar */}
-            {!isRefreshing && (
+            {!isRefreshing && !isDone && (
               <div className="w-12 h-1 bg-muted rounded-full overflow-hidden">
                 <motion.div
                   className="h-full bg-primary"

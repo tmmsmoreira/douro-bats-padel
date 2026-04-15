@@ -3,21 +3,22 @@
 import { useEffect, useState } from 'react';
 
 // Module-level back-navigation detection.
-// `popstate` fires BEFORE the new route's components mount,
-// so the flag is ready for them to read during their initial render.
+// - `popstate` fires on back/forward → sets flag to true
+// - `pushState` fires on forward navigation (link click, router.push) → resets to false
+// No timeout needed: the flag stays true until the next forward navigation.
 let _isBackNavigation = false;
-let _resetTimer: ReturnType<typeof setTimeout> | null = null;
 
 if (typeof window !== 'undefined') {
   window.addEventListener('popstate', () => {
     _isBackNavigation = true;
-    // Clear any pending reset so rapid back/forward navigations work correctly
-    if (_resetTimer) clearTimeout(_resetTimer);
-    // Reset after components have had time to mount and read the flag
-    _resetTimer = setTimeout(() => {
-      _isBackNavigation = false;
-    }, 500);
   });
+
+  // Reset when a forward navigation happens (router.push / Link click)
+  const _origPushState = history.pushState;
+  history.pushState = function (...args) {
+    _isBackNavigation = false;
+    return _origPushState.apply(this, args);
+  };
 }
 
 /**

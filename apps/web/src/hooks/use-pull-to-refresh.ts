@@ -30,6 +30,7 @@ interface PullToRefreshState {
   isPulling: boolean;
   pullDistance: number;
   isRefreshing: boolean;
+  isDone: boolean;
 }
 
 /**
@@ -57,6 +58,7 @@ export function usePullToRefresh(options: UsePullToRefreshOptions = {}): PullToR
   const [isPulling, setIsPulling] = useState(false);
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isDone, setIsDone] = useState(false);
   const touchStartY = useRef(0);
   const scrollY = useRef(0);
 
@@ -78,8 +80,13 @@ export function usePullToRefresh(options: UsePullToRefreshOptions = {}): PullToR
       console.error('Pull to refresh error:', error);
     } finally {
       setIsRefreshing(false);
-      setPullDistance(0);
-      setIsPulling(false);
+      setIsDone(true);
+      // Show done state briefly, then hide
+      setTimeout(() => {
+        setIsDone(false);
+        setPullDistance(0);
+        setIsPulling(false);
+      }, 800);
     }
   }, [onRefresh, router, queryClient]);
 
@@ -168,5 +175,6 @@ export function usePullToRefresh(options: UsePullToRefreshOptions = {}): PullToR
     isPulling,
     pullDistance,
     isRefreshing,
+    isDone,
   };
 }

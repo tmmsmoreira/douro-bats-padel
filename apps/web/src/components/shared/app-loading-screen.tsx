@@ -31,6 +31,10 @@ export function AppLoadingScreen({ minDuration = 1000, show = true }: AppLoading
   const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
+    // Hide the static HTML splash screen now that React has hydrated
+    const staticSplash = document.getElementById('static-splash');
+    if (staticSplash) staticSplash.style.display = 'none';
+
     // Mark as hydrated
     setIsHydrated(true);
 
@@ -89,7 +93,7 @@ export function AppLoadingScreen({ minDuration = 1000, show = true }: AppLoading
         <motion.div
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.2 }}
           className="fixed inset-0 z-9999 flex items-center justify-center bg-background"
         >
           <div className="flex flex-col items-center gap-6">

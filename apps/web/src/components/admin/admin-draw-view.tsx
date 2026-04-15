@@ -17,7 +17,7 @@ import { WaitlistSection, TeamList, TierSection } from '@/components/shared/draw
 import type { Draw, Assignment } from '@/components/shared/draw';
 import { TierCollapsibleItem } from '@/components/shared/tier-collapsible-item';
 import type { EventWithPlayersSerialized } from '@padel/types';
-import { useDraw, useEventDetails, useUpdateAssignment } from '@/hooks';
+import { useDraw, useEventDetails, useUpdateAssignment, useIsFromBfcache } from '@/hooks';
 import {
   groupByRound,
   getUniqueTeamsCount,
@@ -120,6 +120,7 @@ function AdminDrawContent({
   updateAssignmentMutation,
   t,
 }: AdminDrawContentProps) {
+  const isBackNav = useIsFromBfcache();
   const [openTier, setOpenTier] = useState<string | null>(null);
   // Filter assignments by tier
   const masterAssignments = filterByTier(draw.assignments, 'MASTERS');
@@ -160,9 +161,9 @@ function AdminDrawContent({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={isBackNav ? false : { opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: isBackNav ? 0 : 0.3 }}
       className="space-y-4"
     >
       <TierCollapsibleItem

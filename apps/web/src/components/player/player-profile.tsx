@@ -15,6 +15,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { toast } from 'sonner';
 import { motion } from 'motion/react';
 import { DataStateWrapper } from '@/components/shared/data-state-wrapper';
+import { useIsFromBfcache } from '@/hooks';
 import { SquarePenIcon, SquarePenIconHandle } from 'lucide-animated';
 import { PageHeader } from '@/components/shared/page-header';
 import { Mail, CheckCircle, XCircle, TrendingUp } from 'lucide-react';
@@ -275,23 +276,24 @@ function ProfileContent({
   locale: string;
 }) {
   const squarePenIconRef = useRef<SquarePenIconHandle>(null);
+  const isBackNav = useIsFromBfcache();
 
   return (
     <motion.div
       key="content"
-      initial={{ opacity: 0 }}
+      initial={isBackNav ? false : { opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: isBackNav ? 0 : 0.3 }}
       className="space-y-6"
     >
       <PageHeader title={t('title')} description={t('description')} />
 
       {/* Player Header */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={isBackNav ? false : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
+        transition={{ duration: isBackNav ? 0 : 0.5, delay: isBackNav ? 0 : 0.1 }}
       >
         <Card className="glass-card">
           <CardHeader>
@@ -359,9 +361,9 @@ function ProfileContent({
 
       {/* Player Information and Edit Form */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={isBackNav ? false : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
+        transition={{ duration: isBackNav ? 0 : 0.5, delay: isBackNav ? 0 : 0.1 }}
         className="grid gap-6 md:grid-cols-2"
       >
         <Card className="glass-card">

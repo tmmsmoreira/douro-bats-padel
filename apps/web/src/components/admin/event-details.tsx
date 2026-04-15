@@ -13,7 +13,7 @@ import { WaitlistSection } from '@/components/shared/draw';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { formatTimeSlot } from '@/lib/utils';
-import { useRemovePlayerFromEvent, useEventDetails } from '@/hooks/use-events';
+import { useRemovePlayerFromEvent, useEventDetails, useIsFromBfcache } from '@/hooks';
 import type { EventWithPlayersSerialized } from '@padel/types';
 
 export function EventDetails({ eventId }: { eventId: string }) {
@@ -51,6 +51,7 @@ function EventDetailsContent({
   t: ReturnType<typeof useTranslations>;
 }) {
   const locale = useLocale();
+  const isBackNav = useIsFromBfcache();
   const [playerToRemove, setPlayerToRemove] = useState<{ id: string; name: string } | null>(null);
 
   const handleRemovePlayer = (playerId: string) => {
@@ -71,9 +72,9 @@ function EventDetailsContent({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={isBackNav ? false : { opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: isBackNav ? 0 : 0.3 }}
       className="space-y-8"
     >
       <div className="space-y-4">

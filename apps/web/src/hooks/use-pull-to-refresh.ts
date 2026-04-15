@@ -59,8 +59,10 @@ export function usePullToRefresh(options: UsePullToRefreshOptions = {}): PullToR
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isDone, setIsDone] = useState(false);
+  const touchStartX = useRef(0);
   const touchStartY = useRef(0);
   const scrollY = useRef(0);
+  const isHorizontalSwipe = useRef(false);
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
@@ -108,7 +110,9 @@ export function usePullToRefresh(options: UsePullToRefreshOptions = {}): PullToR
 
       // Only start if we're at the top of the page
       scrollY.current = window.scrollY;
+      isHorizontalSwipe.current = false;
       if (scrollY.current === 0) {
+        touchStartX.current = e.touches[0].clientX;
         touchStartY.current = e.touches[0].clientY;
       }
     };
@@ -129,20 +133,31 @@ export function usePullToRefresh(options: UsePullToRefreshOptions = {}): PullToR
       // Only pull if we're at the top of the page
       if (scrollY.current !== 0 || isRefreshing) return;
 
+      // Once locked as horizontal, ignore for the rest of this gesture
+      if (isHorizontalSwipe.current) return;
+
+      const touchX = e.touches[0].clientX;
       const touchY = e.touches[0].clientY;
-      const distance = touchY - touchStartY.current;
+      const deltaX = Math.abs(touchX - touchStartX.current);
+      const deltaY = touchY - touchStartY.current;
+
+      // Lock out pull-to-refresh if the gesture is primarily horizontal
+      if (deltaX > 10 && deltaX > Math.abs(deltaY)) {
+        isHorizontalSwipe.current = true;
+        return;
+      }
 
       // Only pull down (positive distance)
-      if (distance > 0) {
+      if (deltaY > 0) {
         // Prevent default browser pull-to-refresh
-        if (distance > 10) {
+        if (deltaY > 10) {
           e.preventDefault();
         }
 
         setIsPulling(true);
         // Apply resistance effect (diminishing returns)
         const resistanceFactor = 0.5;
-        const adjustedDistance = Math.min(distance * resistanceFactor, maxPullDistance);
+        const adjustedDistance = Math.min(deltaY * resistanceFactor, maxPullDistance);
         setPullDistance(adjustedDistance);
       }
     };

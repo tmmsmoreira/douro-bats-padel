@@ -15,7 +15,7 @@ import { TierSection, TeamList, WaitlistSection } from '@/components/shared/draw
 import type { Draw } from '@/components/shared/draw';
 import type { EventWithPlayersSerialized } from '@padel/types';
 import { BadgeAlertIcon } from 'lucide-animated';
-import { useDraw, useEventDetails } from '@/hooks';
+import { useDraw, useEventDetails, useIsFromBfcache } from '@/hooks';
 import { TierCollapsibleItem } from '@/components/shared/tier-collapsible-item';
 import { groupByRound, getUniqueTeamsCount, getFieldsCount, filterByTier } from '@/lib/draw-utils';
 
@@ -69,6 +69,7 @@ function DrawContent({
   event: EventWithPlayersSerialized | null | undefined;
   t: ReturnType<typeof useTranslations>;
 }) {
+  const isBackNav = useIsFromBfcache();
   const [openTier, setOpenTier] = useState<string | null>(null);
 
   const masterAssignments = filterByTier(draw.assignments, 'MASTERS');
@@ -84,9 +85,9 @@ function DrawContent({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={isBackNav ? false : { opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: isBackNav ? 0 : 0.3 }}
       className="space-y-4"
     >
       {masterAssignments.length > 0 && (

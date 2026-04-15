@@ -22,6 +22,7 @@ import { toast } from 'sonner';
 import { ConfirmationDialog } from '../shared/confirmation-dialog';
 import { motion } from 'motion/react';
 import { DataStateWrapper } from '@/components/shared/data-state-wrapper';
+import { useIsFromBfcache } from '@/hooks';
 import { PageHeader } from '@/components/shared/page-header';
 import { StatusBadge } from '@/components/shared/status-badge';
 import type { PlayerProfileStatus, InvitationStatus } from '@/components/shared/status-badge';
@@ -114,14 +115,16 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
     toast.success(t('linkCopied'));
   };
 
+  const isBackNav = useIsFromBfcache();
+
   // Custom empty component with PageHeader
   const emptyComponent = (
     <motion.div
       key="not-found"
-      initial={{ opacity: 0 }}
+      initial={isBackNav ? false : { opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: isBackNav ? 0 : 0.3 }}
       className="space-y-6"
     >
       <PageHeader
@@ -215,6 +218,7 @@ function PublicPlayerProfileContent({
   tActions: ReturnType<typeof useTranslations>;
   locale: string;
 }) {
+  const isBackNav = useIsFromBfcache();
   const deleteIconRef = useRef<DeleteIconHandle>(null);
   const revokeIconRef = useRef<DeleteIconHandle>(null);
   const copyIconRef = useRef<CopyIconHandle>(null);
@@ -223,10 +227,10 @@ function PublicPlayerProfileContent({
   return (
     <motion.div
       key="content"
-      initial={{ opacity: 0 }}
+      initial={isBackNav ? false : { opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: isBackNav ? 0 : 0.3 }}
       className="space-y-6"
     >
       {/* Player Header */}

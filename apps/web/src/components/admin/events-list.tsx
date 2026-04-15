@@ -152,17 +152,17 @@ function EventsListContent({
   return (
     <motion.div
       key="content"
-      initial={{ opacity: 0 }}
+      initial={isFromBfcache ? false : { opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: isFromBfcache ? 0 : 0.3 }}
       className="space-y-4"
     >
       {/* Filter Chips */}
       <motion.div
-        initial={{ opacity: 0, y: -10 }}
+        initial={isFromBfcache ? false : { opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: isFromBfcache ? 0 : 0.3 }}
         className="-mx-4 sm:mx-0"
       >
         <ScrollableFadeContainer className="px-4 py-1 sm:mx-0 sm:px-0" fadeWidth={70}>
@@ -325,9 +325,9 @@ function EventsListContent({
       {/* Events List */}
       {filteredEvents.length === 0 ? (
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
+          initial={isFromBfcache ? false : { opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: isFromBfcache ? 0 : 0.3 }}
         >
           <Empty>
             <EmptyHeader>

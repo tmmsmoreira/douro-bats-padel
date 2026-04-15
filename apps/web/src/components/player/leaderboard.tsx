@@ -9,6 +9,7 @@ import { DataStateWrapper } from '@/components/shared';
 import { PlayerListItem } from '@/components/shared/player-list-item';
 import { useIsMobile } from '@/hooks/use-media-query';
 import { useLeaderboard } from '@/hooks/use-rankings';
+import { useIsFromBfcache } from '@/hooks';
 import type { LeaderboardEntry } from '@padel/types';
 
 export function Leaderboard() {
@@ -40,6 +41,7 @@ function LeaderboardContent({
   const topThree = leaderboard.slice(0, 3);
   const fullLeaderboard = leaderboard;
   const isMobile = useIsMobile();
+  const isBackNav = useIsFromBfcache();
 
   // Podium colors for top 3
   const podiumColors = {
@@ -72,18 +74,18 @@ function LeaderboardContent({
   return (
     <motion.div
       key="content"
-      initial={{ opacity: 0 }}
+      initial={isBackNav ? false : { opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: isBackNav ? 0 : 0.3 }}
       className="space-y-6"
     >
       {/* Top 3 Podium */}
       {topThree.length > 0 && (
         <motion.div
-          initial={{ opacity: 0, y: 8 }}
+          initial={isBackNav ? false : { opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, ease: 'easeOut' }}
+          transition={{ duration: isBackNav ? 0 : 0.3, ease: 'easeOut' }}
         >
           <div className="grid grid-cols-3 gap-4">
             {/* Reorder: 2nd, 1st, 3rd */}
@@ -96,9 +98,9 @@ function LeaderboardContent({
               return (
                 <motion.div
                   key={entry.playerId}
-                  initial={{ opacity: 0, scale: 0.95 }}
+                  initial={isBackNav ? false : { opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                  transition={{ duration: isBackNav ? 0 : 0.3, ease: 'easeOut' }}
                 >
                   <Card className="glass-card border-border/50 transition-all duration-300 hover:shadow-lg relative overflow-hidden">
                     {/* Top colored border */}
@@ -157,9 +159,13 @@ function LeaderboardContent({
       {/* Full Leaderboard */}
       {fullLeaderboard.length > 0 && (
         <motion.div
-          initial={{ opacity: 0, y: 8 }}
+          initial={isBackNav ? false : { opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, ease: 'easeOut', delay: 0.1 }}
+          transition={{
+            duration: isBackNav ? 0 : 0.3,
+            ease: 'easeOut',
+            delay: isBackNav ? 0 : 0.1,
+          }}
         >
           <Card className="glass-card border-border/50">
             <CardHeader>

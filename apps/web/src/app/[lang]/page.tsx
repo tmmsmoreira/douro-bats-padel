@@ -244,17 +244,26 @@ interface FeatureCardProps {
   index: number;
 }
 
-function FeatureCard({ feature, index }: FeatureCardProps) {
+function FeatureCard({ feature }: FeatureCardProps) {
   const Icon = feature.icon;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 50 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-50px' }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
+      variants={{
+        hidden: { opacity: 0, y: 10 },
+        show: {
+          opacity: 1,
+          y: 0,
+          transition: {
+            duration: 0.3,
+            ease: 'easeOut',
+          },
+        },
+      }}
+      whileHover={{ scale: 1.01 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
     >
-      <Card className="glass-card h-full group hover:shadow-2xl hover:scale-105 transition-all duration-300">
+      <Card className="glass-card h-full group hover:shadow-xl transition-all duration-300">
         <CardHeader>
           <div className={`p-3 rounded-2xl bg-linear-to-br ${feature.gradient} w-fit mb-4`}>
             <Icon className="h-6 w-6 text-foreground" />
@@ -371,12 +380,21 @@ function HowItWorksSection({ t }: { t: (key: string) => string }) {
             {steps.map((step, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-50px' }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
+                variants={{
+                  hidden: { opacity: 0, y: 10 },
+                  show: {
+                    opacity: 1,
+                    y: 0,
+                    transition: {
+                      duration: 0.3,
+                      ease: 'easeOut',
+                    },
+                  },
+                }}
+                whileHover={{ scale: 1.01 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
               >
-                <Card className="glass-card h-full overflow-hidden group hover:shadow-2xl transition-all duration-300">
+                <Card className="glass-card h-full overflow-hidden group hover:shadow-xl transition-all duration-300">
                   {/* Step Image */}
                   <div className="relative h-48 overflow-hidden">
                     <Image
@@ -384,7 +402,7 @@ function HowItWorksSection({ t }: { t: (key: string) => string }) {
                       alt={step.title}
                       fill
                       sizes="(max-width: 640px) 100vw, 33vw"
-                      className="object-cover group-hover:scale-110 transition-transform duration-500"
+                      className="object-cover"
                     />
                     <div className="absolute top-4 left-4 w-12 h-12 rounded-full bg-primary/90 backdrop-blur-sm flex items-center justify-center shadow-lg">
                       <span className="text-2xl font-bold text-primary-foreground">
@@ -480,30 +498,24 @@ function ConnectAppSection({ t }: { t: (key: string) => string }) {
               ))}
             </ul>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.6 }}
-              className="pt-4"
-            >
+            <div className="pt-4">
               {isInstalled ? (
-                <Button size="lg" variant="outline" disabled className="w-full sm:w-auto">
+                <Button size="lg" variant="outline" disabled animate={false}>
                   <Check className="mr-2 h-4 w-4" />
                   {t('connectApp.installed')}
                 </Button>
               ) : isInstallable ? (
-                <Button size="lg" onClick={installApp} className="w-full sm:w-auto group">
-                  <Smartphone className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" />
+                <Button size="lg" onClick={installApp}>
+                  <Smartphone className="mr-2 h-4 w-4" />
                   {t('connectApp.installButton')}
                 </Button>
               ) : (
-                <Button size="lg" variant="outline" className="w-full sm:w-auto">
+                <Button size="lg" variant="outline">
                   <Smartphone className="mr-2 h-4 w-4" />
                   {t('connectApp.downloadButton')}
                 </Button>
               )}
-            </motion.div>
+            </div>
           </motion.div>
         </div>
       </div>

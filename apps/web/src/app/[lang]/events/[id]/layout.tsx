@@ -4,6 +4,8 @@ import { use } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useLocale, useTranslations } from 'next-intl';
+import { usePathname } from 'next/navigation';
+import { motion } from 'motion/react';
 import { HomeAdaptiveNav } from '@/components/shared/home-adaptive-nav';
 import { DataStateWrapper, PageLayout, PageHeader } from '@/components/shared';
 import { EventHeaderInfo, EventTabs } from '@/components/shared/event';
@@ -22,6 +24,7 @@ export default function EventLayout({
   const { data: session } = useSession();
   const t = useTranslations('eventDetails');
   const locale = useLocale();
+  const pathname = usePathname();
 
   const { data: event, isLoading } = useQuery<EventWithRSVPSerialized>({
     queryKey: ['event', eventId],
@@ -58,7 +61,14 @@ export default function EventLayout({
 
             <EventTabs eventId={eventId} basePath="/events" tabs={['details', 'draw', 'results']} />
 
-            {children}
+            <motion.div
+              key={pathname}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2 }}
+            >
+              {children}
+            </motion.div>
           </div>
         )}
       </DataStateWrapper>

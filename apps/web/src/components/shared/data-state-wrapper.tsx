@@ -6,6 +6,7 @@ import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empt
 import { MailboxIcon } from '@/components/icons/mailbox-icon';
 import { LoadingState } from './loading-state';
 import { useMinimumLoading } from '@/hooks/use-minimum-loading';
+import { useIsFromBfcache } from '@/hooks';
 
 interface DataStateWrapperProps<T> {
   /**
@@ -90,6 +91,8 @@ export function DataStateWrapper<T>({
   minLoadingDuration = 500,
   errorClassName = 'text-center py-8',
 }: DataStateWrapperProps<T>) {
+  const isBackNav = useIsFromBfcache();
+
   // Use minimum loading to prevent jarring flashes
   // Consider loading complete if we have data OR an error
   const hasDataOrError = !!data || !!error;
@@ -158,10 +161,10 @@ export function DataStateWrapper<T>({
         ) : (
           <motion.div
             key="content"
-            initial={{ opacity: 0, y: 20 }}
+            initial={isBackNav ? false : { opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: isBackNav ? 0 : 0.3 }}
           >
             {children(data as T)}
           </motion.div>

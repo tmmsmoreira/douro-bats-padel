@@ -72,17 +72,16 @@ function Button({
     return button;
   }
 
-  // Check if className contains width/flex classes that should apply to wrapper
-  const hasWidthClass =
-    className &&
-    (className.includes('w-full') ||
-      className.includes('w-') ||
-      className.includes('flex-1') ||
-      className.includes('flex-auto'));
+  // Extract width/sizing classes so the wrapper sizes identically to the button
+  const widthClasses = className
+    ?.split(/\s+/)
+    .filter((c) => /^(?:(?:sm|md|lg|xl|2xl):)?(?:w-|flex-[01a])/.test(c))
+    .join(' ');
 
   return (
     <motion.span
-      style={{ display: hasWidthClass ? 'flex' : 'inline-flex' }}
+      className={widthClasses || undefined}
+      style={{ display: 'inline-flex' }}
       whileHover={{ scale: 1.01 }}
       whileTap={{ scale: 0.97 }}
       transition={{

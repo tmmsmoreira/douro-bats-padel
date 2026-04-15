@@ -5,7 +5,7 @@ import { motion } from 'motion/react';
 import { Link } from '@/i18n/navigation';
 import { Button } from '@/components/ui/button';
 import { ArrowLeftIcon, ArrowLeftIconHandle } from 'lucide-animated';
-import { useIsMobile } from '@/hooks';
+import { useIsMobile, useIsFromBfcache } from '@/hooks';
 
 interface PageHeaderProps {
   title: string;
@@ -26,19 +26,22 @@ export function PageHeader({
 }: PageHeaderProps) {
   const arrowLeftIconRef = useRef<ArrowLeftIconHandle>(null);
   const isMobile = useIsMobile();
+  const isBackNav = useIsFromBfcache();
 
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+    if (!isBackNav) {
+      window.scrollTo(0, 0);
+    }
+  }, [isBackNav]);
 
   return (
     <div className="space-y-4">
       {/* Back Button */}
       {showBackButton && !isMobile && (
         <motion.div
-          initial={{ opacity: 0, x: -10 }}
+          initial={isBackNav ? false : { opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.25, ease: 'easeOut' }}
+          transition={{ duration: isBackNav ? 0 : 0.25, ease: 'easeOut' }}
           whileTap={{ scale: 0.97 }}
           onMouseEnter={() => arrowLeftIconRef.current?.startAnimation()}
           onMouseLeave={() => arrowLeftIconRef.current?.stopAnimation()}
@@ -55,9 +58,9 @@ export function PageHeader({
 
       {/* Header Content */}
       <motion.div
-        initial={{ opacity: 0, y: 8 }}
+        initial={isBackNav ? false : { opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, ease: 'easeOut' }}
+        transition={{ duration: isBackNav ? 0 : 0.3, ease: 'easeOut' }}
         className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4"
       >
         <div className="flex-1">

@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Spinner } from '@/components/ui/spinner';
-import { StatusBadge } from '@/components/shared';
+import { StatusBadge, DataStateWrapper } from '@/components/shared';
 import { ConfirmedPlayersSection } from '@/components/shared/event';
 import { WaitlistSection } from '@/components/shared/draw';
 import { useSession } from 'next-auth/react';
@@ -20,19 +20,16 @@ export function EventDetails({ eventId }: { eventId: string }) {
 
   const { data: event, isLoading } = useEventDetails(eventId);
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Spinner className="h-8 w-8" />
-      </div>
-    );
-  }
-
-  if (!event) {
-    return null;
-  }
-
-  return <EventDetailsContent event={event} locale={locale} t={t} />;
+  return (
+    <DataStateWrapper
+      isLoading={isLoading}
+      data={event}
+      loadingMessage={t('loadingEvent')}
+      emptyMessage={t('eventNotFound')}
+    >
+      {(event) => <EventDetailsContent event={event} locale={locale} t={t} />}
+    </DataStateWrapper>
+  );
 }
 
 // Separate component for event details content

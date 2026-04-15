@@ -70,7 +70,7 @@ export function EventTabs({ eventId, basePath, tabs, className }: EventTabsProps
                 if (!isActive) {
                   setPendingHref(tab.href);
                   startTransition(() => {
-                    router.push(tab.href);
+                    router.replace(tab.href);
                   });
                 }
               }}

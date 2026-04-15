@@ -4,7 +4,9 @@ import { use } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useLocale, useTranslations } from 'next-intl';
+import { usePathname } from 'next/navigation';
 import { useRouter } from '@/i18n/navigation';
+import { motion } from 'motion/react';
 import { DataStateWrapper, PageHeader } from '@/components/shared';
 import { EventHeaderInfo, EventTabs } from '@/components/shared/event';
 import { EventActionsDropdown } from '@/components/admin/event-actions-dropdown';
@@ -24,6 +26,7 @@ export default function AdminEventLayout({
   const { data: session } = useSession();
   const t = useTranslations('eventDetails');
   const locale = useLocale();
+  const pathname = usePathname();
   const router = useRouter();
   const authFetch = useAuthFetch();
 
@@ -92,7 +95,14 @@ export default function AdminEventLayout({
             tabs={['details', 'draw', 'results']}
           />
 
-          {children}
+          <motion.div
+            key={pathname}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.2 }}
+          >
+            {children}
+          </motion.div>
         </div>
       )}
     </DataStateWrapper>

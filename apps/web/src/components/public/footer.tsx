@@ -13,7 +13,7 @@ export function Footer() {
   const tContact = useTranslations('contact');
 
   return (
-    <footer className="hidden sm:block border-t bg-card mt-auto">
+    <footer className="hidden md:block standalone:hidden border-t bg-card mt-auto">
       <div className="container mx-auto px-4 py-8 sm:py-12 max-w-4xl">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-6">
           {/* About Section */}

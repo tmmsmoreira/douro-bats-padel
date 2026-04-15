@@ -140,20 +140,20 @@ export function usePullToRefresh(options: UsePullToRefreshOptions = {}): PullToR
       const touchY = e.touches[0].clientY;
       const deltaX = Math.abs(touchX - touchStartX.current);
       const deltaY = touchY - touchStartY.current;
+      const totalMovement = Math.max(deltaX, Math.abs(deltaY));
+
+      // Wait for enough movement to determine gesture direction
+      if (totalMovement < 10) return;
 
       // Lock out pull-to-refresh if the gesture is primarily horizontal
-      if (deltaX > 10 && deltaX > Math.abs(deltaY)) {
+      if (deltaX > Math.abs(deltaY)) {
         isHorizontalSwipe.current = true;
         return;
       }
 
-      // Only pull down (positive distance)
+      // Only pull down (positive vertical distance)
       if (deltaY > 0) {
-        // Prevent default browser pull-to-refresh
-        if (deltaY > 10) {
-          e.preventDefault();
-        }
-
+        e.preventDefault();
         setIsPulling(true);
         // Apply resistance effect (diminishing returns)
         const resistanceFactor = 0.5;

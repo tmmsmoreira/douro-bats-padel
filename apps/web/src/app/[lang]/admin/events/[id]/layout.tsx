@@ -10,7 +10,7 @@ import { motion } from 'motion/react';
 import { DataStateWrapper, PageHeader } from '@/components/shared';
 import { EventHeaderInfo, EventTabs } from '@/components/shared/event';
 import { EventActionsDropdown } from '@/components/admin/event-actions-dropdown';
-import { useAuthFetch } from '@/hooks';
+import { useAuthFetch, useIsFromBfcache } from '@/hooks';
 import type { EventWithRSVPSerialized } from '@padel/types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
@@ -27,6 +27,7 @@ export default function AdminEventLayout({
   const t = useTranslations('eventDetails');
   const locale = useLocale();
   const pathname = usePathname();
+  const isBackNav = useIsFromBfcache();
   const router = useRouter();
   const authFetch = useAuthFetch();
 
@@ -97,9 +98,9 @@ export default function AdminEventLayout({
 
           <motion.div
             key={pathname}
-            initial={{ opacity: 0 }}
+            initial={isBackNav ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: isBackNav ? 0 : 0.2 }}
           >
             {children}
           </motion.div>

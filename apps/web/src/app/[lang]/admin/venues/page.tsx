@@ -1,18 +1,12 @@
-import dynamic from 'next/dynamic';
+'use client';
+
 import { PageHeader } from '@/components/shared/page-header';
 import { ActionButton } from '@/components/shared/action-button';
-import { getTranslations } from 'next-intl/server';
-import { LoadingState } from '@/components/shared';
+import { useTranslations } from 'next-intl';
+import { VenuesList } from '@/components/admin/venues-list';
 
-const VenuesList = dynamic(
-  () => import('@/components/admin/venues-list').then((mod) => ({ default: mod.VenuesList })),
-  {
-    loading: () => <LoadingState />,
-  }
-);
-
-export default async function VenuesPage() {
-  const t = await getTranslations('admin');
+export default function VenuesPage() {
+  const t = useTranslations('admin');
 
   return (
     <div className="space-y-8">

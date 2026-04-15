@@ -1,29 +1,13 @@
-import dynamic from 'next/dynamic';
+'use client';
+
 import { PageHeader, PageLayout } from '@/components/shared';
 import { AdaptiveNav } from '@/components/shared/adaptive-nav';
-import { getTranslations } from 'next-intl/server';
-import { LoadingState } from '@/components/shared';
+import { useTranslations } from 'next-intl';
+import { EventsList } from '@/components/shared/event/events-list';
+import { PastEventsList } from '@/components/shared/event/past-events-list';
 
-const EventsList = dynamic(
-  () =>
-    import('@/components/shared/event/events-list').then((mod) => ({ default: mod.EventsList })),
-  {
-    loading: () => <LoadingState />,
-  }
-);
-
-const PastEventsList = dynamic(
-  () =>
-    import('@/components/shared/event/past-events-list').then((mod) => ({
-      default: mod.PastEventsList,
-    })),
-  {
-    loading: () => <LoadingState />,
-  }
-);
-
-export default async function EventsPage() {
-  const t = await getTranslations('home');
+export default function EventsPage() {
+  const t = useTranslations('home');
 
   return (
     <PageLayout nav={<AdaptiveNav />}>

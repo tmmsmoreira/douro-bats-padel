@@ -1,12 +1,15 @@
+'use client';
+
+import { use } from 'react';
 import { PublicPlayerProfile } from '@/components/player/public-player-profile';
 import { AdaptiveNav } from '@/components/shared/adaptive-nav';
 import { PageHeader } from '@/components/shared/page-header';
 import { PageLayout } from '@/components/shared';
-import { getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 
-export default async function PlayerProfilePage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const t = await getTranslations('playersList');
+export default function PlayerProfilePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
+  const t = useTranslations('playersList');
 
   return (
     <PageLayout nav={<AdaptiveNav />}>

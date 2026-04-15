@@ -1,6 +1,6 @@
 import type React from 'react';
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Space_Grotesk } from 'next/font/google';
 import '../globals.css';
 import { Providers } from '@/components/providers';
 import { NextIntlClientProvider } from 'next-intl';
@@ -12,7 +12,8 @@ import { AppLoadingScreen } from '@/components/shared/app-loading-screen';
 import { OfflineIndicator } from '@/components/shared/offline-indicator';
 import { PullToRefresh } from '@/components/shared/pull-to-refresh';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-space-grotesk' });
 
 export const metadata: Metadata = {
   title: 'Douro Bats Padel',
@@ -93,7 +94,10 @@ export default async function LangLayout({
         <link rel="apple-touch-icon-precomposed" href="/icons/apple-touch-icon.png" />
         <link rel="manifest" href="/manifest.json" />
       </head>
-      <body className={inter.className} suppressHydrationWarning>
+      <body
+        className={`${inter.variable} ${spaceGrotesk.variable} ${inter.className}`}
+        suppressHydrationWarning
+      >
         <Providers session={session}>
           <NextIntlClientProvider locale={lang} messages={messages}>
             <AppLoadingScreen minDuration={1000} />

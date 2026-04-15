@@ -1,10 +1,12 @@
+'use client';
+
 import { Leaderboard } from '@/components/player/leaderboard';
-import { getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import { AdaptiveNav } from '@/components/shared/adaptive-nav';
 import { PageHeader, PageLayout } from '@/components/shared';
 
-export default async function LeaderboardPage() {
-  const t = await getTranslations('leaderboard');
+export default function LeaderboardPage() {
+  const t = useTranslations('leaderboard');
 
   return (
     <PageLayout nav={<AdaptiveNav />}>

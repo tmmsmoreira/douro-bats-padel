@@ -1,18 +1,12 @@
-import dynamic from 'next/dynamic';
+'use client';
+
 import { PageHeader } from '@/components/shared/page-header';
 import { ActionButton } from '@/components/shared/action-button';
-import { getTranslations } from 'next-intl/server';
-import { LoadingState } from '@/components/shared';
+import { useTranslations } from 'next-intl';
+import { EventsList } from '@/components/admin/events-list';
 
-const EventsList = dynamic(
-  () => import('@/components/admin/events-list').then((mod) => ({ default: mod.EventsList })),
-  {
-    loading: () => <LoadingState />,
-  }
-);
-
-export default async function AdminEventsPage() {
-  const t = await getTranslations('admin');
+export default function AdminEventsPage() {
+  const t = useTranslations('admin');
 
   return (
     <div className="space-y-8">

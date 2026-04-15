@@ -1,17 +1,11 @@
-import dynamic from 'next/dynamic';
+'use client';
+
 import { PageHeader } from '@/components/shared/page-header';
-import { getTranslations } from 'next-intl/server';
-import { LoadingState } from '@/components/shared';
+import { useTranslations } from 'next-intl';
+import { VenueForm } from '@/components/admin/venue-form';
 
-const VenueForm = dynamic(
-  () => import('@/components/admin/venue-form').then((mod) => ({ default: mod.VenueForm })),
-  {
-    loading: () => <LoadingState />,
-  }
-);
-
-export default async function NewVenuePage() {
-  const t = await getTranslations('admin');
+export default function NewVenuePage() {
+  const t = useTranslations('admin');
 
   return (
     <div className="space-y-6">

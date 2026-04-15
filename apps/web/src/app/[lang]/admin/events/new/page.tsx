@@ -1,17 +1,11 @@
-import dynamic from 'next/dynamic';
+'use client';
+
 import { PageHeader } from '@/components/shared/page-header';
-import { getTranslations } from 'next-intl/server';
-import { LoadingState } from '@/components/shared';
+import { useTranslations } from 'next-intl';
+import { EventForm } from '@/components/admin/event-form';
 
-const EventForm = dynamic(
-  () => import('@/components/admin/event-form').then((mod) => ({ default: mod.EventForm })),
-  {
-    loading: () => <LoadingState />,
-  }
-);
-
-export default async function NewEventPage() {
-  const t = await getTranslations('newEventPage');
+export default function NewEventPage() {
+  const t = useTranslations('newEventPage');
 
   return (
     <div className="space-y-8">

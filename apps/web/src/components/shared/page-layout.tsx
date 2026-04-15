@@ -5,6 +5,7 @@ import { Footer } from '@/components/public/footer';
 import { pageTransition } from '@/lib/animations';
 import { cn } from '@/lib/utils';
 import { SkipLinks } from '@/components/shared/skip-links';
+import { useIsFromBfcache } from '@/hooks';
 
 interface PageLayoutProps {
   /**
@@ -89,6 +90,8 @@ export function PageLayout({
   animate = true,
   padding,
 }: PageLayoutProps) {
+  const isBackNav = useIsFromBfcache();
+
   const mainContent = (
     <main
       id="main-content"
@@ -111,7 +114,7 @@ export function PageLayout({
       {nav}
       {/* Add padding-top to account for fixed navbar (4rem height + safe-area-inset + 1px border) */}
       <div style={{ paddingTop: 'calc(4rem + env(safe-area-inset-top, 0px) + 1px)' }}>
-        {animate ? (
+        {animate && !isBackNav ? (
           <motion.div {...pageTransition} className="flex-1 flex flex-col">
             {mainContent}
           </motion.div>

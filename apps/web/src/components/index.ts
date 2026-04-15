@@ -34,15 +34,14 @@ export {
   SkeletonPlayerCard,
 } from './ui/skeleton';
 
-export { AdminNav } from './admin/admin-nav';
 export { EventsList as AdminEventsList } from './admin/events-list';
-export { EventDetails } from './admin/event-details';
 export { LoginForm } from './auth/login-form';
 export { RegisterForm } from './auth/register-form';
 export { ForgotPasswordForm } from './auth/forgot-password-form';
 export { ResetPasswordForm } from './auth/reset-password-form';
-export { PlayerNav } from './player/player-nav';
-export { DrawView } from './player/draw-view';
+export { UnifiedNav } from './shared/unified-nav';
+export { EventDetails } from './shared/event/event-details';
+export { DrawView } from './shared/draw/draw-view';
 export { Leaderboard } from './player/leaderboard';
 export { PlayerProfile } from './player/player-profile';
 export { ResultsView } from './player/results-view';

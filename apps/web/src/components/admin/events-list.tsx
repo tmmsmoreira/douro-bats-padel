@@ -374,7 +374,7 @@ function EventsListContent({
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.99 }}
                 >
-                  <Link href={`/admin/events/${event.id}`} className="block">
+                  <Link href={`/events/${event.id}`} className="block">
                     <EventCard
                       event={event}
                       animate={false}

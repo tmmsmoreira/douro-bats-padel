@@ -7,6 +7,7 @@ import { EventForm } from '@/components/admin/event-form';
 import { use, useEffect } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { PageHeader } from '@/components/shared/page-header';
+import { EditorGuard } from '@/components/shared/editor-guard';
 import type { TierRules } from '@padel/types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
@@ -20,7 +21,6 @@ interface EventCourt {
   };
 }
 
-// Extended type for API response that includes eventCourts
 interface EventApiResponse {
   id: string;
   title: string | null;
@@ -58,7 +58,6 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         headers.Authorization = `Bearer ${session.accessToken}`;
       }
 
-      // Backend automatically determines access based on user roles from JWT
       const res = await fetch(`${API_URL}/events/${eventId}`, { headers });
 
       if (!res.ok) {
@@ -70,11 +69,6 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     enabled: !!session?.accessToken,
   });
 
-  // Check if event can be edited
-  // Allow editing if:
-  // 1. Event hasn't passed yet, OR
-  // 2. Event was never published (state is DRAFT, OPEN, or FROZEN), OR
-  // 3. Event was never drawn (state is DRAFT, OPEN, or FROZEN)
   const eventEndTime = event?.endsAt ? new Date(event.endsAt) : null;
   const hasEventPassed = eventEndTime ? eventEndTime < new Date() : false;
   const canEdit =
@@ -84,11 +78,9 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     event?.state === 'FROZEN';
   const cannotEdit = !canEdit;
 
-  // Use useEffect to handle navigation to avoid setState during render
-  // This must be called before any conditional returns to follow Rules of Hooks
   useEffect(() => {
     if (cannotEdit && event) {
-      router.push(`/${locale}/admin/events/${eventId}`);
+      router.push(`/${locale}/events/${eventId}`);
     }
   }, [cannotEdit, event, router, locale, eventId]);
 
@@ -125,7 +117,6 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     );
   }
 
-  // Transform event data to match EventFormData interface
   const formData = event
     ? {
         title: event.title ?? undefined,
@@ -161,15 +152,17 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
     : undefined;
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title={t('title')}
-        description={t('description')}
-        showBackButton
-        backButtonHref={`/admin/events/${eventId}`}
-        backButtonLabel={t('backToEvent')}
-      />
-      <EventForm eventId={eventId} initialData={formData} />
-    </div>
+    <EditorGuard>
+      <div className="space-y-6">
+        <PageHeader
+          title={t('title')}
+          description={t('description')}
+          showBackButton
+          backButtonHref={`/events/${eventId}`}
+          backButtonLabel={t('backToEvent')}
+        />
+        <EventForm eventId={eventId} initialData={formData} />
+      </div>
+    </EditorGuard>
   );
 }

@@ -4,7 +4,9 @@ import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { VenueForm } from '@/components/admin/venue-form';
 import { useTranslations } from 'next-intl';
-import { PageHeader } from '@/components/shared/page-header';
+import { PageHeader, PageLayout } from '@/components/shared';
+import { UnifiedNav } from '@/components/shared/unified-nav';
+import { EditorGuard } from '@/components/shared/editor-guard';
 import { LoadingState } from '@/components/shared/loading-state';
 import { useMinimumLoading } from '@/hooks/use-minimum-loading';
 import { Card, CardContent } from '@/components/ui/card';
@@ -35,30 +37,41 @@ export default function EditVenuePage() {
     },
   });
 
-  // Use minimum loading to prevent jarring flashes
   const showLoading = useMinimumLoading(isLoading, !!venue);
 
   if (showLoading) {
-    return <LoadingState message={t('loadingVenue')} />;
+    return (
+      <PageLayout nav={<UnifiedNav />} maxWidth="4xl">
+        <LoadingState message={t('loadingVenue')} />
+      </PageLayout>
+    );
   }
 
   if (!venue) {
     return (
-      <div className="space-y-6">
-        <PageHeader title={t('editVenue')} />
-        <Card className="glass-card">
-          <CardContent className="py-8 text-center text-destructive">
-            {t('venueNotFound')}
-          </CardContent>
-        </Card>
-      </div>
+      <PageLayout nav={<UnifiedNav />} maxWidth="4xl">
+        <EditorGuard>
+          <div className="space-y-6">
+            <PageHeader title={t('editVenue')} />
+            <Card className="glass-card">
+              <CardContent className="py-8 text-center text-destructive">
+                {t('venueNotFound')}
+              </CardContent>
+            </Card>
+          </div>
+        </EditorGuard>
+      </PageLayout>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader title={t('editVenue')} description={t('updateVenueDescription')} />
-      <VenueForm venueId={venueId} initialData={venue} />
-    </div>
+    <PageLayout nav={<UnifiedNav />} maxWidth="4xl">
+      <EditorGuard>
+        <div className="space-y-6">
+          <PageHeader title={t('editVenue')} description={t('updateVenueDescription')} />
+          <VenueForm venueId={venueId} initialData={venue} />
+        </div>
+      </EditorGuard>
+    </PageLayout>
   );
 }

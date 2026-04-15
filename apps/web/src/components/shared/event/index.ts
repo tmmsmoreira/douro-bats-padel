@@ -1,4 +1,5 @@
 export { EventCard } from './event-card';
+export { EventDetails } from './event-details';
 export { EventStats } from './event-stats';
 export { EventsList } from './events-list';
 export { PastEventsList } from './past-events-list';

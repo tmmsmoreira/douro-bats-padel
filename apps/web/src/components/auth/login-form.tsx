@@ -11,7 +11,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
-import { motion } from 'motion/react';
 
 export function LoginForm() {
   const router = useRouter();
@@ -58,7 +57,7 @@ export function LoginForm() {
 
         // Redirect based on role
         if (isAdmin || isEditor) {
-          router.push(`/${locale}/admin`);
+          router.push(`/${locale}/events`);
         } else {
           router.push(`/${locale}`);
         }
@@ -72,12 +71,8 @@ export function LoginForm() {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-    >
-      <Card className="glass-card w-full max-w-md border-0 shadow-none sm:border sm:shadow-sm">
+    <div>
+      <Card className="glass-card w-full max-w-md">
         <CardHeader className="space-y-1 px-4 sm:px-6 pt-6">
           <CardTitle className="text-2xl sm:text-3xl font-bold">{t('title')}</CardTitle>
           <CardDescription className="text-sm">{t('description')}</CardDescription>
@@ -188,6 +183,7 @@ export function LoginForm() {
               <div className="text-center text-sm text-muted-foreground pt-2 border-t mt-4">
                 <p className="font-medium text-foreground mb-2">{t('demoCredentials')}</p>
                 <div className="text-xs space-y-1">
+                  <p>{t('demoPlayer')}</p>
                   <p>{t('demoEditor')}</p>
                   <p>{t('demoAdmin')}</p>
                 </div>
@@ -196,6 +192,6 @@ export function LoginForm() {
           </form>
         </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 }

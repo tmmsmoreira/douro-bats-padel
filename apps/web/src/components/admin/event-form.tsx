@@ -324,7 +324,7 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
 
         if (!hasChanges) {
           toast.info(t('noChangesToSave') || 'No changes to save');
-          router.push(`/admin/events/${eventId}`);
+          router.push(`/events/${eventId}`);
           return;
         }
       }
@@ -733,7 +733,7 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
             className="w-full"
             type="button"
             variant="outline"
-            onClick={() => router.push(isEditMode ? `/admin/events/${eventId}` : '/admin')}
+            onClick={() => router.push(isEditMode ? `/events/${eventId}` : '/events')}
             animate
           >
             {t('cancel')}

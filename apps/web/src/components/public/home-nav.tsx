@@ -102,9 +102,6 @@ export function HomeNav() {
         session={null}
         navItems={[]}
         t={t}
-        showRoleSwitch={false}
-        roleSwitchHref="/admin"
-        roleSwitchLabel={t('adminView')}
         showAccountSection={false}
         showSignInButton={true}
       />

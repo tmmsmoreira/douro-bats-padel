@@ -1,4 +1,9 @@
 {
+  "errors": {
+    "accessDenied": "Access Denied",
+    "accessDeniedDescription": "You don't have permission to access this page.",
+    "goHome": "Go to Home"
+  },
   "status": {
     "draft": "Draft",
     "open": "Open",
@@ -62,6 +67,7 @@
       "accountCreatedSuccess": "Account created successfully! Please sign in.",
       "passwordResetSuccess": "Password reset successfully! Please sign in with your new password.",
       "demoCredentials": "Demo credentials:",
+      "demoPlayer": "Player: ana.costa@dorobats.com / player123",
       "demoEditor": "Editor: tiago@dorobats.com / editor123",
       "demoAdmin": "Admin: admin@dorobats.com / admin123"
     },
@@ -184,17 +190,6 @@
       "backToLogin": "Back to Login",
       "invalidLink": "Invalid verification link",
       "invalidToken": "Invalid or missing verification token"
-    },
-    "resendVerification": {
-      "title": "Resend verification email",
-      "description": "Enter your email to receive a new verification link",
-      "email": "Email",
-      "emailPlaceholder": "hello@example.com",
-      "sendLink": "Send Verification Link",
-      "sending": "Sending...",
-      "backToLogin": "Back to login",
-      "successMessage": "Verification email sent! Please check your inbox.",
-      "errorOccurred": "An error occurred. Please try again."
     }
   },
   "home": {
@@ -656,6 +651,7 @@
     "confirmedBadge": "Confirmed",
     "waitlistedPosition": "Waitlisted #{position}",
     "rsvpNotOpenYet": "Registration not open yet",
+    "rsvpOpensOn": "Opens on {date}",
     "rsvpClosed": "Registration closed",
     "deleteEvent": "Delete Event",
     "deleting": "Deleting...",

@@ -95,7 +95,7 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
 
   // Use custom hooks for mutations
   const deleteMutation = useDeletePlayer(playerId, () => {
-    router.push('/admin/players');
+    router.push('/players');
   });
 
   const handleDeleteUser = () => {
@@ -103,7 +103,7 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
   };
 
   const revokeMutation = useRevokeInvitation(playerId, () => {
-    router.push('/admin/players');
+    router.push('/players');
   });
 
   const resendMutation = useResendInvitation();
@@ -131,7 +131,7 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
         title={tList('playerProfile')}
         description={tList('playerProfileDescription')}
         showBackButton
-        backButtonHref="/admin/players"
+        backButtonHref="/players"
         backButtonLabel={tList('backToPlayers')}
       />
       <Empty>

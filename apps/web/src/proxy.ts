@@ -81,6 +81,22 @@ export default async function proxy(req: NextRequest) {
     return NextResponse.redirect(new URL(`/${locale}/login`, req.url));
   }
 
+  // Editor-only pages require EDITOR or ADMIN role
+  const isEditorOnlyPage =
+    pathnameWithoutLocale === '/players' ||
+    pathnameWithoutLocale.startsWith('/venues') ||
+    pathnameWithoutLocale === '/events/new' ||
+    /^\/events\/[^/]+\/edit$/.test(pathnameWithoutLocale) ||
+    /^\/events\/[^/]+\/draw\/generate$/.test(pathnameWithoutLocale);
+
+  if (isEditorOnlyPage) {
+    const roles = session?.user?.roles || [];
+    const isEditor = roles.includes('EDITOR') || roles.includes('ADMIN');
+    if (!isEditor) {
+      return NextResponse.redirect(new URL(`/${locale}`, req.url));
+    }
+  }
+
   return intlResponse;
 }
 

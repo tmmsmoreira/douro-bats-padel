@@ -15,7 +15,7 @@ interface EventTab {
 
 interface EventTabsProps {
   eventId: string;
-  basePath: string; // '/events' or '/admin/events'
+  basePath: string; // '/events'
   tabs: ('details' | 'draw' | 'results' | 'edit')[];
   className?: string;
 }

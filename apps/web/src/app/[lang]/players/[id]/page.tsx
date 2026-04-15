@@ -2,7 +2,7 @@
 
 import { use } from 'react';
 import { PublicPlayerProfile } from '@/components/player/public-player-profile';
-import { AdaptiveNav } from '@/components/shared/adaptive-nav';
+import { UnifiedNav } from '@/components/shared/unified-nav';
 import { PageHeader } from '@/components/shared/page-header';
 import { PageLayout } from '@/components/shared';
 import { useTranslations } from 'next-intl';
@@ -12,13 +12,13 @@ export default function PlayerProfilePage({ params }: { params: Promise<{ id: st
   const t = useTranslations('playersList');
 
   return (
-    <PageLayout nav={<AdaptiveNav />}>
+    <PageLayout nav={<UnifiedNav />}>
       <div className="space-y-4 sm:space-y-6">
         <PageHeader
           title={t('playerProfile')}
           description={t('playerProfileDescription')}
           showBackButton
-          backButtonHref="/admin/players"
+          backButtonHref="/players"
           backButtonLabel={t('backToPlayers')}
         />
         <PublicPlayerProfile playerId={id} />

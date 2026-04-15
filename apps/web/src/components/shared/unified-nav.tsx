@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
 import { useActivePathname } from '@/hooks/use-active-pathname';
 import { useScrollDirection } from '@/hooks/use-scroll-direction';
+import { useIsEditor } from '@/hooks/use-is-editor';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -21,10 +22,10 @@ import { motion } from 'motion/react';
 import {
   UserIcon,
   LogoutIcon,
-  EyeIcon,
-  EyeIconHandle,
   CalendarDaysIcon,
+  UsersIcon,
   TrendingUpIcon,
+  MapPinIcon,
 } from 'lucide-animated';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { LOGO_BLUR_DATA_URL } from '@/lib/image-blur';
@@ -33,25 +34,26 @@ import { MenuToggle } from '@/components/shared/menu-toggle';
 import { useTranslations } from 'next-intl';
 import { MobileMenu } from '@/components/shared/mobile-menu';
 
-export function PlayerNav() {
+export function UnifiedNav() {
   const pathname = useActivePathname();
   const router = useRouter();
   const { data: session, status } = useSession();
   const t = useTranslations('nav');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const isNavVisible = useScrollDirection();
+  const isEditor = useIsEditor();
 
   const userIconRef = useRef<{ startAnimation: () => void; stopAnimation: () => void }>(null);
   const signOutIconRef = useRef<{ startAnimation: () => void; stopAnimation: () => void }>(null);
-  const eyeIconRef = useRef<EyeIconHandle>(null);
 
   // Determine active tab based on current pathname
-  // This ensures child routes also highlight their parent tab
   const getActiveTab = () => {
     if (pathname === '/') return '/';
     if (pathname === '/events') return '/events';
     if (pathname === '/leaderboard') return '/leaderboard';
     if (pathname === '/profile') return '/profile';
+    if (pathname.startsWith('/players')) return '/players';
+    if (pathname.startsWith('/venues')) return '/venues';
     if (pathname.startsWith('/events/')) return '/events';
     return pathname;
   };
@@ -84,43 +86,73 @@ export function PlayerNav() {
       document.body.style.overflow = 'unset';
     }
 
-    // Cleanup on unmount
     return () => {
       document.body.style.overflow = 'unset';
     };
   }, [mobileMenuOpen]);
 
-  const isEditor =
-    session?.user?.roles?.includes('EDITOR') || session?.user?.roles?.includes('ADMIN');
+  // Nav items based on role
+  const navItems = isEditor
+    ? [
+        { href: '/events', label: t('events') },
+        { href: '/players', label: t('players') },
+        { href: '/leaderboard', label: t('ranking') },
+        { href: '/venues', label: t('venues') },
+      ]
+    : [
+        { href: '/events', label: t('events') },
+        { href: '/leaderboard', label: t('ranking') },
+      ];
 
-  const navItems = [
-    { href: '/events', label: t('events') },
-    { href: '/leaderboard', label: t('ranking') },
-  ];
+  // Tab bar items based on role
+  const tabBarItems = isEditor
+    ? [
+        {
+          id: '/events',
+          label: t('events'),
+          icon: <CalendarDaysIcon className="w-6 h-6" />,
+          onClick: () => router.push('/events'),
+        },
+        {
+          id: '/players',
+          label: t('players'),
+          icon: <UsersIcon className="w-6 h-6" />,
+          onClick: () => router.push('/players'),
+        },
+        {
+          id: '/leaderboard',
+          label: t('ranking'),
+          icon: <TrendingUpIcon className="w-6 h-6" />,
+          onClick: () => router.push('/leaderboard'),
+        },
+        {
+          id: '/venues',
+          label: t('venues'),
+          icon: <MapPinIcon className="w-6 h-6" />,
+          onClick: () => router.push('/venues'),
+        },
+      ]
+    : [
+        {
+          id: '/events',
+          label: t('events'),
+          icon: <CalendarDaysIcon className="w-6 h-6" />,
+          onClick: () => router.push('/events'),
+        },
+        {
+          id: '/leaderboard',
+          label: t('ranking'),
+          icon: <TrendingUpIcon className="w-6 h-6" />,
+          onClick: () => router.push('/leaderboard'),
+        },
+        {
+          id: '/profile',
+          label: t('profile'),
+          icon: <UserIcon className="w-6 h-6" />,
+          onClick: () => router.push('/profile'),
+        },
+      ];
 
-  // Tab bar items for mobile navigation
-  const tabBarItems = [
-    {
-      id: '/events',
-      label: t('events'),
-      icon: <CalendarDaysIcon className="w-6 h-6" />,
-      onClick: () => router.push('/events'),
-    },
-    {
-      id: '/leaderboard',
-      label: t('ranking'),
-      icon: <TrendingUpIcon className="w-6 h-6" />,
-      onClick: () => router.push('/leaderboard'),
-    },
-    {
-      id: '/profile',
-      label: t('profile'),
-      icon: <UserIcon className="w-6 h-6" />,
-      onClick: () => router.push('/profile'),
-    },
-  ];
-
-  // Helper function to check if a nav item is active (for desktop links)
   const isNavItemActive = (href: string) => {
     return activeTab === href;
   };
@@ -132,7 +164,6 @@ export function PlayerNav() {
         <nav className="border-b bg-card sticky top-0 z-50">
           <div className="container mx-auto px-4">
             <div className="flex h-16 items-center justify-between">
-              {/* Logo */}
               <Link href="/" className="flex items-center gap-3 shrink-0">
                 <Image
                   src="/icons/logo.png"
@@ -146,7 +177,6 @@ export function PlayerNav() {
                   Douro Bats Padel
                 </span>
               </Link>
-              {/* Loading skeleton for user avatar */}
               <div className="h-10 w-10 rounded-full bg-muted animate-pulse" />
             </div>
           </div>
@@ -164,7 +194,7 @@ export function PlayerNav() {
         )}
         style={{ marginRight: 'var(--removed-body-scroll-bar-size, 0px)' }}
       >
-        <nav id="navigation" aria-label="Player navigation">
+        <nav id="navigation" aria-label="Main navigation">
           <div className="container mx-auto px-4">
             <div className="flex h-16 items-center justify-between">
               {/* Logo */}
@@ -184,7 +214,7 @@ export function PlayerNav() {
                 </span>
               </Link>
 
-              {/* Desktop Navigation - Only shown on desktop (md and up) */}
+              {/* Desktop Navigation */}
               <div className="hidden md:flex flex-1 items-center justify-between">
                 <div className="flex flex-1 gap-2 px-14">
                   {navItems.map((item) => (
@@ -200,7 +230,7 @@ export function PlayerNav() {
                     >
                       {isNavItemActive(item.href) && (
                         <motion.div
-                          layoutId="player-nav-active"
+                          layoutId="nav-active"
                           className="absolute inset-0 bg-primary rounded-[999px]"
                           transition={navTransition}
                         />
@@ -259,28 +289,6 @@ export function PlayerNav() {
                           <span>{t('profile')}</span>
                         </Link>
                       </DropdownMenuItem>
-                      {isEditor && (
-                        <>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            asChild
-                            onMouseEnter={() => eyeIconRef.current?.startAnimation()}
-                          >
-                            <Link
-                              href="/admin"
-                              onClick={() => {
-                                sessionStorage.setItem('lastView', 'admin');
-                                // Don't dispatch viewChanged immediately - let the URL change first
-                                // The AdaptiveNav will detect the URL change and switch automatically
-                              }}
-                              className="flex gap-2"
-                            >
-                              <EyeIcon size={16} ref={eyeIconRef} />
-                              <span>{t('adminView')}</span>
-                            </Link>
-                          </DropdownMenuItem>
-                        </>
-                      )}
                       <DropdownMenuSeparator />
                       <LanguageMenuItems />
                       <DropdownMenuSeparator />
@@ -323,13 +331,10 @@ export function PlayerNav() {
         session={session}
         navItems={navItems}
         t={t}
-        showRoleSwitch={isEditor}
-        roleSwitchHref="/admin"
-        roleSwitchLabel={t('adminView')}
         showAccountSection={true}
       />
 
-      {/* Mobile Tab Bar - Only visible on mobile */}
+      {/* Mobile Tab Bar */}
       <TabBar items={tabBarItems} activeTab={activeTab} className="md:hidden" variant="ios" />
     </>
   );

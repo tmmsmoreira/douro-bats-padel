@@ -1,4 +1,9 @@
 {
+  "errors": {
+    "accessDenied": "Acesso Negado",
+    "accessDeniedDescription": "Não tem permissão para aceder a esta página.",
+    "goHome": "Ir para Início"
+  },
   "status": {
     "draft": "Rascunho",
     "open": "Aberto",
@@ -62,6 +67,7 @@
       "accountCreatedSuccess": "Conta criada com sucesso! Por favor, inicia sessão.",
       "passwordResetSuccess": "Palavra-passe redefinida com sucesso! Por favor, inicia sessão com a tua nova palavra-passe.",
       "demoCredentials": "Credenciais de demonstração:",
+      "demoPlayer": "Jogador: ana.costa@dorobats.com / player123",
       "demoEditor": "Editor: tiago@dorobats.com / editor123",
       "demoAdmin": "Admin: admin@dorobats.com / admin123"
     },
@@ -638,6 +644,7 @@
     "confirmedBadge": "Confirmado",
     "waitlistedPosition": "Lista de Espera #{position}",
     "rsvpNotOpenYet": "Registo ainda não aberto",
+    "rsvpOpensOn": "Abre a {date}",
     "rsvpClosed": "Registo encerrado",
     "deleteEvent": "Eliminar Evento",
     "deleting": "A eliminar...",

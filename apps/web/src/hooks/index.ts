@@ -5,6 +5,7 @@ export * from './use-bfcache';
 export * from './use-draws';
 export * from './use-events';
 export * from './use-form-mutation';
+export * from './use-is-editor';
 export * from './use-form-state';
 export * from './use-invitations';
 export * from './use-long-press';

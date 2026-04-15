@@ -45,7 +45,7 @@ export function VenuesList() {
   const deleteMutation = useDeleteVenue();
 
   const handleEdit = (venueId: string) => {
-    router.push(`/admin/venues/${venueId}/edit`);
+    router.push(`/venues/${venueId}/edit`);
   };
 
   const handleDelete = (venueId: string, venueName: string) => {

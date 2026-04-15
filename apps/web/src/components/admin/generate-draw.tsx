@@ -133,7 +133,7 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
           <CardDescription>{t('eventCompletedDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
-          <Button variant="outline" onClick={() => router.push(`/admin/events/${eventId}`)}>
+          <Button variant="outline" onClick={() => router.push(`/events/${eventId}`)}>
             {t('backToEvent')}
           </Button>
         </CardContent>
@@ -257,7 +257,7 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
             )}
           </CardContent>
           <CardContent>
-            <Button variant="outline" onClick={() => router.push(`/admin/events/${eventId}/draw`)}>
+            <Button variant="outline" onClick={() => router.push(`/events/${eventId}/draw`)}>
               {t('viewManageDraw')}
             </Button>
           </CardContent>

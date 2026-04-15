@@ -206,7 +206,7 @@ export function EventActionsDropdown({ event, draw, onDeleteSuccess }: EventActi
                 onMouseEnter={() => squarePenIconRef.current?.startAnimation()}
                 onMouseLeave={() => squarePenIconRef.current?.stopAnimation()}
               >
-                <Link href={`/admin/events/${event.id}/edit`} className="flex gap-2">
+                <Link href={`/events/${event.id}/edit`} className="flex gap-2">
                   <SquarePenIcon ref={squarePenIconRef} size={16} className="h-4 w-4" />
                   <span>{t('editEvent')}</span>
                 </Link>

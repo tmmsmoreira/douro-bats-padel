@@ -6,93 +6,19 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { LOGO_BLUR_DATA_URL } from '@/lib/image-blur';
 import { motion } from 'motion/react';
-import { slideUp } from '@/lib/animations';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 interface AuthPageLayoutProps {
-  /**
-   * The form component to render on the right side
-   */
   children: React.ReactNode;
-  /**
-   * Image URL for the left side
-   * @default 'https://images.pexels.com/photos/31012869/pexels-photo-31012869.jpeg?auto=compress&cs=tinysrgb&w=2070'
-   */
-  imageUrl?: string;
-  /**
-   * Alt text for the image
-   * @default 'Padel court'
-   */
-  imageAlt?: string;
-  /**
-   * Title to display on the image side
-   * @default 'Douro Bats Padel'
-   */
-  title?: string;
-  /**
-   * Subtitle to display on the image side
-   */
-  subtitle?: string;
-  /**
-   * Bottom card title on the image side
-   */
-  bottomTitle?: string;
-  /**
-   * Bottom card description on the image side
-   */
-  bottomDescription?: string;
-  /**
-   * Whether to use the fancy gradient effect for the title
-   * @default false
-   */
-  fancyTitle?: boolean;
-  /**
-   * Whether to animate the form on mount
-   * @default true
-   */
-  animate?: boolean;
 }
 
-/**
- * Layout component for authentication pages with split design.
- * Left side shows an image with branding, right side shows the form.
- *
- * Features:
- * - Responsive (image hidden on mobile)
- * - Theme and language toggles in top-right
- * - Consistent branding
- * - Optional animations
- *
- * @example
- * ```tsx
- * <AuthPageLayout
- *   subtitle="Manage your padel game nights with ease"
- *   bottomTitle="Organize & Play"
- *   bottomDescription="Track your games"
- * >
- *   <LoginForm />
- * </AuthPageLayout>
- * ```
- */
-export function AuthPageLayout({
-  children,
-  imageUrl = 'https://images.pexels.com/photos/31012869/pexels-photo-31012869.jpeg?auto=compress&cs=tinysrgb&w=2070',
-  imageAlt = 'Padel court',
-  title = 'Douro Bats Padel',
-  subtitle,
-  bottomTitle,
-  bottomDescription,
-  fancyTitle = false,
-  animate = true,
-}: AuthPageLayoutProps) {
+export function AuthPageLayout({ children }: AuthPageLayoutProps) {
   const locale = useLocale();
-  const formContent = (
-    <div className="flex-1 flex items-center justify-center bg-background p-8">{children}</div>
-  );
+  const t = useTranslations('home.hero');
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Mobile header - logo + controls */}
+      {/* Mobile header */}
       <header className="lg:hidden flex items-center justify-between px-4 h-16 border-b border-border/50 bg-background shrink-0">
         <Link href={`/${locale}`} className="flex items-center gap-3">
           <Image
@@ -113,66 +39,98 @@ export function AuthPageLayout({
         </div>
       </header>
 
-      {/* Main content — original side-by-side layout */}
       <div className="flex-1 flex relative">
-        {/* Desktop top-right controls */}
+        {/* Desktop controls */}
         <div className="absolute top-4 right-4 z-20 hidden lg:flex items-center gap-2">
           <ThemeToggleButton />
           <LanguageToggleButton />
         </div>
 
-        {/* Left side - Image */}
-        <div className="hidden lg:flex lg:w-1/2 relative bg-linear-to-br from-slate-900 via-secondary/80 to-slate-900">
-          <div className="absolute inset-0 bg-black/20" />
-          <Image src={imageUrl} alt={imageAlt} fill className="object-cover opacity-80" priority />
-          <div className="relative z-10 flex flex-col justify-between text-white p-12">
-            {/* Top section - Title */}
-            <div className="relative">
-              {fancyTitle ? (
-                <Link href={`/${locale}`} className="relative inline-block group">
-                  {/* Gradient background */}
-                  <div className="absolute inset-0 bg-linear-to-r from-primary/30 via-purple-500/30 to-pink-500/30 blur-2xl -z-10 group-hover:blur-3xl transition-all" />
-                  {/* Glass container */}
-                  <div className="relative bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 shadow-2xl group-hover:border-white/30 transition-all">
-                    <h1 className="text-4xl font-bold mb-2 font-heading gradient-text">{title}</h1>
-                    {subtitle && <p className="text-lg text-white/90">{subtitle}</p>}
-                  </div>
-                </Link>
-              ) : (
-                <Link href={`/${locale}`} className="inline-block group">
-                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 group-hover:border-white/30 transition-all">
-                    <h1 className="text-4xl font-bold mb-2 font-heading gradient-text">{title}</h1>
-                    {subtitle && <p className="text-lg text-white/90">{subtitle}</p>}
-                  </div>
-                </Link>
-              )}
-            </div>
+        {/* Left side — video with branding (desktop only) */}
+        <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            poster="https://images.pexels.com/videos/34449200/free-video-34449200.jpg?auto=compress&cs=tinysrgb&w=1280"
+            className="absolute inset-0 w-full h-full object-cover"
+          >
+            <source
+              src="https://videos.pexels.com/video-files/34449200/14597533_2160_3840_60fps.mp4"
+              type="video/mp4"
+            />
+          </video>
+          <div className="absolute inset-0 bg-background/20 backdrop-blur-xs" />
+          <motion.div
+            className="absolute inset-0 bg-linear-to-tr from-primary/20 to-secondary/20"
+            initial={{ opacity: 0 }}
+            animate={{
+              opacity: [0.3, 0.6, 0.8, 0.3],
+              scale: [1, 1, 1.1, 1],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+          />
+          <div className="relative z-10 flex flex-col justify-between w-full p-10">
+            {/* Top — logo + name */}
+            <Link href={`/${locale}`} className="flex items-center gap-3">
+              <Image
+                src="/icons/logo.png"
+                alt="Douro Bats Padel"
+                width={40}
+                height={40}
+                priority
+                placeholder="blur"
+                blurDataURL={LOGO_BLUR_DATA_URL}
+                className="object-contain"
+              />
+              <span className="font-heading gradient-text text-xl font-bold">Douro Bats Padel</span>
+            </Link>
 
-            {/* Bottom section - Call to action */}
-            {(bottomTitle || bottomDescription) && (
-              <div className="space-y-4">
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                  {bottomDescription && (
-                    <p className="text-sm text-white/80 mb-1">{bottomDescription}</p>
-                  )}
-                  {bottomTitle && <p className="text-2xl font-semibold">{bottomTitle}</p>}
-                </div>
-              </div>
-            )}
+            {/* Bottom — tagline on a glass card for readability */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3, ease: 'easeOut' }}
+              className="bg-card/60 backdrop-blur-md rounded-xl p-6 border border-border/50"
+            >
+              <h1 className="text-3xl xl:text-4xl font-bold font-heading gradient-text">
+                {t('title')}
+              </h1>
+              <p className="text-base text-muted-foreground mt-2">{t('subtitle')}</p>
+            </motion.div>
           </div>
         </div>
 
-        {/* Right side - Form */}
-        {animate ? (
+        {/* Right side — form */}
+        <div className="flex-1 flex flex-col items-center justify-center bg-background px-4 py-8">
+          {/* Mobile branding text */}
           <motion.div
-            {...slideUp}
-            className="flex-1 flex items-center justify-center bg-background p-8"
+            className="lg:hidden text-center mb-6"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
+          >
+            <h1 className="text-2xl sm:text-3xl font-bold font-heading gradient-text">
+              {t('title')}
+            </h1>
+            <p className="text-sm sm:text-base text-muted-foreground mt-1">{t('subtitle')}</p>
+          </motion.div>
+
+          <motion.div
+            className="w-full max-w-md"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1, ease: 'easeOut' }}
           >
             {children}
           </motion.div>
-        ) : (
-          formContent
-        )}
+        </div>
       </div>
     </div>
   );

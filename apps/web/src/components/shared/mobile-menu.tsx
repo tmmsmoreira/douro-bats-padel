@@ -4,15 +4,13 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Link } from '@/i18n/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Session } from 'next-auth';
 import { LogoutIcon, UserIcon } from 'lucide-animated';
 import { signOut } from 'next-auth/react';
 import { ThemeToggleGroup } from '@/components/shared/theme-toggle-button';
 import { LanguageToggleGroup } from '@/components/shared/language-toggle-button';
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 interface NavItem {
   href: string;
@@ -23,11 +21,8 @@ interface MobileMenuProps {
   isOpen: boolean;
   onClose: () => void;
   session: Session | null;
-  navItems: NavItem[]; // Kept for backward compatibility but not used (navigation moved to TabBar)
+  navItems: NavItem[];
   t: (key: string) => string;
-  showRoleSwitch?: boolean;
-  roleSwitchHref?: string;
-  roleSwitchLabel?: string;
   showAccountSection?: boolean;
   showSignInButton?: boolean;
 }
@@ -36,26 +31,13 @@ export function MobileMenu({
   isOpen,
   onClose,
   session,
-  navItems: _navItems, // Renamed to indicate it's intentionally unused
   t,
-  showRoleSwitch = false,
-  roleSwitchHref,
   showAccountSection = true,
   showSignInButton = false,
 }: MobileMenuProps) {
-  const router = useRouter();
-
-  // Determine current view mode from the href
-  // If roleSwitchHref is '/', we're currently in admin view (switching to player)
-  // If roleSwitchHref is '/admin', we're currently in player view (switching to admin)
-  const isCurrentlyAdminView =
-    roleSwitchHref?.startsWith('/') && !roleSwitchHref.startsWith('/admin');
-  const [viewMode, setViewMode] = useState(isCurrentlyAdminView);
-
   // Prevent pull-to-refresh when menu is open
   useEffect(() => {
     if (isOpen) {
-      // Disable pull-to-refresh on iOS
       document.body.style.overscrollBehavior = 'none';
 
       return () => {
@@ -63,25 +45,6 @@ export function MobileMenu({
       };
     }
   }, [isOpen]);
-
-  // Handle view mode toggle
-  const handleViewModeChange = (checked: boolean) => {
-    const newView = checked ? 'admin' : 'player';
-    const newHref = checked ? '/admin' : '/';
-
-    // Update state
-    setViewMode(checked);
-
-    // Set the view in sessionStorage
-    sessionStorage.setItem('lastView', newView);
-    window.dispatchEvent(new Event('viewChanged'));
-
-    // Navigate to the new view
-    router.push(newHref);
-
-    // Delay closing so the toggle animation is visible before the menu disappears
-    setTimeout(onClose, 300);
-  };
 
   return (
     <AnimatePresence>
@@ -184,21 +147,6 @@ export function MobileMenu({
                     <p className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       {t('settings') || 'Settings'}
                     </p>
-
-                    {/* Admin Mode Toggle - Only show for editors/admins */}
-                    {showRoleSwitch && (
-                      <div
-                        onClick={() => handleViewModeChange(!viewMode)}
-                        className="flex items-center justify-between gap-4 px-4 py-3 rounded-lg w-full cursor-pointer touch-target no-tap-highlight"
-                      >
-                        <span className="text-base font-medium">Admin Mode</span>
-                        <Switch
-                          checked={viewMode}
-                          onCheckedChange={handleViewModeChange}
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                      </div>
-                    )}
 
                     <div className="flex items-center justify-between gap-4 px-4 py-3 rounded-lg">
                       <span className="text-base font-medium">{t('language') || 'Language'}</span>

@@ -21,7 +21,7 @@ export function PageHeader({
   description,
   action,
   showBackButton = false,
-  backButtonHref = '/admin',
+  backButtonHref = '/',
   backButtonLabel = 'Back',
 }: PageHeaderProps) {
   const arrowLeftIconRef = useRef<ArrowLeftIconHandle>(null);

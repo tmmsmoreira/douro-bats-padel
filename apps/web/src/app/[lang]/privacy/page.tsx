@@ -3,13 +3,13 @@
 import Link from 'next/link';
 import { motion } from 'motion/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AdaptiveNav } from '@/components/shared/adaptive-nav';
+import { UnifiedNav } from '@/components/shared/unified-nav';
 import { PageLayout, PageHeader } from '@/components/shared';
 import { staggerContainer, staggerItem } from '@/lib/animations';
 
 export default function PrivacyPage() {
   return (
-    <PageLayout nav={<AdaptiveNav />}>
+    <PageLayout nav={<UnifiedNav />}>
       <div className="space-y-6 sm:space-y-8">
         {/* Header */}
         <PageHeader title="Privacy Policy" description="Last updated: February 2026" />

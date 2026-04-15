@@ -117,7 +117,7 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
 
       if (!hasChanges) {
         toast.info(t('noChangesToSave') || 'No changes to save');
-        router.push('/admin/venues');
+        router.push('/venues');
         return;
       }
     }
@@ -237,7 +237,7 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
             className="w-full"
             type="button"
             variant="outline"
-            onClick={() => router.push('/admin/venues')}
+            onClick={() => router.push('/venues')}
             animate
           >
             {t('cancel')}

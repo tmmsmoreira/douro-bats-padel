@@ -5,15 +5,7 @@ import { LoadingState } from '@/components/shared';
 
 export default function RegisterPage() {
   return (
-    <AuthPageLayout
-      title="Douro Bats Padel"
-      subtitle="Join our padel community today"
-      imageUrl="https://images.pexels.com/photos/31012869/pexels-photo-31012869.jpeg?auto=compress&cs=tinysrgb&w=2070"
-      imageAlt="Padel court"
-      fancyTitle
-      bottomDescription="Get started"
-      bottomTitle="Create Your Account"
-    >
+    <AuthPageLayout>
       <Suspense fallback={<LoadingState />}>
         <RegisterForm />
       </Suspense>

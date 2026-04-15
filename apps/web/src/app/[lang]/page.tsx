@@ -20,7 +20,6 @@ export default function HomePage() {
   const { data: session } = useSession();
   const t = useTranslations('home');
   const containerRef = useRef<HTMLDivElement>(null);
-
   // Ensure page starts at the top (only if no hash)
   useEffect(() => {
     if (!window.location.hash) {
@@ -61,11 +60,16 @@ export default function HomePage() {
               muted
               loop
               playsInline
+              preload="metadata"
+              poster="https://images.pexels.com/videos/33444758/free-video-33444758.jpg?auto=compress&cs=tinysrgb&w=1280"
               className="absolute inset-0 w-full h-full object-cover"
             >
-              <source src="https://www.pexels.com/download/video/18126904/" type="video/mp4" />
+              <source
+                src="https://videos.pexels.com/video-files/33444758/14232220_3840_2160_30fps.mp4"
+                type="video/mp4"
+              />
             </video>
-            <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" />
+            <div className="absolute inset-0 bg-background/40 backdrop-blur-xs" />
           </motion.div>
 
           {/* Animated Overlay */}
@@ -95,7 +99,7 @@ export default function HomePage() {
                 <span className="gradient-text">{t('hero.title')}</span>
               </motion.h1>
               <motion.p
-                className="text-xl sm:text-2xl lg:text-3xl font-semibold text-muted-foreground"
+                className="text-xl sm:text-2xl lg:text-3xl font-semibold text-foreground"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.5, ease: 'easeOut' }}
@@ -105,7 +109,7 @@ export default function HomePage() {
             </motion.div>
 
             <motion.p
-              className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto"
+              className="text-base sm:text-lg text-foreground max-w-2xl mx-auto"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.7, ease: 'easeOut' }}

@@ -107,10 +107,10 @@ export function DataStateWrapper<T>({
           errorComponent ? (
             <motion.div
               key="error"
-              initial={{ opacity: 0 }}
+              initial={isBackNav ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: isBackNav ? 0 : 0.3 }}
               role="alert"
             >
               {errorComponent}
@@ -118,10 +118,10 @@ export function DataStateWrapper<T>({
           ) : (
             <motion.div
               key="error"
-              initial={{ opacity: 0 }}
+              initial={isBackNav ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: isBackNav ? 0 : 0.3 }}
               className={errorClassName}
               role="alert"
             >
@@ -132,20 +132,20 @@ export function DataStateWrapper<T>({
           emptyComponent ? (
             <motion.div
               key="empty"
-              initial={{ opacity: 0, y: 20 }}
+              initial={isBackNav ? false : { opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: isBackNav ? 0 : 0.3 }}
             >
               {emptyComponent}
             </motion.div>
           ) : (
             <motion.div
               key="empty"
-              initial={{ opacity: 0, scale: 0.95 }}
+              initial={isBackNav ? false : { opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: isBackNav ? 0 : 0.3 }}
               role="status"
             >
               <Empty>

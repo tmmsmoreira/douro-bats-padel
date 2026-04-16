@@ -1,17 +1,17 @@
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
-import { json } from 'express';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   // Security headers
   app.use(helmet());
 
   // Body size limit to prevent memory exhaustion
-  app.use(json({ limit: '1mb' }));
+  app.useBodyParser('json', { limit: '1mb' });
 
   // Enable CORS with multiple allowed origins
   const allowedOrigins = [

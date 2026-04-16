@@ -2,6 +2,8 @@
   "errors": {
     "accessDenied": "Access Denied",
     "accessDeniedDescription": "You don't have permission to access this page.",
+    "notFound": "Page Not Found",
+    "notFoundDescription": "The page you're looking for doesn't exist or has been moved.",
     "goHome": "Go to Home"
   },
   "status": {

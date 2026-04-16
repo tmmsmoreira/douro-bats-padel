@@ -93,7 +93,8 @@ export default async function proxy(req: NextRequest) {
     const roles = session?.user?.roles || [];
     const isEditor = roles.includes('EDITOR') || roles.includes('ADMIN');
     if (!isEditor) {
-      return NextResponse.redirect(new URL(`/${locale}`, req.url));
+      // Let the page render — EditorGuard will call notFound()
+      return intlResponse;
     }
   }
 

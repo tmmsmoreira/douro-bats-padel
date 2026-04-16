@@ -2,6 +2,8 @@
   "errors": {
     "accessDenied": "Acesso Negado",
     "accessDeniedDescription": "Não tem permissão para aceder a esta página.",
+    "notFound": "Página Não Encontrada",
+    "notFoundDescription": "A página que procura não existe ou foi movida.",
     "goHome": "Ir para Início"
   },
   "status": {

@@ -1,5 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { render } from '@react-email/components';
 import { EmailService } from './email.service';
+import RSVPConfirmationEmail from '../emails/rsvp-confirmation-email';
+import WaitlistNotificationEmail from '../emails/waitlist-notification-email';
+import PromotionNotificationEmail from '../emails/promotion-notification-email';
+import EventNotificationEmail from '../emails/event-notification-email';
+
+export interface EventNotificationData {
+  id: string;
+  title?: string | null;
+  date: Date | string;
+}
 
 @Injectable()
 export class NotificationService {
@@ -7,42 +18,133 @@ export class NotificationService {
 
   constructor(private emailService: EmailService) {}
 
-  async sendRSVPConfirmation(email: string, name: string, event: any) {
-    // For now, keep logger.log for backward compatibility
-    // TODO: Create proper HTML email template
-    this.logger.log(`[EMAIL] RSVP Confirmation to ${email}`);
-    this.logger.log(`Hi ${name}, you are confirmed for ${event.title} on ${event.date}`);
+  async sendRSVPConfirmation(email: string, name: string, event: EventNotificationData) {
+    try {
+      const eventDate =
+        event.date instanceof Date ? event.date.toLocaleDateString() : String(event.date);
+      const html = await render(
+        RSVPConfirmationEmail({
+          name,
+          eventTitle: event.title || 'Game Night',
+          eventDate,
+        })
+      );
+      await this.emailService.sendEmail(
+        email,
+        `You're confirmed for ${event.title || 'Game Night'} - Douro Bats Padel`,
+        html
+      );
+    } catch (error) {
+      this.logger.error(`Failed to send RSVP confirmation to ${email}:`, error);
+    }
   }
 
-  async sendWaitlistNotification(email: string, name: string, event: any, position: number) {
-    this.logger.log(`[EMAIL] Waitlist Notification to ${email}`);
-    this.logger.log(
-      `Hi ${name}, you are on the waitlist at position #${position} for ${event.title}`
+  async sendWaitlistNotification(
+    email: string,
+    name: string,
+    event: EventNotificationData,
+    position: number
+  ) {
+    try {
+      const html = await render(
+        WaitlistNotificationEmail({
+          name,
+          eventTitle: event.title || 'Game Night',
+          position,
+        })
+      );
+      await this.emailService.sendEmail(
+        email,
+        `Waitlisted for ${event.title || 'Game Night'} - Douro Bats Padel`,
+        html
+      );
+    } catch (error) {
+      this.logger.error(`Failed to send waitlist notification to ${email}:`, error);
+    }
+  }
+
+  async sendPromotionNotification(email: string, name: string, event: EventNotificationData) {
+    try {
+      const html = await render(
+        PromotionNotificationEmail({
+          name,
+          eventTitle: event.title || 'Game Night',
+        })
+      );
+      await this.emailService.sendEmail(
+        email,
+        `You're in! Promoted from waitlist - Douro Bats Padel`,
+        html
+      );
+    } catch (error) {
+      this.logger.error(`Failed to send promotion notification to ${email}:`, error);
+    }
+  }
+
+  async sendDrawPublished(email: string, name: string, event: EventNotificationData) {
+    try {
+      const html = await render(
+        EventNotificationEmail({
+          name,
+          eventTitle: event.title || 'Game Night',
+          type: 'draw-published',
+        })
+      );
+      await this.emailService.sendEmail(
+        email,
+        `Draw published for ${event.title || 'Game Night'} - Douro Bats Padel`,
+        html
+      );
+    } catch (error) {
+      this.logger.error(`Failed to send draw published notification to ${email}:`, error);
+    }
+  }
+
+  async sendResultsPublished(email: string, name: string, event: EventNotificationData) {
+    try {
+      const html = await render(
+        EventNotificationEmail({
+          name,
+          eventTitle: event.title || 'Game Night',
+          type: 'results-published',
+        })
+      );
+      await this.emailService.sendEmail(
+        email,
+        `Results available for ${event.title || 'Game Night'} - Douro Bats Padel`,
+        html
+      );
+    } catch (error) {
+      this.logger.error(`Failed to send results published notification to ${email}:`, error);
+    }
+  }
+
+  async announceEventOpen(emails: string[], event: EventNotificationData) {
+    const results = await Promise.allSettled(
+      emails.map(async (email) => {
+        const html = await render(
+          EventNotificationEmail({
+            name: 'Player',
+            eventTitle: event.title || 'Game Night',
+            type: 'event-open',
+          })
+        );
+        return this.emailService.sendEmail(
+          email,
+          `RSVP now open for ${event.title || 'Game Night'} - Douro Bats Padel`,
+          html
+        );
+      })
     );
-    // TODO: Integrate with Postmark
-  }
 
-  async sendPromotionNotification(email: string, name: string, event: any) {
-    this.logger.log(`[EMAIL] Promotion Notification to ${email}`);
-    this.logger.log(`Hi ${name}, you have been promoted from the waitlist for ${event.title}!`);
-    // TODO: Integrate with Postmark
-  }
-
-  async sendDrawPublished(email: string, name: string, event: any) {
-    this.logger.log(`[EMAIL] Draw Published to ${email}`);
-    this.logger.log(`Hi ${name}, the draw for ${event.title} has been published!`);
-    // TODO: Integrate with Postmark
-  }
-
-  async sendResultsPublished(email: string, name: string, event: any) {
-    this.logger.log(`[EMAIL] Results Published to ${email}`);
-    this.logger.log(`Hi ${name}, results for ${event.title} are now available!`);
-    // TODO: Integrate with Postmark
-  }
-
-  async announceEventOpen(emails: string[], event: any) {
-    this.logger.log(`[EMAIL] Event Open Announcement to ${emails.length} recipients`);
-    this.logger.log(`RSVP is now open for ${event.title}!`);
-    // TODO: Integrate with Postmark bulk send
+    const failed = results.filter((r) => r.status === 'rejected').length;
+    if (failed > 0) {
+      this.logger.error(
+        `Failed to send event open announcement to ${failed}/${emails.length} recipients`
+      );
+    }
+    this.logger.log(
+      `Event open announcement sent to ${emails.length - failed}/${emails.length} recipients`
+    );
   }
 }

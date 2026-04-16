@@ -4,6 +4,17 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '@padel/types';
+import type { Tier } from '@padel/types';
+import type { RequestWithUser } from '../auth/types';
+
+interface SubmitMatchDto {
+  eventId: string;
+  courtId: string;
+  round: number;
+  setsA: number;
+  setsB: number;
+  tier: Tier;
+}
 
 @Controller('matches')
 @UseGuards(JwtAuthGuard)
@@ -13,7 +24,7 @@ export class MatchesController {
   @Post()
   @UseGuards(RolesGuard)
   @Roles(Role.EDITOR, Role.ADMIN)
-  async submitMatch(@Body() dto: any, @Request() req: any) {
+  async submitMatch(@Body() dto: SubmitMatchDto, @Request() req: RequestWithUser) {
     return this.matchesService.submitMatch(dto, req.user.sub);
   }
 

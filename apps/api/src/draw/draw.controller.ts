@@ -14,6 +14,13 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '@padel/types';
+import type { RequestWithUser } from '../auth/types';
+
+interface DrawConstraintsDto {
+  avoidRecentSessions?: number;
+  balanceStrength?: boolean;
+  allowTierMixing?: boolean;
+}
 
 @Controller('draws')
 @UseGuards(JwtAuthGuard)
@@ -26,8 +33,11 @@ export class DrawController {
   async generateDraw(
     @Param('eventId') eventId: string,
     @Body()
-    body: { constraints?: any; selectedCourts?: { masters?: string[]; explorers?: string[] } },
-    @Request() req: any
+    body: {
+      constraints?: DrawConstraintsDto;
+      selectedCourts?: { masters?: string[]; explorers?: string[] };
+    },
+    @Request() req: RequestWithUser
   ) {
     return this.drawService.generateDraw(
       eventId,
@@ -38,7 +48,7 @@ export class DrawController {
   }
 
   @Get('events/:eventId')
-  async getDraw(@Param('eventId') eventId: string, @Request() req: any) {
+  async getDraw(@Param('eventId') eventId: string, @Request() req: RequestWithUser) {
     return this.drawService.getDraw(eventId, req.user);
   }
 
@@ -48,7 +58,7 @@ export class DrawController {
   async updateAssignment(
     @Param('assignmentId') assignmentId: string,
     @Body() body: { teamA: string[]; teamB: string[] },
-    @Request() req: any
+    @Request() req: RequestWithUser
   ) {
     return this.drawService.updateAssignment(assignmentId, body.teamA, body.teamB, req.user.sub);
   }

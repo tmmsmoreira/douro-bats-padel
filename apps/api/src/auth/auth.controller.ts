@@ -11,6 +11,7 @@ import type {
 } from '@padel/types';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import type { RequestWithUser } from './types';
 
 @Controller('auth')
 export class AuthController {
@@ -36,13 +37,13 @@ export class AuthController {
 
   @UseGuards(JwtRefreshGuard)
   @Post('refresh')
-  async refresh(@Req() req: any): Promise<AuthTokens> {
+  async refresh(@Req() req: RequestWithUser): Promise<AuthTokens> {
     return this.authService.refresh(req.user.sub);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  async getProfile(@Req() req: any) {
+  async getProfile(@Req() req: RequestWithUser) {
     return this.authService.validateUser(req.user.sub);
   }
 
@@ -60,14 +61,14 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Patch('profile-photo')
-  async updateProfilePhoto(@Req() req: any, @Body() body: { profilePhoto: string }) {
+  async updateProfilePhoto(@Req() req: RequestWithUser, @Body() body: { profilePhoto: string }) {
     return this.authService.updateProfilePhoto(req.user.sub, body.profilePhoto);
   }
 
   @UseGuards(JwtAuthGuard)
   @Patch('profile')
   async updateProfile(
-    @Req() req: any,
+    @Req() req: RequestWithUser,
     @Body()
     body: { name?: string; dateOfBirth?: string; phoneNumber?: string; profilePhoto?: string }
   ) {

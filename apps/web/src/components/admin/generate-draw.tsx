@@ -116,6 +116,62 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
   const eventEndTime = event?.endsAt ? new Date(event.endsAt) : null;
   const hasEventPassed = eventEndTime ? eventEndTime < new Date() : false;
 
+  const confirmedCount = event?.confirmedCount || 0;
+
+  const drawMetrics = useMemo(() => {
+    const mastersCapacity = selectedMastersCourts.length * 4;
+    const explorersCapacity = selectedExplorersCourts.length * 4;
+    const maxPlayers = mastersCapacity + explorersCapacity;
+
+    const allAvailableCourts = [...new Set([...mastersCourts, ...explorersCourts])];
+    const maxPlayersPerCourt = 4;
+
+    const adjustedPlayerCount = Math.floor(confirmedCount / 4) * 4;
+
+    const hasExcessPlayers = adjustedPlayerCount > maxPlayers;
+    const playersInDraw = hasExcessPlayers ? Math.floor(maxPlayers / 4) * 4 : adjustedPlayerCount;
+    const waitlistedPlayers = confirmedCount - playersInDraw;
+
+    const courtsNeeded = Math.ceil(playersInDraw / maxPlayersPerCourt);
+    const unusedCourts = playersInDraw > 0 ? allAvailableCourts.length - courtsNeeded : 0;
+
+    const hasInsufficientPlayers =
+      confirmedCount > 0 && playersInDraw < confirmedCount && !hasExcessPlayers;
+
+    const allCourts = event?.eventCourts?.map((ec: EventCourt) => ec.court) || [];
+    const availableCourts = allCourts.filter((court: Court) =>
+      allAvailableCourts.includes(court.id)
+    );
+
+    const mastersPlayerCount = Math.floor(
+      (playersInDraw * (tierRules.masterPercentage || 50)) / 100
+    );
+    const explorersPlayerCount = playersInDraw - mastersPlayerCount;
+
+    return {
+      mastersCapacity,
+      explorersCapacity,
+      maxPlayers,
+      playersInDraw,
+      waitlistedPlayers,
+      courtsNeeded,
+      unusedCourts,
+      hasExcessPlayers,
+      hasInsufficientPlayers,
+      availableCourts,
+      mastersPlayerCount,
+      explorersPlayerCount,
+    };
+  }, [
+    selectedMastersCourts.length,
+    selectedExplorersCourts.length,
+    mastersCourts,
+    explorersCourts,
+    confirmedCount,
+    event?.eventCourts,
+    tierRules.masterPercentage,
+  ]);
+
   if (eventLoading) {
     return <div className="text-center py-8">{t('loading')}</div>;
   }
@@ -141,32 +197,20 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
     );
   }
 
-  const confirmedCount = event.confirmedCount || 0;
-
-  const mastersCapacity = selectedMastersCourts.length * 4;
-  const explorersCapacity = selectedExplorersCourts.length * 4;
-  const maxPlayers = mastersCapacity + explorersCapacity;
-
-  const allAvailableCourts = [...new Set([...mastersCourts, ...explorersCourts])];
-  const maxPlayersPerCourt = 4;
-
-  const adjustedPlayerCount = Math.floor(confirmedCount / 4) * 4;
-
-  const hasExcessPlayers = adjustedPlayerCount > maxPlayers;
-  const playersInDraw = hasExcessPlayers ? Math.floor(maxPlayers / 4) * 4 : adjustedPlayerCount;
-  const waitlistedPlayers = confirmedCount - playersInDraw;
-
-  const courtsNeeded = Math.ceil(playersInDraw / maxPlayersPerCourt);
-  const unusedCourts = playersInDraw > 0 ? allAvailableCourts.length - courtsNeeded : 0;
-
-  const hasInsufficientPlayers =
-    confirmedCount > 0 && playersInDraw < confirmedCount && !hasExcessPlayers;
-
-  const allCourts = event.eventCourts?.map((ec: EventCourt) => ec.court) || [];
-  const availableCourts = allCourts.filter((court: Court) => allAvailableCourts.includes(court.id));
-
-  const mastersPlayerCount = Math.floor((playersInDraw * (tierRules.masterPercentage || 50)) / 100);
-  const explorersPlayerCount = playersInDraw - mastersPlayerCount;
+  const {
+    mastersCapacity,
+    explorersCapacity,
+    maxPlayers,
+    playersInDraw,
+    waitlistedPlayers,
+    courtsNeeded,
+    unusedCourts,
+    hasExcessPlayers,
+    hasInsufficientPlayers,
+    availableCourts,
+    mastersPlayerCount,
+    explorersPlayerCount,
+  } = drawMetrics;
 
   return (
     <div className="space-y-6">

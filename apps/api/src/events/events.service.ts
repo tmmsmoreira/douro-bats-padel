@@ -1,5 +1,6 @@
 import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import type { Prisma } from '@prisma/client';
 import type { CreateEventDto, EventWithRSVP, TierRules } from '@padel/types';
 import { EventState, RSVPStatus } from '@padel/types';
 
@@ -116,7 +117,7 @@ export class EventsService {
         rsvpOpensAt: new Date(dto.rsvpOpensAt),
         rsvpClosesAt: new Date(dto.rsvpClosesAt),
         state: EventState.DRAFT,
-        tierRules: (dto.tierRules || {}) as any,
+        tierRules: (dto.tierRules || {}) as Prisma.InputJsonValue,
         eventCourts: {
           create: dto.courtIds.map((courtId) => ({
             courtId,
@@ -137,7 +138,7 @@ export class EventsService {
   }
 
   async findAll(from?: Date, to?: Date, userId?: string, includeUnpublished = false) {
-    const where: any = {};
+    const where: Prisma.EventWhereInput = {};
 
     if (from || to) {
       where.date = {};
@@ -391,7 +392,7 @@ export class EventsService {
         capacity: dto.capacity,
         rsvpOpensAt: dto.rsvpOpensAt ? new Date(dto.rsvpOpensAt) : undefined,
         rsvpClosesAt: dto.rsvpClosesAt ? new Date(dto.rsvpClosesAt) : undefined,
-        tierRules: dto.tierRules as any,
+        tierRules: dto.tierRules as unknown as Prisma.InputJsonValue,
       },
       include: {
         venue: true,

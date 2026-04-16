@@ -20,6 +20,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Public } from '../auth/decorators/public.decorator';
 import { Role } from '@padel/types';
+import type { RequestWithUser, RequestWithOptionalUser } from '../auth/types';
 
 @Controller('events')
 @UseGuards(OptionalJwtAuthGuard)
@@ -33,7 +34,11 @@ export class EventsController {
 
   @Public()
   @Get()
-  async findAll(@Request() req: any, @Query('from') from?: string, @Query('to') to?: string) {
+  async findAll(
+    @Request() req: RequestWithOptionalUser,
+    @Query('from') from?: string,
+    @Query('to') to?: string
+  ) {
     const fromDate = from ? new Date(from) : undefined;
     const toDate = to ? new Date(to) : undefined;
     const userId = req.user?.sub;
@@ -60,7 +65,7 @@ export class EventsController {
 
   @Public()
   @Get(':id')
-  async findOne(@Param('id') id: string, @Request() req: any) {
+  async findOne(@Param('id') id: string, @Request() req: RequestWithOptionalUser) {
     const userId = req.user?.sub;
 
     // Automatically determine if user should see unpublished events based on their roles
@@ -73,7 +78,7 @@ export class EventsController {
   @Post()
   @UseGuards(RolesGuard)
   @Roles(Role.EDITOR, Role.ADMIN)
-  async create(@Body() dto: CreateEventDto, @Request() req: any) {
+  async create(@Body() dto: CreateEventDto, @Request() req: RequestWithUser) {
     return this.eventsService.create(dto, req.user.sub);
   }
 
@@ -107,7 +112,7 @@ export class EventsController {
 
   @Post(':id/rsvp')
   @UseGuards(JwtAuthGuard)
-  async rsvp(@Param('id') id: string, @Body() dto: RSVPDto, @Request() req: any) {
+  async rsvp(@Param('id') id: string, @Body() dto: RSVPDto, @Request() req: RequestWithUser) {
     return this.rsvpService.handleRSVP(id, req.user.sub, dto);
   }
 

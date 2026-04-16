@@ -1,5 +1,7 @@
 import { useSession } from 'next-auth/react';
 import { useMemo } from 'react';
+import { toast } from 'sonner';
+import type { QueryClient } from '@tanstack/react-query';
 import { API_URL } from '@/lib/constants';
 
 /**
@@ -75,4 +77,33 @@ export function useAuthFetch() {
     }),
     [headers]
   );
+}
+
+/**
+ * Helper to build common onSuccess/onError callbacks for mutations.
+ * Reduces boilerplate across mutation hooks.
+ */
+export function mutationCallbacks(options: {
+  queryClient: QueryClient;
+  invalidateKeys?: string[][];
+  successMessage: string;
+  errorMessage?: string;
+  onSuccess?: () => void;
+}) {
+  return {
+    onSuccess: async () => {
+      if (options.invalidateKeys) {
+        await Promise.all(
+          options.invalidateKeys.map((key) =>
+            options.queryClient.invalidateQueries({ queryKey: key })
+          )
+        );
+      }
+      toast.success(options.successMessage);
+      options.onSuccess?.();
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || options.errorMessage || 'An error occurred');
+    },
+  };
 }

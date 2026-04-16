@@ -265,12 +265,16 @@ export class RankingService {
     };
   }
 
+  /**
+   * Get the Monday 00:00:00 UTC of the week containing the given date.
+   * Uses UTC consistently to avoid timezone drift across environments.
+   */
   private getWeekStart(date: Date): Date {
     const d = new Date(date);
-    d.setHours(0, 0, 0, 0);
-    const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust to Monday
-    d.setDate(diff);
+    d.setUTCHours(0, 0, 0, 0);
+    const day = d.getUTCDay();
+    const diff = d.getUTCDate() - day + (day === 0 ? -6 : 1); // Adjust to Monday
+    d.setUTCDate(diff);
     return d;
   }
 }

@@ -198,7 +198,7 @@ export class AuthService {
     } else {
       // For existing users, only update profile photo
       // Do NOT auto-verify email if they signed up with credentials
-      const updateData: any = {};
+      const updateData: { profilePhoto?: string } = {};
       if (dto.profilePhoto && dto.profilePhoto !== user.profilePhoto) {
         updateData.profilePhoto = dto.profilePhoto;
       }
@@ -390,7 +390,12 @@ export class AuthService {
       this.validateProfilePhotoUrl(data.profilePhoto);
     }
 
-    const updateData: any = {};
+    const updateData: {
+      name?: string;
+      phoneNumber?: string;
+      profilePhoto?: string;
+      dateOfBirth?: Date | null;
+    } = {};
     if (data.name !== undefined) updateData.name = data.name;
     if (data.phoneNumber !== undefined) updateData.phoneNumber = data.phoneNumber;
     if (data.profilePhoto !== undefined) updateData.profilePhoto = data.profilePhoto;
@@ -407,8 +412,9 @@ export class AuthService {
           player: true,
         },
       });
-    } catch (error: any) {
-      if (error.code === 'P2002' && error.meta?.target?.includes('phoneNumber')) {
+    } catch (error: unknown) {
+      const prismaError = error as { code?: string; meta?: { target?: string[] } };
+      if (prismaError.code === 'P2002' && prismaError.meta?.target?.includes('phoneNumber')) {
         throw new ConflictException('Phone number already in use');
       }
       throw error;

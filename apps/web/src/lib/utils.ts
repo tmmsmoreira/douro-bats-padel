@@ -30,11 +30,17 @@ export function formatTime(date: Date | string, locale?: string): string {
  * @param locale - Optional locale for formatting
  * @returns Formatted time string
  */
+const TIME_SLOT_REGEX = /^([01]\d|2[0-3]):([0-5]\d)$/;
+
 export function formatTimeSlot(
   timeSlot: string,
   eventDate: Date | string,
   locale?: string
 ): string {
+  if (!TIME_SLOT_REGEX.test(timeSlot)) {
+    return timeSlot; // Return raw value if format is invalid
+  }
+
   // Parse the HH:MM format
   const [hours, minutes] = timeSlot.split(':');
 

@@ -9,8 +9,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { PageHeader } from '@/components/shared/page-header';
 import { EditorGuard } from '@/components/shared/editor-guard';
 import type { TierRules } from '@padel/types';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+import { API_URL } from '@/lib/constants';
 
 interface EventCourt {
   id: string;

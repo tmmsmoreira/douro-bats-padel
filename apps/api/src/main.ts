@@ -1,9 +1,17 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
+import helmet from 'helmet';
+import { json } from 'express';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Security headers
+  app.use(helmet());
+
+  // Body size limit to prevent memory exhaustion
+  app.use(json({ limit: '1mb' }));
 
   // Enable CORS with multiple allowed origins
   const allowedOrigins = [
@@ -50,7 +58,7 @@ async function bootstrap() {
 
   const port = process.env.PORT || 4000;
   await app.listen(port);
-  console.log(`🚀 API running on http://localhost:${port}`);
+  Logger.log(`API running on http://localhost:${port}`, 'Bootstrap');
 }
 
 bootstrap();

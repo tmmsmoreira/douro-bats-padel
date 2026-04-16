@@ -1,4 +1,5 @@
 import type { Role, PlayerStatus } from './common';
+import type { Invitation } from './auth';
 
 /**
  * User entity
@@ -40,7 +41,7 @@ export interface Player {
   tier?: string;
   profilePhoto?: string | null;
   status?: PlayerStatus;
-  invitation?: any; // Will be typed with Invitation from auth.ts
+  invitation?: Invitation;
 }
 
 /**

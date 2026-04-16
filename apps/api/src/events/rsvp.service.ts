@@ -3,6 +3,12 @@ import { PrismaService } from '../prisma/prisma.service';
 import type { RSVPDto, RSVPResponse } from '@padel/types';
 import { RSVPStatus, PlayerStatus } from '@padel/types';
 import { NotificationService } from '../notifications/notification.service';
+import type { PrismaClient } from '@prisma/client';
+
+type TransactionClient = Omit<
+  PrismaClient,
+  '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'
+>;
 
 @Injectable()
 export class RSVPService {
@@ -201,20 +207,22 @@ export class RSVPService {
 
     const wasConfirmed = existingRSVP.status === RSVPStatus.CONFIRMED;
 
-    // Delete RSVP
-    await this.prisma.rSVP.delete({
-      where: {
-        eventId_playerId: {
-          eventId: event.id,
-          playerId: player.id,
+    // Wrap delete + promotion in a transaction to ensure atomicity
+    await this.prisma.$transaction(async (tx) => {
+      await tx.rSVP.delete({
+        where: {
+          eventId_playerId: {
+            eventId: event.id,
+            playerId: player.id,
+          },
         },
-      },
-    });
+      });
 
-    // If was confirmed, promote first waitlisted player
-    if (wasConfirmed) {
-      await this.promoteNextWaitlisted(event.id);
-    }
+      // If was confirmed, promote first waitlisted player
+      if (wasConfirmed) {
+        await this.promoteNextWaitlisted(event.id, tx);
+      }
+    });
 
     return {
       status: RSVPStatus.CANCELLED,
@@ -222,45 +230,12 @@ export class RSVPService {
     };
   }
 
-  async promoteNextWaitlisted(eventId: string) {
-    const event = await this.prisma.event.findUnique({
-      where: { id: eventId },
-      include: {
-        rsvps: {
-          where: { status: RSVPStatus.WAITLISTED },
-          orderBy: { position: 'asc' },
-          take: 1,
-          include: {
-            player: {
-              include: { user: true },
-            },
-          },
-        },
-      },
-    });
-
-    if (!event || event.rsvps.length === 0) {
-      return;
-    }
-
-    const nextPlayer = event.rsvps[0];
-
-    // Promote to confirmed
-    await this.prisma.rSVP.update({
-      where: {
-        eventId_playerId: {
-          eventId,
-          playerId: nextPlayer.playerId,
-        },
-      },
-      data: {
-        status: RSVPStatus.CONFIRMED,
-        position: 0,
-      },
-    });
-
-    // Reorder remaining waitlist
-    const remainingWaitlist = await this.prisma.rSVP.findMany({
+  /**
+   * Reorder waitlist positions sequentially starting from 1.
+   * Uses parallel updates for better performance.
+   */
+  private async reorderWaitlist(eventId: string, tx: TransactionClient): Promise<void> {
+    const remainingWaitlist = await tx.rSVP.findMany({
       where: {
         eventId,
         status: RSVPStatus.WAITLISTED,
@@ -268,19 +243,70 @@ export class RSVPService {
       orderBy: { position: 'asc' },
     });
 
-    for (let i = 0; i < remainingWaitlist.length; i++) {
-      await this.prisma.rSVP.update({
-        where: { id: remainingWaitlist[i].id },
-        data: { position: i + 1 },
+    if (remainingWaitlist.length === 0) return;
+
+    await Promise.all(
+      remainingWaitlist.map((rsvp, i) =>
+        tx.rSVP.update({
+          where: { id: rsvp.id },
+          data: { position: i + 1 },
+        })
+      )
+    );
+  }
+
+  async promoteNextWaitlisted(eventId: string, tx?: TransactionClient) {
+    const client = tx || this.prisma;
+
+    const runPromotion = async (prisma: TransactionClient) => {
+      const nextWaitlisted = await prisma.rSVP.findFirst({
+        where: {
+          eventId,
+          status: RSVPStatus.WAITLISTED,
+        },
+        orderBy: { position: 'asc' },
+        include: {
+          player: {
+            include: { user: true },
+          },
+        },
+      });
+
+      if (!nextWaitlisted) return;
+
+      // Promote to confirmed
+      await prisma.rSVP.update({
+        where: {
+          eventId_playerId: {
+            eventId,
+            playerId: nextWaitlisted.playerId,
+          },
+        },
+        data: {
+          status: RSVPStatus.CONFIRMED,
+          position: 0,
+        },
+      });
+
+      // Reorder remaining waitlist
+      await this.reorderWaitlist(eventId, prisma);
+
+      // Send promotion notification
+      await this.notificationService.sendPromotionNotification(
+        nextWaitlisted.player.user.email,
+        nextWaitlisted.player.user.name || 'Player',
+        { id: eventId } as any
+      );
+    };
+
+    // If we already have a transaction client, use it directly
+    if (tx) {
+      await runPromotion(tx);
+    } else {
+      await this.prisma.$transaction(async (newTx) => {
+        await runPromotion(newTx);
       });
     }
-
-    // Send promotion notification
-    await this.notificationService.sendPromotionNotification(
-      nextPlayer.player.user.email,
-      nextPlayer.player.user.name || 'Player',
-      event
-    );
   }
 
   async autoPromoteWaitlist(eventId: string) {
@@ -297,36 +323,60 @@ export class RSVPService {
       throw new BadRequestException('Cannot auto-promote after cutoff');
     }
 
-    // Keep promoting until capacity is full or no more waitlisted
-    let promoted = 0;
-    while (true) {
-      const confirmedCount = await this.prisma.rSVP.count({
-        where: {
-          eventId,
-          status: RSVPStatus.CONFIRMED,
-        },
-      });
+    // Calculate how many spots to fill in one query
+    const confirmedCount = await this.prisma.rSVP.count({
+      where: { eventId, status: RSVPStatus.CONFIRMED },
+    });
 
-      if (confirmedCount >= event.capacity) {
-        break;
-      }
-
-      const waitlistCount = await this.prisma.rSVP.count({
-        where: {
-          eventId,
-          status: RSVPStatus.WAITLISTED,
-        },
-      });
-
-      if (waitlistCount === 0) {
-        break;
-      }
-
-      await this.promoteNextWaitlisted(eventId);
-      promoted++;
+    const availableSpots = event.capacity - confirmedCount;
+    if (availableSpots <= 0) {
+      return { promoted: 0 };
     }
 
-    return { promoted };
+    // Fetch exactly the number of waitlisted players we can promote
+    const toPromote = await this.prisma.rSVP.findMany({
+      where: { eventId, status: RSVPStatus.WAITLISTED },
+      orderBy: { position: 'asc' },
+      take: availableSpots,
+      include: {
+        player: {
+          include: { user: true },
+        },
+      },
+    });
+
+    if (toPromote.length === 0) {
+      return { promoted: 0 };
+    }
+
+    // Bulk-promote in a single transaction
+    await this.prisma.$transaction(async (tx) => {
+      // Update all promoted RSVPs to CONFIRMED
+      await Promise.all(
+        toPromote.map((rsvp) =>
+          tx.rSVP.update({
+            where: { id: rsvp.id },
+            data: { status: RSVPStatus.CONFIRMED, position: 0 },
+          })
+        )
+      );
+
+      // Reorder remaining waitlist
+      await this.reorderWaitlist(eventId, tx);
+    });
+
+    // Send notifications in parallel (outside transaction to avoid long locks)
+    await Promise.all(
+      toPromote.map((rsvp) =>
+        this.notificationService.sendPromotionNotification(
+          rsvp.player.user.email,
+          rsvp.player.user.name || 'Player',
+          event
+        )
+      )
+    );
+
+    return { promoted: toPromote.length };
   }
 
   async removePlayerFromEvent(eventId: string, playerId: string) {
@@ -354,39 +404,29 @@ export class RSVPService {
     }
 
     const wasConfirmed = rsvp.status === RSVPStatus.CONFIRMED;
+    const wasWaitlisted = rsvp.status === RSVPStatus.WAITLISTED;
 
-    // Delete the RSVP
-    await this.prisma.rSVP.delete({
-      where: {
-        eventId_playerId: {
-          eventId,
-          playerId,
-        },
-      },
-    });
-
-    // If player was confirmed, promote next waitlisted player
-    if (wasConfirmed) {
-      await this.promoteNextWaitlisted(eventId);
-    }
-
-    // If player was waitlisted, reorder remaining waitlist
-    if (rsvp.status === RSVPStatus.WAITLISTED) {
-      const remainingWaitlist = await this.prisma.rSVP.findMany({
+    // Wrap delete + promotion/reorder in a transaction
+    await this.prisma.$transaction(async (tx) => {
+      await tx.rSVP.delete({
         where: {
-          eventId,
-          status: RSVPStatus.WAITLISTED,
+          eventId_playerId: {
+            eventId,
+            playerId,
+          },
         },
-        orderBy: { position: 'asc' },
       });
 
-      for (let i = 0; i < remainingWaitlist.length; i++) {
-        await this.prisma.rSVP.update({
-          where: { id: remainingWaitlist[i].id },
-          data: { position: i + 1 },
-        });
+      // If player was confirmed, promote next waitlisted player
+      if (wasConfirmed) {
+        await this.promoteNextWaitlisted(eventId, tx);
       }
-    }
+
+      // If player was waitlisted, reorder remaining waitlist
+      if (wasWaitlisted) {
+        await this.reorderWaitlist(eventId, tx);
+      }
+    });
 
     return { message: 'Player removed from event successfully' };
   }

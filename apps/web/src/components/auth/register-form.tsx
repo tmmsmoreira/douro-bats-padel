@@ -82,9 +82,18 @@ export function RegisterForm() {
       return;
     }
 
-    // Validate password length
-    if (password.length < 6) {
+    // Validate password strength
+    if (password.length < 8) {
       setError(t('passwordTooShort'));
+      setIsLoading(false);
+      return;
+    }
+
+    if (!/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+      setError(
+        t('passwordRequirements') ||
+          'Password must contain at least one uppercase letter and one number'
+      );
       setIsLoading(false);
       return;
     }

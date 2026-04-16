@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Logger,
   NotFoundException,
   BadRequestException,
   ConflictException,
@@ -11,6 +12,8 @@ import type { CreateInvitationDto, Invitation, InvitationValidationResponse } fr
 
 @Injectable()
 export class InvitationsService {
+  private readonly logger = new Logger(InvitationsService.name);
+
   constructor(
     private prisma: PrismaService,
     private emailService: EmailService
@@ -81,7 +84,7 @@ export class InvitationsService {
         invitation.invitedByUser?.name || 'Admin'
       );
     } catch (error) {
-      console.error('Failed to send invitation email:', error);
+      this.logger.error('Failed to send invitation email:', error);
       emailSent = false;
       // Don't fail the invitation creation if email fails
     }
@@ -273,7 +276,7 @@ export class InvitationsService {
         invitation.invitedByUser?.name || 'Admin'
       );
     } catch (error) {
-      console.error('Failed to resend invitation email:', error);
+      this.logger.error('Failed to resend invitation email:', error);
       throw new BadRequestException('Failed to send invitation email');
     }
 

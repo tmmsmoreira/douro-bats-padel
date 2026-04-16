@@ -1,10 +1,11 @@
 import { auth } from './auth';
+import { API_URL } from './constants';
 
 class ApiClient {
   private baseUrl: string;
 
   constructor() {
-    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    this.baseUrl = API_URL;
   }
 
   private async getHeaders(): Promise<HeadersInit> {

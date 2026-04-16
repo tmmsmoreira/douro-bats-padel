@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
 import { render } from '@react-email/components';
@@ -8,12 +8,13 @@ import InvitationEmail from '../emails/invitation-email';
 
 @Injectable()
 export class EmailService {
+  private readonly logger = new Logger(EmailService.name);
   private resend: Resend;
 
   constructor(private configService: ConfigService) {
     const apiKey = this.configService.get<string>('RESEND_API_KEY');
     if (!apiKey) {
-      console.warn('[EMAIL] RESEND_API_KEY not configured. Email sending will fail.');
+      this.logger.warn('[EMAIL] RESEND_API_KEY not configured. Email sending will fail.');
     }
     this.resend = new Resend(apiKey);
   }
@@ -34,14 +35,14 @@ export class EmailService {
       });
 
       if (error) {
-        console.error(`[EMAIL] Failed to send email to ${to}:`, error);
+        this.logger.error(`[EMAIL] Failed to send email to ${to}:`, error);
         throw error;
       }
 
-      console.log(`[EMAIL] Message sent to ${to}: ${data?.id}`);
+      this.logger.log(`[EMAIL] Message sent to ${to}: ${data?.id}`);
       return data;
     } catch (error) {
-      console.error(`[EMAIL] Failed to send email to ${to}:`, error);
+      this.logger.error(`[EMAIL] Failed to send email to ${to}:`, error);
       throw error;
     }
   }

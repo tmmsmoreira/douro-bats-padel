@@ -1,8 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+import { useAuthFetch } from './use-api';
 
 interface CreateInvitationDto {
   email: string;
@@ -15,23 +13,11 @@ interface CreateInvitationDto {
  */
 export function useCreateInvitation(onSuccessCallback?: (data: unknown) => void) {
   const queryClient = useQueryClient();
-  const { data: session } = useSession();
+  const authFetch = useAuthFetch();
 
   return useMutation({
     mutationFn: async (dto: CreateInvitationDto) => {
-      const res = await fetch(`${API_URL}/invitations`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session?.accessToken}`,
-        },
-        body: JSON.stringify(dto),
-      });
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || 'Failed to create invitation');
-      }
-      return res.json();
+      return authFetch.post<unknown>('/invitations', dto);
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['players'] });
@@ -49,20 +35,11 @@ export function useCreateInvitation(onSuccessCallback?: (data: unknown) => void)
  */
 export function useRevokeInvitation(playerId: string, onSuccessCallback?: () => void) {
   const queryClient = useQueryClient();
-  const { data: session } = useSession();
+  const authFetch = useAuthFetch();
 
   return useMutation({
     mutationFn: async (invitationId: string) => {
-      const res = await fetch(`${API_URL}/invitations/${invitationId}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${session?.accessToken}`,
-        },
-      });
-
-      if (!res.ok) {
-        throw new Error('Failed to revoke invitation');
-      }
+      return authFetch.delete<void>(`/invitations/${invitationId}`);
     },
     onSuccess: async () => {
       toast.success('Invitation revoked successfully');
@@ -83,20 +60,11 @@ export function useRevokeInvitation(playerId: string, onSuccessCallback?: () => 
  * Hook to resend an invitation
  */
 export function useResendInvitation() {
-  const { data: session } = useSession();
+  const authFetch = useAuthFetch();
 
   return useMutation({
     mutationFn: async (invitationId: string) => {
-      const res = await fetch(`${API_URL}/invitations/${invitationId}/resend`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${session?.accessToken}`,
-        },
-      });
-
-      if (!res.ok) {
-        throw new Error('Failed to resend invitation');
-      }
+      return authFetch.post<void>(`/invitations/${invitationId}/resend`);
     },
     onSuccess: () => {
       toast.success('Invitation resent successfully');

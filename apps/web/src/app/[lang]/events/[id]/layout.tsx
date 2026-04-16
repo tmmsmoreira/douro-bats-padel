@@ -14,8 +14,7 @@ import { EventActionsDropdown } from '@/components/admin/event-actions-dropdown'
 import { useIsFromBfcache, useIsEditor } from '@/hooks';
 import { useDraw } from '@/hooks/use-draws';
 import type { EventWithRSVPSerialized } from '@padel/types';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+import { API_URL } from '@/lib/constants';
 
 export default function EventLayout({
   children,

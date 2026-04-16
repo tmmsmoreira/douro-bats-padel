@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Logger,
   Post,
   Patch,
   Delete,
@@ -14,6 +15,7 @@ import { EventsService } from './events.service';
 import { RSVPService } from './rsvp.service';
 import type { CreateEventDto, RSVPDto } from '@padel/types';
 import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Public } from '../auth/decorators/public.decorator';
@@ -22,6 +24,8 @@ import { Role } from '@padel/types';
 @Controller('events')
 @UseGuards(OptionalJwtAuthGuard)
 export class EventsController {
+  private readonly logger = new Logger(EventsController.name);
+
   constructor(
     private eventsService: EventsService,
     private rsvpService: RSVPService
@@ -40,13 +44,15 @@ export class EventsController {
 
     // Debug logging
     if (process.env.NODE_ENV === 'development') {
-      console.log(
-        'GET /events - User:',
-        req.user
-          ? { sub: req.user.sub, email: req.user.email, roles: userRoles }
-          : 'not authenticated'
+      this.logger.log(
+        'GET /events - User:' +
+          JSON.stringify(
+            req.user
+              ? { sub: req.user.sub, email: req.user.email, roles: userRoles }
+              : 'not authenticated'
+          )
       );
-      console.log('GET /events - includeUnpublished:', isAdminOrEditor);
+      this.logger.log('GET /events - includeUnpublished: ' + isAdminOrEditor);
     }
 
     return this.eventsService.findAll(fromDate, toDate, userId, isAdminOrEditor);
@@ -100,6 +106,7 @@ export class EventsController {
   }
 
   @Post(':id/rsvp')
+  @UseGuards(JwtAuthGuard)
   async rsvp(@Param('id') id: string, @Body() dto: RSVPDto, @Request() req: any) {
     return this.rsvpService.handleRSVP(id, req.user.sub, dto);
   }

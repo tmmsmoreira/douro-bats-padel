@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { RankingService } from '../ranking/ranking.service';
 import type { Tier } from '@padel/types';
@@ -14,6 +14,8 @@ interface SubmitMatchDto {
 
 @Injectable()
 export class MatchesService {
+  private readonly logger = new Logger(MatchesService.name);
+
   constructor(
     private prisma: PrismaService,
     private rankingService: RankingService
@@ -105,7 +107,7 @@ export class MatchesService {
       await this.rankingService.computeRankingsForEvent(eventId);
     } catch (error) {
       // Log error but don't fail the publish operation
-      console.error('Failed to compute rankings:', error);
+      this.logger.error('Failed to compute rankings:', error);
     }
 
     return {

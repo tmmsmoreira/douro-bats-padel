@@ -61,7 +61,7 @@ export const validators = {
    */
   email: (message = 'Invalid email address'): Validator => {
     return (value: string) => {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
       const isValid = emailRegex.test(value);
       return {
         isValid,

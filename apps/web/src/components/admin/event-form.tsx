@@ -319,7 +319,8 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
           parseInt(formData.capacity) !== initialData.capacity ||
           formData.rsvpOpensAt?.getTime() !== initialRsvpOpensAt?.getTime() ||
           formData.rsvpClosesAt?.getTime() !== initialRsvpClosesAt?.getTime() ||
-          JSON.stringify(allCourtIds.sort()) !== JSON.stringify(initialData.courtIds?.sort()) ||
+          JSON.stringify([...allCourtIds].sort()) !==
+            JSON.stringify([...(initialData.courtIds || [])].sort()) ||
           JSON.stringify(tierRules) !== JSON.stringify(initialData.tierRules);
 
         if (!hasChanges) {

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import seedrandom from 'seedrandom';
@@ -35,6 +35,8 @@ interface DrawConstraints {
 
 @Injectable()
 export class DrawService {
+  private readonly logger = new Logger(DrawService.name);
+
   constructor(
     private prisma: PrismaService,
     private configService: ConfigService,
@@ -159,7 +161,7 @@ export class DrawService {
       };
     });
 
-    console.log(
+    this.logger.log(
       `Tier assignment: ${masterCount} MASTERS, ${explorerCount} EXPLORERS (Total: ${players.length})`
     );
 
@@ -237,7 +239,7 @@ export class DrawService {
     const excessPlayers = sortedRsvps.filter((r) => !playersInDraw.has(r.player.id));
 
     if (excessPlayers.length > 0) {
-      console.log(`Moving ${excessPlayers.length} excess players to waitlist`);
+      this.logger.log(`Moving ${excessPlayers.length} excess players to waitlist`);
 
       // Get current max position in waitlist (if any existing waitlisted players)
       const existingWaitlist = await this.prisma.rSVP.findMany({
@@ -400,7 +402,7 @@ export class DrawService {
     const used = new Set<string>();
 
     // Log player tiers for debugging
-    console.log(
+    this.logger.log(
       'Creating teams for players:',
       sortedPlayers.map((p) => ({ name: p.name, tier: p.tier }))
     );
@@ -438,7 +440,7 @@ export class DrawService {
           const teamKey1 = this.getTeamKey(player1.id, player2.id);
           if (previousWeekTeams.has(teamKey1)) {
             score -= 5000; // Extra heavy penalty for duplicate teams from previous week
-            console.log(
+            this.logger.log(
               `Avoiding duplicate team from previous week: ${player1.name} + ${player2.name}`
             );
           }
@@ -454,7 +456,7 @@ export class DrawService {
       }
 
       if (bestPartner) {
-        console.log(`Paired ${player1.name} with ${bestPartner.name}`);
+        this.logger.log(`Paired ${player1.name} with ${bestPartner.name}`);
         teams.push({
           player1,
           player2: bestPartner,
@@ -463,11 +465,11 @@ export class DrawService {
         used.add(player1.id);
         used.add(bestPartner.id);
       } else {
-        console.log(`WARNING: Could not find partner for ${player1.name} (${player1.tier})`);
+        this.logger.log(`WARNING: Could not find partner for ${player1.name} (${player1.tier})`);
       }
     }
 
-    console.log(`Created ${teams.length} teams from ${players.length} players`);
+    this.logger.log(`Created ${teams.length} teams from ${players.length} players`);
     return teams;
   }
 
@@ -610,11 +612,11 @@ export class DrawService {
     });
 
     if (!previousEvent || previousEvent.draws.length === 0) {
-      console.log('No previous event found or no draws available');
+      this.logger.log('No previous event found or no draws available');
       return teamKeys;
     }
 
-    console.log(`Found previous event: ${previousEvent.id} on ${previousEvent.date}`);
+    this.logger.log(`Found previous event: ${previousEvent.id} on ${previousEvent.date}`);
 
     // Extract all team pairings from the previous event
     for (const draw of previousEvent.draws) {
@@ -632,7 +634,7 @@ export class DrawService {
       }
     }
 
-    console.log(`Found ${teamKeys.size} team pairings from previous week to avoid`);
+    this.logger.log(`Found ${teamKeys.size} team pairings from previous week to avoid`);
     return teamKeys;
   }
 
@@ -793,9 +795,9 @@ export class DrawService {
     }
 
     // Audit log
-    console.log(`[AUDIT] Assignment ${assignmentId} updated by ${updatedBy}`);
-    console.log(`Before: TeamA=${assignment.teamA}, TeamB=${assignment.teamB}`);
-    console.log(`After: TeamA=${teamA}, TeamB=${teamB}`);
+    this.logger.log(`[AUDIT] Assignment ${assignmentId} updated by ${updatedBy}`);
+    this.logger.log(`Before: TeamA=${assignment.teamA}, TeamB=${assignment.teamB}`);
+    this.logger.log(`After: TeamA=${teamA}, TeamB=${teamB}`);
 
     return this.prisma.assignment.update({
       where: { id: assignmentId },
@@ -915,7 +917,7 @@ export class DrawService {
     // Move all WAITLISTED players back to CONFIRMED status
     // This allows them to be included in a new draw if regenerated
     if (event.rsvps.length > 0) {
-      console.log(`Restoring ${event.rsvps.length} waitlisted players to CONFIRMED status`);
+      this.logger.log(`Restoring ${event.rsvps.length} waitlisted players to CONFIRMED status`);
 
       await this.prisma.rSVP.updateMany({
         where: {

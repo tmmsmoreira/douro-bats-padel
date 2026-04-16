@@ -1,10 +1,12 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import type { CreateEventDto, EventWithRSVP, TierRules } from '@padel/types';
 import { EventState, RSVPStatus } from '@padel/types';
 
 @Injectable()
 export class EventsService {
+  private readonly logger = new Logger(EventsService.name);
+
   constructor(private prisma: PrismaService) {}
 
   /**
@@ -150,29 +152,55 @@ export class EventsService {
       };
     }
 
+    // Fetch events without loading full RSVP + player + user data
     const events = await this.prisma.event.findMany({
       where,
       include: {
         venue: true,
-        rsvps: {
-          include: {
-            player: {
-              include: {
-                user: true,
-              },
-            },
-          },
-        },
       },
       orderBy: {
         date: 'asc',
       },
     });
 
+    if (events.length === 0) return [];
+
+    const eventIds = events.map((e) => e.id);
+
+    // Get RSVP counts grouped by eventId and status in a single query
+    const rsvpCounts = await this.prisma.rSVP.groupBy({
+      by: ['eventId', 'status'],
+      where: { eventId: { in: eventIds } },
+      _count: true,
+    });
+
+    // Build a lookup map: eventId -> { confirmed, waitlisted }
+    const countsMap = new Map<string, { confirmed: number; waitlisted: number }>();
+    for (const row of rsvpCounts) {
+      const entry = countsMap.get(row.eventId) || { confirmed: 0, waitlisted: 0 };
+      if (row.status === RSVPStatus.CONFIRMED) entry.confirmed = row._count;
+      if (row.status === RSVPStatus.WAITLISTED) entry.waitlisted = row._count;
+      countsMap.set(row.eventId, entry);
+    }
+
+    // Get user's RSVPs for all events in a single query (if logged in)
+    let userRsvpMap = new Map<string, { status: string; position: number }>();
+    if (userId) {
+      const player = await this.prisma.playerProfile.findUnique({ where: { userId } });
+      if (player) {
+        const userRsvps = await this.prisma.rSVP.findMany({
+          where: { eventId: { in: eventIds }, playerId: player.id },
+          select: { eventId: true, status: true, position: true },
+        });
+        for (const rsvp of userRsvps) {
+          userRsvpMap.set(rsvp.eventId, { status: rsvp.status, position: rsvp.position });
+        }
+      }
+    }
+
     return events.map((event) => {
-      const confirmedCount = event.rsvps.filter((r) => r.status === 'CONFIRMED').length;
-      const waitlistCount = event.rsvps.filter((r) => r.status === 'WAITLISTED').length;
-      const userRSVP = userId ? event.rsvps.find((r) => r.player.userId === userId) : undefined;
+      const counts = countsMap.get(event.id) || { confirmed: 0, waitlisted: 0 };
+      const userRSVP = userRsvpMap.get(event.id);
 
       return {
         id: event.id,
@@ -190,8 +218,8 @@ export class EventsService {
               name: event.venue.name,
             }
           : undefined,
-        confirmedCount,
-        waitlistCount,
+        confirmedCount: counts.confirmed,
+        waitlistCount: counts.waitlisted,
         userRSVP: userRSVP
           ? {
               status: userRSVP.status,
@@ -230,7 +258,7 @@ export class EventsService {
     });
 
     if (!event) {
-      console.log(`Event not found in database: ${id}`);
+      this.logger.log(`Event not found in database: ${id}`);
       throw new NotFoundException('Event not found');
     }
 
@@ -244,7 +272,7 @@ export class EventsService {
         EventState.PUBLISHED,
       ];
       if (!allowedStates.includes(event.state as string)) {
-        console.log(
+        this.logger.log(
           `Event ${id} exists but state ${event.state} is not in allowed states for non-admin users`
         );
         throw new NotFoundException('Event not found');

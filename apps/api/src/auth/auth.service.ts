@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Logger,
   UnauthorizedException,
   ConflictException,
   BadRequestException,
@@ -23,8 +24,14 @@ import { Role } from '@padel/types';
 import { EmailService } from '../notifications/email.service';
 import { InvitationsService } from '../invitations/invitations.service';
 
+const BCRYPT_SALT_ROUNDS = 10;
+const VERIFICATION_TOKEN_TTL_MS = 86400000; // 24 hours
+const RESET_TOKEN_TTL_MS = 3600000; // 1 hour
+
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
@@ -34,7 +41,7 @@ export class AuthService {
     private invitationsService: InvitationsService
   ) {}
 
-  async signup(dto: SignupDto): Promise<{ message: string; token?: string }> {
+  async signup(dto: SignupDto): Promise<{ message: string }> {
     // Validate invitation token
     if (!dto.invitationToken) {
       throw new BadRequestException('Invitation token is required');
@@ -59,7 +66,7 @@ export class AuthService {
       throw new ConflictException('Email already registered');
     }
 
-    const passwordHash = await bcrypt.hash(dto.password, 10);
+    const passwordHash = await bcrypt.hash(dto.password, BCRYPT_SALT_ROUNDS);
 
     // Generate email verification token
     const verificationToken = crypto.randomBytes(32).toString('hex');
@@ -67,7 +74,7 @@ export class AuthService {
       .createHash('sha256')
       .update(verificationToken)
       .digest('hex');
-    const emailVerificationExpires = new Date(Date.now() + 86400000); // 24 hours from now
+    const emailVerificationExpires = new Date(Date.now() + VERIFICATION_TOKEN_TTL_MS); // 24 hours from now
 
     const user = await this.prisma.user.create({
       data: {
@@ -94,7 +101,7 @@ export class AuthService {
     try {
       await this.invitationsService.markAsUsed(dto.invitationToken);
     } catch (error) {
-      console.error('Failed to mark invitation as used:', error);
+      this.logger.error('Failed to mark invitation as used:', error);
       // Don't fail registration if this fails
     }
 
@@ -106,17 +113,12 @@ export class AuthService {
         verificationToken
       );
     } catch (error) {
-      console.error('Failed to send verification email:', error);
+      this.logger.error('Failed to send verification email:', error);
       // Don't fail registration if email fails
     }
 
-    // For development: return the token
     return {
       message: 'Registration successful! Please check your email to verify your account.',
-      token:
-        this.configService.get<string>('NODE_ENV') === 'development'
-          ? verificationToken
-          : undefined,
     };
   }
 
@@ -190,7 +192,7 @@ export class AuthService {
       try {
         await this.invitationsService.markAsUsed(dto.invitationToken);
       } catch (error) {
-        console.error('Failed to mark invitation as used:', error);
+        this.logger.error('Failed to mark invitation as used:', error);
         // Don't fail registration if this fails
       }
     } else {
@@ -253,7 +255,7 @@ export class AuthService {
     };
   }
 
-  async forgotPassword(dto: ForgotPasswordDto): Promise<{ message: string; token?: string }> {
+  async forgotPassword(dto: ForgotPasswordDto): Promise<{ message: string }> {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
@@ -266,7 +268,7 @@ export class AuthService {
     // Generate reset token
     const resetToken = crypto.randomBytes(32).toString('hex');
     const resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-    const resetPasswordExpires = new Date(Date.now() + 3600000); // 1 hour from now
+    const resetPasswordExpires = new Date(Date.now() + RESET_TOKEN_TTL_MS); // 1 hour from now
 
     await this.prisma.user.update({
       where: { id: user.id },
@@ -280,13 +282,12 @@ export class AuthService {
     try {
       await this.emailService.sendPasswordResetEmail(user.email, user.name || 'User', resetToken);
     } catch (error) {
-      console.error('Failed to send password reset email:', error);
+      this.logger.error('Failed to send password reset email:', error);
       // Don't fail the request if email fails
     }
 
     return {
       message: 'If the email exists, a password reset link has been sent',
-      token: this.configService.get<string>('NODE_ENV') === 'development' ? resetToken : undefined,
     };
   }
 
@@ -306,7 +307,7 @@ export class AuthService {
       throw new BadRequestException('Invalid or expired reset token');
     }
 
-    const passwordHash = await bcrypt.hash(dto.password, 10);
+    const passwordHash = await bcrypt.hash(dto.password, BCRYPT_SALT_ROUNDS);
 
     await this.prisma.user.update({
       where: { id: user.id },
@@ -321,7 +322,7 @@ export class AuthService {
   }
 
   private async generateTokens(userId: string, email: string, roles: Role[]): Promise<AuthTokens> {
-    const payload = { sub: userId, email, roles };
+    const payload = { sub: userId, email, roles, iss: 'padel-api', aud: 'padel-app' };
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload),
@@ -337,7 +338,27 @@ export class AuthService {
     };
   }
 
+  private validateProfilePhotoUrl(url: string): void {
+    if (url.length > 2048) {
+      throw new BadRequestException('Profile photo URL is too long (max 2048 characters)');
+    }
+
+    try {
+      const parsed = new URL(url);
+      const isDev = this.configService.get<string>('NODE_ENV') === 'development';
+      const allowedProtocols = isDev ? ['https:', 'http:'] : ['https:'];
+      if (!allowedProtocols.includes(parsed.protocol)) {
+        throw new BadRequestException('Profile photo URL must use HTTPS');
+      }
+    } catch (error) {
+      if (error instanceof BadRequestException) throw error;
+      throw new BadRequestException('Profile photo URL is not a valid URL');
+    }
+  }
+
   async updateProfilePhoto(userId: string, profilePhoto: string) {
+    this.validateProfilePhotoUrl(profilePhoto);
+
     const user = await this.prisma.user.update({
       where: { id: userId },
       data: { profilePhoto },
@@ -365,18 +386,8 @@ export class AuthService {
       profilePhoto?: string;
     }
   ) {
-    // Check if phone number is already taken by another user
-    if (data.phoneNumber) {
-      const existingUser = await this.prisma.user.findFirst({
-        where: {
-          phoneNumber: data.phoneNumber,
-          NOT: { id: userId },
-        },
-      });
-
-      if (existingUser) {
-        throw new ConflictException('Phone number already in use');
-      }
+    if (data.profilePhoto) {
+      this.validateProfilePhotoUrl(data.profilePhoto);
     }
 
     const updateData: any = {};
@@ -387,13 +398,21 @@ export class AuthService {
       updateData.dateOfBirth = data.dateOfBirth ? new Date(data.dateOfBirth) : null;
     }
 
-    const user = await this.prisma.user.update({
-      where: { id: userId },
-      data: updateData,
-      include: {
-        player: true,
-      },
-    });
+    let user;
+    try {
+      user = await this.prisma.user.update({
+        where: { id: userId },
+        data: updateData,
+        include: {
+          player: true,
+        },
+      });
+    } catch (error: any) {
+      if (error.code === 'P2002' && error.meta?.target?.includes('phoneNumber')) {
+        throw new ConflictException('Phone number already in use');
+      }
+      throw error;
+    }
 
     return {
       id: user.id,
@@ -435,7 +454,7 @@ export class AuthService {
     return { message: 'Email verified successfully! You can now log in.' };
   }
 
-  async resendVerificationEmail(email: string): Promise<{ message: string; token?: string }> {
+  async resendVerificationEmail(email: string): Promise<{ message: string }> {
     const user = await this.prisma.user.findUnique({
       where: { email },
     });
@@ -457,7 +476,7 @@ export class AuthService {
       .createHash('sha256')
       .update(verificationToken)
       .digest('hex');
-    const emailVerificationExpires = new Date(Date.now() + 86400000); // 24 hours from now
+    const emailVerificationExpires = new Date(Date.now() + VERIFICATION_TOKEN_TTL_MS); // 24 hours from now
 
     await this.prisma.user.update({
       where: { id: user.id },
@@ -475,17 +494,12 @@ export class AuthService {
         verificationToken
       );
     } catch (error) {
-      console.error('Failed to send verification email:', error);
+      this.logger.error('Failed to send verification email:', error);
       throw new BadRequestException('Failed to send verification email');
     }
 
-    // For development: return the token
     return {
       message: 'Verification email sent! Please check your inbox.',
-      token:
-        this.configService.get<string>('NODE_ENV') === 'development'
-          ? verificationToken
-          : undefined,
     };
   }
 }

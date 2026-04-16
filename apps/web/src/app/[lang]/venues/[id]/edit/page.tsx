@@ -10,8 +10,7 @@ import { EditorGuard } from '@/components/shared/editor-guard';
 import { LoadingState } from '@/components/shared/loading-state';
 import { useMinimumLoading } from '@/hooks/use-minimum-loading';
 import { Card, CardContent } from '@/components/ui/card';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+import { API_URL } from '@/lib/constants';
 
 interface Venue {
   id: string;

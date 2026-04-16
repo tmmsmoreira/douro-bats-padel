@@ -3,8 +3,6 @@ import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
 import { useAuthFetch } from './use-api';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-
 interface UserProfile {
   id: string;
   email: string;
@@ -51,28 +49,11 @@ interface UpdateProfileData {
 export function useUpdateProfile(onSuccessCallback?: () => void) {
   const queryClient = useQueryClient();
   const { data: session, update: updateSession } = useSession();
+  const authFetch = useAuthFetch();
 
   return useMutation({
     mutationFn: async (data: UpdateProfileData) => {
-      if (!session?.accessToken) {
-        throw new Error('No access token');
-      }
-
-      const res = await fetch(`${API_URL}/auth/profile`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.accessToken}`,
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({ message: res.statusText }));
-        throw new Error(errorData.message || res.statusText);
-      }
-
-      return res.json();
+      return authFetch.patch<UserProfile>('/auth/profile', data);
     },
     onSuccess: async (data) => {
       // Update the session with new user data

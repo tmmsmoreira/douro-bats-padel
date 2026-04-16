@@ -196,24 +196,20 @@ export class AuthService {
         // Don't fail registration if this fails
       }
     } else {
-      // For existing users, only update profile photo
-      // Do NOT auto-verify email if they signed up with credentials
-      const updateData: { profilePhoto?: string } = {};
+      // For existing users, update profile photo and verify email
+      // Google OAuth proves email ownership, so it's safe to mark as verified
+      const updateData: { profilePhoto?: string; emailVerified?: boolean } = {};
       if (dto.profilePhoto && dto.profilePhoto !== user.profilePhoto) {
         updateData.profilePhoto = dto.profilePhoto;
+      }
+      if (!user.emailVerified) {
+        updateData.emailVerified = true;
       }
 
       user = await this.prisma.user.update({
         where: { id: user.id },
         data: updateData,
       });
-
-      // Check if email is verified for existing users
-      if (!user.emailVerified) {
-        throw new UnauthorizedException(
-          'Please verify your email before logging in. Check your inbox for the verification link.'
-        );
-      }
     }
 
     return this.generateTokens(user.id, user.email, user.roles as Role[]);

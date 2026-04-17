@@ -10,10 +10,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from '@/i18n/navigation';
 import { Trophy, Users, TrendingUp, Calendar, ArrowRight, Smartphone, Check } from 'lucide-react';
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { HomeUpcomingEvents } from '@/components/home/home-upcoming-events';
 import { usePWAInstall } from '@/hooks/use-pwa-install';
+import { PWAInstallInstructions } from '@/components/shared/pwa-install-instructions';
 import Image from 'next/image';
 
 export default function HomePage() {
@@ -434,7 +435,8 @@ function HowItWorksSection({ t }: { t: (key: string) => string }) {
 
 // Connect with App Section
 function ConnectAppSection({ t }: { t: (key: string) => string }) {
-  const { isInstallable, isInstalled, installApp } = usePWAInstall();
+  const { canPromptInstall, isInstalled, installApp, platform } = usePWAInstall();
+  const [instructionsOpen, setInstructionsOpen] = useState(false);
 
   const features = [
     t('connectApp.features.0'),
@@ -508,18 +510,23 @@ function ConnectAppSection({ t }: { t: (key: string) => string }) {
                   <Check className="mr-2 h-4 w-4" />
                   {t('connectApp.installed')}
                 </Button>
-              ) : isInstallable ? (
+              ) : canPromptInstall ? (
                 <Button size="lg" onClick={installApp}>
                   <Smartphone className="mr-2 h-4 w-4" />
                   {t('connectApp.installButton')}
                 </Button>
               ) : (
-                <Button size="lg" variant="outline">
+                <Button size="lg" variant="outline" onClick={() => setInstructionsOpen(true)}>
                   <Smartphone className="mr-2 h-4 w-4" />
                   {t('connectApp.downloadButton')}
                 </Button>
               )}
             </div>
+            <PWAInstallInstructions
+              open={instructionsOpen}
+              onOpenChange={setInstructionsOpen}
+              platform={platform}
+            />
           </motion.div>
         </div>
       </div>

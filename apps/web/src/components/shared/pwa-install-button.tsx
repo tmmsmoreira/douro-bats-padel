@@ -11,11 +11,10 @@ import { usePWAInstall } from '@/hooks/use-pwa-install';
  * Automatically hides when the app is already installed or not installable
  */
 export function PWAInstallButton() {
-  const { isInstallable, installApp } = usePWAInstall();
+  const { canPromptInstall, installApp } = usePWAInstall();
   const tFooter = useTranslations('footer');
 
-  // Don't render anything if the app is not installable
-  if (!isInstallable) {
+  if (!canPromptInstall) {
     return null;
   }
 

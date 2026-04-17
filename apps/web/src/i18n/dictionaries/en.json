@@ -238,7 +238,87 @@
       ],
       "installButton": "Install App",
       "downloadButton": "Download App",
-      "installed": "App Installed"
+      "installed": "App Installed",
+      "manualInstall": {
+        "iosSafari": {
+          "title": "Install on iPhone or iPad",
+          "description": "Safari lets you add this app to your home screen.",
+          "steps": [
+            "Tap the **Share** icon in the bottom toolbar.",
+            "Scroll down and choose **Add to Home Screen**.",
+            "Tap **Add** to confirm."
+          ],
+          "note": "Push notifications require opening the app from the home screen icon."
+        },
+        "iosOther": {
+          "title": "Install on iOS",
+          "description": "On iOS, only Safari can install web apps.",
+          "steps": [
+            "Open **Safari** and visit this page.",
+            "Tap the **Share** icon in the bottom toolbar.",
+            "Choose **Add to Home Screen**, then tap **Add**."
+          ],
+          "note": "Chrome, Firefox and other iOS browsers use WebKit but do not expose the install action."
+        },
+        "macSafari": {
+          "title": "Install on Mac",
+          "description": "Safari 17 and newer can add this site to your Dock.",
+          "steps": [
+            "Click **File** in the Safari menu bar.",
+            "Choose **Add to Dock…**.",
+            "Confirm the name and icon, then click **Add**."
+          ],
+          "note": "Requires macOS Sonoma with Safari 17 or newer."
+        },
+        "arc": {
+          "title": "Install in Arc",
+          "description": "Arc handles PWAs through its own menu.",
+          "steps": [
+            "Click the **current URL** in the address bar.",
+            "Choose **Create App…** from the menu.",
+            "Confirm to add the app to your sidebar."
+          ],
+          "note": "Arc suppresses the standard install prompt — use the menu instead."
+        },
+        "firefox": {
+          "title": "Install with Firefox",
+          "description": "Firefox desktop does not support PWA installation.",
+          "steps": [
+            "Open this page in **Chrome**, **Edge**, **Arc**, or **Safari**.",
+            "Follow that browser's install flow to add the app."
+          ],
+          "note": "Firefox on Android supports PWAs via the browser menu."
+        },
+        "chromiumDesktop": {
+          "title": "Install this app",
+          "description": "Your browser can add this app to your system.",
+          "steps": [
+            "Look for the **install icon** in the address bar (a small monitor with a down arrow).",
+            "Click it, then choose **Install**.",
+            "If you don't see it, open the browser menu and pick **Install app**."
+          ],
+          "note": ""
+        },
+        "chromiumAndroid": {
+          "title": "Install on Android",
+          "description": "Add this app to your home screen.",
+          "steps": [
+            "Tap the browser **menu** (three dots).",
+            "Choose **Install app** or **Add to Home screen**.",
+            "Confirm to finish."
+          ],
+          "note": ""
+        },
+        "generic": {
+          "title": "Install this app",
+          "description": "We couldn't detect an automatic install option for your browser.",
+          "steps": [
+            "Open the browser menu and look for **Install app** or **Add to Home Screen**.",
+            "If the option is missing, try Chrome, Edge or Safari instead."
+          ],
+          "note": ""
+        }
+      }
     },
     "features": {
       "title": "Everything You Need",

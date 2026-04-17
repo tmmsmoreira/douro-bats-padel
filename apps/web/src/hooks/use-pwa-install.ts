@@ -1,42 +1,75 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-/**
- * Hook to handle PWA installation
- * Detects if the app can be installed and provides methods to trigger installation
- */
+export type PWAPlatform =
+  | 'chromium-desktop'
+  | 'chromium-android'
+  | 'safari-ios'
+  | 'safari-macos'
+  | 'arc'
+  | 'firefox'
+  | 'ios-other'
+  | 'unsupported';
+
+function detectPlatform(): PWAPlatform {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+    return 'unsupported';
+  }
+
+  const ua = navigator.userAgent;
+  const isIPad =
+    /iPad/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isIOS = /iPhone|iPod/.test(ua) || isIPad;
+  const isAndroid = /Android/.test(ua);
+  const isMac = /Macintosh/.test(ua) && !isIPad;
+  const isFirefox = /Firefox/.test(ua);
+  // Arc exposes a CSS custom property on the root element
+  const isArc =
+    typeof getComputedStyle === 'function' &&
+    getComputedStyle(document.documentElement).getPropertyValue('--arc-palette-title').trim() !==
+      '';
+  const isSafari = /Safari/.test(ua) && !/Chrome|Chromium|Edg|OPR/.test(ua);
+
+  if (isIOS) {
+    return isSafari ? 'safari-ios' : 'ios-other';
+  }
+  if (isArc) return 'arc';
+  if (isFirefox) return 'firefox';
+  if (isMac && isSafari) return 'safari-macos';
+  if (isAndroid) return 'chromium-android';
+  return 'chromium-desktop';
+}
+
 export function usePWAInstall() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isInstallable, setIsInstallable] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [platform, setPlatform] = useState<PWAPlatform>('unsupported');
 
   useEffect(() => {
-    // Check if already installed (running in standalone mode)
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+    setPlatform(detectPlatform());
+
+    const isStandalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      // iOS Safari exposes this non-standard flag when launched from the home screen
+      (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
     if (isStandalone) {
       setIsInstalled(true);
       return;
     }
 
-    // Listen for the beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
-      // Prevent the mini-infobar from appearing on mobile
       e.preventDefault();
-      // Stash the event so it can be triggered later
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      setIsInstallable(true);
     };
 
-    // Listen for successful installation
     const handleAppInstalled = () => {
       setIsInstalled(true);
-      setIsInstallable(false);
       setDeferredPrompt(null);
     };
 
@@ -49,31 +82,30 @@ export function usePWAInstall() {
     };
   }, []);
 
+  const canPromptInstall = deferredPrompt !== null;
+
   const installApp = async () => {
-    if (!deferredPrompt) {
-      return;
-    }
-
-    // Show the install prompt
+    if (!deferredPrompt) return;
     await deferredPrompt.prompt();
-
-    // Wait for the user to respond to the prompt
-    const { outcome } = await deferredPrompt.userChoice;
-
-    if (outcome === 'accepted') {
-      console.log('User accepted the install prompt');
-    } else {
-      console.log('User dismissed the install prompt');
-    }
-
-    // Clear the deferredPrompt for next time
+    await deferredPrompt.userChoice;
     setDeferredPrompt(null);
-    setIsInstallable(false);
   };
 
+  const needsManualInstructions = useMemo(
+    () => !isInstalled && !canPromptInstall,
+    [isInstalled, canPromptInstall]
+  );
+
   return {
-    isInstallable,
+    /** True when the browser-native install prompt is available */
+    canPromptInstall,
+    /** True when the app is running standalone (already installed) */
     isInstalled,
+    /** True when we should show a manual instructions modal instead */
+    needsManualInstructions,
+    /** The detected browser/platform for choosing instructions */
+    platform,
+    /** Trigger the native install prompt (no-op when not available) */
     installApp,
   };
 }

@@ -30,3 +30,4 @@ export * from './offline-indicator';
 export * from './pull-to-refresh';
 export * from './skip-links';
 export * from './pwa-install-button';
+export * from './pwa-install-instructions';

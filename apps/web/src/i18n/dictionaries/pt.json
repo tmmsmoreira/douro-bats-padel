@@ -231,7 +231,87 @@
       ],
       "installButton": "Instalar App",
       "downloadButton": "Descarregar App",
-      "installed": "App Instalada"
+      "installed": "App Instalada",
+      "manualInstall": {
+        "iosSafari": {
+          "title": "Instalar no iPhone ou iPad",
+          "description": "O Safari permite adicionar esta app ao teu ecrã inicial.",
+          "steps": [
+            "Toca no ícone **Partilhar** na barra inferior.",
+            "Desliza até encontrar **Adicionar ao Ecrã Principal**.",
+            "Toca em **Adicionar** para confirmar."
+          ],
+          "note": "As notificações push só funcionam quando abres a app pelo ícone do ecrã principal."
+        },
+        "iosOther": {
+          "title": "Instalar no iOS",
+          "description": "No iOS, apenas o Safari consegue instalar apps web.",
+          "steps": [
+            "Abre o **Safari** e visita esta página.",
+            "Toca no ícone **Partilhar** na barra inferior.",
+            "Escolhe **Adicionar ao Ecrã Principal** e toca em **Adicionar**."
+          ],
+          "note": "Chrome, Firefox e outros browsers no iOS usam o WebKit mas não expõem a ação de instalar."
+        },
+        "macSafari": {
+          "title": "Instalar no Mac",
+          "description": "O Safari 17 ou mais recente pode adicionar esta app ao Dock.",
+          "steps": [
+            "Clica em **Ficheiro** na barra de menus do Safari.",
+            "Escolhe **Adicionar ao Dock…**.",
+            "Confirma o nome e o ícone e clica em **Adicionar**."
+          ],
+          "note": "Requer macOS Sonoma com Safari 17 ou mais recente."
+        },
+        "arc": {
+          "title": "Instalar no Arc",
+          "description": "O Arc gere PWAs através do seu próprio menu.",
+          "steps": [
+            "Clica no **URL atual** na barra de endereço.",
+            "Escolhe **Criar App…** no menu.",
+            "Confirma para adicionar a app à tua barra lateral."
+          ],
+          "note": "O Arc bloqueia o pedido de instalação padrão — usa o menu em vez disso."
+        },
+        "firefox": {
+          "title": "Instalar com Firefox",
+          "description": "O Firefox em desktop não suporta a instalação de PWAs.",
+          "steps": [
+            "Abre esta página em **Chrome**, **Edge**, **Arc** ou **Safari**.",
+            "Segue o fluxo de instalação desse browser para adicionar a app."
+          ],
+          "note": "O Firefox em Android suporta PWAs através do menu do browser."
+        },
+        "chromiumDesktop": {
+          "title": "Instalar esta app",
+          "description": "O teu browser pode adicionar esta app ao sistema.",
+          "steps": [
+            "Procura o **ícone de instalação** na barra de endereço (um pequeno monitor com uma seta).",
+            "Clica nele e escolhe **Instalar**.",
+            "Se não o vires, abre o menu do browser e escolhe **Instalar app**."
+          ],
+          "note": ""
+        },
+        "chromiumAndroid": {
+          "title": "Instalar no Android",
+          "description": "Adiciona esta app ao teu ecrã inicial.",
+          "steps": [
+            "Toca no **menu** do browser (três pontos).",
+            "Escolhe **Instalar app** ou **Adicionar ao Ecrã Principal**.",
+            "Confirma para concluir."
+          ],
+          "note": ""
+        },
+        "generic": {
+          "title": "Instalar esta app",
+          "description": "Não conseguimos detetar uma forma automática de instalar no teu browser.",
+          "steps": [
+            "Abre o menu do browser e procura **Instalar app** ou **Adicionar ao Ecrã Principal**.",
+            "Se a opção não existir, tenta com Chrome, Edge ou Safari."
+          ],
+          "note": ""
+        }
+      }
     },
     "features": {
       "title": "Tudo o Que Precisas",

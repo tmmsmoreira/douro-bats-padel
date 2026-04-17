@@ -278,14 +278,14 @@ function PlayersListContent({
         <>
           <motion.div
             key={`${searchQuery}-${statusFilter}-${currentPage}`}
-            initial="hidden"
+            initial={isBackNav ? false : 'hidden'}
             animate="show"
             variants={{
               hidden: { opacity: 0 },
               show: {
                 opacity: 1,
                 transition: {
-                  staggerChildren: 0.05,
+                  staggerChildren: isBackNav ? 0 : 0.05,
                 },
               },
             }}
@@ -296,7 +296,7 @@ function PlayersListContent({
                 key={player.id}
                 variants={{
                   hidden: { opacity: 0, y: 20 },
-                  show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+                  show: { opacity: 1, y: 0, transition: { duration: isBackNav ? 0 : 0.4 } },
                 }}
               >
                 <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>

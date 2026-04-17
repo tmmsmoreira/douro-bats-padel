@@ -177,11 +177,11 @@ function LeaderboardContent({
                 variants={{
                   show: {
                     transition: {
-                      staggerChildren: 0.05,
+                      staggerChildren: isBackNav ? 0 : 0.05,
                     },
                   },
                 }}
-                initial="hidden"
+                initial={isBackNav ? false : 'hidden'}
                 animate="show"
               >
                 {fullLeaderboard.map((entry, index) => {

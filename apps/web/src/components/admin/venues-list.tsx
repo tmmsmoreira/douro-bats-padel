@@ -28,6 +28,7 @@ import { useTranslations } from 'next-intl';
 import { getShimmerDataURL } from '@/lib/image-blur';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
 import { DataStateWrapper } from '@/components/shared/data-state-wrapper';
+import { useIsFromBfcache } from '@/hooks';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 import type { Venue } from '@padel/types';
@@ -98,17 +99,19 @@ function VenuesListContent({
   squarePenIconRef: React.RefObject<SquarePenIconHandle | null>;
   t: ReturnType<typeof useTranslations>;
 }) {
+  const isBackNav = useIsFromBfcache();
+
   return (
     <motion.div
       key="content"
-      initial="hidden"
+      initial={isBackNav ? false : 'hidden'}
       animate="show"
       variants={{
         hidden: { opacity: 0 },
         show: {
           opacity: 1,
           transition: {
-            staggerChildren: 0.1,
+            staggerChildren: isBackNav ? 0 : 0.1,
           },
         },
       }}
@@ -119,7 +122,7 @@ function VenuesListContent({
           key={venue.id}
           variants={{
             hidden: { opacity: 0, y: 20 },
-            show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+            show: { opacity: 1, y: 0, transition: { duration: isBackNav ? 0 : 0.4 } },
           }}
           whileHover={{ scale: 1.01 }}
         >

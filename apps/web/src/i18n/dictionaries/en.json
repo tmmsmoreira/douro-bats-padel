@@ -455,7 +455,14 @@
     "deleteInvitationError": "Failed to delete invitation",
     "invitationResent": "Invitation resent successfully",
     "resendInvitationError": "Failed to resend invitation",
-    "linkCopied": "Link copied to clipboard"
+    "linkCopied": "Link copied to clipboard",
+    "notifications": "Notifications",
+    "pushNotifications": "Push Notifications",
+    "pushNotificationsDescription": "Receive notifications about events, draws, and results",
+    "pushNotificationsBlocked": "Notifications are blocked. Please enable them in your browser settings.",
+    "pushSubscribed": "Push notifications enabled",
+    "pushUnsubscribed": "Push notifications disabled",
+    "pushError": "Failed to update notification preferences"
   },
   "admin": {
     "loading": "Loading...",

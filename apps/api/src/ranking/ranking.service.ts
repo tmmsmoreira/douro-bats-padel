@@ -170,8 +170,18 @@ export class RankingService {
     });
 
     // Notify players
-    const emails = players.map((p) => p.user?.email).filter(Boolean) as string[];
-    await this.notificationService.sendResultsPublished(emails[0], 'Players', event);
+    await Promise.allSettled(
+      players
+        .filter((p) => p.user?.email)
+        .map((p) =>
+          this.notificationService.sendResultsPublished(
+            p.user.email,
+            p.user.name || 'Player',
+            event,
+            p.userId
+          )
+        )
+    );
 
     return {
       playersUpdated: Object.keys(newRatings).length,

@@ -20,6 +20,7 @@ import { SquarePenIcon, SquarePenIconHandle } from 'lucide-animated';
 import { PageHeader } from '@/components/shared/page-header';
 import { Mail, CheckCircle, XCircle, TrendingUp } from 'lucide-react';
 import { StatusBadge } from '@/components/shared/status-badge';
+import { PushNotificationToggle } from '@/components/shared/push-notification-toggle';
 import type { PlayerProfileStatus } from '@/components/shared/status-badge';
 import type { UserWithPlayer } from '@padel/types';
 
@@ -539,6 +540,21 @@ function ProfileContent({
                 </div>
               </>
             )}
+          </CardContent>
+        </Card>
+      </motion.div>
+      {/* Notifications */}
+      <motion.div
+        initial={isBackNav ? false : { opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: isBackNav ? 0 : 0.5, delay: isBackNav ? 0 : 0.2 }}
+      >
+        <Card className="glass-card">
+          <CardHeader>
+            <CardTitle>{t('notifications')}</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <PushNotificationToggle />
           </CardContent>
         </Card>
       </motion.div>

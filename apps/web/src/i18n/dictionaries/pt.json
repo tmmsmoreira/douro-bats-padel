@@ -448,7 +448,14 @@
     "deleteInvitationError": "Falha ao eliminar convite",
     "invitationResent": "Convite reenviado com sucesso",
     "resendInvitationError": "Falha ao reenviar convite",
-    "linkCopied": "Link copiado para a área de transferência"
+    "linkCopied": "Link copiado para a área de transferência",
+    "notifications": "Notificações",
+    "pushNotifications": "Notificações Push",
+    "pushNotificationsDescription": "Receber notificações sobre eventos, sorteios e resultados",
+    "pushNotificationsBlocked": "As notificações estão bloqueadas. Ative-as nas definições do navegador.",
+    "pushSubscribed": "Notificações push ativadas",
+    "pushUnsubscribed": "Notificações push desativadas",
+    "pushError": "Falha ao atualizar preferências de notificação"
   },
   "admin": {
     "loading": "A carregar...",

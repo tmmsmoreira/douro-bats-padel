@@ -133,11 +133,12 @@ export class RSVPService {
           });
         }
 
-        // Send confirmation email
+        // Send confirmation notification
         await this.notificationService.sendRSVPConfirmation(
           player.user.email,
           player.user.name || 'Player',
-          event
+          event,
+          player.user.id
         );
 
         return {
@@ -183,7 +184,8 @@ export class RSVPService {
           player.user.email,
           player.user.name || 'Player',
           event,
-          position
+          position,
+          player.user.id
         );
 
         return {
@@ -295,7 +297,8 @@ export class RSVPService {
       await this.notificationService.sendPromotionNotification(
         nextWaitlisted.player.user.email,
         nextWaitlisted.player.user.name || 'Player',
-        { id: eventId } as any
+        { id: eventId } as any,
+        nextWaitlisted.player.user.id
       );
     };
 
@@ -371,7 +374,8 @@ export class RSVPService {
         this.notificationService.sendPromotionNotification(
           rsvp.player.user.email,
           rsvp.player.user.name || 'Player',
-          event
+          event,
+          rsvp.player.user.id
         )
       )
     );

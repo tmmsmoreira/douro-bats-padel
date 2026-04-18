@@ -16,6 +16,7 @@ export * from './use-online-status';
 export * from './use-players';
 export * from './use-profile';
 export * from './use-pull-to-refresh';
+export * from './use-push-notifications';
 export * from './use-pwa-install';
 export * from './use-rankings';
 export * from './use-scroll-direction';

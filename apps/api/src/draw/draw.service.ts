@@ -271,8 +271,10 @@ export class DrawService {
     }
 
     // Notify players
-    const emails = event.rsvps.map((r) => r.player.user.email).filter(Boolean) as string[];
-    await this.notificationService.announceEventOpen(emails, event);
+    const recipients = event.rsvps
+      .filter((r) => r.player.user.email)
+      .map((r) => ({ email: r.player.user.email, userId: r.player.user.id }));
+    await this.notificationService.announceEventOpen(recipients, event);
 
     return draw;
   }

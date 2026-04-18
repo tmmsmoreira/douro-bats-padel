@@ -12,6 +12,7 @@ import { MatchesModule } from './matches/matches.module';
 import { VenuesModule } from './venues/venues.module';
 import { PlayersModule } from './players/players.module';
 import { InvitationsModule } from './invitations/invitations.module';
+import { PushModule } from './push/push.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { InvitationsModule } from './invitations/invitations.module';
     RankingModule,
     DrawModule,
     MatchesModule,
+    PushModule,
   ],
   providers: [
     {

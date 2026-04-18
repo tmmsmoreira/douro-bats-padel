@@ -78,11 +78,14 @@ function Button({
     .filter((c) => /^(?:(?:sm|md|lg|xl|2xl):)?(?:w-|flex-[01a])/.test(c))
     .join(' ');
 
+  const isDisabled =
+    props.disabled || props['aria-disabled'] === true || props['aria-disabled'] === 'true';
+
   return (
     <motion.span
       className={widthClasses || undefined}
       style={{ display: 'inline-flex' }}
-      whileTap={{ scale: 0.97 }}
+      whileTap={isDisabled ? undefined : { scale: 0.97 }}
       transition={{
         type: 'spring',
         stiffness: 400,

@@ -1,18 +1,38 @@
 /// <reference lib="webworker" />
 declare const self: ServiceWorkerGlobalScope;
 
+// Lightweight lifecycle logging. Helps debug stuck SW registrations in prod
+// (DevTools → Application → Service Workers) without adding a logging SDK.
+// Kept behind a `[SW]` prefix so grep/filter works.
+const log = (...args: unknown[]) => console.log('[SW]', ...args);
+
+self.addEventListener('install', () => {
+  log('install');
+});
+
+self.addEventListener('activate', (event) => {
+  log('activate');
+  // Claim open clients so the new worker takes over them as soon as the
+  // user reloads (after confirming via the SW update prompt).
+  event.waitUntil(self.clients.claim());
+});
+
 // Client-triggered skip-waiting. We don't call skipWaiting() in the install
 // event because that would silently replace the running worker under the user
 // (losing in-flight mutations). Instead we wait for the client to confirm via
 // a postMessage after the UI prompts the user to reload.
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
+    log('SKIP_WAITING received — activating new worker');
     self.skipWaiting();
   }
 });
 
 self.addEventListener('push', (event) => {
-  if (!event.data) return;
+  if (!event.data) {
+    log('push received without data — ignoring');
+    return;
+  }
 
   const payload = event.data.json();
 
@@ -28,7 +48,11 @@ self.addEventListener('push', (event) => {
     vibrate: [100, 50, 100],
   };
 
-  event.waitUntil(self.registration.showNotification(payload.title, options));
+  event.waitUntil(
+    self.registration.showNotification(payload.title, options).catch((err) => {
+      log('showNotification failed:', err);
+    })
+  );
 });
 
 self.addEventListener('notificationclick', (event) => {

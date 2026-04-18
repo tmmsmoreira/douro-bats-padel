@@ -3,6 +3,7 @@
 import { useSession, signOut } from 'next-auth/react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useUpdateProfile, useProfile, useIsFromBfcache, useLeaderboard } from '@/hooks';
+import { useAuthFetch } from '@/hooks/use-api';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -351,16 +352,12 @@ function EmailVerificationBanner({
   t: ReturnType<typeof useTranslations>;
 }) {
   const [isSending, setIsSending] = useState(false);
+  const authFetch = useAuthFetch();
 
   const handleResend = async () => {
     setIsSending(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/resend-verification`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-      if (!res.ok) throw new Error('Request failed');
+      await authFetch.post('/auth/resend-verification', { email });
       toast.success(t('verificationEmailSent'));
     } catch {
       toast.error(t('verificationEmailError'));

@@ -8,12 +8,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
+import { useAuthFetch } from '@/hooks/use-api';
+import { TIMINGS } from '@/lib/constants';
 
 export function VerifyEmailForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const t = useTranslations('auth.verifyEmail');
   const locale = useLocale();
+  const authFetch = useAuthFetch();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -22,34 +25,20 @@ export function VerifyEmailForm() {
   const verifyEmail = useCallback(
     async (token: string) => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/verify-email`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token }),
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          setError(data.message || t('verificationFailed'));
-          setIsLoading(false);
-          return;
-        }
-
+        const data = await authFetch.post<{ message?: string }>('/auth/verify-email', { token });
         setSuccess(true);
-        setMessage(data.message);
+        setMessage(data.message ?? '');
         setIsLoading(false);
 
-        // Redirect to login after 3 seconds
         setTimeout(() => {
           router.push(`/${locale}/login`);
-        }, 3000);
-      } catch {
-        setError(t('verificationError'));
+        }, TIMINGS.ONLINE_TOAST_MS);
+      } catch (err) {
+        setError(err instanceof Error && err.message ? err.message : t('verificationError'));
         setIsLoading(false);
       }
     },
-    [router, t, locale]
+    [router, t, locale, authFetch]
   );
 
   useEffect(() => {

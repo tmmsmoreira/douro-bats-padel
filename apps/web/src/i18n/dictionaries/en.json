@@ -1,4 +1,16 @@
 {
+  "common": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "close": "Close",
+    "back": "Back",
+    "backToEvent": "Back to Event",
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "retry": "Retry"
+  },
   "errors": {
     "accessDenied": "Access Denied",
     "accessDeniedDescription": "You don't have permission to access this page.",

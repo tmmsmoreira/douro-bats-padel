@@ -7,10 +7,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
+import { useAuthFetch } from '@/hooks/use-api';
 
 export function ResendVerificationForm() {
   const t = useTranslations('auth.resendVerification');
   const locale = useLocale();
+  const authFetch = useAuthFetch();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -24,28 +26,14 @@ export function ResendVerificationForm() {
     setSuccess(false);
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/resend-verification`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+      const data = await authFetch.post<{ token?: string }>('/auth/resend-verification', {
+        email,
       });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.message || t('failedToSend'));
-        setIsLoading(false);
-        return;
-      }
-
       setSuccess(true);
-      // For development: show the token
-      if (data.token) {
-        setVerificationToken(data.token);
-      }
+      if (data.token) setVerificationToken(data.token);
       setIsLoading(false);
-    } catch {
-      setError(t('errorOccurred'));
+    } catch (err) {
+      setError(err instanceof Error && err.message ? err.message : t('failedToSend'));
       setIsLoading(false);
     }
   };

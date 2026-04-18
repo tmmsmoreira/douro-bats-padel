@@ -40,7 +40,7 @@ export const fadeInScale = {
 
 /**
  * Slide up with fade in
- * Duration: 400ms
+ * Duration: 300ms
  * Use for: Individual cards, form fields
  */
 export const slideUp = {
@@ -51,7 +51,7 @@ export const slideUp = {
 
 /**
  * Slide down with fade in
- * Duration: 400ms
+ * Duration: 300ms
  * Use for: Dropdowns, notifications from top
  */
 export const slideDown = {

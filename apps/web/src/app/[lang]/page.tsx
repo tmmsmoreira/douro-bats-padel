@@ -24,6 +24,29 @@ export default function HomePage() {
   const t = useTranslations('home');
   const containerRef = useRef<HTMLDivElement>(null);
   const splashOffset = useSplashOffset();
+
+  // Defer the hero video until after first paint. The MP4 source is ~33MB
+  // at 4K/30fps and autoplay would start pulling it during hydration; showing
+  // the poster first keeps LCP fast and respects `prefers-reduced-motion`.
+  const [showVideo, setShowVideo] = useState(false);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const w = window as Window & {
+      requestIdleCallback?: (cb: () => void) => number;
+      cancelIdleCallback?: (h: number) => void;
+    };
+
+    if (w.requestIdleCallback) {
+      const handle = w.requestIdleCallback(() => setShowVideo(true));
+      return () => w.cancelIdleCallback?.(handle);
+    }
+
+    const handle = window.setTimeout(() => setShowVideo(true), 300);
+    return () => window.clearTimeout(handle);
+  }, []);
+
   // Ensure page starts at the top (only if no hash)
   useEffect(() => {
     if (!window.location.hash) {
@@ -59,20 +82,31 @@ export default function HomePage() {
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 1.2, ease: 'easeOut' }}
           >
-            <video
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              poster="https://images.pexels.com/videos/33444758/free-video-33444758.jpg?auto=compress&cs=tinysrgb&w=1280"
-              className="absolute inset-0 w-full h-full object-cover"
-            >
-              <source
-                src="https://videos.pexels.com/video-files/33444758/14232220_3840_2160_30fps.mp4"
-                type="video/mp4"
+            {showVideo ? (
+              <video
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                poster="https://images.pexels.com/videos/33444758/free-video-33444758.jpg?auto=compress&cs=tinysrgb&w=1280"
+                className="absolute inset-0 w-full h-full object-cover"
+              >
+                <source
+                  src="https://videos.pexels.com/video-files/33444758/14232220_3840_2160_30fps.mp4"
+                  type="video/mp4"
+                />
+              </video>
+            ) : (
+              <div
+                aria-hidden
+                className="absolute inset-0 w-full h-full bg-cover bg-center"
+                style={{
+                  backgroundImage:
+                    'url(https://images.pexels.com/videos/33444758/free-video-33444758.jpg?auto=compress&cs=tinysrgb&w=1280)',
+                }}
               />
-            </video>
+            )}
             <div className="absolute inset-0 bg-background/40 backdrop-blur-xs" />
           </motion.div>
 

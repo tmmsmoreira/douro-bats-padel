@@ -11,11 +11,13 @@ import { Label } from '@/components/ui/label';
 import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
+import { useAuthFetch } from '@/hooks/use-api';
 
 export function RegisterForm() {
   const searchParams = useSearchParams();
   const t = useTranslations('auth.register');
   const locale = useLocale();
+  const authFetch = useAuthFetch();
   const invitationToken = searchParams.get('invitation');
 
   const [name, setName] = useState('');
@@ -40,35 +42,32 @@ export function RegisterForm() {
       }
 
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/invitations/validate`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token: invitationToken }),
-        });
+        const data = await authFetch.post<{
+          valid: boolean;
+          email?: string;
+          name?: string;
+          message?: string;
+        }>('/invitations/validate', { token: invitationToken });
 
-        const data = await res.json();
-
-        if (data.valid) {
+        if (data.valid && data.email) {
           setInvitationValid(true);
           setInvitationEmail(data.email);
-          setEmail(data.email); // Pre-fill email
-          if (data.name) {
-            setName(data.name); // Pre-fill name if provided
-          }
+          setEmail(data.email);
+          if (data.name) setName(data.name);
         } else {
           setInvitationValid(false);
           setError(data.message || t('invalidInvitation'));
         }
-      } catch {
+      } catch (err) {
         setInvitationValid(false);
-        setError(t('failedToValidate'));
+        setError(err instanceof Error && err.message ? err.message : t('failedToValidate'));
       } finally {
         setValidatingInvitation(false);
       }
     };
 
     validateInvitation();
-  }, [invitationToken, t]);
+  }, [invitationToken, t, authFetch]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,34 +105,18 @@ export function RegisterForm() {
     }
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-          invitationToken,
-        }),
+      const data = await authFetch.post<{ token?: string }>('/auth/signup', {
+        name,
+        email,
+        password,
+        invitationToken,
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.message || t('registrationFailed'));
-        setIsLoading(false);
-        return;
-      }
-
-      // Registration successful, show success message
       setSuccess(true);
-      // For development: show the token
-      if (data.token) {
-        setVerificationToken(data.token);
-      }
+      if (data.token) setVerificationToken(data.token);
       setIsLoading(false);
-    } catch {
-      setError(t('errorOccurred'));
+    } catch (err) {
+      setError(err instanceof Error && err.message ? err.message : t('registrationFailed'));
       setIsLoading(false);
     }
   };

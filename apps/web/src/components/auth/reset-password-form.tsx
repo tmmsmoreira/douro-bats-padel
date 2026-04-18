@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
+import { useAuthFetch } from '@/hooks/use-api';
 
 interface ResetPasswordFormProps {
   token: string;
@@ -17,6 +18,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   const router = useRouter();
   const t = useTranslations('auth.resetPassword');
   const locale = useLocale();
+  const authFetch = useAuthFetch();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -51,26 +53,10 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     }
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/reset-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          token,
-          password,
-        }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        setError(data.message || t('failedToReset'));
-        setIsLoading(false);
-        return;
-      }
-
-      // Password reset successful, redirect to login
+      await authFetch.post('/auth/reset-password', { token, password });
       router.push(`/${locale}/login?reset=true`);
-    } catch {
-      setError(t('errorOccurred'));
+    } catch (err) {
+      setError(err instanceof Error && err.message ? err.message : t('failedToReset'));
       setIsLoading(false);
     }
   };

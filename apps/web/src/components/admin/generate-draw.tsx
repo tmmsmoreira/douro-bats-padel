@@ -13,50 +13,10 @@ import { AlertTriangle, Info, Lightbulb, Clock } from 'lucide-react';
 import { useGenerateDraw, useEventDetails, useDraw } from '@/hooks';
 import { PlayerListItem } from '@/components/shared/player-list-item';
 import { formatTimeSlot } from '@/lib/utils';
+import type { EventCourtWithCourt, EventWithPlayersSerialized, Player } from '@padel/types';
 
-interface Court {
-  id: string;
-  label: string;
-}
-
-interface EventCourt {
-  court: Court;
-}
-
-interface Player {
-  id: string;
-  name: string;
-  rating: number;
-  tier?: string;
-}
-
-interface TierTimeSlot {
-  startsAt: string;
-  endsAt: string;
-  courtIds: string[];
-}
-
-interface TierRules {
-  masterCount?: number;
-  masterPercentage?: number;
-  mastersTimeSlot?: TierTimeSlot;
-  explorersTimeSlot?: TierTimeSlot;
-}
-
-interface EventDetails {
-  id: string;
-  title: string | null;
-  date: string;
-  startsAt: string;
-  endsAt: string;
-  capacity: number;
-  state: 'DRAFT' | 'OPEN' | 'FROZEN' | 'DRAWN' | 'PUBLISHED';
-  tierRules?: TierRules;
-  confirmedCount: number;
-  waitlistCount: number;
-  confirmedPlayers?: Player[];
-  eventCourts?: EventCourt[];
-}
+type Court = EventCourtWithCourt['court'];
+type EventDetails = EventWithPlayersSerialized;
 
 interface GenerateDrawProps {
   eventId: string;
@@ -138,7 +98,7 @@ export function GenerateDraw({ eventId }: GenerateDrawProps) {
     const hasInsufficientPlayers =
       confirmedCount > 0 && playersInDraw < confirmedCount && !hasExcessPlayers;
 
-    const allCourts = event?.eventCourts?.map((ec: EventCourt) => ec.court) || [];
+    const allCourts = event?.eventCourts?.map((ec: EventCourtWithCourt) => ec.court) || [];
     const availableCourts = allCourts.filter((court: Court) =>
       allAvailableCourts.includes(court.id)
     );

@@ -7,10 +7,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
+import { useAuthFetch } from '@/hooks/use-api';
 
 export function ForgotPasswordForm() {
   const t = useTranslations('auth.forgotPassword');
   const locale = useLocale();
+  const authFetch = useAuthFetch();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -24,28 +26,12 @@ export function ForgotPasswordForm() {
     setSuccess(false);
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/forgot-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        setError(data.message || t('failedToSend'));
-        setIsLoading(false);
-        return;
-      }
-
-      const data = await res.json();
+      const data = await authFetch.post<{ token?: string }>('/auth/forgot-password', { email });
       setSuccess(true);
-      // For development: show the token
-      if (data.token) {
-        setResetToken(data.token);
-      }
+      if (data.token) setResetToken(data.token);
       setIsLoading(false);
-    } catch {
-      setError(t('errorOccurred'));
+    } catch (err) {
+      setError(err instanceof Error && err.message ? err.message : t('failedToSend'));
       setIsLoading(false);
     }
   };

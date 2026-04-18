@@ -1,9 +1,17 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.toTier = void 0;
+exports.toTier = exports.RANKING_POINTS = void 0;
 exports.computeRanking = computeRanking;
 const common_1 = require("./common");
-const CONFIG = {
+/**
+ * Per-tier scoring table. Source of truth for both the compute function
+ * below AND the human-readable rules in Prisma's schema comments.
+ *
+ * Winner = base + perSet × setsWon
+ * Loser  =        perSet × setsWon
+ * Tie    = no base, only perSet × sets (halved across team)
+ */
+exports.RANKING_POINTS = {
     MASTERS: { base: 300, perSet: 20 },
     EXPLORERS: { base: 200, perSet: 15 },
 };
@@ -14,7 +22,7 @@ function computeRanking(i) {
     const inc = (p) => (rounds[p] = (rounds[p] || 0) + 1);
     for (const m of i.matches) {
         const tie = m.setsA === m.setsB;
-        const cfg = CONFIG[m.tier];
+        const cfg = exports.RANKING_POINTS[m.tier];
         if (tie) {
             const ptsA = cfg.perSet * m.setsA;
             const ptsB = cfg.perSet * m.setsB;

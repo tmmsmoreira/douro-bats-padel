@@ -1,72 +1,22 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
-import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { EventForm } from '@/components/admin/event-form';
 import { use, useEffect } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { PageHeader } from '@/components/shared/page-header';
 import { EditorGuard } from '@/components/shared/editor-guard';
-import type { TierRules } from '@padel/types';
-import { API_URL } from '@/lib/constants';
-
-interface EventCourt {
-  id: string;
-  courtId: string;
-  court: {
-    id: string;
-    label: string;
-  };
-}
-
-interface EventApiResponse {
-  id: string;
-  title: string | null;
-  date: Date;
-  startsAt: Date;
-  endsAt: Date;
-  venueId?: string | null;
-  capacity: number;
-  state: string;
-  rsvpOpensAt: Date;
-  rsvpClosesAt: Date;
-  tierRules?: TierRules | null;
-  eventCourts?: EventCourt[];
-  venue?: {
-    id: string;
-    name: string;
-  };
-}
+import { useEventDetails } from '@/hooks';
 
 export default function EditEventPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: eventId } = use(params);
-  const { data: session } = useSession();
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations('editEventPage');
 
-  const { data: event, isLoading } = useQuery<EventApiResponse>({
-    queryKey: ['event', eventId, session?.accessToken],
-    queryFn: async () => {
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-      };
-
-      if (session?.accessToken) {
-        headers.Authorization = `Bearer ${session.accessToken}`;
-      }
-
-      const res = await fetch(`${API_URL}/events/${eventId}`, { headers });
-
-      if (!res.ok) {
-        throw new Error(`API Error: ${res.statusText}`);
-      }
-
-      return res.json();
-    },
-    enabled: !!session?.accessToken,
-  });
+  // Shares the ['event', eventId] cache entry with the rest of the event
+  // surface, so we don't refetch on navigation from the event page.
+  const { data: event, isLoading } = useEventDetails(eventId);
 
   const eventEndTime = event?.endsAt ? new Date(event.endsAt) : null;
   const hasEventPassed = eventEndTime ? eventEndTime < new Date() : false;
@@ -119,14 +69,15 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
   const formData = event
     ? {
         title: event.title ?? undefined,
-        date: event.date,
-        startsAt: event.startsAt,
-        endsAt: event.endsAt,
+        // API returns dates as ISO strings; EventForm expects `Date` objects.
+        date: new Date(event.date),
+        startsAt: new Date(event.startsAt),
+        endsAt: new Date(event.endsAt),
         venueId: event.venueId || event.venue?.id || '',
         courtIds: event.eventCourts?.map((ec) => ec.courtId) || [],
         capacity: event.capacity,
-        rsvpOpensAt: event.rsvpOpensAt,
-        rsvpClosesAt: event.rsvpClosesAt,
+        rsvpOpensAt: new Date(event.rsvpOpensAt),
+        rsvpClosesAt: new Date(event.rsvpClosesAt),
         tierRules: event.tierRules
           ? {
               masterCount: event.tierRules.masterCount,

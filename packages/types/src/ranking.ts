@@ -20,7 +20,15 @@ export type ComputeOutput = {
   newRatings: Record<string, number>;
 };
 
-const CONFIG = {
+/**
+ * Per-tier scoring table. Source of truth for both the compute function
+ * below AND the human-readable rules in Prisma's schema comments.
+ *
+ * Winner = base + perSet × setsWon
+ * Loser  =        perSet × setsWon
+ * Tie    = no base, only perSet × sets (halved across team)
+ */
+export const RANKING_POINTS = {
   MASTERS: { base: 300, perSet: 20 },
   EXPLORERS: { base: 200, perSet: 15 },
 } as const;
@@ -34,7 +42,7 @@ export function computeRanking(i: ComputeInput): ComputeOutput {
 
   for (const m of i.matches) {
     const tie = m.setsA === m.setsB;
-    const cfg = CONFIG[m.tier];
+    const cfg = RANKING_POINTS[m.tier];
 
     if (tie) {
       const ptsA = cfg.perSet * m.setsA;

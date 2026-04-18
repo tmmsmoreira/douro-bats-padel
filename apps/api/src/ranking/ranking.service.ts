@@ -229,19 +229,31 @@ export class RankingService {
   }
 
   async getLeaderboard(limit = 50): Promise<LeaderboardEntry[]> {
+    // Narrow selects: the leaderboard UI only needs name + photo from User,
+    // score from weeklyScores, and before/after from the latest snapshot.
+    // Avoids pulling passwordHash / reset tokens / verification tokens etc.
     const players = await this.prisma.playerProfile.findMany({
       where: {
         status: { in: ['ACTIVE', 'INACTIVE'] },
       },
-      include: {
-        user: true,
+      select: {
+        id: true,
+        rating: true,
+        user: {
+          select: {
+            name: true,
+            profilePhoto: true,
+          },
+        },
         weeklyScores: {
           orderBy: { weekStart: 'desc' },
           take: 5,
+          select: { score: true },
         },
         rankingSnapshots: {
           orderBy: { createdAt: 'desc' },
           take: 1,
+          select: { before: true, after: true },
         },
       },
       orderBy: {

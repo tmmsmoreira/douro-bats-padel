@@ -1,11 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Logger, ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const config = app.get(ConfigService);
 
   // Security headers
   app.use(helmet());
@@ -13,9 +15,11 @@ async function bootstrap() {
   // Body size limit to prevent memory exhaustion
   app.useBodyParser('json', { limit: '1mb' });
 
-  // Enable CORS with multiple allowed origins
+  const frontendUrl = config.get<string>('FRONTEND_URL');
+  const nodeEnv = config.get<string>('NODE_ENV');
+
   const allowedOrigins = [
-    process.env.FRONTEND_URL,
+    frontendUrl,
     'http://localhost:3000',
     'http://localhost:3001',
     'http://127.0.0.1:3000',
@@ -28,14 +32,10 @@ async function bootstrap() {
       if (!origin) return callback(null, true);
 
       // In development, allow all localhost origins
-      if (
-        process.env.NODE_ENV === 'development' &&
-        origin.match(/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/)
-      ) {
+      if (nodeEnv === 'development' && origin.match(/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/)) {
         return callback(null, true);
       }
 
-      // Check if origin is in allowed list
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
@@ -47,7 +47,6 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   });
 
-  // Ensure hooks are called at the top level
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -56,7 +55,7 @@ async function bootstrap() {
     })
   );
 
-  const port = process.env.PORT || 4000;
+  const port = config.get<number>('PORT', 4000);
   await app.listen(port);
   Logger.log(`API running on http://localhost:${port}`, 'Bootstrap');
 }

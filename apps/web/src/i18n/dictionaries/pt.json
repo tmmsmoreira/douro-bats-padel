@@ -1,4 +1,16 @@
 {
+  "common": {
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "confirm": "Confirmar",
+    "close": "Fechar",
+    "back": "Voltar",
+    "backToEvent": "Voltar ao Evento",
+    "loading": "A carregar...",
+    "saving": "A guardar...",
+    "retry": "Tentar novamente"
+  },
   "errors": {
     "accessDenied": "Acesso Negado",
     "accessDeniedDescription": "Não tem permissão para aceder a esta página.",

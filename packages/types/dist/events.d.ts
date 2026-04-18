@@ -103,12 +103,26 @@ export interface EventWithRSVP {
     };
 }
 /**
+ * Event ↔ Court junction row, as returned when the API includes
+ * `eventCourts: { court: true }`. Used by the admin edit form and the
+ * draw generator UI to pick courts without refetching the whole venue.
+ */
+export interface EventCourtWithCourt {
+    id: string;
+    courtId: string;
+    court: {
+        id: string;
+        label: string;
+    };
+}
+/**
  * Event with RSVP information and player lists
  * Used for detailed event views that show confirmed and waitlisted players
  */
 export interface EventWithPlayers extends EventWithRSVP {
     confirmedPlayers: Player[];
     waitlistedPlayers: WaitlistedPlayer[];
+    eventCourts?: EventCourtWithCourt[];
 }
 /**
  * Serialized version of EventWithRSVP (as returned from API)

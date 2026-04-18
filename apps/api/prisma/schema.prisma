@@ -155,13 +155,14 @@ model Match {
   round       Int
   setsA       Int       @default(0)
   setsB       Int       @default(0)
-  // NOTE: tier determines which point system to use for this match
-  // (MASTERS: 300 base + 20/set, EXPLORERS: 200 base + 15/set)
   tier        Tier
   reportedBy  String?
   publishedAt DateTime?
   createdAt   DateTime  @default(now())
 
+  // Scoring rules are defined in packages/types/src/ranking.ts → RANKING_POINTS.
+  // Keep these in sync with the computeRanking() implementation; this comment
+  // is for reference only and is NOT consulted at runtime.
   @@index([eventId, publishedAt])
 }
 
@@ -188,6 +189,7 @@ model RankingSnapshot {
   createdAt    DateTime      @default(now())
 
   @@index([playerId, createdAt])
+  @@index([eventId])
 }
 
 model Invitation {

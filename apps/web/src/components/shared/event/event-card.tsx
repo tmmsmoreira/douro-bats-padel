@@ -26,7 +26,7 @@ export function EventCard({
   const locale = useLocale();
 
   const cardContent = (
-    <Card className="glass-card group hover:shadow-xl transition-all duration-300 border-border/50">
+    <Card className="glass-card group hover:shadow-xl transition-shadow duration-200 ease-out border-border/50">
       <CardHeader className="pb-4">
         <div className="flex items-start justify-between gap-4">
           <CardTitle className="text-xl font-semibold group-hover:text-primary transition-colors">

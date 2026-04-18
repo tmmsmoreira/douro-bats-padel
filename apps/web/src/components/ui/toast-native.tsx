@@ -109,8 +109,8 @@ export function ToastNative({
           exit={{ y: position === 'top' ? -100 : 100, opacity: 0 }}
           transition={{
             type: 'spring',
-            damping: 25,
-            stiffness: 300,
+            duration: 0.35,
+            bounce: 0.1,
           }}
           className={cn('fixed left-4 right-4 z-200 mx-auto max-w-md', positionClasses)}
         >

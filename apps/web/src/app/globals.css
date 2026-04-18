@@ -214,11 +214,6 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  html {
-    /* Smooth scrolling */
-    scroll-behavior: smooth;
-  }
-
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family: var(--font-sans);
@@ -265,7 +260,7 @@
   }
 
   .hover-lift {
-    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-xl;
+    @apply transition-transform duration-200 ease-out hover:-translate-y-1 hover:shadow-xl;
   }
 
   .status-glow {

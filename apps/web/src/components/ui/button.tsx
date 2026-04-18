@@ -82,7 +82,6 @@ function Button({
     <motion.span
       className={widthClasses || undefined}
       style={{ display: 'inline-flex' }}
-      whileHover={{ scale: 1.01 }}
       whileTap={{ scale: 0.97 }}
       transition={{
         type: 'spring',

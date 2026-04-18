@@ -62,7 +62,10 @@ export function EmptyState({
 }: EmptyStateProps) {
   const content = (
     <Card
-      className={cn('glass-card group transition-all duration-300 border-border/50', className)}
+      className={cn(
+        'glass-card group transition-shadow duration-200 ease-out border-border/50',
+        className
+      )}
     >
       <CardContent className="py-12 text-center">
         <div className="flex flex-col items-center gap-4">

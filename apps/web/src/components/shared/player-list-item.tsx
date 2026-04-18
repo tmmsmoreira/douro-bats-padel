@@ -201,7 +201,7 @@ export function PlayerListItem({
             hidden: { opacity: 0, y: 6 },
             show: { opacity: 1, y: 0, transition: { duration: 0.25, ease: 'easeOut' } },
           }}
-          className="flex items-center justify-between py-3 px-4 rounded-lg border border-border/50 hover:bg-accent/50 hover:border-primary/30 transition-all duration-300"
+          className="flex items-center justify-between py-3 px-4 rounded-lg border border-border/50 hover:bg-accent/50 hover:border-primary/30 transition-colors duration-150"
         >
           {content}
         </motion.div>
@@ -211,7 +211,7 @@ export function PlayerListItem({
     return (
       <div
         key={id}
-        className="flex items-center justify-between py-3 px-4 rounded-lg border border-border/50 hover:bg-accent/50 hover:border-primary/30 transition-all duration-300"
+        className="flex items-center justify-between py-3 px-4 rounded-lg border border-border/50 hover:bg-accent/50 hover:border-primary/30 transition-colors duration-150"
       >
         {content}
       </div>

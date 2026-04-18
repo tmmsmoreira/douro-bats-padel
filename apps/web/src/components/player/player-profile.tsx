@@ -292,9 +292,9 @@ function ProfileContent({
 
       {/* Player Header */}
       <motion.div
-        initial={isBackNav ? false : { opacity: 0, y: 20 }}
+        initial={isBackNav ? false : { opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: isBackNav ? 0 : 0.5, delay: isBackNav ? 0 : 0.1 }}
+        transition={{ duration: isBackNav ? 0 : 0.25, ease: [0.165, 0.84, 0.44, 1] }}
       >
         <Card className="glass-card">
           <CardHeader>
@@ -362,9 +362,9 @@ function ProfileContent({
 
       {/* Player Information and Edit Form */}
       <motion.div
-        initial={isBackNav ? false : { opacity: 0, y: 20 }}
+        initial={isBackNav ? false : { opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: isBackNav ? 0 : 0.5, delay: isBackNav ? 0 : 0.1 }}
+        transition={{ duration: isBackNav ? 0 : 0.25, ease: [0.165, 0.84, 0.44, 1] }}
         className="grid gap-6 md:grid-cols-2"
       >
         <Card className="glass-card">
@@ -545,9 +545,9 @@ function ProfileContent({
       </motion.div>
       {/* Notifications */}
       <motion.div
-        initial={isBackNav ? false : { opacity: 0, y: 20 }}
+        initial={isBackNav ? false : { opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: isBackNav ? 0 : 0.5, delay: isBackNav ? 0 : 0.2 }}
+        transition={{ duration: isBackNav ? 0 : 0.25, ease: [0.165, 0.84, 0.44, 1] }}
       >
         <Card className="glass-card">
           <CardHeader>

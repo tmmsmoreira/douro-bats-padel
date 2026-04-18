@@ -126,7 +126,7 @@ function VenuesListContent({
           }}
           whileHover={{ scale: 1.01 }}
         >
-          <Card className="glass-card group hover:shadow-xl transition-all duration-300 border-border/50">
+          <Card className="glass-card group hover:shadow-xl transition-shadow duration-200 ease-out border-border/50">
             <CardContent className="p-6 space-y-4">
               {/* Top Section: Logo, Name, Address, and Actions */}
               <div className="flex items-start justify-between gap-4">

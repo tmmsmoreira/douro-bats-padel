@@ -305,7 +305,7 @@ function PlayersListContent({
                     className="block"
                     onMouseEnter={() => trendingUpIconRefs.current.get(player.id)?.startAnimation()}
                   >
-                    <Card className="glass-card group hover:shadow-xl transition-all duration-300 border-border/50">
+                    <Card className="glass-card group hover:shadow-xl transition-shadow duration-200 ease-out border-border/50">
                       <CardContent className="p-6 space-y-4">
                         {/* Top Section: Avatar, Name, Email, and Status Badge */}
                         <div className="flex items-start justify-between gap-4">

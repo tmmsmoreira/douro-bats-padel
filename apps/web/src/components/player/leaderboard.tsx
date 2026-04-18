@@ -102,7 +102,7 @@ function LeaderboardContent({
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: isBackNav ? 0 : 0.3, ease: 'easeOut' }}
                 >
-                  <Card className="glass-card border-border/50 transition-all duration-300 hover:shadow-lg relative overflow-hidden">
+                  <Card className="glass-card border-border/50 transition-shadow duration-200 ease-out hover:shadow-lg relative overflow-hidden">
                     {/* Top colored border */}
                     <div className={cn('h-1 w-full', colors.bg)} />
 

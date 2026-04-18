@@ -16,6 +16,7 @@ import { HomeUpcomingEvents } from '@/components/home/home-upcoming-events';
 import { usePWAInstall } from '@/hooks/use-pwa-install';
 import { useSplashOffset } from '@/hooks/use-is-standalone';
 import { PWAInstallInstructions } from '@/components/shared/pwa-install-instructions';
+import { staggerItem } from '@/lib/animations';
 import Image from 'next/image';
 
 export default function HomePage() {
@@ -75,37 +76,28 @@ export default function HomePage() {
             <div className="absolute inset-0 bg-background/40 backdrop-blur-xs" />
           </motion.div>
 
-          {/* Animated Overlay */}
-          <motion.div
-            className="absolute inset-0 bg-linear-to-tr from-primary/20 to-secondary/20"
-            initial={{ opacity: 0 }}
-            animate={{
-              opacity: [0.3, 0.6, 0.8, 0.3],
-              scale: [1, 1, 1.1, 1],
-            }}
-            transition={{
-              duration: 8,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-          />
+          <div className="absolute inset-0 bg-linear-to-tr from-primary/20 to-secondary/20" />
 
           {/* Hero Content */}
           <div className="relative z-10 max-w-4xl mx-auto text-center space-y-6 sm:space-y-8 px-4">
             <motion.div className="space-y-4">
               <motion.h1
                 className="text-4xl sm:text-5xl lg:text-7xl font-bold font-heading"
-                initial={{ opacity: 0, y: 50 }}
+                initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: splashOffset, ease: 'easeOut' }}
+                transition={{ duration: 0.4, delay: splashOffset, ease: [0.165, 0.84, 0.44, 1] }}
               >
                 <span className="gradient-text">{t('hero.title')}</span>
               </motion.h1>
               <motion.p
                 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-foreground"
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: splashOffset + 0.2, ease: 'easeOut' }}
+                transition={{
+                  duration: 0.4,
+                  delay: splashOffset + 0.08,
+                  ease: [0.165, 0.84, 0.44, 1],
+                }}
               >
                 {t('hero.subtitle')}
               </motion.p>
@@ -113,18 +105,26 @@ export default function HomePage() {
 
             <motion.p
               className="text-base sm:text-lg text-foreground max-w-2xl mx-auto"
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: splashOffset + 0.4, ease: 'easeOut' }}
+              transition={{
+                duration: 0.4,
+                delay: splashOffset + 0.16,
+                ease: [0.165, 0.84, 0.44, 1],
+              }}
             >
               {t('hero.description')}
             </motion.p>
 
             <motion.div
               className="flex flex-col sm:flex-row gap-4 justify-center items-center"
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: splashOffset + 0.6, ease: 'easeOut' }}
+              transition={{
+                duration: 0.4,
+                delay: splashOffset + 0.24,
+                ease: [0.165, 0.84, 0.44, 1],
+              }}
             >
               {!session ? (
                 <>
@@ -270,7 +270,7 @@ function FeatureCard({ feature }: FeatureCardProps) {
       whileHover={{ scale: 1.01 }}
       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
     >
-      <Card className="glass-card h-full group hover:shadow-xl transition-all duration-300">
+      <Card className="glass-card h-full group hover:shadow-xl transition-shadow duration-200 ease-out">
         <CardHeader>
           <div className={`p-3 rounded-2xl bg-linear-to-br ${feature.gradient} w-fit mb-4`}>
             <Icon className="h-6 w-6 text-foreground" />
@@ -358,19 +358,7 @@ function HowItWorksSection({ t }: { t: (key: string) => string }) {
 
   return (
     <section className="py-12 sm:py-16 lg:py-20 relative overflow-hidden">
-      <motion.div
-        className="absolute inset-0 bg-linear-to-tr from-primary/30 to-secondary/30"
-        initial={{ opacity: 0 }}
-        animate={{
-          opacity: [0.3, 0.6, 0.8, 0.3],
-          scale: [1, 1, 1.1, 1],
-        }}
-        transition={{
-          duration: 8,
-          repeat: Infinity,
-          ease: 'easeInOut',
-        }}
-      />
+      <div className="absolute inset-0 bg-linear-to-tr from-primary/30 to-secondary/30" />
       <div className="container mx-auto px-4">
         <div className="relative z-10 space-y-8 sm:space-y-12">
           <motion.h2
@@ -401,7 +389,7 @@ function HowItWorksSection({ t }: { t: (key: string) => string }) {
                 whileHover={{ scale: 1.01 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 25 }}
               >
-                <Card className="glass-card h-full overflow-hidden group hover:shadow-xl transition-all duration-300">
+                <Card className="glass-card h-full overflow-hidden group hover:shadow-xl transition-shadow duration-200 ease-out">
                   {/* Step Image */}
                   <div className="relative h-48 overflow-hidden">
                     <Image
@@ -490,21 +478,23 @@ function ConnectAppSection({ t }: { t: (key: string) => string }) {
               {t('connectApp.title')}
             </h2>
 
-            <ul className="space-y-3">
+            <motion.ul
+              className="space-y-3"
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, margin: '-100px' }}
+              variants={{
+                hidden: { opacity: 0 },
+                show: { opacity: 1, transition: { staggerChildren: 0.04 } },
+              }}
+            >
               {features.map((feature, index) => (
-                <motion.li
-                  key={index}
-                  initial={{ opacity: 0, x: 20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: index * 0.1 }}
-                  className="flex items-start gap-3"
-                >
+                <motion.li key={index} variants={staggerItem} className="flex items-start gap-3">
                   <Check className="h-5 w-5 text-primary mt-0.5 shrink-0" />
                   <span className="text-muted-foreground">{feature}</span>
                 </motion.li>
               ))}
-            </ul>
+            </motion.ul>
 
             <div className="pt-4">
               {isInstalled ? (

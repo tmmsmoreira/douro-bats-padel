@@ -42,8 +42,8 @@ const AlertDialogContent = React.forwardRef<
 
   const triggerPulse = React.useCallback(() => {
     controls.start({
-      scale: [1, 1.05, 1],
-      transition: { duration: 0.3, ease: 'easeInOut' },
+      scale: [1, 1.02, 1],
+      transition: { duration: 0.2, ease: 'easeInOut' },
     });
   }, [controls]);
 
@@ -79,7 +79,7 @@ const AlertDialogContent = React.forwardRef<
             'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-100',
             'data-[state=open]:slide-in-from-bottom-4',
             'data-[state=open]:duration-300 data-[state=closed]:duration-200',
-            'data-[state=open]:ease-out data-[state=closed]:ease-in',
+            'data-[state=open]:ease-out',
             className
           )}
           {...props}

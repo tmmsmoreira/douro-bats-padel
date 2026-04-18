@@ -17,7 +17,8 @@ export class RankingService {
     private notificationService: NotificationService
   ) {}
 
-  async computeRankingsForEvent(eventId: string) {
+  async computeRankingsForEvent(eventId: string, options: { notify?: boolean } = {}) {
+    const { notify = true } = options;
     const event = await this.prisma.event.findUnique({
       where: { id: eventId },
       include: {
@@ -169,25 +170,69 @@ export class RankingService {
       data: { state: EventState.PUBLISHED },
     });
 
-    // Notify players
-    await Promise.allSettled(
-      players
-        .filter((p) => p.user?.email)
-        .map((p) =>
-          this.notificationService.sendResultsPublished(
-            p.user.email,
-            p.user.name || 'Player',
-            event,
-            p.userId
+    if (notify) {
+      // Notify players
+      await Promise.allSettled(
+        players
+          .filter((p) => p.user?.email)
+          .map((p) =>
+            this.notificationService.sendResultsPublished(
+              p.user.email,
+              p.user.name || 'Player',
+              event,
+              p.userId
+            )
           )
-        )
-    );
+      );
+    }
 
     return {
       playersUpdated: Object.keys(newRatings).length,
       weeklyScores: weeklyScore,
       newRatings,
     };
+  }
+
+  async recomputeRankingsForEvent(eventId: string) {
+    const event = await this.prisma.event.findUnique({
+      where: { id: eventId },
+    });
+
+    if (!event) {
+      throw new NotFoundException('Event not found');
+    }
+
+    const snapshots = await this.prisma.rankingSnapshot.findMany({
+      where: { eventId },
+    });
+
+    if (snapshots.length === 0) {
+      throw new BadRequestException(
+        'No prior rankings found for this event — publish results first'
+      );
+    }
+
+    const affectedPlayerIds = Array.from(new Set(snapshots.map((s) => s.playerId)));
+    const weekStart = this.getWeekStart(event.date);
+
+    // Revert player ratings to the state before the previous compute
+    await this.prisma.$transaction([
+      ...snapshots.map((snapshot) =>
+        this.prisma.playerProfile.update({
+          where: { id: snapshot.playerId },
+          data: { rating: snapshot.before },
+        })
+      ),
+      this.prisma.rankingSnapshot.deleteMany({ where: { eventId } }),
+      this.prisma.weeklyScore.deleteMany({
+        where: {
+          playerId: { in: affectedPlayerIds },
+          weekStart,
+        },
+      }),
+    ]);
+
+    return this.computeRankingsForEvent(eventId, { notify: false });
   }
 
   async getLeaderboard(limit = 50): Promise<LeaderboardEntry[]> {

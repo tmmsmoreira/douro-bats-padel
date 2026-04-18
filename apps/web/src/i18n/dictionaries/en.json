@@ -923,7 +923,10 @@
     "enterValidScore": "Please enter a valid score",
     "saveAllResults": "Save All Results",
     "resultsSaved": "{count, plural, one {# result saved} other {# results saved}}",
-    "noChangesToSave": "No changes to save"
+    "noChangesToSave": "No changes to save",
+    "recomputeRankings": "Recompute Rankings",
+    "recomputeRankingsTitle": "Recompute Rankings?",
+    "recomputeRankingsDescription": "This will revert the previous ranking changes from this event and recompute ratings based on the corrected scores. Players will not be notified."
   },
   "newEventPage": {
     "title": "Create Event",

@@ -14,10 +14,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
-import { Lock, Calendar, ClipboardList } from 'lucide-react';
+import { Lock, Calendar, ClipboardList, RefreshCw } from 'lucide-react';
 import { BadgeAlertIcon, LockIcon, LockIconHandle } from 'lucide-animated';
 import {
   usePublishMatches,
+  useRecomputeRankings,
   useSaveMatchResults,
   useEventDetails,
   useDraw,
@@ -38,6 +39,7 @@ interface ResultsViewProps {
 export function ResultsView({ eventId }: ResultsViewProps) {
   const t = useTranslations('resultsEntry');
   const [showPublishDialog, setShowPublishDialog] = useState(false);
+  const [showRecomputeDialog, setShowRecomputeDialog] = useState(false);
   const [matchResults, setMatchResults] = useState<
     Record<string, { setsA: number | ''; setsB: number | '' }>
   >({});
@@ -68,6 +70,9 @@ export function ResultsView({ eventId }: ResultsViewProps) {
   const saveResultsMutation = useSaveMatchResults(eventId);
   const publishMutation = usePublishMatches(eventId, () => {
     setShowPublishDialog(false);
+  });
+  const recomputeMutation = useRecomputeRankings(eventId, () => {
+    setShowRecomputeDialog(false);
   });
 
   const handleScoreChange = (courtId: string, round: number, team: 'A' | 'B', value: string) => {
@@ -221,6 +226,9 @@ export function ResultsView({ eventId }: ResultsViewProps) {
             publishMutation={publishMutation}
             showPublishDialog={showPublishDialog}
             setShowPublishDialog={setShowPublishDialog}
+            recomputeMutation={recomputeMutation}
+            showRecomputeDialog={showRecomputeDialog}
+            setShowRecomputeDialog={setShowRecomputeDialog}
             lockIconRef={lockIconRef}
             t={t}
           />
@@ -299,8 +307,6 @@ function ResultsTierSection({
                           teamB: t('teamB'),
                           teamASets: t('teamASets'),
                           teamBSets: t('teamBSets'),
-                          saved: t('saved'),
-                          published: t('published'),
                         }}
                       />
                     );
@@ -324,6 +330,9 @@ function ResultsViewContent({
   publishMutation,
   showPublishDialog,
   setShowPublishDialog,
+  recomputeMutation,
+  showRecomputeDialog,
+  setShowRecomputeDialog,
   lockIconRef,
   t,
 }: {
@@ -335,6 +344,9 @@ function ResultsViewContent({
   publishMutation: UseMutationResult<unknown, Error, void, unknown>;
   showPublishDialog: boolean;
   setShowPublishDialog: (show: boolean) => void;
+  recomputeMutation: UseMutationResult<unknown, Error, void, unknown>;
+  showRecomputeDialog: boolean;
+  setShowRecomputeDialog: (show: boolean) => void;
   lockIconRef: React.RefObject<LockIconHandle | null>;
   t: ReturnType<typeof useTranslations>;
 }) {
@@ -406,29 +418,38 @@ function ResultsViewContent({
                   {t('published')}
                 </Badge>
               )}
+              <Button
+                onClick={handleSaveAllResults}
+                disabled={!hasUnsavedChanges}
+                variant="outline"
+                className="gap-2"
+                animate
+              >
+                {t('saveAllResults')}
+              </Button>
+              {hasPublishedMatches && (
+                <Button
+                  onClick={() => setShowRecomputeDialog(true)}
+                  disabled={recomputeMutation.isPending}
+                  className="gap-2"
+                  animate
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  {t('recomputeRankings')}
+                </Button>
+              )}
               {!hasPublishedMatches && (
-                <>
-                  <Button
-                    onClick={handleSaveAllResults}
-                    disabled={!hasUnsavedChanges}
-                    variant="outline"
-                    className="gap-2"
-                    animate
-                  >
-                    {t('saveAllResults')}
-                  </Button>
-                  <Button
-                    onClick={() => setShowPublishDialog(true)}
-                    disabled={!allMatchesEntered || publishMutation.isPending}
-                    className="gap-2"
-                    onMouseEnter={() => lockIconRef.current?.startAnimation()}
-                    onMouseLeave={() => lockIconRef.current?.stopAnimation()}
-                    animate
-                  >
-                    <LockIcon ref={lockIconRef} size={16} />
-                    {t('publishResults')}
-                  </Button>
-                </>
+                <Button
+                  onClick={() => setShowPublishDialog(true)}
+                  disabled={!allMatchesEntered || publishMutation.isPending}
+                  className="gap-2"
+                  onMouseEnter={() => lockIconRef.current?.startAnimation()}
+                  onMouseLeave={() => lockIconRef.current?.stopAnimation()}
+                  animate
+                >
+                  <LockIcon ref={lockIconRef} size={16} />
+                  {t('publishResults')}
+                </Button>
               )}
             </div>
           </div>
@@ -475,6 +496,19 @@ function ResultsViewContent({
         variant="default"
         isLoading={publishMutation.isPending}
         onConfirm={() => publishMutation.mutate()}
+      />
+
+      {/* Recompute confirmation dialog */}
+      <ConfirmationDialog
+        open={showRecomputeDialog}
+        onOpenChange={setShowRecomputeDialog}
+        title={t('recomputeRankingsTitle')}
+        description={t('recomputeRankingsDescription')}
+        confirmText={t('recomputeRankings')}
+        cancelText={t('cancel')}
+        variant="default"
+        isLoading={recomputeMutation.isPending}
+        onConfirm={() => recomputeMutation.mutate()}
       />
     </div>
   );

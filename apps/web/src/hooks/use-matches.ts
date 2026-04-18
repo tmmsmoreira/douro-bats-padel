@@ -77,6 +77,29 @@ export function useEventMatches(eventId: string) {
 }
 
 /**
+ * Hook to recompute rankings after corrections to published matches
+ */
+export function useRecomputeRankings(eventId: string, onSuccessCallback?: () => void) {
+  const queryClient = useQueryClient();
+  const authFetch = useAuthFetch();
+
+  return useMutation({
+    mutationFn: async () => {
+      return authFetch.post(`/rankings/recompute/${eventId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['matches', eventId] });
+      queryClient.invalidateQueries({ queryKey: ['leaderboard'] });
+      toast.success('Rankings recomputed');
+      onSuccessCallback?.();
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to recompute rankings');
+    },
+  });
+}
+
+/**
  * Hook to publish match results for an event
  */
 export function usePublishMatches(eventId: string, onSuccessCallback?: () => void) {

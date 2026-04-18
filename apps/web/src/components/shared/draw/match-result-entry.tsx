@@ -1,10 +1,9 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Lock, Save } from 'lucide-react';
+import { Save } from 'lucide-react';
 import { MatchCard } from './match-card';
 import type { Assignment } from './types';
 
@@ -26,8 +25,6 @@ interface MatchResultEntryProps {
     teamBSets: string;
     save?: string;
     update?: string;
-    saved: string;
-    published: string;
   };
 }
 
@@ -53,21 +50,6 @@ export function MatchResultEntry({
       teamALabel={translations.teamA}
       teamBLabel={translations.teamB}
       className={isPublished ? 'opacity-75' : ''}
-      headerExtra={
-        <>
-          {isSaved && !isPublished && (
-            <Badge variant="outline" className="bg-blue-50 dark:bg-blue-950">
-              {translations.saved}
-            </Badge>
-          )}
-          {isPublished && (
-            <Badge variant="default" className="gap-1">
-              <Lock className="h-3 w-3" />
-              {translations.published}
-            </Badge>
-          )}
-        </>
-      }
       centerContent={
         <div className="flex items-center gap-4">
           <div className="space-y-2">
@@ -81,7 +63,6 @@ export function MatchResultEntry({
               max="20"
               value={result.setsA}
               onChange={(e) => onScoreChange('A', e.target.value)}
-              disabled={isPublished}
               className="w-12 text-center text-lg font-bold bg-white dark:bg-white dark:text-foreground [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
           </div>
@@ -97,7 +78,6 @@ export function MatchResultEntry({
               max="20"
               value={result.setsB}
               onChange={(e) => onScoreChange('B', e.target.value)}
-              disabled={isPublished}
               className="w-12 text-center text-lg font-bold bg-white dark:bg-white dark:text-foreground [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
           </div>

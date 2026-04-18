@@ -916,7 +916,10 @@
     "enterValidScore": "Por favor, insere um resultado válido",
     "saveAllResults": "Guardar Todos os Resultados",
     "resultsSaved": "{count, plural, one {# resultado guardado} other {# resultados guardados}}",
-    "noChangesToSave": "Sem alterações para guardar"
+    "noChangesToSave": "Sem alterações para guardar",
+    "recomputeRankings": "Recalcular Classificações",
+    "recomputeRankingsTitle": "Recalcular Classificações?",
+    "recomputeRankingsDescription": "Isto irá reverter as alterações de classificação anteriores deste evento e recalcular as classificações com base nos resultados corrigidos. Os jogadores não serão notificados."
   },
   "newEventPage": {
     "title": "Criar Evento",

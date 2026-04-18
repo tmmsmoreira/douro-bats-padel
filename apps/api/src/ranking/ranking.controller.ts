@@ -19,6 +19,13 @@ export class RankingController {
     return this.rankingService.computeRankingsForEvent(eventId);
   }
 
+  @Post('recompute/:eventId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  async recomputeRankings(@Param('eventId') eventId: string) {
+    return this.rankingService.recomputeRankingsForEvent(eventId);
+  }
+
   @Public()
   @Get('leaderboard')
   async getLeaderboard(@Query('limit') limit?: string) {

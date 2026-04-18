@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
+import { ErrorPage } from '@/components/shared/error-page';
 
 export default function Error({
   error,
@@ -10,19 +12,21 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useTranslations('errors');
+
   useEffect(() => {
     console.error('Application error:', error);
   }, [error]);
 
   return (
-    <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 px-4 text-center">
-      <h2 className="text-2xl font-bold">Something went wrong</h2>
-      <p className="text-muted-foreground max-w-md">
-        An unexpected error occurred. Please try again.
-      </p>
-      <Button onClick={reset} variant="default">
-        Try Again
-      </Button>
-    </div>
+    <ErrorPage
+      title={t('somethingWentWrong')}
+      description={t('unexpectedError')}
+      actions={
+        <Button onClick={reset} variant="default">
+          {t('tryAgain')}
+        </Button>
+      }
+    />
   );
 }

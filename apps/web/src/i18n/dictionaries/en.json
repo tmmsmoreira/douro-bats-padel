@@ -4,7 +4,15 @@
     "accessDeniedDescription": "You don't have permission to access this page.",
     "notFound": "Page Not Found",
     "notFoundDescription": "The page you're looking for doesn't exist or has been moved.",
-    "goHome": "Go to Home"
+    "goHome": "Go to Home",
+    "somethingWentWrong": "Something went wrong",
+    "unexpectedError": "An unexpected error occurred. Please try again.",
+    "tryAgain": "Try again",
+    "goBack": "Go back",
+    "failedToLoadEvents": "Failed to load events",
+    "failedToLoadEventsDescription": "There was a problem loading the events. Please try again.",
+    "failedToLoadEvent": "Failed to load event",
+    "failedToLoadEventDescription": "There was a problem loading this event. It may no longer exist or you may not have access."
   },
   "status": {
     "draft": "Draft",
@@ -462,7 +470,24 @@
     "pushNotificationsBlocked": "Notifications are blocked. Please enable them in your browser settings.",
     "pushSubscribed": "Push notifications enabled",
     "pushUnsubscribed": "Push notifications disabled",
-    "pushError": "Failed to update notification preferences"
+    "pushError": "Failed to update notification preferences",
+    "rank": "Rank",
+    "noRank": "—",
+    "account": "Account",
+    "signOut": "Sign out",
+    "signOutConfirmation": "Sign out?",
+    "signOutConfirmationDescription": "You'll need to sign in again to access your profile.",
+    "emailNotVerified": "Email not verified",
+    "emailNotVerifiedDescription": "Verify your email to secure your account.",
+    "resendVerification": "Resend verification",
+    "verificationEmailSent": "Verification email sent",
+    "verificationEmailError": "Could not send verification email",
+    "dateOfBirthHint": "DD/MM/YYYY",
+    "lastFiveWeeks": "Last 5 weeks",
+    "noWeeklyScores": "No weekly scores yet",
+    "verified": "Verified",
+    "emailVerifiedLabel": "Email verified",
+    "adminOnly": "Admin"
   },
   "admin": {
     "loading": "Loading...",

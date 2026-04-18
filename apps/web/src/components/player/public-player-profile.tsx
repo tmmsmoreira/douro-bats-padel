@@ -4,11 +4,18 @@ import { UseMutationResult } from '@tanstack/react-query';
 import { useTranslations, useLocale } from 'next-intl';
 import { useSession } from 'next-auth/react';
 import { useRouter } from '@/i18n/navigation';
-import { useDeletePlayer, useRevokeInvitation, useResendInvitation, usePlayer } from '@/hooks';
+import {
+  useDeletePlayer,
+  useRevokeInvitation,
+  useResendInvitation,
+  usePlayer,
+  useLeaderboard,
+} from '@/hooks';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Mail, CheckCircle, XCircle, TrendingUp, MoreVertical, UserX } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Mail, CheckCircle, XCircle, MoreVertical, UserX } from 'lucide-react';
 import { DeleteIcon, DeleteIconHandle, CopyIcon, CopyIconHandle } from 'lucide-animated';
 import { Button } from '@/components/ui/button';
 import {
@@ -28,17 +35,16 @@ import { StatusBadge } from '@/components/shared/status-badge';
 import type { PlayerProfileStatus, InvitationStatus } from '@/components/shared/status-badge';
 import { SendIcon, SendIconHandle } from '../icons/send-icon';
 import { Spinner } from '../ui/spinner';
-import { Invitation } from '@padel/types';
+import { Invitation, LeaderboardEntry } from '@padel/types';
 import { useIsMobile } from '@/hooks/use-media-query';
+import { PlayerStatsStrip } from './player-stats-strip';
+import { WeeklyScoresCard } from './weekly-scores-card';
+import { cn } from '@/lib/utils';
 
 interface PlayerData {
   id: string;
-  email: string;
   name: string | null;
   profilePhoto: string | null;
-  emailVerified: boolean;
-  createdAt: string;
-  roles: string[];
   player: {
     id: string;
     rating: number;
@@ -57,10 +63,17 @@ interface PlayerData {
       createdAt: string;
     }>;
   } | null;
+  // Admin/editor-only fields (gated on the backend)
+  email?: string;
+  emailVerified?: boolean;
+  createdAt?: string;
+  roles?: string[];
+  dateOfBirth?: string | null;
+  phoneNumber?: string | null;
   invitation?: Invitation | null;
 }
 
-function getUserInitials(name: string | null, email: string): string {
+function getUserInitials(name: string | null, email?: string): string {
   if (name) {
     return name
       .split(' ')
@@ -69,7 +82,7 @@ function getUserInitials(name: string | null, email: string): string {
       .toUpperCase()
       .slice(0, 2);
   }
-  return email[0].toUpperCase();
+  return email?.[0]?.toUpperCase() ?? 'U';
 }
 
 export function PublicPlayerProfile({ playerId }: { playerId: string }) {
@@ -83,7 +96,6 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showRevokeDialog, setShowRevokeDialog] = useState(false);
 
-  // Check if user is admin or editor
   const userRoles = session?.user?.roles || [];
   const isAdminOrEditor = userRoles.includes('ADMIN') || userRoles.includes('EDITOR');
 
@@ -93,7 +105,8 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
     error,
   } = usePlayer(playerId) as ReturnType<typeof usePlayer> & { data: PlayerData | undefined };
 
-  // Use custom hooks for mutations
+  const { data: leaderboard } = useLeaderboard();
+
   const deleteMutation = useDeletePlayer(playerId, () => {
     router.push('/players');
   });
@@ -117,7 +130,6 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
 
   const isBackNav = useIsFromBfcache();
 
-  // Custom empty component with PageHeader
   const emptyComponent = (
     <motion.div
       key="not-found"
@@ -158,6 +170,7 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
       {(player) => (
         <PublicPlayerProfileContent
           player={player}
+          leaderboard={leaderboard}
           isAdminOrEditor={isAdminOrEditor}
           handleDeleteUser={handleDeleteUser}
           isDeleting={isDeleting}
@@ -180,9 +193,9 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
   );
 }
 
-// Separate component for public player profile content
 function PublicPlayerProfileContent({
   player,
+  leaderboard,
   isAdminOrEditor,
   handleDeleteUser,
   isDeleting,
@@ -201,6 +214,7 @@ function PublicPlayerProfileContent({
   locale,
 }: {
   player: PlayerData;
+  leaderboard: LeaderboardEntry[] | undefined;
   isAdminOrEditor: boolean;
   handleDeleteUser: () => void;
   isDeleting: boolean;
@@ -224,6 +238,16 @@ function PublicPlayerProfileContent({
   const copyIconRef = useRef<CopyIconHandle>(null);
   const resendIconRef = useRef<SendIconHandle>(null);
 
+  const leaderboardEntry = player.player
+    ? leaderboard?.find((e) => e.playerId === player.player!.id)
+    : undefined;
+  const rank = leaderboardEntry ? leaderboard!.indexOf(leaderboardEntry) + 1 : undefined;
+  const weeklyScores = player.player?.weeklyScores.map((s) => s.score) ?? [];
+  const bestRank =
+    player.player && player.player.rankingSnapshots.length > 0
+      ? Math.min(...player.player.rankingSnapshots.map((s) => s.rank))
+      : undefined;
+
   return (
     <motion.div
       key="content"
@@ -235,9 +259,9 @@ function PublicPlayerProfileContent({
     >
       {/* Player Header */}
       <Card className="glass-card">
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <Avatar className="h-24 w-24">
+        <CardHeader className="pb-0">
+          <div className="flex items-center gap-4">
+            <Avatar className="h-20 w-20 sm:h-24 sm:w-24 shrink-0">
               <AvatarImage
                 src={player.profilePhoto || undefined}
                 alt={player.name || t('userAltText')}
@@ -246,34 +270,42 @@ function PublicPlayerProfileContent({
                 {getUserInitials(player.name, player.email)}
               </AvatarFallback>
             </Avatar>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <CardTitle className="text-2xl sm:text-3xl flex items-center gap-2 flex-wrap">
-                {player.name || tList('noName')}
-                {player.emailVerified ? (
-                  <CheckCircle className="h-5 w-5 text-green-600" />
-                ) : (
-                  <XCircle className="h-5 w-5 text-muted-foreground" />
+                <span className="truncate">{player.name || tList('noName')}</span>
+                {player.emailVerified === true && (
+                  <CheckCircle className="h-5 w-5 text-green-600 shrink-0" aria-hidden />
+                )}
+                {player.emailVerified === false && (
+                  <XCircle
+                    className="h-5 w-5 text-muted-foreground shrink-0"
+                    aria-label={t('emailNotVerified')}
+                  />
                 )}
               </CardTitle>
-              <div className="flex items-center gap-1 text-sm text-muted-foreground mt-2">
-                <Mail className="h-4 w-4" />
-                {player.email}
-              </div>
+              {player.email && (
+                <div className="flex items-center gap-1 text-sm text-muted-foreground mt-2 min-w-0">
+                  <Mail className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{player.email}</span>
+                </div>
+              )}
             </div>
-            {player.player && (
-              <div className="flex flex-col items-center sm:items-end gap-1 bg-primary/10 px-6 py-4 rounded-lg">
-                <div className="flex items-center gap-1.5 text-3xl font-bold text-primary font-heading">
-                  <TrendingUp size={20} className="text-primary" />
-                  <span className="gradient-text">{player.player.rating}</span>
-                </div>
-                <div className="text-xs text-muted-foreground font-medium">
-                  {t('currentRating')}
-                </div>
-              </div>
-            )}
           </div>
         </CardHeader>
+        {player.player && (
+          <CardContent className="pt-6">
+            <PlayerStatsStrip
+              rating={player.player.rating}
+              rank={rank}
+              weeksPlayed={weeklyScores.length}
+              status={player.player.status as PlayerProfileStatus}
+            />
+          </CardContent>
+        )}
       </Card>
+
+      {/* Admin-only Player Details */}
+      {isAdminOrEditor && <AdminDetailsCard player={player} t={t} tList={tList} locale={locale} />}
 
       {/* Invitation Section - Only visible for pending invitations */}
       {player.invitation && (
@@ -303,12 +335,14 @@ function PublicPlayerProfileContent({
                   </p>
                 </div>
               )}
-              <div>
-                <p className="text-sm text-muted-foreground">{t('invitedOn')}</p>
-                <p className="font-medium mt-1">
-                  {new Date(player.createdAt).toLocaleDateString(locale)}
-                </p>
-              </div>
+              {player.createdAt && (
+                <div>
+                  <p className="text-sm text-muted-foreground">{t('invitedOn')}</p>
+                  <p className="font-medium mt-1">
+                    {new Date(player.createdAt).toLocaleDateString(locale)}
+                  </p>
+                </div>
+              )}
             </div>
           </CardContent>
           <CardFooter className="border-t gap-2 ">
@@ -329,96 +363,24 @@ function PublicPlayerProfileContent({
         </Card>
       )}
 
-      {/* Player Information */}
+      {/* Performance */}
       {player.player && (
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card className="glass-card">
-            <CardHeader>
-              <CardTitle>{t('playerInformation')}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 pt-0">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">{tList('status')}</p>
-                  <div className="mt-1">
-                    <StatusBadge status={player.player.status as PlayerProfileStatus} />
-                  </div>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('currentRating')}</p>
-                  <div className="flex items-center gap-1.5 text-2xl font-bold text-primary font-heading mt-1">
-                    <TrendingUp size={16} className="text-primary" />
-                    <span className="gradient-text">{player.player.rating}</span>
-                  </div>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t">
-                <div>
-                  <p className="text-sm text-muted-foreground">{tList('playerSince')}</p>
-                  <p className="font-medium">
-                    {new Date(player.player.createdAt).toLocaleDateString(locale)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">{tList('accountCreated')}</p>
-                  <p className="font-medium">
-                    {new Date(player.createdAt).toLocaleDateString(locale)}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        <div className={cn('grid gap-6', bestRank !== undefined && 'md:grid-cols-2')}>
+          <WeeklyScoresCard weeklyScores={weeklyScores} />
 
-          {/* Performance Stats */}
-          <Card className="glass-card">
-            <CardHeader>
-              <CardTitle>{t('performanceStats')}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 pt-0">
-              <div>
-                <p className="text-sm text-muted-foreground">{t('weeksPlayed')}</p>
-                <p className="text-2xl font-bold">{player.player.weeklyScores.length}</p>
-              </div>
-              {player.player.rankingSnapshots.length > 0 && (
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('bestRank')}</p>
-                  <p className="text-2xl font-bold">
-                    #{Math.min(...player.player.rankingSnapshots.map((s) => s.rank))}
-                  </p>
+          {bestRank !== undefined && (
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle>{t('bestRank')}</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-4xl font-bold font-heading gradient-text">#{bestRank}</span>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
         </div>
-      )}
-
-      {/* Recent Performance */}
-      {player.player && player.player.weeklyScores.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('recentWeeklyScores')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {player.player.weeklyScores.slice(0, 5).map((score) => (
-                <div
-                  key={score.id}
-                  className="flex justify-between items-center py-2 border-b last:border-0"
-                >
-                  <div>
-                    <p className="font-medium">
-                      {t('week')} {new Date(score.week).toLocaleDateString()}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(score.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div className="text-xl font-bold text-primary">{score.score}</div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
       )}
 
       {/* Admin Actions - Only for registered users */}
@@ -430,7 +392,7 @@ function PublicPlayerProfileContent({
           <CardContent className="pt-0">
             <p className="text-sm text-muted-foreground">{tActions('actionsDescription')}</p>
             {player.roles?.includes('ADMIN') && (
-              <div className="text-sm text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950/20 p-3 rounded-md border border-yellow-200 dark:border-yellow-800">
+              <div className="mt-3 text-sm text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950/20 p-3 rounded-md border border-yellow-200 dark:border-yellow-800">
                 {tActions('adminCannotBeDeleted')}
               </div>
             )}
@@ -451,7 +413,6 @@ function PublicPlayerProfileContent({
         </Card>
       )}
 
-      {/* Delete User Confirmation Dialog */}
       <ConfirmationDialog
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
@@ -467,7 +428,6 @@ function PublicPlayerProfileContent({
         }}
       />
 
-      {/* Revoke Invitation Confirmation Dialog */}
       <ConfirmationDialog
         open={showRevokeDialog}
         onOpenChange={setShowRevokeDialog}
@@ -485,7 +445,85 @@ function PublicPlayerProfileContent({
   );
 }
 
-// Separate component for invitation actions with responsive layout
+function AdminDetailsCard({
+  player,
+  t,
+  tList,
+  locale,
+}: {
+  player: PlayerData;
+  t: ReturnType<typeof useTranslations>;
+  tList: ReturnType<typeof useTranslations>;
+  locale: string;
+}) {
+  return (
+    <Card className="glass-card">
+      <CardHeader>
+        <CardTitle>{t('playerInformation')}</CardTitle>
+      </CardHeader>
+      <CardContent className="pt-0">
+        <div className="grid gap-4 sm:grid-cols-2">
+          {player.email && <DetailField label={t('email')} value={player.email} />}
+          <DetailField
+            label={t('phoneNumber')}
+            value={player.phoneNumber || t('notSet')}
+            muted={!player.phoneNumber}
+          />
+          <DetailField
+            label={t('dateOfBirth')}
+            value={
+              player.dateOfBirth
+                ? new Date(player.dateOfBirth).toLocaleDateString(locale)
+                : t('notSet')
+            }
+            muted={!player.dateOfBirth}
+          />
+          <DetailField
+            label={t('emailVerifiedLabel')}
+            value={player.emailVerified ? t('verified') : t('emailNotVerified')}
+            muted={!player.emailVerified}
+          />
+          {player.player?.createdAt && (
+            <DetailField
+              label={t('playerSince')}
+              value={new Date(player.player.createdAt).toLocaleDateString(locale)}
+            />
+          )}
+          {player.createdAt && (
+            <DetailField
+              label={tList('accountCreated')}
+              value={new Date(player.createdAt).toLocaleDateString(locale)}
+            />
+          )}
+          {player.roles && player.roles.length > 0 && (
+            <div className="sm:col-span-2">
+              <p className="text-sm text-muted-foreground">{t('role')}</p>
+              <div className="flex gap-2 mt-1 flex-wrap">
+                {player.roles.map((role: string) => (
+                  <Badge key={role} variant="outline">
+                    {role}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function DetailField({ label, value, muted }: { label: string; value: string; muted?: boolean }) {
+  return (
+    <div className="min-w-0">
+      <p className="text-sm text-muted-foreground">{label}</p>
+      <p className={`font-medium truncate ${muted ? 'text-muted-foreground italic' : ''}`}>
+        {value}
+      </p>
+    </div>
+  );
+}
+
 function InvitationActions({
   player,
   copyInvitationLink,
@@ -509,8 +547,6 @@ function InvitationActions({
 }) {
   const isMobile = useIsMobile();
 
-  // On mobile: show Copy and Resend buttons, with Revoke in dropdown
-  // On desktop: show all three buttons
   if (isMobile) {
     return (
       <>
@@ -562,7 +598,6 @@ function InvitationActions({
     );
   }
 
-  // Desktop: show all three buttons
   return (
     <>
       <Button

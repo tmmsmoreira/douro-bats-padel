@@ -4,7 +4,15 @@
     "accessDeniedDescription": "Não tem permissão para aceder a esta página.",
     "notFound": "Página Não Encontrada",
     "notFoundDescription": "A página que procura não existe ou foi movida.",
-    "goHome": "Ir para Início"
+    "goHome": "Ir para Início",
+    "somethingWentWrong": "Algo correu mal",
+    "unexpectedError": "Ocorreu um erro inesperado. Por favor, tenta novamente.",
+    "tryAgain": "Tentar novamente",
+    "goBack": "Voltar",
+    "failedToLoadEvents": "Erro ao carregar eventos",
+    "failedToLoadEventsDescription": "Houve um problema a carregar os eventos. Por favor, tenta novamente.",
+    "failedToLoadEvent": "Erro ao carregar evento",
+    "failedToLoadEventDescription": "Houve um problema a carregar este evento. Pode já não existir ou pode não ter permissão."
   },
   "status": {
     "draft": "Rascunho",
@@ -455,7 +463,24 @@
     "pushNotificationsBlocked": "As notificações estão bloqueadas. Ative-as nas definições do navegador.",
     "pushSubscribed": "Notificações push ativadas",
     "pushUnsubscribed": "Notificações push desativadas",
-    "pushError": "Falha ao atualizar preferências de notificação"
+    "pushError": "Falha ao atualizar preferências de notificação",
+    "rank": "Posição",
+    "noRank": "—",
+    "account": "Conta",
+    "signOut": "Terminar sessão",
+    "signOutConfirmation": "Terminar sessão?",
+    "signOutConfirmationDescription": "Vais precisar de iniciar sessão novamente para aceder ao teu perfil.",
+    "emailNotVerified": "Email não verificado",
+    "emailNotVerifiedDescription": "Verifica o teu email para proteger a tua conta.",
+    "resendVerification": "Reenviar verificação",
+    "verificationEmailSent": "Email de verificação enviado",
+    "verificationEmailError": "Não foi possível enviar o email de verificação",
+    "dateOfBirthHint": "DD/MM/AAAA",
+    "lastFiveWeeks": "Últimas 5 semanas",
+    "noWeeklyScores": "Ainda não tens pontuações",
+    "verified": "Verificado",
+    "emailVerifiedLabel": "Email verificado",
+    "adminOnly": "Admin"
   },
   "admin": {
     "loading": "A carregar...",

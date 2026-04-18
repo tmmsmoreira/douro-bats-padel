@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
+import { ErrorPage } from '@/components/shared/error-page';
 
 export default function EventsError({
   error,
@@ -10,19 +12,21 @@ export default function EventsError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useTranslations('errors');
+
   useEffect(() => {
     console.error('Events error:', error);
   }, [error]);
 
   return (
-    <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 px-4 text-center">
-      <h2 className="text-2xl font-bold">Failed to load events</h2>
-      <p className="text-muted-foreground max-w-md">
-        There was a problem loading the events. Please try again.
-      </p>
-      <Button onClick={reset} variant="default">
-        Try Again
-      </Button>
-    </div>
+    <ErrorPage
+      title={t('failedToLoadEvents')}
+      description={t('failedToLoadEventsDescription')}
+      actions={
+        <Button onClick={reset} variant="default">
+          {t('tryAgain')}
+        </Button>
+      }
+    />
   );
 }

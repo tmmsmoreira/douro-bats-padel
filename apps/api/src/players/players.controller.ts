@@ -5,6 +5,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Public } from '../auth/decorators/public.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Role } from '@padel/types';
 
 @Controller('players')
@@ -20,8 +21,8 @@ export class PlayersController {
 
   @Public()
   @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return this.playersService.findOne(id);
+  async findOne(@Param('id') id: string, @CurrentUser() requester: { roles?: Role[] } | null) {
+    return this.playersService.findOne(id, requester);
   }
 
   @Delete(':id')

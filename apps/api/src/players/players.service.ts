@@ -89,7 +89,9 @@ export class PlayersService {
     return [...playersList, ...invitedPlayers];
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, requester?: { roles?: Role[] | string[] } | null) {
+    const isAdminOrEditor = !!requester?.roles?.some((r) => r === Role.ADMIN || r === Role.EDITOR);
+
     // First try to find as a registered user
     const user = await this.prisma.user.findUnique({
       where: { id },
@@ -114,53 +116,65 @@ export class PlayersService {
     });
 
     if (user) {
-      return {
+      const publicFields = {
         id: user.id,
-        email: user.email,
         name: user.name,
         profilePhoto: user.profilePhoto,
+        player: user.player,
+      };
+
+      if (!isAdminOrEditor) {
+        return publicFields;
+      }
+
+      return {
+        ...publicFields,
+        email: user.email,
         emailVerified: user.emailVerified,
         createdAt: user.createdAt,
         roles: user.roles,
-        player: user.player,
+        dateOfBirth: user.dateOfBirth,
+        phoneNumber: user.phoneNumber,
         invitation: null,
       };
     }
 
-    // If not found as user, try to find as invitation (including revoked ones for admin view)
-    const invitation = await this.prisma.invitation.findUnique({
-      where: { id },
-      include: {
-        invitedByUser: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
+    // Invitation lookups are admin/editor-only — don't leak invitation metadata publicly
+    if (isAdminOrEditor) {
+      const invitation = await this.prisma.invitation.findUnique({
+        where: { id },
+        include: {
+          invitedByUser: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    if (invitation) {
-      return {
-        id: invitation.id,
-        email: invitation.email,
-        name: invitation.name,
-        profilePhoto: null,
-        emailVerified: false,
-        createdAt: invitation.createdAt,
-        roles: [],
-        player: null,
-        invitation: {
+      if (invitation) {
+        return {
           id: invitation.id,
-          status: invitation.status,
-          expiresAt: invitation.expiresAt,
-          invitedBy: invitation.invitedBy,
-          invitedByUser: invitation.invitedByUser,
-          token: invitation.token,
-          usedAt: invitation.usedAt,
-        },
-      };
+          email: invitation.email,
+          name: invitation.name,
+          profilePhoto: null,
+          emailVerified: false,
+          createdAt: invitation.createdAt,
+          roles: [],
+          player: null,
+          invitation: {
+            id: invitation.id,
+            status: invitation.status,
+            expiresAt: invitation.expiresAt,
+            invitedBy: invitation.invitedBy,
+            invitedByUser: invitation.invitedByUser,
+            token: invitation.token,
+            usedAt: invitation.usedAt,
+          },
+        };
+      }
     }
 
     // If neither user nor invitation found, throw NotFoundException

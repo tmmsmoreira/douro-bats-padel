@@ -2,8 +2,8 @@
 
 import { useSession, signOut } from 'next-auth/react';
 import { useTranslations, useLocale } from 'next-intl';
-import { useUpdateProfile, useProfile } from '@/hooks';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useUpdateProfile, useProfile, useIsFromBfcache, useLeaderboard } from '@/hooks';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -15,17 +15,28 @@ import { useRouter, usePathname } from 'next/navigation';
 import { toast } from 'sonner';
 import { motion } from 'motion/react';
 import { DataStateWrapper } from '@/components/shared/data-state-wrapper';
-import { useIsFromBfcache } from '@/hooks';
-import { SquarePenIcon, SquarePenIconHandle } from 'lucide-animated';
 import { PageHeader } from '@/components/shared/page-header';
-import { Mail, CheckCircle, XCircle, TrendingUp } from 'lucide-react';
-import { StatusBadge } from '@/components/shared/status-badge';
 import { PushNotificationToggle } from '@/components/shared/push-notification-toggle';
+import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
+import { PlayerStatsStrip } from './player-stats-strip';
+import { WeeklyScoresCard } from './weekly-scores-card';
+import { SquarePenIcon, SquarePenIconHandle, LogoutIcon, LogoutIconHandle } from 'lucide-animated';
+import { Mail, CheckCircle, XCircle, MailWarning } from 'lucide-react';
 import type { PlayerProfileStatus } from '@/components/shared/status-badge';
-import type { UserWithPlayer } from '@padel/types';
+import type { LeaderboardEntry, UserWithPlayer } from '@padel/types';
+import { cn } from '@/lib/utils';
+
+const CARD_EASING: [number, number, number, number] = [0.165, 0.84, 0.44, 1];
+
+interface ValidationErrors {
+  name?: string;
+  dateOfBirth?: string;
+  phoneNumber?: string;
+  profilePhoto?: string;
+}
 
 export function PlayerProfile() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const t = useTranslations('profile');
   const locale = useLocale();
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -33,43 +44,30 @@ export function PlayerProfile() {
   const [editedDateOfBirth, setEditedDateOfBirth] = useState<Date | undefined>(undefined);
   const [editedPhoneNumber, setEditedPhoneNumber] = useState('');
   const [editedProfilePhoto, setEditedProfilePhoto] = useState('');
-  const [validationErrors, setValidationErrors] = useState<{
-    name?: string;
-    dateOfBirth?: string;
-    phoneNumber?: string;
-    profilePhoto?: string;
-  }>({});
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const router = useRouter();
   const pathname = usePathname();
 
   const { data: profile, isLoading, error } = useProfile();
+  const { data: leaderboard } = useLeaderboard();
 
-  // Handle unauthorized errors by signing out and redirecting to login
   useEffect(() => {
     if (error && error instanceof Error && error.message.includes('Unauthorized')) {
-      console.log('Unauthorized error detected, signing out...');
-      const locale = pathname.split('/')[1] || 'en';
+      const lang = pathname.split('/')[1] || 'en';
       signOut({ redirect: false }).then(() => {
-        router.push(`/${locale}/login`);
+        router.push(`/${lang}/login`);
       });
     }
   }, [error, pathname, router]);
 
-  // Use custom hook for updating profile
   const updateProfileMutation = useUpdateProfile(() => {
     setIsEditingProfile(false);
     setValidationErrors({});
   });
 
   const validateForm = () => {
-    const errors: {
-      name?: string;
-      dateOfBirth?: string;
-      phoneNumber?: string;
-      profilePhoto?: string;
-    } = {};
+    const errors: ValidationErrors = {};
 
-    // Name validation
     if (!editedName || editedName.trim().length === 0) {
       errors.name = 'Name is required';
     } else if (editedName.trim().length < 2) {
@@ -78,7 +76,6 @@ export function PlayerProfile() {
       errors.name = 'Name must be less than 100 characters';
     }
 
-    // Date of birth validation
     if (editedDateOfBirth) {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -87,14 +84,12 @@ export function PlayerProfile() {
         errors.dateOfBirth = 'Date of birth cannot be in the future';
       }
 
-      // Check if user is at least 13 years old
       const minAge = new Date();
       minAge.setFullYear(minAge.getFullYear() - 13);
       if (editedDateOfBirth > minAge) {
         errors.dateOfBirth = 'You must be at least 13 years old';
       }
 
-      // Check if date is reasonable (not more than 120 years ago)
       const maxAge = new Date();
       maxAge.setFullYear(maxAge.getFullYear() - 120);
       if (editedDateOfBirth < maxAge) {
@@ -102,12 +97,9 @@ export function PlayerProfile() {
       }
     }
 
-    // Phone number validation
     if (editedPhoneNumber && editedPhoneNumber.trim().length > 0) {
-      // Remove spaces, dashes, and parentheses for validation
       const cleanPhone = editedPhoneNumber.replace(/[\s\-\(\)]/g, '');
 
-      // Check if it contains only digits and optional + at the start
       if (!/^\+?\d+$/.test(cleanPhone)) {
         errors.phoneNumber =
           'Phone number can only contain digits, spaces, dashes, and parentheses';
@@ -118,11 +110,9 @@ export function PlayerProfile() {
       }
     }
 
-    // Profile photo URL validation
     if (editedProfilePhoto && editedProfilePhoto.trim().length > 0) {
       try {
         new URL(editedProfilePhoto);
-        // Check if it's a valid image URL (basic check)
         if (
           !/\.(jpg|jpeg|png|gif|webp|svg)$/i.test(editedProfilePhoto) &&
           !editedProfilePhoto.includes('googleusercontent.com') &&
@@ -149,11 +139,8 @@ export function PlayerProfile() {
   };
 
   const handleSaveProfile = () => {
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
-    // Check if any field has changed
     const nameChanged = editedName.trim() !== (profile?.name || '');
     const dateOfBirthChanged = editedDateOfBirth
       ? editedDateOfBirth.toISOString().split('T')[0] !== profile?.dateOfBirth
@@ -187,18 +174,6 @@ export function PlayerProfile() {
     setValidationErrors({});
   };
 
-  const getUserInitials = (name?: string | null, email?: string) => {
-    if (name) {
-      return name
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2);
-    }
-    return email?.[0]?.toUpperCase() || 'U';
-  };
-
   return (
     <DataStateWrapper
       isLoading={status === 'loading' || isLoading}
@@ -211,6 +186,7 @@ export function PlayerProfile() {
       {(profile) => (
         <ProfileContent
           profile={profile}
+          leaderboard={leaderboard}
           isEditingProfile={isEditingProfile}
           editedName={editedName}
           setEditedName={setEditedName}
@@ -225,7 +201,6 @@ export function PlayerProfile() {
           handleSaveProfile={handleSaveProfile}
           handleCancelProfileEdit={handleCancelProfileEdit}
           updateProfileMutation={updateProfileMutation}
-          getUserInitials={getUserInitials}
           t={t}
           locale={locale}
         />
@@ -234,9 +209,42 @@ export function PlayerProfile() {
   );
 }
 
-// Separate component for profile content
+function getUserInitials(name?: string | null, email?: string) {
+  if (name) {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  }
+  return email?.[0]?.toUpperCase() || 'U';
+}
+
+interface ProfileContentProps {
+  profile: UserWithPlayer;
+  leaderboard: LeaderboardEntry[] | undefined;
+  isEditingProfile: boolean;
+  editedName: string;
+  setEditedName: (value: string) => void;
+  editedDateOfBirth: Date | undefined;
+  setEditedDateOfBirth: (value: Date | undefined) => void;
+  editedPhoneNumber: string;
+  setEditedPhoneNumber: (value: string) => void;
+  editedProfilePhoto: string;
+  setEditedProfilePhoto: (value: string) => void;
+  validationErrors: ValidationErrors;
+  handleEditProfile: () => void;
+  handleSaveProfile: () => void;
+  handleCancelProfileEdit: () => void;
+  updateProfileMutation: { isPending: boolean };
+  t: ReturnType<typeof useTranslations>;
+  locale: string;
+}
+
 function ProfileContent({
   profile,
+  leaderboard,
   isEditingProfile,
   editedName,
   setEditedName,
@@ -251,7 +259,242 @@ function ProfileContent({
   handleSaveProfile,
   handleCancelProfileEdit,
   updateProfileMutation,
-  getUserInitials,
+  t,
+  locale,
+}: ProfileContentProps) {
+  const isBackNav = useIsFromBfcache();
+
+  const leaderboardEntry = profile.player
+    ? leaderboard?.find((e) => e.playerId === profile.player!.id)
+    : undefined;
+  const rank = leaderboardEntry ? leaderboard!.indexOf(leaderboardEntry) + 1 : undefined;
+  const weeklyScores = leaderboardEntry?.weeklyScores ?? [];
+  const weeksPlayed = weeklyScores.length;
+
+  const hasNonPlayerRole = (profile.roles?.length ?? 0) > 1 || !profile.roles?.includes('PLAYER');
+
+  return (
+    <motion.div
+      key="content"
+      initial={isBackNav ? false : { opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: isBackNav ? 0 : 0.3 }}
+      className="space-y-6"
+    >
+      <PageHeader title={t('title')} description={t('description')} />
+
+      {!profile.emailVerified && <EmailVerificationBanner email={profile.email} t={t} />}
+
+      <motion.div
+        initial={isBackNav ? false : { opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: isBackNav ? 0 : 0.25, ease: CARD_EASING }}
+      >
+        <ProfileHeaderCard
+          profile={profile}
+          isEditingProfile={isEditingProfile}
+          editedProfilePhoto={editedProfilePhoto}
+          rank={rank}
+          weeksPlayed={weeksPlayed}
+          onEditProfile={handleEditProfile}
+          t={t}
+        />
+      </motion.div>
+
+      <motion.div
+        initial={isBackNav ? false : { opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: isBackNav ? 0 : 0.25, ease: CARD_EASING }}
+        className="grid gap-6 md:grid-cols-2"
+      >
+        <InformationCard
+          profile={profile}
+          isEditingProfile={isEditingProfile}
+          editedName={editedName}
+          setEditedName={setEditedName}
+          editedDateOfBirth={editedDateOfBirth}
+          setEditedDateOfBirth={setEditedDateOfBirth}
+          editedPhoneNumber={editedPhoneNumber}
+          setEditedPhoneNumber={setEditedPhoneNumber}
+          editedProfilePhoto={editedProfilePhoto}
+          setEditedProfilePhoto={setEditedProfilePhoto}
+          validationErrors={validationErrors}
+          hasNonPlayerRole={hasNonPlayerRole}
+          handleSaveProfile={handleSaveProfile}
+          handleCancelProfileEdit={handleCancelProfileEdit}
+          updateProfileMutation={updateProfileMutation}
+          t={t}
+          locale={locale}
+        />
+
+        <WeeklyScoresCard weeklyScores={weeklyScores} />
+      </motion.div>
+
+      <motion.div
+        initial={isBackNav ? false : { opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: isBackNav ? 0 : 0.25, ease: CARD_EASING }}
+      >
+        <AccountCard t={t} />
+      </motion.div>
+    </motion.div>
+  );
+}
+
+function EmailVerificationBanner({
+  email,
+  t,
+}: {
+  email: string;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  const [isSending, setIsSending] = useState(false);
+
+  const handleResend = async () => {
+    setIsSending(true);
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/resend-verification`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      if (!res.ok) throw new Error('Request failed');
+      toast.success(t('verificationEmailSent'));
+    } catch {
+      toast.error(t('verificationEmailError'));
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  return (
+    <Card className="glass-card border-warning/40 bg-warning/5">
+      <CardContent className="flex flex-col sm:flex-row sm:items-center gap-4 p-4">
+        <div className="flex items-start gap-3 flex-1 min-w-0">
+          <div className="rounded-full bg-warning/15 p-2 shrink-0">
+            <MailWarning className="h-5 w-5 text-warning" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-medium text-sm">{t('emailNotVerified')}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {t('emailNotVerifiedDescription')}
+            </p>
+          </div>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleResend}
+          disabled={isSending}
+          className="w-full sm:w-auto shrink-0"
+        >
+          {isSending ? t('sending') : t('resendVerification')}
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ProfileHeaderCard({
+  profile,
+  isEditingProfile,
+  editedProfilePhoto,
+  rank,
+  weeksPlayed,
+  onEditProfile,
+  t,
+}: {
+  profile: UserWithPlayer;
+  isEditingProfile: boolean;
+  editedProfilePhoto: string;
+  rank: number | undefined;
+  weeksPlayed: number;
+  onEditProfile: () => void;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  const squarePenIconRef = useRef<SquarePenIconHandle>(null);
+
+  return (
+    <Card className="glass-card">
+      <CardHeader className="pb-0">
+        <div className="flex items-center gap-4">
+          <Avatar className="h-20 w-20 sm:h-24 sm:w-24 shrink-0">
+            <AvatarImage
+              src={
+                isEditingProfile
+                  ? editedProfilePhoto || undefined
+                  : profile.profilePhoto || undefined
+              }
+              alt={profile.name || t('userAltText')}
+            />
+            <AvatarFallback className="gradient-primary text-3xl">
+              {getUserInitials(profile.name, profile.email)}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <CardTitle className="text-2xl sm:text-3xl flex items-center gap-2 flex-wrap">
+              <span className="truncate">{profile.name || t('noName')}</span>
+              {profile.emailVerified ? (
+                <CheckCircle className="h-5 w-5 text-green-600 shrink-0" aria-hidden />
+              ) : (
+                <XCircle
+                  className="h-5 w-5 text-muted-foreground shrink-0"
+                  aria-label={t('emailNotVerified')}
+                />
+              )}
+            </CardTitle>
+            <div className="flex items-center gap-1 text-sm text-muted-foreground mt-2 min-w-0">
+              <Mail className="h-4 w-4 shrink-0" />
+              <span className="truncate">{profile.email}</span>
+            </div>
+          </div>
+          {!isEditingProfile && (
+            <Button
+              onClick={onEditProfile}
+              variant="outline"
+              size="icon"
+              onMouseEnter={() => squarePenIconRef.current?.startAnimation()}
+              onMouseLeave={() => squarePenIconRef.current?.stopAnimation()}
+              aria-label={t('editProfile')}
+              className="shrink-0"
+              animate
+            >
+              <SquarePenIcon ref={squarePenIconRef} size={16} className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      </CardHeader>
+      {profile.player && (
+        <CardContent className="pt-6">
+          <PlayerStatsStrip
+            rating={profile.player.rating}
+            rank={rank}
+            weeksPlayed={weeksPlayed}
+            status={profile.player.status as PlayerProfileStatus}
+          />
+        </CardContent>
+      )}
+    </Card>
+  );
+}
+
+function InformationCard({
+  profile,
+  isEditingProfile,
+  editedName,
+  setEditedName,
+  editedDateOfBirth,
+  setEditedDateOfBirth,
+  editedPhoneNumber,
+  setEditedPhoneNumber,
+  editedProfilePhoto,
+  setEditedProfilePhoto,
+  validationErrors,
+  hasNonPlayerRole,
+  handleSaveProfile,
+  handleCancelProfileEdit,
+  updateProfileMutation,
   t,
   locale,
 }: {
@@ -265,236 +508,113 @@ function ProfileContent({
   setEditedPhoneNumber: (value: string) => void;
   editedProfilePhoto: string;
   setEditedProfilePhoto: (value: string) => void;
-  validationErrors: Record<string, string>;
-  handleEditProfile: () => void;
+  validationErrors: ValidationErrors;
+  hasNonPlayerRole: boolean;
   handleSaveProfile: () => void;
   handleCancelProfileEdit: () => void;
-  updateProfileMutation: {
-    isPending: boolean;
-  };
-  getUserInitials: (name?: string | null, email?: string) => string;
-  t: (key: string) => string;
+  updateProfileMutation: { isPending: boolean };
+  t: ReturnType<typeof useTranslations>;
   locale: string;
 }) {
-  const squarePenIconRef = useRef<SquarePenIconHandle>(null);
-  const isBackNav = useIsFromBfcache();
-
   return (
-    <motion.div
-      key="content"
-      initial={isBackNav ? false : { opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: isBackNav ? 0 : 0.3 }}
-      className="space-y-6"
-    >
-      <PageHeader title={t('title')} description={t('description')} />
-
-      {/* Player Header */}
-      <motion.div
-        initial={isBackNav ? false : { opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: isBackNav ? 0 : 0.25, ease: [0.165, 0.84, 0.44, 1] }}
-      >
-        <Card className="glass-card">
-          <CardHeader>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              <Avatar className="h-24 w-24">
-                <AvatarImage
-                  src={
-                    isEditingProfile
-                      ? editedProfilePhoto || undefined
-                      : profile.profilePhoto || undefined
-                  }
-                  alt={profile.name || t('userAltText')}
-                />
-                <AvatarFallback className="gradient-primary text-3xl">
-                  {getUserInitials(profile.name, profile.email)}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <CardTitle className="text-2xl sm:text-3xl flex items-center gap-2 flex-wrap">
-                  {profile.name || t('noName')}
-                  {profile.emailVerified ? (
-                    <CheckCircle className="h-5 w-5 text-green-600" />
-                  ) : (
-                    <XCircle className="h-5 w-5 text-muted-foreground" />
-                  )}
-                </CardTitle>
-                <div className="flex items-center gap-1 text-sm text-muted-foreground mt-2">
-                  <Mail className="h-4 w-4" />
-                  {profile.email}
-                </div>
-              </div>
-              {profile.player && (
-                <div className="flex flex-col items-center sm:items-end gap-1 bg-primary/10 px-6 py-4 rounded-lg">
-                  <div className="flex items-center gap-1.5 text-3xl font-bold text-primary font-heading">
-                    <TrendingUp size={20} className="text-primary" />
-                    <span className="gradient-text">{profile.player.rating}</span>
-                  </div>
-                  <div className="text-xs text-muted-foreground font-medium">
-                    {t('currentRating')}
-                  </div>
-                </div>
+    <Card className="glass-card">
+      <CardHeader>
+        <CardTitle>{t('playerInformation')}</CardTitle>
+      </CardHeader>
+      <CardContent className={cn('pt-0', isEditingProfile ? 'space-y-4' : 'space-y-6')}>
+        {isEditingProfile ? (
+          <>
+            <Field>
+              <FieldLabel htmlFor="profilePhoto">{t('profilePhoto')}</FieldLabel>
+              <Input
+                id="profilePhoto"
+                type="text"
+                value={editedProfilePhoto}
+                onChange={(e) => setEditedProfilePhoto(e.target.value)}
+                placeholder={t('enterImageUrl')}
+              />
+              <FieldDescription>{t('profilePhotoDescription')}</FieldDescription>
+              {validationErrors.profilePhoto && (
+                <FieldError>{validationErrors.profilePhoto}</FieldError>
               )}
-            </div>
-          </CardHeader>
-          {isEditingProfile && (
-            <CardContent className="border-t pt-6">
-              <Field>
-                <FieldLabel htmlFor="profilePhoto">{t('profilePhoto')}</FieldLabel>
-                <Input
-                  id="profilePhoto"
-                  type="text"
-                  value={editedProfilePhoto}
-                  onChange={(e) => setEditedProfilePhoto(e.target.value)}
-                  placeholder={t('enterImageUrl')}
-                />
-                <FieldDescription>{t('profilePhotoDescription')}</FieldDescription>
-                {validationErrors.profilePhoto && (
-                  <FieldError>{validationErrors.profilePhoto}</FieldError>
-                )}
-              </Field>
-            </CardContent>
-          )}
-        </Card>
-      </motion.div>
+            </Field>
 
-      {/* Player Information and Edit Form */}
-      <motion.div
-        initial={isBackNav ? false : { opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: isBackNav ? 0 : 0.25, ease: [0.165, 0.84, 0.44, 1] }}
-        className="grid gap-6 md:grid-cols-2"
-      >
-        <Card className="glass-card">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>{t('playerInformation')}</CardTitle>
-            <div className="flex gap-2">
-              {!isEditingProfile ? (
-                <Button
-                  onClick={handleEditProfile}
-                  variant="outline"
-                  size="icon"
-                  onMouseEnter={() => squarePenIconRef.current?.startAnimation()}
-                  onMouseLeave={() => squarePenIconRef.current?.stopAnimation()}
-                  animate
-                >
-                  <SquarePenIcon ref={squarePenIconRef} size={16} className="h-4 w-4" />
-                </Button>
-              ) : (
-                <>
-                  <Button
-                    onClick={handleSaveProfile}
-                    disabled={updateProfileMutation.isPending}
-                    size="sm"
-                    animate
-                  >
-                    {updateProfileMutation.isPending ? t('saving') : t('save')}
-                  </Button>
+            <Field>
+              <FieldLabel htmlFor="name">{t('name')}</FieldLabel>
+              <Input
+                id="name"
+                type="text"
+                value={editedName}
+                onChange={(e) => setEditedName(e.target.value)}
+                placeholder={t('name')}
+                required
+              />
+              {validationErrors.name && <FieldError>{validationErrors.name}</FieldError>}
+            </Field>
 
-                  <Button onClick={handleCancelProfileEdit} variant="outline" size="sm" animate>
-                    {t('cancel')}
-                  </Button>
-                </>
+            <Field>
+              <FieldLabel htmlFor="email">{t('email')}</FieldLabel>
+              <Input
+                id="email"
+                type="email"
+                value={profile.email}
+                disabled
+                className="bg-muted cursor-not-allowed"
+              />
+              <FieldDescription>{t('emailCannotBeChanged')}</FieldDescription>
+            </Field>
+
+            <Field>
+              <FieldLabel htmlFor="dateOfBirth">{t('dateOfBirth')}</FieldLabel>
+              <DatePicker
+                id="dateOfBirth"
+                value={editedDateOfBirth}
+                onChange={setEditedDateOfBirth}
+                placeholder={t('dateOfBirth')}
+              />
+              <FieldDescription>{t('dateOfBirthHint')}</FieldDescription>
+              {validationErrors.dateOfBirth && (
+                <FieldError>{validationErrors.dateOfBirth}</FieldError>
               )}
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-6 pt-0">
-            {/* Name Field */}
-            {isEditingProfile ? (
-              <Field>
-                <FieldLabel htmlFor="name">{t('name')}</FieldLabel>
-                <Input
-                  id="name"
-                  type="text"
-                  value={editedName}
-                  onChange={(e) => setEditedName(e.target.value)}
-                  placeholder={t('name')}
-                  required
-                />
-                {validationErrors.name && <FieldError>{validationErrors.name}</FieldError>}
-              </Field>
-            ) : (
-              <div>
-                <p className="text-sm text-muted-foreground">{t('name')}</p>
-                <p className="text-lg font-medium">{profile.name || t('notSet')}</p>
-              </div>
-            )}
+            </Field>
 
-            {/* Email Field (Read-only) */}
-            {isEditingProfile ? (
-              <Field>
-                <FieldLabel htmlFor="email">{t('email')}</FieldLabel>
-                <Input
-                  id="email"
-                  type="email"
-                  value={profile.email}
-                  disabled
-                  className="bg-muted cursor-not-allowed"
-                />
-                <FieldDescription>{t('emailCannotBeChanged')}</FieldDescription>
-              </Field>
-            ) : (
-              <div>
-                <p className="text-sm text-muted-foreground">{t('email')}</p>
-                <p className="text-lg font-medium">{profile.email}</p>
-              </div>
+            <Field>
+              <FieldLabel htmlFor="phoneNumber">{t('phoneNumber')}</FieldLabel>
+              <Input
+                id="phoneNumber"
+                type="tel"
+                value={editedPhoneNumber}
+                onChange={(e) => setEditedPhoneNumber(e.target.value)}
+                placeholder={t('phoneNumber')}
+              />
+              {validationErrors.phoneNumber && (
+                <FieldError>{validationErrors.phoneNumber}</FieldError>
+              )}
+            </Field>
+          </>
+        ) : (
+          <>
+            <ReadField label={t('name')} value={profile.name || t('notSet')} />
+            <ReadField label={t('email')} value={profile.email} />
+            <ReadField
+              label={t('dateOfBirth')}
+              value={
+                profile.dateOfBirth
+                  ? new Date(profile.dateOfBirth).toLocaleDateString(locale)
+                  : t('notSet')
+              }
+            />
+            <ReadField label={t('phoneNumber')} value={profile.phoneNumber || t('notSet')} />
+            {profile.player?.createdAt && (
+              <ReadField
+                label={t('playerSince')}
+                value={new Date(profile.player.createdAt).toLocaleDateString(locale)}
+              />
             )}
-
-            {/* Date of Birth Field */}
-            {isEditingProfile ? (
-              <Field>
-                <FieldLabel htmlFor="dateOfBirth">{t('dateOfBirth')}</FieldLabel>
-                <DatePicker
-                  id="dateOfBirth"
-                  value={editedDateOfBirth}
-                  onChange={setEditedDateOfBirth}
-                  placeholder={t('dateOfBirth')}
-                />
-                <FieldDescription>Format: DD/MM/YYYY</FieldDescription>
-                {validationErrors.dateOfBirth && (
-                  <FieldError>{validationErrors.dateOfBirth}</FieldError>
-                )}
-              </Field>
-            ) : (
-              <div>
-                <p className="text-sm text-muted-foreground">{t('dateOfBirth')}</p>
-                <p className="text-lg font-medium">
-                  {profile.dateOfBirth
-                    ? new Date(profile.dateOfBirth).toLocaleDateString(locale)
-                    : t('notSet')}
-                </p>
-              </div>
-            )}
-
-            {/* Phone Number Field */}
-            {isEditingProfile ? (
-              <Field>
-                <FieldLabel htmlFor="phoneNumber">{t('phoneNumber')}</FieldLabel>
-                <Input
-                  id="phoneNumber"
-                  type="tel"
-                  value={editedPhoneNumber}
-                  onChange={(e) => setEditedPhoneNumber(e.target.value)}
-                  placeholder={t('phoneNumber')}
-                />
-                {validationErrors.phoneNumber && (
-                  <FieldError>{validationErrors.phoneNumber}</FieldError>
-                )}
-              </Field>
-            ) : (
-              <div>
-                <p className="text-sm text-muted-foreground">{t('phoneNumber')}</p>
-                <p className="text-lg font-medium">{profile.phoneNumber || t('notSet')}</p>
-              </div>
-            )}
-
-            {/* Role Field (Read-only) - Hidden for PLAYER role */}
-            {profile.roles?.length > 1 || !profile.roles?.includes('PLAYER') ? (
+            {hasNonPlayerRole && (
               <div>
                 <p className="text-sm text-muted-foreground">{t('role')}</p>
-                <div className="flex gap-2 mt-1">
+                <div className="flex gap-2 mt-1 flex-wrap">
                   {profile.roles?.map((role: string) => (
                     <Badge key={role} variant="outline">
                       {role}
@@ -502,62 +622,83 @@ function ProfileContent({
                   ))}
                 </div>
               </div>
-            ) : null}
-          </CardContent>
-        </Card>
-
-        <Card className="glass-card">
-          <CardHeader>
-            <CardTitle>{t('performanceStats')}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-0">
-            {profile.player && (
-              <>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t('status')}</p>
-                    <div className="mt-1">
-                      <StatusBadge status={profile.player.status as PlayerProfileStatus} />
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t('currentRating')}</p>
-                    <div className="flex items-center gap-1.5 text-2xl font-bold text-primary font-heading mt-1">
-                      <TrendingUp size={16} className="text-primary" />
-                      <span className="gradient-text">{profile.player.rating}</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="pt-4 border-t">
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t('playerSince')}</p>
-                    <p className="font-medium">
-                      {profile.player.createdAt
-                        ? new Date(profile.player.createdAt).toLocaleDateString(locale)
-                        : t('notSet')}
-                    </p>
-                  </div>
-                </div>
-              </>
             )}
-          </CardContent>
-        </Card>
-      </motion.div>
-      {/* Notifications */}
-      <motion.div
-        initial={isBackNav ? false : { opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: isBackNav ? 0 : 0.25, ease: [0.165, 0.84, 0.44, 1] }}
-      >
-        <Card className="glass-card">
-          <CardHeader>
-            <CardTitle>{t('notifications')}</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <PushNotificationToggle />
-          </CardContent>
-        </Card>
-      </motion.div>
-    </motion.div>
+          </>
+        )}
+      </CardContent>
+      {isEditingProfile && (
+        <CardFooter className="border-t gap-2 justify-end">
+          <Button onClick={handleCancelProfileEdit} variant="outline" size="sm" animate>
+            {t('cancel')}
+          </Button>
+          <Button
+            onClick={handleSaveProfile}
+            disabled={updateProfileMutation.isPending}
+            size="sm"
+            animate
+          >
+            {updateProfileMutation.isPending ? t('saving') : t('save')}
+          </Button>
+        </CardFooter>
+      )}
+    </Card>
+  );
+}
+
+function ReadField({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-sm text-muted-foreground">{label}</p>
+      <p className="text-lg font-medium truncate">{value}</p>
+    </div>
+  );
+}
+
+function AccountCard({ t }: { t: ReturnType<typeof useTranslations> }) {
+  const [showSignOutDialog, setShowSignOutDialog] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const logoutIconRef = useRef<LogoutIconHandle>(null);
+
+  const handleSignOut = () => {
+    setIsSigningOut(true);
+    signOut();
+  };
+
+  return (
+    <>
+      <Card className="glass-card">
+        <CardHeader>
+          <CardTitle>{t('account')}</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0 space-y-4">
+          <PushNotificationToggle />
+        </CardContent>
+        <CardFooter className="border-t">
+          <Button
+            variant="destructive"
+            onClick={() => setShowSignOutDialog(true)}
+            disabled={isSigningOut}
+            onMouseEnter={() => logoutIconRef.current?.startAnimation()}
+            onMouseLeave={() => logoutIconRef.current?.stopAnimation()}
+            className="w-full sm:w-auto"
+          >
+            <LogoutIcon ref={logoutIconRef} size={16} />
+            {t('signOut')}
+          </Button>
+        </CardFooter>
+      </Card>
+
+      <ConfirmationDialog
+        open={showSignOutDialog}
+        onOpenChange={setShowSignOutDialog}
+        title={t('signOutConfirmation')}
+        description={t('signOutConfirmationDescription')}
+        confirmText={t('signOut')}
+        cancelText={t('cancel')}
+        variant="destructive"
+        isLoading={isSigningOut}
+        onConfirm={handleSignOut}
+      />
+    </>
   );
 }

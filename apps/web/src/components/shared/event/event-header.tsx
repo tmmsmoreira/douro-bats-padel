@@ -1,7 +1,7 @@
 'use client';
 
 import { Calendar, Clock, MapPin } from 'lucide-react';
-import { formatTime } from '@/lib/utils';
+import { formatDateNumeric, formatTime } from '@/lib/utils';
 import { StatusBadge } from '../status-badge';
 import type { EventStatus } from '../status-badge';
 import { useIsMobile } from '@/hooks/use-media-query';
@@ -20,18 +20,6 @@ interface EventHeaderInfoProps {
   locale: string;
   showStatus?: boolean;
   actions?: React.ReactNode;
-}
-
-function formatDateNumeric(date: Date, locale: string): string {
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const year = date.getFullYear();
-
-  // Use MM/DD/YYYY for US locale, DD/MM/YYYY for others
-  if (locale.startsWith('en-US')) {
-    return `${month}/${day}/${year}`;
-  }
-  return `${day}/${month}/${year}`;
 }
 
 export function EventHeaderInfo({

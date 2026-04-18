@@ -166,39 +166,6 @@ export class NotificationService {
     });
   }
 
-  async sendResultsPublished(
-    email: string,
-    name: string,
-    event: EventNotificationData,
-    userId?: string
-  ) {
-    try {
-      const html = await render(
-        EventNotificationEmail({
-          name,
-          eventTitle: event.title || 'Game Night',
-          type: 'results-published',
-        })
-      );
-      await this.emailService.sendEmail(
-        email,
-        `Results available for ${event.title || 'Game Night'} - Douro Bats Padel`,
-        html
-      );
-    } catch (error) {
-      this.logger.error(`Failed to send results published notification to ${email}:`, error);
-    }
-
-    await this.sendPush(userId, {
-      title: 'Results are in!',
-      body: `See your scores for ${event.title || 'Game Night'}`,
-      icon: '/icons/icon-192x192.png',
-      badge: '/icons/icon-96x96.png',
-      url: `/events/${event.id}`,
-      tag: `results-${event.id}`,
-    });
-  }
-
   async announceEventOpen(
     recipients: { email: string; userId: string }[],
     event: EventNotificationData
@@ -230,7 +197,6 @@ export class NotificationService {
       `Event open announcement sent to ${recipients.length - failed}/${recipients.length} recipients`
     );
 
-    // Send push to all recipients
     const userIds = recipients.map((r) => r.userId);
     try {
       await this.pushService.sendToUsers(userIds, {
@@ -244,5 +210,38 @@ export class NotificationService {
     } catch (error) {
       this.logger.error('Failed to send push for event open announcement:', error);
     }
+  }
+
+  async sendResultsPublished(
+    email: string,
+    name: string,
+    event: EventNotificationData,
+    userId?: string
+  ) {
+    try {
+      const html = await render(
+        EventNotificationEmail({
+          name,
+          eventTitle: event.title || 'Game Night',
+          type: 'results-published',
+        })
+      );
+      await this.emailService.sendEmail(
+        email,
+        `Results available for ${event.title || 'Game Night'} - Douro Bats Padel`,
+        html
+      );
+    } catch (error) {
+      this.logger.error(`Failed to send results published notification to ${email}:`, error);
+    }
+
+    await this.sendPush(userId, {
+      title: 'Results are in!',
+      body: `See your scores for ${event.title || 'Game Night'}`,
+      icon: '/icons/icon-192x192.png',
+      badge: '/icons/icon-96x96.png',
+      url: `/events/${event.id}`,
+      tag: `results-${event.id}`,
+    });
   }
 }

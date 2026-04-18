@@ -18,6 +18,7 @@ interface UserProfile {
     rating: number;
     tier: string;
     status: string;
+    notificationsPaused: boolean;
     createdAt: string;
   } | null;
 }
@@ -41,6 +42,7 @@ interface UpdateProfileData {
   dateOfBirth?: string;
   phoneNumber?: string;
   profilePhoto?: string;
+  notificationsPaused?: boolean;
 }
 
 /**

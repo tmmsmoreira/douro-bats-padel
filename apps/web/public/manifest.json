@@ -1,8 +1,9 @@
 {
+  "id": "/",
   "name": "Douro Bats Padel",
   "short_name": "Douro Bats",
   "description": "Manage padel game nights, RSVPs, draws, and rankings for Douro Bats Padel Club",
-  "start_url": "/en",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -70,22 +71,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/images/padel/screenshot-mobile.png",
-      "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Douro Bats Padel — Home"
-    },
-    {
-      "src": "/images/padel/screenshot-desktop.png",
-      "sizes": "1280x800",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Douro Bats Padel — Home"
     }
   ],
   "categories": ["sports", "lifestyle"]

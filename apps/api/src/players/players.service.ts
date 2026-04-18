@@ -59,6 +59,7 @@ export class PlayersService {
             id: user.player.id,
             rating: user.player.rating,
             status: user.player.status,
+            notificationsPaused: user.player.notificationsPaused,
             createdAt: user.player.createdAt,
           }
         : null,

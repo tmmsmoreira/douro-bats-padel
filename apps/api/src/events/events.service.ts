@@ -1,5 +1,6 @@
 import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationService } from '../notifications/notification.service';
 import type { Prisma } from '@prisma/client';
 import type { CreateEventDto, EventWithRSVP, TierRules } from '@padel/types';
 import { EventState, RSVPStatus } from '@padel/types';
@@ -8,7 +9,10 @@ import { EventState, RSVPStatus } from '@padel/types';
 export class EventsService {
   private readonly logger = new Logger(EventsService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationService: NotificationService
+  ) {}
 
   /**
    * Validate tier rules configuration
@@ -416,10 +420,29 @@ export class EventsService {
       throw new BadRequestException('Event is not in draft state');
     }
 
-    return this.prisma.event.update({
+    const updated = await this.prisma.event.update({
       where: { id },
       data: { state: EventState.OPEN },
     });
+
+    try {
+      const activePlayers = await this.prisma.playerProfile.findMany({
+        where: {
+          status: 'ACTIVE',
+          notificationsPaused: false,
+          user: { email: { not: '' } },
+        },
+        include: { user: { select: { id: true, email: true } } },
+      });
+      const recipients = activePlayers
+        .filter((p) => p.user.email)
+        .map((p) => ({ email: p.user.email, userId: p.user.id }));
+      await this.notificationService.announceEventOpen(recipients, updated);
+    } catch (err) {
+      this.logger.error('Failed to send event open announcement', err);
+    }
+
+    return updated;
   }
 
   async freeze(id: string) {
@@ -427,6 +450,12 @@ export class EventsService {
 
     if (!event) {
       throw new NotFoundException('Event not found');
+    }
+
+    // State machine: DRAFT → OPEN → FROZEN → DRAWN → PUBLISHED.
+    // Only OPEN → FROZEN is valid here.
+    if (event.state !== EventState.OPEN) {
+      throw new BadRequestException('Only open events can be frozen');
     }
 
     return this.prisma.event.update({

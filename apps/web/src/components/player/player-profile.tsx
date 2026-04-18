@@ -17,6 +17,7 @@ import { motion } from 'motion/react';
 import { DataStateWrapper } from '@/components/shared/data-state-wrapper';
 import { PageHeader } from '@/components/shared/page-header';
 import { PushNotificationToggle } from '@/components/shared/push-notification-toggle';
+import { EventNotificationsToggle } from '@/components/shared/event-notifications-toggle';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
 import { PlayerStatsStrip } from './player-stats-strip';
 import { WeeklyScoresCard } from './weekly-scores-card';
@@ -671,6 +672,7 @@ function AccountCard({ t }: { t: ReturnType<typeof useTranslations> }) {
           <CardTitle>{t('account')}</CardTitle>
         </CardHeader>
         <CardContent className="pt-0 space-y-4">
+          <EventNotificationsToggle />
           <PushNotificationToggle />
         </CardContent>
         <CardFooter className="border-t">

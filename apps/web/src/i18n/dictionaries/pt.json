@@ -188,11 +188,18 @@
       "description": "Escreve o teu email para receber um novo link de verificação",
       "email": "Email",
       "emailPlaceholder": "ola@exemplo.com",
-      "sendLink": "Enviar Link de Verificação",
+      "resendButton": "Enviar Link de Verificação",
       "sending": "A enviar...",
+      "successTitle": "Verifica o Teu Email",
+      "successDescription": "Email de verificação enviado",
+      "successMessage": "Se existir uma conta com o email {email} e ainda não estiver verificada, receberás um email de verificação.",
+      "alreadyVerified": "Já verificaste?",
+      "signIn": "Entrar",
       "backToLogin": "Voltar ao login",
-      "successMessage": "Email de verificação enviado! Por favor, verifica a tua caixa de entrada.",
-      "errorOccurred": "Ocorreu um erro. Por favor, tenta novamente."
+      "failedToSend": "Falha ao enviar email de verificação",
+      "errorOccurred": "Ocorreu um erro. Por favor, tenta novamente.",
+      "devModeToken": "Modo de Desenvolvimento - Token de Verificação:",
+      "clickToVerify": "Clica aqui para verificar"
     }
   },
   "home": {
@@ -458,9 +465,12 @@
     "resendInvitationError": "Falha ao reenviar convite",
     "linkCopied": "Link copiado para a área de transferência",
     "notifications": "Notificações",
+    "eventNotifications": "Notificações de eventos",
+    "eventNotificationsDescription": "Receber emails e notificações push quando novos eventos abrem para inscrição",
     "pushNotifications": "Notificações Push",
-    "pushNotificationsDescription": "Receber notificações sobre eventos, sorteios e resultados",
+    "pushNotificationsDescription": "Afeta apenas este dispositivo",
     "pushNotificationsBlocked": "As notificações estão bloqueadas. Ative-as nas definições do navegador.",
+    "pushNotificationsInstallRequired": "Instala o Douro Bats no ecrã inicial para ativar notificações no iOS.",
     "pushSubscribed": "Notificações push ativadas",
     "pushUnsubscribed": "Notificações push desativadas",
     "pushError": "Falha ao atualizar preferências de notificação",
@@ -569,7 +579,7 @@
     "addCourt": "Adicionar Campo",
     "cancel": "Cancelar",
     "updateVenue": "Atualizar Clube",
-    "createVenue": "Criar Venue",
+    "createVenue": "Criar Clube",
     "updating": "A atualizar...",
     "creating": "A criar...",
     "errorPrefix": "Erro:",
@@ -686,6 +696,7 @@
     "loadingPlayers": "A carregar jogadores...",
     "noPlayersFound": "Nenhum jogador encontrado.",
     "noName": "Sem nome",
+    "notificationsPaused": "Notificações pausadas pelo jogador",
     "rating": "Classificação",
     "status": "Estado",
     "playerSince": "Jogador desde",
@@ -1161,6 +1172,10 @@
     "message": "Sem ligação à internet",
     "backOnline": "Ligação restabelecida",
     "checkConnection": "Por favor, verifica a tua ligação de rede e tenta novamente"
+  },
+  "swUpdate": {
+    "message": "Está disponível uma nova versão",
+    "reload": "Recarregar"
   },
   "accessibility": {
     "skipToMainContent": "Saltar para o conteúdo principal",

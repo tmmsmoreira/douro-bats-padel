@@ -23,6 +23,15 @@ export function formatTime(date: Date | string, locale?: string): string {
   });
 }
 
+export function formatDateNumeric(date: Date | string, locale: string): string {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  // MM/DD/YYYY for US locale, DD/MM/YYYY for everywhere else.
+  return locale.startsWith('en-US') ? `${month}/${day}/${year}` : `${day}/${month}/${year}`;
+}
+
 /**
  * Format a time slot string (HH:MM format) for display using the event's date
  * @param timeSlot - Time in HH:MM format (e.g., "20:00")
@@ -48,7 +57,7 @@ export function formatTimeSlot(
   const date = typeof eventDate === 'string' ? new Date(eventDate) : new Date(eventDate);
   date.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
 
-  return date.toLocaleTimeString(locale || 'pt-PT', {
+  return date.toLocaleTimeString(locale || 'en-US', {
     hour: '2-digit',
     minute: '2-digit',
   });

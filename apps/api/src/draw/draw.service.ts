@@ -1,9 +1,58 @@
 import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import seedrandom from 'seedrandom';
-import { EventState, Tier } from '@padel/types';
+import { EventState, Tier, type TierRules, type TierTimeSlot } from '@padel/types';
 import { NotificationService } from '../notifications/notification.service';
+
+function isTierTimeSlot(value: unknown): value is TierTimeSlot {
+  if (!value || typeof value !== 'object') return false;
+  const v = value as Record<string, unknown>;
+  return (
+    typeof v.startsAt === 'string' &&
+    typeof v.endsAt === 'string' &&
+    (v.courtIds === undefined ||
+      (Array.isArray(v.courtIds) && v.courtIds.every((id) => typeof id === 'string')))
+  );
+}
+
+// Prisma stores tierRules as a JSON blob. Parse defensively so the rest of the
+// service can rely on a narrow typed shape; malformed rules fail fast with a
+// clear 400 instead of throwing deep inside seeded pairing logic.
+function parseTierRules(raw: unknown): TierRules {
+  if (raw === null || raw === undefined) return {};
+  if (typeof raw !== 'object') {
+    throw new BadRequestException('Invalid tierRules: expected object');
+  }
+  const r = raw as Record<string, unknown>;
+  const result: TierRules = {};
+  if (r.masterCount !== undefined) {
+    if (typeof r.masterCount !== 'number' || !Number.isFinite(r.masterCount)) {
+      throw new BadRequestException('Invalid tierRules.masterCount');
+    }
+    result.masterCount = r.masterCount;
+  }
+  if (r.masterPercentage !== undefined) {
+    if (typeof r.masterPercentage !== 'number' || !Number.isFinite(r.masterPercentage)) {
+      throw new BadRequestException('Invalid tierRules.masterPercentage');
+    }
+    result.masterPercentage = r.masterPercentage;
+  }
+  if (r.mastersTimeSlot !== undefined) {
+    if (!isTierTimeSlot(r.mastersTimeSlot)) {
+      throw new BadRequestException('Invalid tierRules.mastersTimeSlot');
+    }
+    result.mastersTimeSlot = r.mastersTimeSlot;
+  }
+  if (r.explorersTimeSlot !== undefined) {
+    if (!isTierTimeSlot(r.explorersTimeSlot)) {
+      throw new BadRequestException('Invalid tierRules.explorersTimeSlot');
+    }
+    result.explorersTimeSlot = r.explorersTimeSlot;
+  }
+  return result;
+}
 
 // Internal player type for draw algorithm (extends shared Player type with tier)
 interface Player {
@@ -47,7 +96,8 @@ export class DrawService {
     eventId: string,
     createdBy: string,
     constraints?: DrawConstraints,
-    selectedCourts?: { masters?: string[]; explorers?: string[] }
+    selectedCourts?: { masters?: string[]; explorers?: string[] },
+    seedOverride?: string
   ) {
     const event = await this.prisma.event.findUnique({
       where: { id: eventId },
@@ -90,7 +140,7 @@ export class DrawService {
     const sortedRsvps = [...event.rsvps].sort((a, b) => b.player.rating - a.player.rating);
 
     // Get available courts from tierRules or use selected courts if provided
-    const tierRules = (event.tierRules as any) || {};
+    const tierRules = parseTierRules(event.tierRules);
     const mastersCourts = selectedCourts?.masters || tierRules.mastersTimeSlot?.courtIds || [];
     const explorersCourts =
       selectedCourts?.explorers || tierRules.explorersTimeSlot?.courtIds || [];
@@ -120,20 +170,11 @@ export class DrawService {
     // Calculate tier split based on court capacity and tier rules
     let masterCount: number;
 
-    if (event.tierRules && typeof event.tierRules === 'object') {
-      const rules = event.tierRules as any;
-
-      if (rules.masterCount && typeof rules.masterCount === 'number') {
-        // Use fixed count from tier rules
-        masterCount = Math.min(rules.masterCount, mastersCapacity, adjustedPlayerCount);
-      } else if (rules.masterPercentage && typeof rules.masterPercentage === 'number') {
-        // Use percentage from tier rules
-        masterCount = Math.floor((adjustedPlayerCount * rules.masterPercentage) / 100);
-        masterCount = Math.min(masterCount, mastersCapacity);
-      } else {
-        // Default: 50/50 split, respecting court capacity
-        masterCount = Math.min(Math.floor(adjustedPlayerCount / 2), mastersCapacity);
-      }
+    if (tierRules.masterCount !== undefined) {
+      masterCount = Math.min(tierRules.masterCount, mastersCapacity, adjustedPlayerCount);
+    } else if (tierRules.masterPercentage !== undefined) {
+      masterCount = Math.floor((adjustedPlayerCount * tierRules.masterPercentage) / 100);
+      masterCount = Math.min(masterCount, mastersCapacity);
     } else {
       // Default: 50/50 split, respecting court capacity
       masterCount = Math.min(Math.floor(adjustedPlayerCount / 2), mastersCapacity);
@@ -180,8 +221,11 @@ export class DrawService {
     const mastersCourtObjects = courts.filter((c) => mastersCourts.includes(c.id));
     const explorersCourtObjects = courts.filter((c) => explorersCourts.includes(c.id));
 
-    // Generate seed for reproducibility
-    const seed = `${eventId}-${Date.now()}-${Math.random()}`;
+    // Seed format: accept an override (for replaying a specific draw) or mint
+    // a stable UUID-based seed. The seed is persisted on the event so the same
+    // inputs can be replayed later to reproduce an identical draw — which is
+    // only possible if the seed itself is deterministic (no Date.now/Math.random).
+    const seed = seedOverride ?? `${eventId}-${randomUUID()}`;
 
     // Get recent match history for constraints
     const recentHistory = await this.getRecentMatchHistory(
@@ -203,78 +247,70 @@ export class DrawService {
       previousWeekTeams
     );
 
-    // Save draw to database
-    const draw = await this.prisma.draw.create({
-      data: {
-        eventId,
-        createdBy,
-        constraintsJson: (constraints as any) || {},
-        assignments: {
-          create: matches.map((match) => ({
-            round: match.round,
-            courtId: match.courtId,
-            teamA: [match.teamA.player1.id, match.teamA.player2.id],
-            teamB: [match.teamB.player1.id, match.teamB.player2.id],
-            tier: match.tier,
-          })),
-        },
-      },
-      include: {
-        assignments: true,
-      },
-    });
-
-    // Update event state and seed
-    await this.prisma.event.update({
-      where: { id: eventId },
-      data: {
-        state: EventState.DRAWN,
-        seed,
-      },
-    });
-
-    // Move excess CONFIRMED players to WAITLISTED status
-    // Players who were CONFIRMED but didn't make it into the draw due to capacity limits
+    // Compute excess players (confirmed but capacity-overflow → waitlist)
     const playersInDraw = new Set(adjustedRsvps.map((r) => r.player.id));
     const excessPlayers = sortedRsvps.filter((r) => !playersInDraw.has(r.player.id));
 
-    if (excessPlayers.length > 0) {
-      this.logger.log(`Moving ${excessPlayers.length} excess players to waitlist`);
-
-      // Get current max position in waitlist (if any existing waitlisted players)
-      const existingWaitlist = await this.prisma.rSVP.findMany({
-        where: {
+    // Atomic: draw + event state + waitlist overflow must succeed together,
+    // otherwise event state can diverge from draw/rsvp state.
+    const draw = await this.prisma.$transaction(async (tx) => {
+      const createdDraw = await tx.draw.create({
+        data: {
           eventId,
-          status: 'WAITLISTED',
+          createdBy,
+          constraintsJson: (constraints as any) || {},
+          assignments: {
+            create: matches.map((match) => ({
+              round: match.round,
+              courtId: match.courtId,
+              teamA: [match.teamA.player1.id, match.teamA.player2.id],
+              teamB: [match.teamB.player1.id, match.teamB.player2.id],
+              tier: match.tier,
+            })),
+          },
         },
-        orderBy: {
-          position: 'desc',
+        include: {
+          assignments: true,
         },
-        take: 1,
       });
 
-      let nextPosition =
-        existingWaitlist.length > 0 && existingWaitlist[0].position
-          ? existingWaitlist[0].position + 1
-          : 1;
+      await tx.event.update({
+        where: { id: eventId },
+        data: {
+          state: EventState.DRAWN,
+          seed,
+        },
+      });
 
-      // Update each excess player to WAITLISTED status with position
-      for (const rsvp of excessPlayers) {
-        await this.prisma.rSVP.update({
-          where: { id: rsvp.id },
-          data: {
-            status: 'WAITLISTED',
-            position: nextPosition++,
-          },
+      if (excessPlayers.length > 0) {
+        this.logger.log(`Moving ${excessPlayers.length} excess players to waitlist`);
+
+        const existingWaitlist = await tx.rSVP.findMany({
+          where: { eventId, status: 'WAITLISTED' },
+          orderBy: { position: 'desc' },
+          take: 1,
         });
-      }
-    }
 
-    // Notify players
-    const recipients = event.rsvps
-      .filter((r) => r.player.user.email)
-      .map((r) => ({ email: r.player.user.email, userId: r.player.user.id }));
-    await this.notificationService.announceEventOpen(recipients, event);
+        const startPosition =
+          existingWaitlist.length > 0 && existingWaitlist[0].position
+            ? existingWaitlist[0].position + 1
+            : 1;
+
+        await Promise.all(
+          excessPlayers.map((rsvp, index) =>
+            tx.rSVP.update({
+              where: { id: rsvp.id },
+              data: {
+                status: 'WAITLISTED',
+                position: startPosition + index,
+              },
+            })
+          )
+        );
+      }
+
+      return createdDraw;
+    });
 
     return draw;
   }
@@ -815,6 +851,10 @@ export class DrawService {
       where: { id: eventId },
       include: {
         draws: true,
+        rsvps: {
+          where: { status: 'CONFIRMED' },
+          include: { player: { include: { user: true } } },
+        },
       },
     });
 
@@ -838,6 +878,23 @@ export class DrawService {
       where: { id: eventId },
       data: { state: EventState.PUBLISHED },
     });
+
+    try {
+      await Promise.allSettled(
+        event.rsvps
+          .filter((r) => r.player.user.email)
+          .map((r) =>
+            this.notificationService.sendDrawPublished(
+              r.player.user.email,
+              r.player.user.name || 'Player',
+              event,
+              r.player.user.id
+            )
+          )
+      );
+    } catch (err) {
+      this.logger.error('Failed to send draw published notifications', err);
+    }
 
     return { message: 'Draw published successfully' };
   }

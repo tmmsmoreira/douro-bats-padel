@@ -17,6 +17,7 @@ import { Mail, Phone, MapPin, Clock } from 'lucide-react';
 import { UnifiedNav } from '@/components/shared/unified-nav';
 import { useTranslations } from 'next-intl';
 import { PageLayout, PageHeader } from '@/components/shared';
+import { TIMINGS } from '@/lib/constants';
 
 export default function ContactPage() {
   const t = useTranslations('contactPage');
@@ -34,14 +35,13 @@ export default function ContactPage() {
     setIsSubmitting(true);
 
     // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, TIMINGS.MOCK_SUBMIT_MS));
 
     setIsSubmitting(false);
     setSubmitted(true);
     setFormData({ name: '', email: '', subject: '', message: '' });
 
-    // Reset success message after 5 seconds
-    setTimeout(() => setSubmitted(false), 5000);
+    setTimeout(() => setSubmitted(false), TIMINGS.FORM_SUCCESS_MS);
   };
 
   return (

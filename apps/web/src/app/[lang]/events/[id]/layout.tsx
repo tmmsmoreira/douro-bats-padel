@@ -1,8 +1,6 @@
 'use client';
 
 import { use } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { useSession } from 'next-auth/react';
 import { useLocale, useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import { useRouter } from '@/i18n/navigation';
@@ -11,10 +9,8 @@ import { HomeAdaptiveNav } from '@/components/shared/home-adaptive-nav';
 import { DataStateWrapper, PageLayout, PageHeader } from '@/components/shared';
 import { EventHeaderInfo, EventTabs } from '@/components/shared/event';
 import { EventActionsDropdown } from '@/components/admin/event-actions-dropdown';
-import { useIsFromBfcache, useIsEditor } from '@/hooks';
+import { useIsFromBfcache, useIsEditor, useEventDetails } from '@/hooks';
 import { useDraw } from '@/hooks/use-draws';
-import type { EventWithRSVPSerialized } from '@padel/types';
-import { API_URL } from '@/lib/constants';
 
 export default function EventLayout({
   children,
@@ -24,7 +20,6 @@ export default function EventLayout({
   params: Promise<{ id: string }>;
 }) {
   const { id: eventId } = use(params);
-  const { data: session } = useSession();
   const t = useTranslations('eventDetails');
   const locale = useLocale();
   const pathname = usePathname();
@@ -32,22 +27,10 @@ export default function EventLayout({
   const isBackNav = useIsFromBfcache();
   const isEditor = useIsEditor();
 
-  const { data: event, isLoading } = useQuery<EventWithRSVPSerialized>({
-    queryKey: ['event', eventId],
-    queryFn: async () => {
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-      };
-      if (session?.accessToken) {
-        headers.Authorization = `Bearer ${session.accessToken}`;
-      }
-      const res = await fetch(`${API_URL}/events/${eventId}`, { headers });
-      if (!res.ok) throw new Error('Failed to fetch event');
-      return res.json();
-    },
-  });
+  // Shares the ['event', eventId] cache key with `useEventDetails` on the
+  // inner page; layout and page no longer double-fetch.
+  const { data: event, isLoading } = useEventDetails(eventId);
 
-  // Fetch draw data for editor actions dropdown
   const { data: draw } = useDraw(eventId);
 
   return (

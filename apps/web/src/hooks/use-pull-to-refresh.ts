@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
+import { TIMINGS } from '@/lib/constants';
 
 interface UsePullToRefreshOptions {
   /**
@@ -74,8 +75,8 @@ export function usePullToRefresh(options: UsePullToRefreshOptions = {}): PullToR
         // Default: invalidate all queries and refresh the current page
         await queryClient.invalidateQueries();
         router.refresh();
-        // Add a small delay to show the refresh animation
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        // Keep the refresh spinner visible long enough to feel intentional.
+        await new Promise((resolve) => setTimeout(resolve, TIMINGS.PULL_REFRESH_MIN_MS));
       }
     } catch (error) {
       // Log error but don't throw to prevent breaking the UI

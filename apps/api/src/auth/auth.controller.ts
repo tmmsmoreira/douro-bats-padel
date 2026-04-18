@@ -12,6 +12,12 @@ import type {
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import type { RequestWithUser } from './types';
+import {
+  ResendVerificationDto,
+  UpdateProfileDto,
+  UpdateProfilePhotoDto,
+  VerifyEmailDto,
+} from './dto/profile.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -61,29 +67,25 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Patch('profile-photo')
-  async updateProfilePhoto(@Req() req: RequestWithUser, @Body() body: { profilePhoto: string }) {
-    return this.authService.updateProfilePhoto(req.user.sub, body.profilePhoto);
+  async updateProfilePhoto(@Req() req: RequestWithUser, @Body() dto: UpdateProfilePhotoDto) {
+    return this.authService.updateProfilePhoto(req.user.sub, dto.profilePhoto);
   }
 
   @UseGuards(JwtAuthGuard)
   @Patch('profile')
-  async updateProfile(
-    @Req() req: RequestWithUser,
-    @Body()
-    body: { name?: string; dateOfBirth?: string; phoneNumber?: string; profilePhoto?: string }
-  ) {
-    return this.authService.updateProfile(req.user.sub, body);
+  async updateProfile(@Req() req: RequestWithUser, @Body() dto: UpdateProfileDto) {
+    return this.authService.updateProfile(req.user.sub, dto);
   }
 
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('verify-email')
-  async verifyEmail(@Body() body: { token: string }) {
-    return this.authService.verifyEmail(body.token);
+  async verifyEmail(@Body() dto: VerifyEmailDto) {
+    return this.authService.verifyEmail(dto.token);
   }
 
   @Throttle({ default: { limit: 2, ttl: 60000 } })
   @Post('resend-verification')
-  async resendVerification(@Body() body: { email: string }) {
-    return this.authService.resendVerificationEmail(body.email);
+  async resendVerification(@Body() dto: ResendVerificationDto) {
+    return this.authService.resendVerificationEmail(dto.email);
   }
 }

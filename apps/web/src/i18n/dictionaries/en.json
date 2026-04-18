@@ -465,9 +465,12 @@
     "resendInvitationError": "Failed to resend invitation",
     "linkCopied": "Link copied to clipboard",
     "notifications": "Notifications",
+    "eventNotifications": "Event notifications",
+    "eventNotificationsDescription": "Receive emails and push when new events open for RSVP",
     "pushNotifications": "Push Notifications",
-    "pushNotificationsDescription": "Receive notifications about events, draws, and results",
+    "pushNotificationsDescription": "Only affects this device",
     "pushNotificationsBlocked": "Notifications are blocked. Please enable them in your browser settings.",
+    "pushNotificationsInstallRequired": "Install Douro Bats to your home screen to enable notifications on iOS.",
     "pushSubscribed": "Push notifications enabled",
     "pushUnsubscribed": "Push notifications disabled",
     "pushError": "Failed to update notification preferences",
@@ -693,6 +696,7 @@
     "loadingPlayers": "Loading players...",
     "noPlayersFound": "No players found.",
     "noName": "No name",
+    "notificationsPaused": "Notifications paused by player",
     "rating": "Rating",
     "status": "Status",
     "playerSince": "Player since",
@@ -1169,6 +1173,10 @@
     "message": "No internet connection",
     "backOnline": "Back online",
     "checkConnection": "Please check your network connection and try again"
+  },
+  "swUpdate": {
+    "message": "A new version is available",
+    "reload": "Reload"
   },
   "accessibility": {
     "skipToMainContent": "Skip to main content",

@@ -10,6 +10,7 @@ import { locales, type Locale } from '@/i18n/config';
 import { auth } from '@/lib/auth';
 import { AppLoadingScreen } from '@/components/shared/app-loading-screen';
 import { OfflineIndicator } from '@/components/shared/offline-indicator';
+import { ServiceWorkerUpdatePrompt } from '@/components/shared/sw-update-prompt';
 import { PullToRefresh } from '@/components/shared/pull-to-refresh';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
@@ -130,6 +131,7 @@ export default async function LangLayout({
           <NextIntlClientProvider locale={lang} messages={messages}>
             <AppLoadingScreen minDuration={1000} />
             <OfflineIndicator />
+            <ServiceWorkerUpdatePrompt />
             <PullToRefresh />
             {children}
           </NextIntlClientProvider>

@@ -7,9 +7,30 @@ import { toast } from 'sonner';
 import { Bell, BellOff } from 'lucide-react';
 
 export function PushNotificationToggle() {
-  const { isSupported, permission, isSubscribed, isLoading, subscribe, unsubscribe } =
-    usePushNotifications();
+  const {
+    isSupported,
+    requiresInstall,
+    permission,
+    isSubscribed,
+    isLoading,
+    subscribe,
+    unsubscribe,
+  } = usePushNotifications();
   const t = useTranslations('profile');
+
+  // iOS Safari only exposes Web Push inside an installed PWA. Tell the user
+  // explicitly instead of silently hiding the toggle.
+  if (requiresInstall) {
+    return (
+      <div className="flex items-center gap-3">
+        <BellOff className="h-4 w-4 text-muted-foreground" />
+        <div className="flex-1">
+          <p className="text-sm font-medium">{t('pushNotifications')}</p>
+          <p className="text-xs text-muted-foreground">{t('pushNotificationsInstallRequired')}</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!isSupported) return null;
 

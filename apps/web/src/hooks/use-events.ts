@@ -3,6 +3,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import type { EventWithRSVP, EventWithPlayersSerialized, CreateEventDto } from '@padel/types';
+import { TIMINGS } from '@/lib/constants';
 import { useAuthFetch } from './use-api';
 
 interface UseEventsOptions {
@@ -68,11 +69,13 @@ export function useAdminEvents() {
  * Note: Backend automatically determines access to unpublished events based on user roles from JWT
  */
 export function useEventDetails(eventId: string) {
-  const { data: session } = useSession();
   const authFetch = useAuthFetch();
 
   return useQuery<EventWithPlayersSerialized>({
-    queryKey: ['event', eventId, session?.accessToken],
+    // queryKey intentionally excludes the access token — authorization is
+    // handled inside the fetch layer, and including the token causes a cache
+    // miss on every token rotation which re-triggers the request needlessly.
+    queryKey: ['event', eventId],
     queryFn: async () => {
       return authFetch.get(`/events/${eventId}`);
     },
@@ -182,7 +185,7 @@ export function useDeleteEvent(eventId: string, onSuccessCallback?: () => void) 
       toast.success('Event deleted successfully');
 
       // Small delay to ensure the UI updates with fresh data
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, TIMINGS.UI_SETTLE_MS));
 
       onSuccessCallback?.();
     },
@@ -231,7 +234,7 @@ export function useCreateEvent() {
       await queryClient.invalidateQueries({ queryKey: ['admin-events'] });
 
       // Small delay to ensure backend transaction is committed
-      await new Promise((resolve) => setTimeout(resolve, 150));
+      await new Promise((resolve) => setTimeout(resolve, TIMINGS.CACHE_SETTLE_MS));
 
       // Navigate to the newly created event
       router.push(`/admin/events/${data.id}`);

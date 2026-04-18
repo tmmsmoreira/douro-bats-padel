@@ -113,15 +113,26 @@ export class PushService {
         },
         JSON.stringify(payload)
       );
-    } catch (error: any) {
-      if (error.statusCode === 410 || error.statusCode === 404) {
+    } catch (error) {
+      // web-push throws `WebPushError` with a numeric `statusCode`. 404/410
+      // means the subscription is gone on the push service; purge our copy.
+      // `deleteMany` is intentional (instead of `delete`) — it's idempotent
+      // so concurrent sends to the same endpoint can both cleanup safely.
+      const statusCode =
+        typeof error === 'object' && error !== null && 'statusCode' in error
+          ? (error as { statusCode?: number }).statusCode
+          : undefined;
+
+      if (statusCode === 410 || statusCode === 404) {
         this.logger.log(`[PUSH] Removing expired subscription: ${subscription.endpoint}`);
         await this.prisma.pushSubscription.deleteMany({
           where: { endpoint: subscription.endpoint },
         });
-      } else {
-        this.logger.error(`[PUSH] Failed to send notification:`, error.message);
+        return;
       }
+
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`[PUSH] Failed to send notification: ${message}`);
     }
   }
 }

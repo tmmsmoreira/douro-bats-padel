@@ -14,6 +14,7 @@ export interface PlayerRecord {
     rating: number;
     tier: string;
     status: string;
+    notificationsPaused: boolean;
     createdAt: string;
   } | null;
   invitation?: {

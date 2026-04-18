@@ -119,37 +119,81 @@
     <div class="icon">
       📡
     </div>
-    
-    <h1>You're Offline</h1>
-    
-    <p>
-      It looks like you've lost your internet connection. 
+
+    <h1 data-i18n="title">You're Offline</h1>
+
+    <p data-i18n="description">
+      It looks like you've lost your internet connection.
       Please check your network and try again.
     </p>
-    
-    <button class="retry-btn" onclick="window.location.reload()">
+
+    <button class="retry-btn" onclick="window.location.reload()" data-i18n="retry">
       Try Again
     </button>
 
     <div class="features">
-      <h2>When you're back online, you can:</h2>
+      <h2 data-i18n="featuresHeading">When you're back online, you can:</h2>
       <ul class="feature-list">
-        <li>View upcoming padel events</li>
-        <li>RSVP to game nights</li>
-        <li>Check the leaderboard</li>
-        <li>View match draws and results</li>
-        <li>Update your profile</li>
+        <li data-i18n="feature1">View upcoming padel events</li>
+        <li data-i18n="feature2">RSVP to game nights</li>
+        <li data-i18n="feature3">Check the leaderboard</li>
+        <li data-i18n="feature4">View match draws and results</li>
+        <li data-i18n="feature5">Update your profile</li>
       </ul>
     </div>
   </div>
 
   <script>
-    // Auto-retry when connection is restored
-    window.addEventListener('online', function() {
+    // Keep this inline + tiny: the offline page is served by the service
+    // worker and cannot fetch any other resources. Strings mirror keys used
+    // in apps/web/src/i18n/dictionaries so copy stays consistent.
+    var messages = {
+      en: {
+        title: "You're Offline",
+        description: "It looks like you've lost your internet connection. Please check your network and try again.",
+        retry: 'Try Again',
+        featuresHeading: "When you're back online, you can:",
+        feature1: 'View upcoming padel events',
+        feature2: 'RSVP to game nights',
+        feature3: 'Check the leaderboard',
+        feature4: 'View match draws and results',
+        feature5: 'Update your profile',
+      },
+      pt: {
+        title: 'Estás Offline',
+        description: 'Parece que perdeste a ligação à internet. Por favor, verifica a tua rede e tenta novamente.',
+        retry: 'Tentar Novamente',
+        featuresHeading: 'Quando voltares a estar online, podes:',
+        feature1: 'Ver próximos eventos de padel',
+        feature2: 'Inscrever-te em noites de jogo',
+        feature3: 'Consultar o ranking',
+        feature4: 'Ver sorteios e resultados',
+        feature5: 'Atualizar o teu perfil',
+      },
+    };
+
+    // Prefer the locale encoded in the URL path (e.g. /pt/events) — that's the
+    // page the user was trying to reach. Fall back to the browser language.
+    function detectLocale() {
+      var pathLocale = (location.pathname.split('/')[1] || '').toLowerCase();
+      if (messages[pathLocale]) return pathLocale;
+      var browser = (navigator.language || 'en').slice(0, 2).toLowerCase();
+      return messages[browser] ? browser : 'en';
+    }
+
+    var locale = detectLocale();
+    var copy = messages[locale];
+    document.documentElement.lang = locale;
+    document.title = copy.title + ' - Douro Bats Padel';
+    document.querySelectorAll('[data-i18n]').forEach(function (el) {
+      var key = el.getAttribute('data-i18n');
+      if (copy[key]) el.textContent = copy[key];
+    });
+
+    window.addEventListener('online', function () {
       window.location.reload();
     });
 
-    // Check connection status
     if (navigator.onLine) {
       window.location.reload();
     }

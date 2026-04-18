@@ -13,23 +13,42 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
   return Uint8Array.from(rawData, (char) => char.charCodeAt(0));
 }
 
+// iOS Safari only exposes Web Push when the site is launched as an installed
+// PWA (standalone display). We detect that combo so the UI can show a
+// "install to enable notifications" hint instead of a dead toggle.
+function isIOSInBrowserTab(): boolean {
+  if (typeof window === 'undefined') return false;
+  const ua = navigator.userAgent;
+  const isIOS = /iPad|iPhone|iPod/.test(ua) || (ua.includes('Mac') && 'ontouchend' in document);
+  if (!isIOS) return false;
+  const standalone =
+    window.matchMedia('(display-mode: standalone)').matches ||
+    (navigator as Navigator & { standalone?: boolean }).standalone === true;
+  return !standalone;
+}
+
 export function usePushNotifications() {
   const [permission, setPermission] = useState<NotificationPermission>('default');
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSupported, setIsSupported] = useState(false);
+  const [requiresInstall, setRequiresInstall] = useState(false);
   const authFetch = useAuthFetch();
   const { data: session } = useSession();
 
   useEffect(() => {
     const checkSupport = async () => {
-      const supported =
+      const hasApis =
         typeof window !== 'undefined' &&
         'serviceWorker' in navigator &&
         'PushManager' in window &&
         'Notification' in window;
 
+      const iosNeedsInstall = isIOSInBrowserTab();
+      const supported = hasApis && !iosNeedsInstall;
+
       setIsSupported(supported);
+      setRequiresInstall(iosNeedsInstall);
 
       if (!supported) {
         setIsLoading(false);
@@ -108,6 +127,7 @@ export function usePushNotifications() {
 
   return {
     isSupported,
+    requiresInstall,
     permission,
     isSubscribed,
     isLoading,

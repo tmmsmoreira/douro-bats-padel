@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
-import { Mail, CheckCircle, UserX } from 'lucide-react';
+import { Mail, CheckCircle, UserX, BellOff } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { useState, useMemo, useRef, useEffect } from 'react';
@@ -348,7 +348,13 @@ function PlayersListContent({
                           </div>
 
                           {/* Status Badge - Top Right */}
-                          <div className="shrink-0">
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {player.player?.notificationsPaused && (
+                              <BellOff
+                                className="h-4 w-4 text-muted-foreground"
+                                aria-label={t('notificationsPaused')}
+                              />
+                            )}
                             {player.invitation ? (
                               <StatusBadge status="INVITED" />
                             ) : (

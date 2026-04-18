@@ -1,6 +1,16 @@
 /// <reference lib="webworker" />
 declare const self: ServiceWorkerGlobalScope;
 
+// Client-triggered skip-waiting. We don't call skipWaiting() in the install
+// event because that would silently replace the running worker under the user
+// (losing in-flight mutations). Instead we wait for the client to confirm via
+// a postMessage after the UI prompts the user to reload.
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
 self.addEventListener('push', (event) => {
   if (!event.data) return;
 

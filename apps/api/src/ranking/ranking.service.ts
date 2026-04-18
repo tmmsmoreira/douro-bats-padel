@@ -91,28 +91,30 @@ export class RankingService {
       currentRatings[p.id] = p.rating;
     });
 
-    // Get last 4 weeks of scores for 5-week moving average
+    // Get last 4 weeks of scores for 5-week moving average (parallel fetch).
     const weekStart = this.getWeekStart(event.date);
-    const weeklyWindow: Array<Record<string, number>> = [];
+    const playerIdsArray = Array.from(playerIds);
 
-    for (let i = 1; i <= 4; i++) {
-      const pastWeek = new Date(weekStart);
-      pastWeek.setDate(pastWeek.getDate() - i * 7);
+    const weeklyWindow = await Promise.all(
+      // Oldest → newest, so the resulting array is already in the expected order.
+      [4, 3, 2, 1].map(async (i) => {
+        const pastWeek = new Date(weekStart);
+        pastWeek.setDate(pastWeek.getDate() - i * 7);
 
-      const weekScores = await this.prisma.weeklyScore.findMany({
-        where: {
-          playerId: { in: Array.from(playerIds) },
-          weekStart: pastWeek,
-        },
-      });
+        const weekScores = await this.prisma.weeklyScore.findMany({
+          where: {
+            playerId: { in: playerIdsArray },
+            weekStart: pastWeek,
+          },
+        });
 
-      const weekMap: Record<string, number> = {};
-      weekScores.forEach((ws) => {
-        weekMap[ws.playerId] = ws.score;
-      });
-
-      weeklyWindow.unshift(weekMap);
-    }
+        const weekMap: Record<string, number> = {};
+        weekScores.forEach((ws) => {
+          weekMap[ws.playerId] = ws.score;
+        });
+        return weekMap;
+      })
+    );
 
     // Compute new rankings
     const { weeklyScore, newRatings } = computeRanking({
@@ -121,53 +123,44 @@ export class RankingService {
       matches: matchResults,
     });
 
-    // Save weekly scores
-    for (const [playerId, score] of Object.entries(weeklyScore)) {
-      await this.prisma.weeklyScore.upsert({
-        where: {
-          playerId_weekStart: {
-            playerId,
-            weekStart,
-          },
-        },
-        create: {
-          playerId,
-          weekStart,
-          score,
-        },
-        update: {
-          score,
-        },
+    // Atomic writes: weekly scores + player ratings + snapshots + event state.
+    // A partial commit here would corrupt the leaderboard, so all-or-nothing.
+    await this.prisma.$transaction(async (tx) => {
+      await Promise.all(
+        Object.entries(weeklyScore).map(([playerId, score]) =>
+          tx.weeklyScore.upsert({
+            where: { playerId_weekStart: { playerId, weekStart } },
+            create: { playerId, weekStart, score },
+            update: { score },
+          })
+        )
+      );
+
+      await Promise.all(
+        Object.entries(newRatings).flatMap(([playerId, newRating]) => {
+          const oldRating = currentRatings[playerId] || 0;
+          return [
+            tx.playerProfile.update({
+              where: { id: playerId },
+              data: { rating: newRating },
+            }),
+            tx.rankingSnapshot.create({
+              data: {
+                playerId,
+                eventId,
+                before: oldRating,
+                after: newRating,
+                algoVersion: 'v1',
+              },
+            }),
+          ];
+        })
+      );
+
+      await tx.event.update({
+        where: { id: eventId },
+        data: { state: EventState.PUBLISHED },
       });
-    }
-
-    // Update player ratings (tier is assigned dynamically per event, not stored)
-    for (const [playerId, newRating] of Object.entries(newRatings)) {
-      const oldRating = currentRatings[playerId] || 0;
-
-      await this.prisma.playerProfile.update({
-        where: { id: playerId },
-        data: {
-          rating: newRating,
-        },
-      });
-
-      // Create ranking snapshot
-      await this.prisma.rankingSnapshot.create({
-        data: {
-          playerId,
-          eventId,
-          before: oldRating,
-          after: newRating,
-          algoVersion: 'v1',
-        },
-      });
-    }
-
-    // Update event state
-    await this.prisma.event.update({
-      where: { id: eventId },
-      data: { state: EventState.PUBLISHED },
     });
 
     if (notify) {

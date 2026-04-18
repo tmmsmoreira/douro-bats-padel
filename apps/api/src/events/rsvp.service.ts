@@ -1,8 +1,11 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import type { RSVPDto, RSVPResponse } from '@padel/types';
 import { RSVPStatus, PlayerStatus } from '@padel/types';
-import { NotificationService } from '../notifications/notification.service';
+import {
+  NotificationService,
+  type EventNotificationData,
+} from '../notifications/notification.service';
 import type { PrismaClient } from '@prisma/client';
 
 type TransactionClient = Omit<
@@ -12,6 +15,8 @@ type TransactionClient = Omit<
 
 @Injectable()
 export class RSVPService {
+  private readonly logger = new Logger(RSVPService.name);
+
   constructor(
     private prisma: PrismaService,
     private notificationService: NotificationService
@@ -258,8 +263,10 @@ export class RSVPService {
   }
 
   async promoteNextWaitlisted(eventId: string, tx?: TransactionClient) {
-    const client = tx || this.prisma;
-
+    // runPromotion does only DB work and returns the promoted player so the
+    // caller can fire the email outside the transaction boundary. Emailing
+    // inside the tx would hold a DB connection open during network IO and
+    // could roll back the promotion on transient email failures.
     const runPromotion = async (prisma: TransactionClient) => {
       const nextWaitlisted = await prisma.rSVP.findFirst({
         where: {
@@ -274,9 +281,8 @@ export class RSVPService {
         },
       });
 
-      if (!nextWaitlisted) return;
+      if (!nextWaitlisted) return null;
 
-      // Promote to confirmed
       await prisma.rSVP.update({
         where: {
           eventId_playerId: {
@@ -290,25 +296,29 @@ export class RSVPService {
         },
       });
 
-      // Reorder remaining waitlist
       await this.reorderWaitlist(eventId, prisma);
 
-      // Send promotion notification
-      await this.notificationService.sendPromotionNotification(
-        nextWaitlisted.player.user.email,
-        nextWaitlisted.player.user.name || 'Player',
-        { id: eventId } as any,
-        nextWaitlisted.player.user.id
-      );
+      return nextWaitlisted;
     };
 
-    // If we already have a transaction client, use it directly
-    if (tx) {
-      await runPromotion(tx);
-    } else {
-      await this.prisma.$transaction(async (newTx) => {
-        await runPromotion(newTx);
-      });
+    // Reuse an existing transaction if the caller is already inside one;
+    // otherwise open a fresh transaction. Avoids nested `$transaction` calls,
+    // which Prisma does not support and which can deadlock under load.
+    const promoted = tx
+      ? await runPromotion(tx)
+      : await this.prisma.$transaction((newTx) => runPromotion(newTx));
+
+    if (promoted) {
+      try {
+        await this.notificationService.sendPromotionNotification(
+          promoted.player.user.email,
+          promoted.player.user.name || 'Player',
+          { id: eventId } as EventNotificationData,
+          promoted.player.user.id
+        );
+      } catch (err) {
+        this.logger.error('Failed to send waitlist promotion notification', err);
+      }
     }
   }
 

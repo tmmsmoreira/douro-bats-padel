@@ -146,6 +146,12 @@ export class AuthService {
   }
 
   async googleAuth(dto: GoogleAuthDto): Promise<AuthTokens> {
+    // Validate the photo URL before any DB write so that both new and returning
+    // Google users get the same HTTPS/length guarantees applied to manual uploads.
+    if (dto.profilePhoto) {
+      this.validateProfilePhotoUrl(dto.profilePhoto);
+    }
+
     // Check if user exists
     let user = await this.prisma.user.findUnique({
       where: { email: dto.email },
@@ -380,6 +386,7 @@ export class AuthService {
       dateOfBirth?: string;
       phoneNumber?: string;
       profilePhoto?: string;
+      notificationsPaused?: boolean;
     }
   ) {
     if (data.profilePhoto) {
@@ -414,6 +421,14 @@ export class AuthService {
         throw new ConflictException('Phone number already in use');
       }
       throw error;
+    }
+
+    if (data.notificationsPaused !== undefined && user.player) {
+      const updatedPlayer = await this.prisma.playerProfile.update({
+        where: { id: user.player.id },
+        data: { notificationsPaused: data.notificationsPaused },
+      });
+      user.player = updatedPlayer;
     }
 
     return {

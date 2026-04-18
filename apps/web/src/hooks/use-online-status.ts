@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { TIMINGS } from '@/lib/constants';
 
 /**
  * Custom hook to detect online/offline status.
@@ -30,8 +31,7 @@ export function useOnlineStatus() {
     const handleOnline = () => {
       setIsOnline(true);
       setWasOffline(true);
-      // Reset wasOffline after 3 seconds
-      timeoutId = setTimeout(() => setWasOffline(false), 3000);
+      timeoutId = setTimeout(() => setWasOffline(false), TIMINGS.ONLINE_TOAST_MS);
     };
 
     const handleOffline = () => {

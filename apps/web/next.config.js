@@ -73,7 +73,10 @@ module.exports = withNextIntl(
   withPWA({
     dest: 'public',
     register: true,
-    skipWaiting: true,
+    // Do NOT silently activate new SWs — the client listens for the waiting
+    // worker and prompts the user to reload via <ServiceWorkerUpdatePrompt>.
+    // Users then send a SKIP_WAITING message (see worker/index.ts).
+    skipWaiting: false,
     disable: process.env.NODE_ENV === 'development',
     fallbacks: {
       document: '/offline.html',
@@ -169,31 +172,12 @@ module.exports = withNextIntl(
           },
         },
       },
-      {
-        urlPattern: /\/api\/.*$/i,
-        handler: 'NetworkFirst',
-        method: 'GET',
-        options: {
-          cacheName: 'apis',
-          expiration: {
-            maxEntries: 16,
-            maxAgeSeconds: 24 * 60 * 60, // 24 hours
-          },
-          networkTimeoutSeconds: 10, // Fall back to cache if network takes > 10s
-        },
-      },
-      {
-        urlPattern: /.*/i,
-        handler: 'NetworkFirst',
-        options: {
-          cacheName: 'others',
-          expiration: {
-            maxEntries: 32,
-            maxAgeSeconds: 24 * 60 * 60, // 24 hours
-          },
-          networkTimeoutSeconds: 10,
-        },
-      },
+      // NOTE: we intentionally do NOT cache /api/* or provide a catch-all.
+      // The backend API is on a different origin (NEXT_PUBLIC_API_URL), so any
+      // same-origin /api/* routes are NextAuth callbacks that must never be
+      // cached. For authenticated HTML pages we rely on the offline document
+      // fallback rather than a catch-all NetworkFirst — otherwise cached
+      // pages can leak the previous user's data after logout.
     ],
   })(nextConfig)
 );

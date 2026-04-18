@@ -63,12 +63,17 @@ export default async function proxy(req: NextRequest) {
     pathnameWithoutLocale === '/privacy' ||
     pathnameWithoutLocale === '/cookies';
 
-  // If user is logged in and tries to access auth pages, redirect to home
+  // If user is logged in and tries to access auth pages, redirect to events
   if (isAuthPage) {
     if (isLoggedIn) {
-      return NextResponse.redirect(new URL(`/${locale}`, req.url));
+      return NextResponse.redirect(new URL(`/${locale}/events`, req.url));
     }
     return intlResponse;
+  }
+
+  // Logged-in users see Events as the default landing page instead of the marketing home
+  if (isLoggedIn && pathnameWithoutLocale === '/') {
+    return NextResponse.redirect(new URL(`/${locale}/events`, req.url));
   }
 
   // Allow access to public pages without authentication

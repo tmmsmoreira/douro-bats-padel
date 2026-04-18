@@ -8,6 +8,7 @@ export * from './use-form-mutation';
 export * from './use-is-editor';
 export * from './use-form-state';
 export * from './use-invitations';
+export * from './use-is-standalone';
 export * from './use-long-press';
 export * from './use-matches';
 export * from './use-media-query';

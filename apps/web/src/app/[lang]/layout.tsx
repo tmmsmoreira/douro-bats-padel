@@ -78,7 +78,7 @@ export default async function LangLayout({
         {/* Inline critical CSS: background color + static splash screen visible before JS loads */}
         <style
           dangerouslySetInnerHTML={{
-            __html: `html{background:#fafafa;color:#1a1a1a}@media(prefers-color-scheme:dark){html{background:#1a1a1a;color:#f5f5f5}}.dark html,html.dark{background:#1a1a1a;color:#f5f5f5}#static-splash{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#fafafa;color:#1a1a1a}@media(prefers-color-scheme:dark){#static-splash{background:#1a1a1a;color:#f5f5f5}}.dark #static-splash{background:#1a1a1a;color:#f5f5f5}`,
+            __html: `html{background:#fafafa;color:#1a1a1a}@media(prefers-color-scheme:dark){html{background:#1a1a1a;color:#f5f5f5}}.dark html,html.dark{background:#1a1a1a;color:#f5f5f5}#static-splash{display:none}@media(display-mode:standalone){#static-splash{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#fafafa;color:#1a1a1a}@media(prefers-color-scheme:dark){#static-splash{background:#1a1a1a;color:#f5f5f5}}.dark #static-splash{background:#1a1a1a;color:#f5f5f5}}`,
           }}
         />
         <meta name="application-name" content="Douro Bats Padel" />

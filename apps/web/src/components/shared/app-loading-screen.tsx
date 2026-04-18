@@ -3,6 +3,9 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Image from 'next/image';
+import { useIsStandalone } from '@/hooks/use-is-standalone';
+
+let hasShownSplash = false;
 
 interface AppLoadingScreenProps {
   /**
@@ -27,7 +30,8 @@ interface AppLoadingScreenProps {
  * ```
  */
 export function AppLoadingScreen({ minDuration = 1000, show = true }: AppLoadingScreenProps) {
-  const [isVisible, setIsVisible] = useState(show);
+  const isStandalone = useIsStandalone();
+  const [isVisible, setIsVisible] = useState(show && !hasShownSplash && isStandalone);
   const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
@@ -37,6 +41,13 @@ export function AppLoadingScreen({ minDuration = 1000, show = true }: AppLoading
 
     // Mark as hydrated
     setIsHydrated(true);
+
+    if (!isStandalone || hasShownSplash) {
+      setIsVisible(false);
+      return;
+    }
+
+    hasShownSplash = true;
 
     // Ensure minimum duration is met
     const startTime = Date.now();
@@ -52,7 +63,7 @@ export function AppLoadingScreen({ minDuration = 1000, show = true }: AppLoading
 
     // Wait for both hydration and minimum duration
     hideScreen();
-  }, [minDuration]);
+  }, [minDuration, isStandalone]);
 
   // Lock body scroll when splash screen is visible
   useEffect(() => {

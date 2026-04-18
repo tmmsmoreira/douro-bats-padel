@@ -47,20 +47,7 @@ export function LoginForm() {
       if (result?.error) {
         setError(t('invalidCredentials'));
       } else {
-        // Fetch the session to get user roles
-        const response = await fetch('/api/auth/session');
-        const session = await response.json();
-
-        // Check if user is admin or editor
-        const isAdmin = session?.user?.roles?.includes('ADMIN');
-        const isEditor = session?.user?.roles?.includes('EDITOR');
-
-        // Redirect based on role
-        if (isAdmin || isEditor) {
-          router.push(`/${locale}/events`);
-        } else {
-          router.push(`/${locale}`);
-        }
+        router.push(`/${locale}/events`);
         router.refresh();
       }
     } catch {

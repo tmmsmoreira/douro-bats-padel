@@ -14,6 +14,7 @@ import { useRef, useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { HomeUpcomingEvents } from '@/components/home/home-upcoming-events';
 import { usePWAInstall } from '@/hooks/use-pwa-install';
+import { useSplashOffset } from '@/hooks/use-is-standalone';
 import { PWAInstallInstructions } from '@/components/shared/pwa-install-instructions';
 import Image from 'next/image';
 
@@ -21,6 +22,7 @@ export default function HomePage() {
   const { data: session } = useSession();
   const t = useTranslations('home');
   const containerRef = useRef<HTMLDivElement>(null);
+  const splashOffset = useSplashOffset();
   // Ensure page starts at the top (only if no hash)
   useEffect(() => {
     if (!window.location.hash) {
@@ -95,7 +97,7 @@ export default function HomePage() {
                 className="text-4xl sm:text-5xl lg:text-7xl font-bold font-heading"
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.3, ease: 'easeOut' }}
+                transition={{ duration: 0.8, delay: splashOffset, ease: 'easeOut' }}
               >
                 <span className="gradient-text">{t('hero.title')}</span>
               </motion.h1>
@@ -103,7 +105,7 @@ export default function HomePage() {
                 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-foreground"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.5, ease: 'easeOut' }}
+                transition={{ duration: 0.8, delay: splashOffset + 0.2, ease: 'easeOut' }}
               >
                 {t('hero.subtitle')}
               </motion.p>
@@ -113,7 +115,7 @@ export default function HomePage() {
               className="text-base sm:text-lg text-foreground max-w-2xl mx-auto"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.7, ease: 'easeOut' }}
+              transition={{ duration: 0.8, delay: splashOffset + 0.4, ease: 'easeOut' }}
             >
               {t('hero.description')}
             </motion.p>
@@ -122,7 +124,7 @@ export default function HomePage() {
               className="flex flex-col sm:flex-row gap-4 justify-center items-center"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.9, ease: 'easeOut' }}
+              transition={{ duration: 0.8, delay: splashOffset + 0.6, ease: 'easeOut' }}
             >
               {!session ? (
                 <>

@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { LOGO_BLUR_DATA_URL } from '@/lib/image-blur';
 import { motion } from 'motion/react';
 import { useLocale, useTranslations } from 'next-intl';
+import { useSplashOffset } from '@/hooks/use-is-standalone';
 
 interface AuthPageLayoutProps {
   children: React.ReactNode;
@@ -15,6 +16,7 @@ interface AuthPageLayoutProps {
 export function AuthPageLayout({ children }: AuthPageLayoutProps) {
   const locale = useLocale();
   const t = useTranslations('home.hero');
+  const splashOffset = useSplashOffset();
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -96,7 +98,7 @@ export function AuthPageLayout({ children }: AuthPageLayoutProps) {
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.3, ease: 'easeOut' }}
+              transition={{ duration: 0.8, delay: splashOffset, ease: 'easeOut' }}
               className="bg-card/60 backdrop-blur-md rounded-xl p-6 border border-border/50"
             >
               <h1 className="text-3xl xl:text-4xl font-bold font-heading gradient-text">

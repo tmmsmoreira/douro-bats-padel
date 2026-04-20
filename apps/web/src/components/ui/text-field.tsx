@@ -4,7 +4,8 @@
  */
 
 import React from 'react';
-import { Field, FieldLabel, FieldDescription, FieldError } from './field';
+import { Field, FieldLabel } from './field';
+import { FieldFeedback } from './field-feedback';
 import { Input } from './input';
 import { cn } from '@/lib/utils';
 
@@ -20,7 +21,7 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
     const fieldId = id || `field-${label.toLowerCase().replace(/\s+/g, '-')}`;
 
     return (
-      <Field className={containerClassName}>
+      <Field className={containerClassName} data-invalid={!!error}>
         <FieldLabel htmlFor={fieldId}>{label}</FieldLabel>
         <Input
           ref={ref}
@@ -32,8 +33,12 @@ export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
           }
           {...props}
         />
-        {description && !error && <FieldDescription>{description}</FieldDescription>}
-        {error && <FieldError id={`${fieldId}-error`}>{error}</FieldError>}
+        <FieldFeedback
+          error={error}
+          description={description}
+          errorId={`${fieldId}-error`}
+          descriptionId={`${fieldId}-description`}
+        />
       </Field>
     );
   }

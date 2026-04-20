@@ -608,6 +608,7 @@
   "eventForm": {
     "eventTitle": "Título do Evento",
     "eventTitlePlaceholder": "ex., Sexta à Noite - Explorers & Masters",
+    "eventTitleHint": "Opcional. Se deixares vazio, o título será gerado a partir da data, hora de início e formato do jogo.",
     "eventDate": "Data do Evento",
     "selectEventDate": "Selecionar data do evento",
     "duration": "Duração do Jogo",
@@ -672,10 +673,10 @@
     "validationSelectDate": "Por favor seleciona uma data do evento",
     "validationRsvpOpens": "Por favor seleciona a data/hora de abertura das confirmações",
     "validationRsvpCloses": "Por favor seleciona a data/hora de fecho das confirmações",
-    "validationMastersTime": "Por favor configura o horário MASTERS (hora de início e fim)",
-    "validationMastersCourts": "Por favor seleciona pelo menos um campo para o horário MASTERS",
-    "validationExplorersTime": "Por favor configura o horário EXPLORERS (hora de início e fim)",
-    "validationExplorersCourts": "Por favor seleciona pelo menos um campo para o horário EXPLORERS",
+    "validationMastersTime": "Por favor seleciona a hora de início MASTERS",
+    "validationMastersCourts": "Por favor seleciona pelo menos um campo para MASTERS",
+    "validationExplorersTime": "Por favor seleciona a hora de início EXPLORERS",
+    "validationExplorersCourts": "Por favor seleciona pelo menos um campo para EXPLORERS",
     "validationMasterCount": "Por favor insere uma contagem de masters válida (número não negativo)",
     "validationMasterCountExceeds": "Contagem de masters ({count}) não pode exceder a capacidade do evento ({capacity})",
     "validationMasterPercentage": "Por favor insere uma percentagem de masters válida (0-100)"

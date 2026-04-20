@@ -7,17 +7,21 @@ import { TimePicker } from '@/components/shared/time-picker';
 interface DateTimePickerProps {
   value?: Date;
   onChange?: (date: Date | undefined) => void;
+  onBlur?: () => void;
   placeholder?: string;
   disabled?: boolean;
   id?: string;
+  'aria-invalid'?: boolean;
 }
 
 export function DateTimePicker({
   value,
   onChange,
+  onBlur,
   placeholder: _placeholder = 'Select date and time',
   disabled,
   id,
+  'aria-invalid': ariaInvalid,
 }: DateTimePickerProps) {
   const [date, setDate] = React.useState<Date | undefined>(value);
   const [time, setTime] = React.useState<Date | undefined>(value);
@@ -73,15 +77,19 @@ export function DateTimePicker({
         id={id ? `${id}-date` : undefined}
         value={date}
         onChange={handleDateChange}
+        onBlur={onBlur}
         placeholder="Select date"
         disabled={disabled}
+        aria-invalid={ariaInvalid}
       />
       <TimePicker
         id={id ? `${id}-time` : undefined}
         value={time}
         onChange={handleTimeChange}
+        onBlur={onBlur}
         placeholder="Select time"
         disabled={disabled}
+        aria-invalid={ariaInvalid}
       />
     </div>
   );

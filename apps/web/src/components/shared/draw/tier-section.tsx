@@ -79,15 +79,15 @@ export function TierSection({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-8">
       {Object.entries(rounds)
         .sort(([a], [b]) => Number(a) - Number(b))
         .map(([round, assignments]) => (
           <Card key={`${tier}-${round}`} className="shadow-none border-0">
-            <CardHeader className="pb-4 ">
+            <CardHeader className="py-4 pt-0 px-0">
               <CardTitle className="text-lg">{translations.round(Number(round))}</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4 pt-0">
+            <CardContent className="space-y-4 p-0">
               <div className="grid grid-cols-1 gap-4">
                 {assignments.map((assignment) => (
                   <MatchAssignment

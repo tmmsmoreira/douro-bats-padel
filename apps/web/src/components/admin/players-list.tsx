@@ -38,8 +38,6 @@ export function PlayersList() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<PlayerState>('ALL');
   const [currentPage, setCurrentPage] = useState(1);
-  const searchIconRef = useRef<SearchIconHandle>(null);
-  const xIconRef = useRef<XIconHandle>(null);
 
   const { data: players, isLoading } = usePlayers();
 
@@ -113,8 +111,6 @@ export function PlayersList() {
           totalPages={totalPages}
           startIndex={startIndex}
           endIndex={endIndex}
-          searchIconRef={searchIconRef}
-          xIconRef={xIconRef}
           t={t}
           locale={locale}
         />
@@ -136,8 +132,6 @@ function PlayersListContent({
   totalPages,
   startIndex,
   endIndex,
-  searchIconRef,
-  xIconRef,
   t,
   locale,
 }: {
@@ -152,14 +146,15 @@ function PlayersListContent({
   totalPages: number;
   startIndex: number;
   endIndex: number;
-  searchIconRef: React.RefObject<SearchIconHandle | null>;
-  xIconRef: React.RefObject<XIconHandle | null>;
   t: ReturnType<typeof useTranslations>;
   locale: string;
 }) {
   const isBackNav = useIsFromBfcache();
   // Create refs for each player's trending icon
   const trendingUpIconRefs = useRef<Map<string, TrendingUpIconHandle>>(new Map());
+
+  const xIconRef = useRef<XIconHandle>(null);
+  const searchIconRef = useRef<SearchIconHandle>(null);
 
   const setTrendingUpIconRef = (playerId: string) => (el: TrendingUpIconHandle | null) => {
     if (el) {
@@ -299,130 +294,128 @@ function PlayersListContent({
                   show: { opacity: 1, y: 0, transition: { duration: isBackNav ? 0 : 0.4 } },
                 }}
               >
-                <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
-                  <Link
-                    href={`/players/${player.id}`}
-                    className="block"
-                    onMouseEnter={() => trendingUpIconRefs.current.get(player.id)?.startAnimation()}
-                  >
-                    <Card className="glass-card group hover:shadow-xl transition-shadow duration-200 ease-out border-border/50">
-                      <CardContent className="p-6 space-y-4">
-                        {/* Top Section: Avatar, Name, Email, and Status Badge */}
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex items-start gap-3 flex-1 min-w-0">
-                            {/* Avatar with verified badge */}
-                            <div className="relative shrink-0">
-                              <Avatar className="h-14 w-14">
-                                <AvatarImage
-                                  src={player.profilePhoto || undefined}
-                                  alt={player.name || player.email}
-                                />
-                                <AvatarFallback className="gradient-primary text-lg font-semibold">
-                                  {player.name
-                                    ? player.name
-                                        .split(' ')
-                                        .map((n) => n[0])
-                                        .join('')
-                                        .toUpperCase()
-                                        .slice(0, 2)
-                                    : player.email[0].toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                              {player.emailVerified && (
-                                <div className="absolute -bottom-1 -right-1 bg-background rounded-full p-0.5">
-                                  <CheckCircle className="h-4 w-4 text-success" />
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Name and Email */}
-                            <div className="flex-1 min-w-0 space-y-1.5">
-                              <h3 className="group-hover:text-primary transition-colors font-heading font-semibold text-lg truncate">
-                                {player.name || t('noName')}
-                              </h3>
-                              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                                <Mail className="h-3.5 w-3.5 shrink-0" />
-                                <span className="truncate">{player.email}</span>
+                <Link
+                  href={`/players/${player.id}`}
+                  className="block"
+                  onMouseEnter={() => trendingUpIconRefs.current.get(player.id)?.startAnimation()}
+                >
+                  <Card className="glass-card group hover:shadow-xl transition-shadow duration-200 ease-out border-border/50">
+                    <CardContent className="p-6 space-y-4">
+                      {/* Top Section: Avatar, Name, Email, and Status Badge */}
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start gap-3 flex-1 min-w-0">
+                          {/* Avatar with verified badge */}
+                          <div className="relative shrink-0">
+                            <Avatar className="h-14 w-14">
+                              <AvatarImage
+                                src={player.profilePhoto || undefined}
+                                alt={player.name || player.email}
+                              />
+                              <AvatarFallback className="gradient-primary text-lg font-semibold">
+                                {player.name
+                                  ? player.name
+                                      .split(' ')
+                                      .map((n) => n[0])
+                                      .join('')
+                                      .toUpperCase()
+                                      .slice(0, 2)
+                                  : player.email[0].toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            {player.emailVerified && (
+                              <div className="absolute -bottom-1 -right-1 bg-background rounded-full p-0.5">
+                                <CheckCircle className="h-4 w-4 text-success" />
                               </div>
-                            </div>
+                            )}
                           </div>
 
-                          {/* Status Badge - Top Right */}
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            {player.player?.notificationsPaused && (
-                              <BellOff
-                                className="h-4 w-4 text-muted-foreground"
-                                aria-label={t('notificationsPaused')}
-                              />
-                            )}
-                            {player.invitation ? (
-                              <StatusBadge status="INVITED" />
-                            ) : (
-                              player.player && (
-                                <StatusBadge status={player.player.status as PlayerProfileStatus} />
-                              )
-                            )}
+                          {/* Name and Email */}
+                          <div className="flex-1 min-w-0 space-y-1.5">
+                            <h3 className="group-hover:text-primary transition-colors font-heading font-semibold text-lg truncate">
+                              {player.name || t('noName')}
+                            </h3>
+                            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                              <Mail className="h-3.5 w-3.5 shrink-0" />
+                              <span className="truncate">{player.email}</span>
+                            </div>
                           </div>
                         </div>
 
-                        {/* Bottom Section: Player Info and Rating */}
-                        {player.invitation ? (
-                          <div className="flex items-end justify-between text-sm text-muted-foreground pt-4 border-t border-border/50">
-                            <div className="space-y-1">
-                              <div>
-                                <span className="font-medium">{t('invitedOn')}:</span>{' '}
-                                <span className="font-semibold text-foreground">
-                                  {new Date(player.createdAt).toLocaleDateString(locale)}
-                                </span>
-                              </div>
-                              <div>
-                                <span className="font-medium">{t('expiresOn')}:</span>{' '}
-                                <span className="font-semibold text-foreground">
-                                  {new Date(player.invitation.expiresAt).toLocaleDateString(locale)}
-                                </span>
-                              </div>
+                        {/* Status Badge - Top Right */}
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {player.player?.notificationsPaused && (
+                            <BellOff
+                              className="h-4 w-4 text-muted-foreground"
+                              aria-label={t('notificationsPaused')}
+                            />
+                          )}
+                          {player.invitation ? (
+                            <StatusBadge status="INVITED" />
+                          ) : (
+                            player.player && (
+                              <StatusBadge status={player.player.status as PlayerProfileStatus} />
+                            )
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Bottom Section: Player Info and Rating */}
+                      {player.invitation ? (
+                        <div className="flex items-end justify-between text-sm text-muted-foreground pt-4 border-t border-border/50">
+                          <div className="space-y-1">
+                            <div>
+                              <span className="font-medium">{t('invitedOn')}:</span>{' '}
+                              <span className="font-semibold text-foreground">
+                                {new Date(player.createdAt).toLocaleDateString(locale)}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="font-medium">{t('expiresOn')}:</span>{' '}
+                              <span className="font-semibold text-foreground">
+                                {new Date(player.invitation.expiresAt).toLocaleDateString(locale)}
+                              </span>
                             </div>
                           </div>
-                        ) : (
-                          <div className="flex items-end justify-between text-sm text-muted-foreground pt-4 border-t border-border/50">
-                            <div className="space-y-1">
-                              {player.player && (
-                                <div>
-                                  <span className="font-medium">{t('playerSince')}:</span>{' '}
-                                  <span className="font-semibold text-foreground">
-                                    {new Date(player.player.createdAt).toLocaleDateString(locale)}
-                                  </span>
-                                </div>
-                              )}
-                              <div>
-                                <span className="font-medium">{t('accountCreated')}:</span>{' '}
-                                <span className="font-semibold text-foreground">
-                                  {new Date(player.createdAt).toLocaleDateString(locale)}
-                                </span>
-                              </div>
-                            </div>
-                            {/* Rating - Bottom Right */}
+                        </div>
+                      ) : (
+                        <div className="flex items-end justify-between text-sm text-muted-foreground pt-4 border-t border-border/50">
+                          <div className="space-y-1">
                             {player.player && (
-                              <div className="flex flex-col items-end gap-0.5 shrink-0">
-                                <div className="flex items-center gap-1.5 text-3xl font-bold text-primary font-heading">
-                                  <TrendingUpIcon
-                                    ref={setTrendingUpIconRef(player.id)}
-                                    size={20}
-                                    className="text-primary"
-                                  />
-                                  <span className="gradient-text">{player.player.rating}</span>
-                                </div>
-                                <div className="text-xs text-muted-foreground font-medium">
-                                  {t('rating')}
-                                </div>
+                              <div>
+                                <span className="font-medium">{t('playerSince')}:</span>{' '}
+                                <span className="font-semibold text-foreground">
+                                  {new Date(player.player.createdAt).toLocaleDateString(locale)}
+                                </span>
                               </div>
                             )}
+                            <div>
+                              <span className="font-medium">{t('accountCreated')}:</span>{' '}
+                              <span className="font-semibold text-foreground">
+                                {new Date(player.createdAt).toLocaleDateString(locale)}
+                              </span>
+                            </div>
                           </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </Link>
-                </motion.div>
+                          {/* Rating - Bottom Right */}
+                          {player.player && (
+                            <div className="flex flex-col items-end gap-0.5 shrink-0">
+                              <div className="flex items-center gap-1.5 text-3xl font-bold text-primary font-heading">
+                                <TrendingUpIcon
+                                  ref={setTrendingUpIconRef(player.id)}
+                                  size={20}
+                                  className="text-primary"
+                                />
+                                <span className="gradient-text">{player.player.rating}</span>
+                              </div>
+                              <div className="text-xs text-muted-foreground font-medium">
+                                {t('rating')}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </Link>
               </motion.div>
             ))}
           </motion.div>

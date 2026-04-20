@@ -9,7 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Field, FieldLabel, FieldDescription, FieldError } from '@/components/ui/field';
+import { Field, FieldLabel, FieldDescription } from '@/components/ui/field';
+import { FieldFeedback } from '@/components/ui/field-feedback';
 import { DatePicker } from '@/components/shared/date-picker';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
@@ -522,7 +523,7 @@ function InformationCard({
       <CardContent className={cn('pt-0', isEditingProfile ? 'space-y-4' : 'space-y-6')}>
         {isEditingProfile ? (
           <>
-            <Field>
+            <Field data-invalid={!!validationErrors.profilePhoto}>
               <FieldLabel htmlFor="profilePhoto">{t('profilePhoto')}</FieldLabel>
               <Input
                 id="profilePhoto"
@@ -530,14 +531,15 @@ function InformationCard({
                 value={editedProfilePhoto}
                 onChange={(e) => setEditedProfilePhoto(e.target.value)}
                 placeholder={t('enterImageUrl')}
+                aria-invalid={!!validationErrors.profilePhoto}
               />
-              <FieldDescription>{t('profilePhotoDescription')}</FieldDescription>
-              {validationErrors.profilePhoto && (
-                <FieldError>{validationErrors.profilePhoto}</FieldError>
-              )}
+              <FieldFeedback
+                description={t('profilePhotoDescription')}
+                error={validationErrors.profilePhoto}
+              />
             </Field>
 
-            <Field>
+            <Field data-invalid={!!validationErrors.name}>
               <FieldLabel htmlFor="name">{t('name')}</FieldLabel>
               <Input
                 id="name"
@@ -546,8 +548,9 @@ function InformationCard({
                 onChange={(e) => setEditedName(e.target.value)}
                 placeholder={t('name')}
                 required
+                aria-invalid={!!validationErrors.name}
               />
-              {validationErrors.name && <FieldError>{validationErrors.name}</FieldError>}
+              <FieldFeedback error={validationErrors.name} />
             </Field>
 
             <Field>
@@ -562,21 +565,22 @@ function InformationCard({
               <FieldDescription>{t('emailCannotBeChanged')}</FieldDescription>
             </Field>
 
-            <Field>
+            <Field data-invalid={!!validationErrors.dateOfBirth}>
               <FieldLabel htmlFor="dateOfBirth">{t('dateOfBirth')}</FieldLabel>
               <DatePicker
                 id="dateOfBirth"
                 value={editedDateOfBirth}
                 onChange={setEditedDateOfBirth}
                 placeholder={t('dateOfBirth')}
+                aria-invalid={!!validationErrors.dateOfBirth}
               />
-              <FieldDescription>{t('dateOfBirthHint')}</FieldDescription>
-              {validationErrors.dateOfBirth && (
-                <FieldError>{validationErrors.dateOfBirth}</FieldError>
-              )}
+              <FieldFeedback
+                description={t('dateOfBirthHint')}
+                error={validationErrors.dateOfBirth}
+              />
             </Field>
 
-            <Field>
+            <Field data-invalid={!!validationErrors.phoneNumber}>
               <FieldLabel htmlFor="phoneNumber">{t('phoneNumber')}</FieldLabel>
               <Input
                 id="phoneNumber"
@@ -584,10 +588,9 @@ function InformationCard({
                 value={editedPhoneNumber}
                 onChange={(e) => setEditedPhoneNumber(e.target.value)}
                 placeholder={t('phoneNumber')}
+                aria-invalid={!!validationErrors.phoneNumber}
               />
-              {validationErrors.phoneNumber && (
-                <FieldError>{validationErrors.phoneNumber}</FieldError>
-              )}
+              <FieldFeedback error={validationErrors.phoneNumber} />
             </Field>
           </>
         ) : (

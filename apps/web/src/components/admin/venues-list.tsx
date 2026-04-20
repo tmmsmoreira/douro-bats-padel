@@ -118,7 +118,6 @@ function VenuesListContent({
             hidden: { opacity: 0, y: 20 },
             show: { opacity: 1, y: 0, transition: { duration: isBackNav ? 0 : 0.4 } },
           }}
-          whileHover={{ scale: 1.01 }}
         >
           <Card className="glass-card group hover:shadow-xl transition-shadow duration-200 ease-out border-border/50">
             <CardContent className="p-6 space-y-4">

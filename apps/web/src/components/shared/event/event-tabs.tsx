@@ -13,14 +13,17 @@ interface EventTab {
   match: (pathname: string) => boolean;
 }
 
+type EventTabKey = 'details' | 'draw' | 'results' | 'edit';
+
 interface EventTabsProps {
   eventId: string;
   basePath: string; // '/events'
-  tabs: ('details' | 'draw' | 'results' | 'edit')[];
+  tabs: EventTabKey[];
+  disabledTabs?: EventTabKey[];
   className?: string;
 }
 
-export function EventTabs({ eventId, basePath, tabs, className }: EventTabsProps) {
+export function EventTabs({ eventId, basePath, tabs, disabledTabs, className }: EventTabsProps) {
   const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations('eventTabs');
@@ -55,28 +58,34 @@ export function EventTabs({ eventId, basePath, tabs, className }: EventTabsProps
     },
   };
 
-  const visibleTabs = tabs.map((key) => tabConfig[key]).filter(Boolean);
+  const visibleTabs = tabs.map((key) => ({ key, ...tabConfig[key] })).filter((t) => t.href);
+  const disabledSet = new Set(disabledTabs ?? []);
 
   return (
     <div className={cn('border-b border-border', className)}>
       <nav className="flex space-x-8 md:space-x-8" aria-label="Event navigation">
         {visibleTabs.map((tab) => {
-          const isActive = pendingHref ? tab.href === pendingHref : tab.match(pathname);
+          const isDisabled = disabledSet.has(tab.key as EventTabKey);
+          const isActive =
+            !isDisabled && (pendingHref ? tab.href === pendingHref : tab.match(pathname));
           return (
             <button
               key={tab.href}
               type="button"
+              disabled={isDisabled}
+              aria-disabled={isDisabled}
               onClick={() => {
-                if (!isActive) {
-                  setPendingHref(tab.href);
-                  startTransition(() => {
-                    router.replace(tab.href);
-                  });
-                }
+                if (isDisabled || isActive) return;
+                setPendingHref(tab.href);
+                startTransition(() => {
+                  router.replace(tab.href);
+                });
               }}
               className={cn(
-                'relative flex-1 md:flex-none text-center md:text-left py-4 px-1 text-sm font-medium transition-colors cursor-pointer',
-                isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+                'relative flex-1 md:flex-none text-center md:text-left py-4 px-1 text-sm font-medium transition-colors',
+                isDisabled ? 'text-muted-foreground/50 cursor-not-allowed' : 'cursor-pointer',
+                !isDisabled &&
+                  (isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground')
               )}
             >
               {tab.label}

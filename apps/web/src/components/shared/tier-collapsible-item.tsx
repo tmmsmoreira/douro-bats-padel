@@ -26,7 +26,11 @@ export function TierCollapsibleItem({
   children,
 }: TierCollapsibleItemProps) {
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="border rounded-lg glass-card">
+    <Collapsible
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      className="border border-border/50 rounded-lg glass-card"
+    >
       <CollapsibleTrigger className="flex w-full items-start justify-between gap-4 px-6 py-4 text-left outline-none transition-colors hover:bg-muted/50">
         <div className="flex flex-col gap-3 w-full pr-2">
           {/* Row 1: Tier Title + Time Slot */}

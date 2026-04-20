@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useVenues } from '@/hooks/use-venues';
 import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { toast } from 'sonner';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Field, FieldLabel, FieldDescription } from '@/components/ui/field';
+import { FieldFeedback } from '@/components/ui/field-feedback';
 import { DatePicker } from '@/components/shared/date-picker';
 import { TimePicker } from '@/components/shared/time-picker';
 import { DateTimePicker } from '@/components/shared/datetime-picker';
@@ -47,6 +48,7 @@ interface EventFormProps {
 export function EventForm({ eventId, initialData }: EventFormProps = {}) {
   const router = useRouter();
   const t = useTranslations('eventForm');
+  const locale = useLocale();
   const isEditMode = !!eventId;
 
   const [formData, setFormData] = useState<{
@@ -163,103 +165,87 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
     }));
   }, [formData.mastersCourtIds, formData.explorersCourtIds]);
 
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [submitAttempted, setSubmitAttempted] = useState(false);
+
+  const errors = useMemo(() => {
+    const e: Record<string, string> = {};
+    if (!formData.venueId) e.venueId = t('validationSelectVenue');
+    if (!formData.date) e.date = t('validationSelectDate');
+    if (!formData.rsvpOpensAt) e.rsvpOpensAt = t('validationRsvpOpens');
+    if (!formData.rsvpClosesAt) e.rsvpClosesAt = t('validationRsvpCloses');
+    if (!formData.mastersStartTime) e.mastersStartTime = t('validationMastersTime');
+    if (formData.mastersCourtIds.length === 0) e.mastersCourtIds = t('validationMastersCourts');
+    if (!formData.explorersStartTime) e.explorersStartTime = t('validationExplorersTime');
+    if (formData.explorersCourtIds.length === 0)
+      e.explorersCourtIds = t('validationExplorersCourts');
+
+    if (formData.tierRuleType === 'count') {
+      const masterCount = parseInt(formData.masterCount);
+      if (isNaN(masterCount) || masterCount < 0) {
+        e.masterCount = t('validationMasterCount');
+      } else if (masterCount > parseInt(formData.capacity)) {
+        e.masterCount = t('validationMasterCountExceeds', {
+          count: masterCount,
+          capacity: formData.capacity,
+        });
+      }
+    } else if (formData.tierRuleType === 'percentage') {
+      const masterPercentage = parseFloat(formData.masterPercentage);
+      if (isNaN(masterPercentage) || masterPercentage < 0 || masterPercentage > 100) {
+        e.masterPercentage = t('validationMasterPercentage');
+      }
+    }
+    return e;
+  }, [formData, t]);
+
+  const showError = (field: string): string | undefined =>
+    touched[field] || submitAttempted ? errors[field] : undefined;
+
+  const markTouched = (field: string) => {
+    setTouched((prev) => (prev[field] ? prev : { ...prev, [field]: true }));
+  };
+
   // Use dedicated hooks for create and update
   const createMutation = useCreateEvent();
   const updateMutation = useUpdateEvent(eventId || '');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitAttempted(true);
 
-    // Validation
-    if (!formData.venueId) {
-      alert(t('validationSelectVenue'));
-      return;
-    }
-    if (!formData.date) {
-      alert(t('validationSelectDate'));
-      return;
-    }
-    if (!formData.rsvpOpensAt) {
-      alert(t('validationRsvpOpens'));
-      return;
-    }
-    if (!formData.rsvpClosesAt) {
-      alert(t('validationRsvpCloses'));
+    if (Object.keys(errors).length > 0) {
       return;
     }
 
-    // Validate time slots are provided
-    if (!formData.mastersStartTime) {
-      alert(t('validationMastersTime'));
-      return;
-    }
-    if (formData.mastersCourtIds.length === 0) {
-      alert(t('validationMastersCourts'));
-      return;
-    }
-    if (!formData.explorersStartTime) {
-      alert(t('validationExplorersTime'));
-      return;
-    }
-    if (formData.explorersCourtIds.length === 0) {
-      alert(t('validationExplorersCourts'));
-      return;
-    }
+    // After validation passes, these are guaranteed to be defined
+    const date = formData.date!;
+    const rsvpOpensAt = formData.rsvpOpensAt!;
+    const rsvpClosesAt = formData.rsvpClosesAt!;
+    const mastersStartTimeDate = formData.mastersStartTime!;
+    const explorersStartTimeDate = formData.explorersStartTime!;
 
-    // Derive overall event start/end times from time slots
-    const eventDate = new Date(formData.date);
+    const eventDate = new Date(date);
 
-    // Calculate end times based on start time + duration
     const mastersStart = new Date(eventDate);
-    mastersStart.setHours(
-      formData.mastersStartTime.getHours(),
-      formData.mastersStartTime.getMinutes()
-    );
-
+    mastersStart.setHours(mastersStartTimeDate.getHours(), mastersStartTimeDate.getMinutes());
     const mastersEnd = new Date(mastersStart.getTime() + formData.duration * 60 * 1000);
 
     const explorersStart = new Date(eventDate);
-    explorersStart.setHours(
-      formData.explorersStartTime.getHours(),
-      formData.explorersStartTime.getMinutes()
-    );
-
+    explorersStart.setHours(explorersStartTimeDate.getHours(), explorersStartTimeDate.getMinutes());
     const explorersEnd = new Date(explorersStart.getTime() + formData.duration * 60 * 1000);
 
     const startsAt = mastersStart < explorersStart ? mastersStart : explorersStart;
     const endsAt = mastersEnd > explorersEnd ? mastersEnd : explorersEnd;
 
-    // Build tier rules based on selection
-    let tierRules: TierRules | undefined = undefined;
+    const tierRules: TierRules = {};
     if (formData.tierRuleType === 'count') {
-      const masterCount = parseInt(formData.masterCount);
-      if (isNaN(masterCount) || masterCount < 0) {
-        alert(t('validationMasterCount'));
-        return;
-      }
-      if (masterCount > parseInt(formData.capacity)) {
-        alert(
-          t('validationMasterCountExceeds', { count: masterCount, capacity: formData.capacity })
-        );
-        return;
-      }
-      tierRules = { masterCount };
+      tierRules.masterCount = parseInt(formData.masterCount);
     } else if (formData.tierRuleType === 'percentage') {
-      const masterPercentage = parseFloat(formData.masterPercentage);
-      if (isNaN(masterPercentage) || masterPercentage < 0 || masterPercentage > 100) {
-        alert(t('validationMasterPercentage'));
-        return;
-      }
-      tierRules = { masterPercentage };
+      tierRules.masterPercentage = parseFloat(formData.masterPercentage);
     }
 
-    // Add time slot information (always required now)
-    if (!tierRules) {
-      tierRules = {};
-    }
-
-    // Add MASTERS time slot
-    const mastersStartTime = `${String(formData.mastersStartTime.getHours()).padStart(2, '0')}:${String(formData.mastersStartTime.getMinutes()).padStart(2, '0')}`;
+    const mastersStartTime = `${String(mastersStartTimeDate.getHours()).padStart(2, '0')}:${String(mastersStartTimeDate.getMinutes()).padStart(2, '0')}`;
     const mastersEndTime = `${String(mastersEnd.getHours()).padStart(2, '0')}:${String(mastersEnd.getMinutes()).padStart(2, '0')}`;
     tierRules.mastersTimeSlot = {
       startsAt: mastersStartTime,
@@ -267,8 +253,7 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
       courtIds: formData.mastersCourtIds,
     };
 
-    // Add EXPLORERS time slot
-    const explorersStartTime = `${String(formData.explorersStartTime.getHours()).padStart(2, '0')}:${String(formData.explorersStartTime.getMinutes()).padStart(2, '0')}`;
+    const explorersStartTime = `${String(explorersStartTimeDate.getHours()).padStart(2, '0')}:${String(explorersStartTimeDate.getMinutes()).padStart(2, '0')}`;
     const explorersEndTime = `${String(explorersEnd.getHours()).padStart(2, '0')}:${String(explorersEnd.getMinutes()).padStart(2, '0')}`;
     tierRules.explorersTimeSlot = {
       startsAt: explorersStartTime,
@@ -276,13 +261,22 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
       courtIds: formData.explorersCourtIds,
     };
 
-    // Collect all unique court IDs from time slots
     const allCourtIds = Array.from(
       new Set([...formData.mastersCourtIds, ...formData.explorersCourtIds])
     );
 
+    const formatLabel =
+      formData.format === EventFormat.NON_STOP ? t('nonStopFormat') : formData.format;
+    const dateLabel = eventDate.toLocaleDateString(locale, {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+    });
+    const timeLabel = `${String(startsAt.getHours()).padStart(2, '0')}:${String(startsAt.getMinutes()).padStart(2, '0')}`;
+    const generatedTitle = `${formatLabel} · ${dateLabel} · ${timeLabel}`;
+
     const dto: CreateEventDto = {
-      title: formData.title,
+      title: formData.title.trim() || generatedTitle,
       date: eventDate,
       startsAt,
       endsAt,
@@ -291,8 +285,8 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
       venueId: formData.venueId,
       courtIds: allCourtIds,
       capacity: parseInt(formData.capacity),
-      rsvpOpensAt: formData.rsvpOpensAt,
-      rsvpClosesAt: formData.rsvpClosesAt,
+      rsvpOpensAt,
+      rsvpClosesAt,
       tierRules,
     };
 
@@ -347,18 +341,21 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               placeholder={t('eventTitlePlaceholder')}
             />
+            <FieldDescription>{t('eventTitleHint')}</FieldDescription>
           </Field>
 
           <div className="grid grid-cols-2 gap-4">
-            <Field>
+            <Field data-invalid={!!showError('date')}>
               <FieldLabel htmlFor="date">{t('eventDate')}</FieldLabel>
               <DatePicker
                 id="date"
                 value={formData.date}
                 onChange={(date) => setFormData({ ...formData, date })}
+                onBlur={() => markTouched('date')}
                 placeholder={t('selectEventDate')}
+                aria-invalid={!!showError('date')}
               />
-              <FieldDescription>Format: DD/MM/YYYY</FieldDescription>
+              <FieldFeedback description="Format: DD/MM/YYYY" error={showError('date')} />
             </Field>
 
             <Field>
@@ -375,23 +372,27 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
             </Field>
           </div>
 
-          <Field>
+          <Field data-invalid={!!showError('venueId')}>
             <FieldLabel htmlFor="venue">{t('venue')}</FieldLabel>
             {venuesLoading ? (
               <div className="text-sm text-muted-foreground">{t('loadingVenues')}</div>
             ) : (
               <Select
                 value={formData.venueId}
-                onValueChange={(value) =>
+                onOpenChange={(open) => {
+                  if (!open) markTouched('venueId');
+                }}
+                onValueChange={(value) => {
+                  markTouched('venueId');
                   setFormData({
                     ...formData,
                     venueId: value,
                     mastersCourtIds: [],
                     explorersCourtIds: [],
-                  })
-                }
+                  });
+                }}
               >
-                <SelectTrigger>
+                <SelectTrigger aria-invalid={!!showError('venueId')}>
                   <SelectValue placeholder={t('selectVenue')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -403,29 +404,40 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
                 </SelectContent>
               </Select>
             )}
+            <FieldFeedback error={showError('venueId')} />
           </Field>
 
           <div className="space-y-4">
-            <Field>
+            <Field data-invalid={!!showError('rsvpOpensAt')}>
               <FieldLabel htmlFor="rsvpOpensAt">{t('rsvpOpensAt')}</FieldLabel>
               <DateTimePicker
                 id="rsvpOpensAt"
                 value={formData.rsvpOpensAt}
                 onChange={(datetime) => setFormData({ ...formData, rsvpOpensAt: datetime })}
+                onBlur={() => markTouched('rsvpOpensAt')}
                 placeholder={t('rsvpOpensAtPlaceholder')}
+                aria-invalid={!!showError('rsvpOpensAt')}
               />
-              <FieldDescription>Format: DD/MM/YYYY HH:MM (24h)</FieldDescription>
+              <FieldFeedback
+                description="Format: DD/MM/YYYY HH:MM (24h)"
+                error={showError('rsvpOpensAt')}
+              />
             </Field>
 
-            <Field>
+            <Field data-invalid={!!showError('rsvpClosesAt')}>
               <FieldLabel htmlFor="rsvpClosesAt">{t('rsvpClosesAt')}</FieldLabel>
               <DateTimePicker
                 id="rsvpClosesAt"
                 value={formData.rsvpClosesAt}
                 onChange={(datetime) => setFormData({ ...formData, rsvpClosesAt: datetime })}
+                onBlur={() => markTouched('rsvpClosesAt')}
                 placeholder={t('rsvpClosesAtPlaceholder')}
+                aria-invalid={!!showError('rsvpClosesAt')}
               />
-              <FieldDescription>Format: DD/MM/YYYY HH:MM (24h)</FieldDescription>
+              <FieldFeedback
+                description="Format: DD/MM/YYYY HH:MM (24h)"
+                error={showError('rsvpClosesAt')}
+              />
             </Field>
           </div>
 
@@ -464,7 +476,7 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
             </RadioGroup>
 
             {formData.tierRuleType === 'count' && (
-              <Field className="ml-6">
+              <Field className="ml-6" data-invalid={!!showError('masterCount')}>
                 <FieldLabel htmlFor="masterCount">{t('numberOfMastersPlayers')}</FieldLabel>
                 <Input
                   id="masterCount"
@@ -473,16 +485,19 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
                   max={formData.capacity}
                   value={formData.masterCount}
                   onChange={(e) => setFormData({ ...formData, masterCount: e.target.value })}
+                  onBlur={() => markTouched('masterCount')}
                   placeholder={t('numberOfMastersPlaceholder')}
+                  aria-invalid={!!showError('masterCount')}
                 />
-                <FieldDescription>
-                  {t('topRatedPlayers', { count: formData.masterCount || 'X' })}
-                </FieldDescription>
+                <FieldFeedback
+                  description={t('topRatedPlayers', { count: formData.masterCount || 'X' })}
+                  error={showError('masterCount')}
+                />
               </Field>
             )}
 
             {formData.tierRuleType === 'percentage' && (
-              <Field className="pl-6">
+              <Field className="pl-6" data-invalid={!!showError('masterPercentage')}>
                 <FieldLabel htmlFor="masterPercentage">{t('mastersPercentage')}</FieldLabel>
                 <Input
                   id="masterPercentage"
@@ -492,11 +507,16 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
                   step="1"
                   value={formData.masterPercentage}
                   onChange={(e) => setFormData({ ...formData, masterPercentage: e.target.value })}
+                  onBlur={() => markTouched('masterPercentage')}
                   placeholder={t('mastersPercentagePlaceholder')}
+                  aria-invalid={!!showError('masterPercentage')}
                 />
-                <FieldDescription>
-                  {t('topPercentagePlayers', { percentage: formData.masterPercentage || 'X' })}
-                </FieldDescription>
+                <FieldFeedback
+                  description={t('topPercentagePlayers', {
+                    percentage: formData.masterPercentage || 'X',
+                  })}
+                  error={showError('masterPercentage')}
+                />
               </Field>
             )}
 
@@ -614,7 +634,7 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-3 p-3 rounded-lg border bg-card">
                   <FieldLabel className="text-sm font-medium">{t('mastersTimeSlot')}</FieldLabel>
-                  <Field>
+                  <Field data-invalid={!!showError('mastersStartTime')}>
                     <FieldLabel
                       htmlFor="mastersStartTime"
                       className="text-xs text-muted-foreground"
@@ -625,13 +645,18 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
                       id="mastersStartTime"
                       value={formData.mastersStartTime}
                       onChange={(time) => setFormData({ ...formData, mastersStartTime: time })}
+                      onBlur={() => markTouched('mastersStartTime')}
                       placeholder={t('startTimePlaceholder')}
+                      aria-invalid={!!showError('mastersStartTime')}
                     />
-                    <FieldDescription>Format: HH:MM (24h)</FieldDescription>
+                    <FieldFeedback
+                      description="Format: HH:MM (24h)"
+                      error={showError('mastersStartTime')}
+                    />
                   </Field>
 
                   {selectedVenue && selectedVenue.courts && selectedVenue.courts.length > 0 && (
-                    <div className="space-y-2">
+                    <Field data-invalid={!!showError('mastersCourtIds')}>
                       <FieldLabel className="text-xs text-muted-foreground">
                         {t('courtsAvailable')}
                       </FieldLabel>
@@ -642,6 +667,7 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
                               id={`masters-court-${court.id}`}
                               checked={formData.mastersCourtIds.includes(court.id)}
                               onCheckedChange={(checked) => {
+                                markTouched('mastersCourtIds');
                                 setFormData((prev) => ({
                                   ...prev,
                                   mastersCourtIds: checked
@@ -659,16 +685,19 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
                           </div>
                         ))}
                       </div>
-                      <FieldDescription>
-                        {t('courtsSelected', { count: formData.mastersCourtIds.length })}
-                      </FieldDescription>
-                    </div>
+                      <FieldFeedback
+                        description={t('courtsSelected', {
+                          count: formData.mastersCourtIds.length,
+                        })}
+                        error={showError('mastersCourtIds')}
+                      />
+                    </Field>
                   )}
                 </div>
 
                 <div className="space-y-3 p-3 rounded-lg border bg-card">
                   <FieldLabel className="text-sm font-medium">{t('explorersTimeSlot')}</FieldLabel>
-                  <Field>
+                  <Field data-invalid={!!showError('explorersStartTime')}>
                     <FieldLabel
                       htmlFor="explorersStartTime"
                       className="text-xs text-muted-foreground"
@@ -679,13 +708,18 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
                       id="explorersStartTime"
                       value={formData.explorersStartTime}
                       onChange={(time) => setFormData({ ...formData, explorersStartTime: time })}
+                      onBlur={() => markTouched('explorersStartTime')}
                       placeholder={t('explorersStartTimePlaceholder')}
+                      aria-invalid={!!showError('explorersStartTime')}
                     />
-                    <FieldDescription>Format: HH:MM (24h)</FieldDescription>
+                    <FieldFeedback
+                      description="Format: HH:MM (24h)"
+                      error={showError('explorersStartTime')}
+                    />
                   </Field>
 
                   {selectedVenue && selectedVenue.courts && selectedVenue.courts.length > 0 && (
-                    <div className="space-y-2">
+                    <Field data-invalid={!!showError('explorersCourtIds')}>
                       <FieldLabel className="text-xs text-muted-foreground">
                         {t('courtsAvailable')}
                       </FieldLabel>
@@ -696,6 +730,7 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
                               id={`explorers-court-${court.id}`}
                               checked={formData.explorersCourtIds.includes(court.id)}
                               onCheckedChange={(checked) => {
+                                markTouched('explorersCourtIds');
                                 setFormData((prev) => ({
                                   ...prev,
                                   explorersCourtIds: checked
@@ -713,10 +748,13 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
                           </div>
                         ))}
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        {t('courtsSelected', { count: formData.explorersCourtIds.length })}
-                      </p>
-                    </div>
+                      <FieldFeedback
+                        description={t('courtsSelected', {
+                          count: formData.explorersCourtIds.length,
+                        })}
+                        error={showError('explorersCourtIds')}
+                      />
+                    </Field>
                   )}
                 </div>
               </div>

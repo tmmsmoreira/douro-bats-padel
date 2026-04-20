@@ -110,10 +110,10 @@ function EventDetailsContent({
       initial={isBackNav ? false : { opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: isBackNav ? 0 : 0.3 }}
-      className="space-y-8"
+      className="space-y-6"
     >
-      {/* RSVP Card - For all authenticated users on non-past events */}
-      {session && !isPastEvent && (
+      {/* RSVP Card - For all authenticated users on non-past, non-draft events */}
+      {session && !isPastEvent && event.state !== 'DRAFT' && (
         <Card className="glass-card">
           <CardHeader>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

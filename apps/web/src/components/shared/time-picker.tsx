@@ -26,11 +26,13 @@ function formatTime(date: Date | undefined): string {
 function parseTimeString(timeString: string, baseDate?: Date): Date | undefined {
   if (!timeString) return undefined;
 
-  const [hours, minutes] = timeString.split(':').map(Number);
-  if (isNaN(hours) || isNaN(minutes)) return undefined;
+  const match = timeString.match(/^(\d{2}):(\d{2})$/);
+  if (!match) return undefined;
 
-  // Use the provided base date or create a new one
-  // This ensures the time is set on the correct date
+  const hours = parseInt(match[1], 10);
+  const minutes = parseInt(match[2], 10);
+  if (hours > 23 || minutes > 59) return undefined;
+
   const date = baseDate ? new Date(baseDate) : new Date();
   date.setHours(hours, minutes, 0, 0);
   return date;
@@ -39,17 +41,21 @@ function parseTimeString(timeString: string, baseDate?: Date): Date | undefined 
 interface TimePickerProps {
   value?: Date;
   onChange?: (date: Date | undefined) => void;
+  onBlur?: () => void;
   placeholder?: string;
   disabled?: boolean;
   id?: string;
+  'aria-invalid'?: boolean;
 }
 
 export function TimePicker({
   value,
   onChange,
+  onBlur,
   placeholder = 'HH:MM',
   disabled,
   id,
+  'aria-invalid': ariaInvalid,
 }: TimePickerProps) {
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState(formatTime(value));
@@ -147,12 +153,17 @@ export function TimePicker({
     <InputGroup>
       <InputGroupInput
         id={id}
-        type="time"
         value={inputValue}
         placeholder={placeholder}
         disabled={disabled}
-        className="appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+        aria-invalid={ariaInvalid}
         onChange={handleInputChange}
+        onBlur={() => {
+          if (inputValue && !parseTimeString(inputValue, value)) {
+            setInputValue(formatTime(value));
+          }
+          onBlur?.();
+        }}
         onKeyDown={(e) => {
           if (e.key === 'ArrowDown') {
             e.preventDefault();
@@ -160,6 +171,7 @@ export function TimePicker({
           }
         }}
         maxLength={5}
+        inputMode="numeric"
       />
       <InputGroupAddon align="inline-end">
         {isMobile ? (

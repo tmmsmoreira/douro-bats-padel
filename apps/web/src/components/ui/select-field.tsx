@@ -4,7 +4,8 @@
  */
 
 import React from 'react';
-import { Field, FieldLabel, FieldDescription, FieldError } from './field';
+import { Field, FieldLabel } from './field';
+import { FieldFeedback } from './field-feedback';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
 
 export interface SelectFieldOption {
@@ -44,7 +45,7 @@ export const SelectField = React.forwardRef<HTMLButtonElement, SelectFieldProps>
     const fieldId = id || `field-${label.toLowerCase().replace(/\s+/g, '-')}`;
 
     return (
-      <Field className={containerClassName}>
+      <Field className={containerClassName} data-invalid={!!error}>
         <FieldLabel htmlFor={fieldId}>{label}</FieldLabel>
         <Select value={value} onValueChange={onValueChange} disabled={disabled}>
           <SelectTrigger
@@ -65,8 +66,12 @@ export const SelectField = React.forwardRef<HTMLButtonElement, SelectFieldProps>
             ))}
           </SelectContent>
         </Select>
-        {description && !error && <FieldDescription>{description}</FieldDescription>}
-        {error && <FieldError id={`${fieldId}-error`}>{error}</FieldError>}
+        <FieldFeedback
+          error={error}
+          description={description}
+          errorId={`${fieldId}-error`}
+          descriptionId={`${fieldId}-description`}
+        />
       </Field>
     );
   }

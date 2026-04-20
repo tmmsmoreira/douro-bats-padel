@@ -47,17 +47,21 @@ function parseDateInput(input: string): Date | undefined {
 interface DatePickerProps {
   value?: Date;
   onChange?: (date: Date | undefined) => void;
+  onBlur?: () => void;
   placeholder?: string;
   disabled?: boolean;
   id?: string;
+  'aria-invalid'?: boolean;
 }
 
 export function DatePicker({
   value,
   onChange,
+  onBlur,
   placeholder = 'DD/MM/YYYY',
   disabled,
   id,
+  'aria-invalid': ariaInvalid,
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
   const [date, setDate] = React.useState<Date | undefined>(value);
@@ -132,7 +136,14 @@ export function DatePicker({
         value={inputValue}
         placeholder={placeholder}
         disabled={disabled}
+        aria-invalid={ariaInvalid}
         onChange={handleInputChange}
+        onBlur={() => {
+          if (inputValue && !parseDateInput(inputValue)) {
+            setInputValue(formatDateInput(value));
+          }
+          onBlur?.();
+        }}
         onKeyDown={(e) => {
           if (e.key === 'ArrowDown') {
             e.preventDefault();
@@ -140,6 +151,7 @@ export function DatePicker({
           }
         }}
         maxLength={10}
+        inputMode="numeric"
       />
       <InputGroupAddon align="inline-end">
         {isMobile ? (

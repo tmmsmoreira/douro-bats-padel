@@ -69,7 +69,14 @@ export default function EventLayout({
               }
             />
 
-            <EventTabs eventId={eventId} basePath="/events" tabs={['details', 'draw', 'results']} />
+            <EventTabs
+              eventId={eventId}
+              basePath="/events"
+              tabs={['details', 'draw', 'results']}
+              disabledTabs={
+                event.state === 'DRAWN' || event.state === 'PUBLISHED' ? [] : ['draw', 'results']
+              }
+            />
 
             <motion.div
               key={pathname}

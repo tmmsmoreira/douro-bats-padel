@@ -202,7 +202,7 @@ function DrawViewContent({
           `${fieldsCount} ${t('fields')}`,
         ]}
       >
-        <div className="space-y-6">
+        <div className="space-y-8">
           <TeamList
             assignments={assignments}
             onEditTeam={isEditor ? handleEditTeam : undefined}

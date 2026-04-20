@@ -4,12 +4,15 @@
  */
 
 import React from 'react';
-import { Field, FieldLabel, FieldDescription, FieldError } from './field';
+import { Field, FieldLabel } from './field';
+import { FieldFeedback } from './field-feedback';
 import { Input } from './input';
 import { cn } from '@/lib/utils';
 
-export interface NumberFieldProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
+export interface NumberFieldProps extends Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  'type'
+> {
   label: string;
   description?: string;
   error?: string;
@@ -21,7 +24,7 @@ export const NumberField = React.forwardRef<HTMLInputElement, NumberFieldProps>(
     const fieldId = id || `field-${label.toLowerCase().replace(/\s+/g, '-')}`;
 
     return (
-      <Field className={containerClassName}>
+      <Field className={containerClassName} data-invalid={!!error}>
         <FieldLabel htmlFor={fieldId}>{label}</FieldLabel>
         <Input
           ref={ref}
@@ -34,8 +37,12 @@ export const NumberField = React.forwardRef<HTMLInputElement, NumberFieldProps>(
           }
           {...props}
         />
-        {description && !error && <FieldDescription>{description}</FieldDescription>}
-        {error && <FieldError id={`${fieldId}-error`}>{error}</FieldError>}
+        <FieldFeedback
+          error={error}
+          description={description}
+          errorId={`${fieldId}-error`}
+          descriptionId={`${fieldId}-description`}
+        />
       </Field>
     );
   }

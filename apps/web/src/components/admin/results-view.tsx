@@ -14,8 +14,14 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
-import { Lock, Calendar, ClipboardList, RefreshCw } from 'lucide-react';
-import { BadgeAlertIcon, LockIcon, LockIconHandle } from 'lucide-animated';
+import { Lock, Calendar, ClipboardList } from 'lucide-react';
+import {
+  BadgeAlertIcon,
+  LockIcon,
+  LockIconHandle,
+  RefreshCwIcon,
+  RefreshCwIconHandle,
+} from 'lucide-animated';
 import {
   usePublishMatches,
   useRecomputeRankings,
@@ -43,7 +49,6 @@ export function ResultsView({ eventId }: ResultsViewProps) {
   const [matchResults, setMatchResults] = useState<
     Record<string, { setsA: number | ''; setsB: number | '' }>
   >({});
-  const lockIconRef = useRef<LockIconHandle>(null);
 
   // Fetch event data to check state and date
   const { data: event, isLoading: isLoadingEvent } = useEventDetails(eventId);
@@ -229,7 +234,6 @@ export function ResultsView({ eventId }: ResultsViewProps) {
             recomputeMutation={recomputeMutation}
             showRecomputeDialog={showRecomputeDialog}
             setShowRecomputeDialog={setShowRecomputeDialog}
-            lockIconRef={lockIconRef}
             t={t}
           />
         ) : null
@@ -271,15 +275,15 @@ function ResultsTierSection({
       tierColor={tier === 'MASTERS' ? 'bg-yellow-500' : 'bg-green-500'}
       badges={[`${roundCount} ${t('rounds')}`, `${matchCount} ${t('matches')}`]}
     >
-      <div className="space-y-4">
+      <div className="space-y-8">
         {Object.entries(rounds)
           .sort(([a], [b]) => Number(a) - Number(b))
           .map(([round, assignments]) => (
             <Card key={`${tier}-${round}`} className="shadow-none border-0">
-              <CardHeader className="pb-4">
+              <CardHeader className="px-0 pb-4 pt-0">
                 <CardTitle className="text-lg">{t('round', { round })}</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4 pt-0">
+              <CardContent className="space-y-4 p-0">
                 <div className="grid grid-cols-1 gap-4">
                   {assignments.map((assignment) => {
                     const key = `${assignment.courtId}-${assignment.round}`;
@@ -333,7 +337,6 @@ function ResultsViewContent({
   recomputeMutation,
   showRecomputeDialog,
   setShowRecomputeDialog,
-  lockIconRef,
   t,
 }: {
   draw: Draw;
@@ -347,7 +350,6 @@ function ResultsViewContent({
   recomputeMutation: UseMutationResult<unknown, Error, void, unknown>;
   showRecomputeDialog: boolean;
   setShowRecomputeDialog: (show: boolean) => void;
-  lockIconRef: React.RefObject<LockIconHandle | null>;
   t: ReturnType<typeof useTranslations>;
 }) {
   // Group assignments by tier and round (same as draw page)
@@ -369,6 +371,9 @@ function ResultsViewContent({
 
   const mastersRounds = groupByRound(masterAssignments);
   const explorersRounds = groupByRound(explorerAssignments);
+
+  const refreshCwIconRef = useRef<RefreshCwIconHandle>(null);
+  const lockIconRef = useRef<LockIconHandle>(null);
 
   // Check if all matches have been entered
   const totalMatches = draw.assignments.length;
@@ -411,19 +416,20 @@ function ResultsViewContent({
                 {t('matchesEntered', { entered: enteredMatches, total: totalMatches })}
               </p>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {hasPublishedMatches && (
+            {hasPublishedMatches && (
+              <div className="flex flex-1">
                 <Badge variant="default" className="gap-1">
                   <Lock className="h-3 w-3" />
                   {t('published')}
                 </Badge>
-              )}
+              </div>
+            )}
+            <div className="flex flex-wrap gap-2">
               <Button
                 onClick={handleSaveAllResults}
                 disabled={!hasUnsavedChanges}
                 variant="outline"
                 className="gap-2"
-                animate
               >
                 {t('saveAllResults')}
               </Button>
@@ -432,9 +438,10 @@ function ResultsViewContent({
                   onClick={() => setShowRecomputeDialog(true)}
                   disabled={recomputeMutation.isPending}
                   className="gap-2"
-                  animate
+                  onMouseEnter={() => refreshCwIconRef.current?.startAnimation()}
+                  onMouseLeave={() => refreshCwIconRef.current?.stopAnimation()}
                 >
-                  <RefreshCw className="h-4 w-4" />
+                  <RefreshCwIcon ref={refreshCwIconRef} className="h-4 w-4" />
                   {t('recomputeRankings')}
                 </Button>
               )}
@@ -445,7 +452,6 @@ function ResultsViewContent({
                   className="gap-2"
                   onMouseEnter={() => lockIconRef.current?.startAnimation()}
                   onMouseLeave={() => lockIconRef.current?.stopAnimation()}
-                  animate
                 >
                   <LockIcon ref={lockIconRef} size={16} />
                   {t('publishResults')}

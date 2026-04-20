@@ -16,14 +16,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  SquarePenIcon,
-  DeleteIcon,
-  DeleteIconHandle,
-  SquarePenIconHandle,
-  MapPinIcon,
-} from 'lucide-animated';
-import { MoreVertical } from 'lucide-react';
+import { SquarePenIcon, DeleteIcon, DeleteIconHandle, SquarePenIconHandle } from 'lucide-animated';
+import { MoreVertical, MapPin } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { getShimmerDataURL } from '@/lib/image-blur';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
@@ -165,7 +159,7 @@ function VenuesListContent({
                     <h3 className="font-heading font-semibold text-lg truncate">{venue.name}</h3>
                     {venue.address && (
                       <div className="flex items-center gap-1.5 mt-1">
-                        <MapPinIcon size={14} className="text-muted-foreground shrink-0" />
+                        <MapPin size={14} className="text-muted-foreground shrink-0" />
                         <p className="text-sm text-muted-foreground truncate">{venue.address}</p>
                       </div>
                     )}

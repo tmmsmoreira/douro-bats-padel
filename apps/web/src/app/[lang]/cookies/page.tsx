@@ -55,7 +55,8 @@ export default function CookiesPage() {
                     <li key={i}>{item}</li>
                   ))}
                 </ul>
-
+              </CardContent>
+              <CardContent className="pt-0 space-y-4">
                 <h3 className="font-semibold mt-4">{t('types.functionalTitle')}</h3>
                 <p className="text-muted-foreground">{t('types.functionalBody')}</p>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
@@ -63,7 +64,8 @@ export default function CookiesPage() {
                     <li key={i}>{item}</li>
                   ))}
                 </ul>
-
+              </CardContent>
+              <CardContent className="pt-0 space-y-4">
                 <h3 className="font-semibold mt-4">{t('types.analyticsTitle')}</h3>
                 <p className="text-muted-foreground">{t('types.analyticsBody')}</p>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
@@ -71,7 +73,8 @@ export default function CookiesPage() {
                     <li key={i}>{item}</li>
                   ))}
                 </ul>
-
+              </CardContent>
+              <CardContent className="pt-0 space-y-4">
                 <h3 className="font-semibold mt-4">{t('types.performanceTitle')}</h3>
                 <p className="text-muted-foreground">{t('types.performanceBody')}</p>
               </CardContent>
@@ -103,7 +106,8 @@ export default function CookiesPage() {
               <CardContent className="pt-0 space-y-4">
                 <h3 className="font-semibold">{t('duration.sessionTitle')}</h3>
                 <p className="text-muted-foreground">{t('duration.sessionBody')}</p>
-
+              </CardContent>
+              <CardContent className="pt-0 space-y-4">
                 <h3 className="font-semibold mt-4">{t('duration.persistentTitle')}</h3>
                 <p className="text-muted-foreground">{t('duration.persistentBody')}</p>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
@@ -122,7 +126,8 @@ export default function CookiesPage() {
               </CardHeader>
               <CardContent className="pt-0 space-y-4">
                 <p className="text-muted-foreground">{t('managing.intro')}</p>
-
+              </CardContent>
+              <CardContent className="pt-0 space-y-4">
                 <h3 className="font-semibold mt-4">{t('managing.browserTitle')}</h3>
                 <p className="text-muted-foreground">{t('managing.browserIntro')}</p>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
@@ -130,9 +135,9 @@ export default function CookiesPage() {
                     <li key={i}>{item}</li>
                   ))}
                 </ul>
-
                 <p className="text-muted-foreground mt-4">{t('managing.note')}</p>
-
+              </CardContent>
+              <CardContent className="pt-0 space-y-4">
                 <h3 className="font-semibold mt-4">{t('managing.specificTitle')}</h3>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
                   {specificItems.map((item, i) => (

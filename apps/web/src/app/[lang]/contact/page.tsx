@@ -9,10 +9,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { LoadingButton } from '@/components/ui/loading-button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Field, FieldLabel } from '@/components/ui/field';
 import { Mail, Instagram, MapPin, Globe } from 'lucide-react';
 import { UnifiedNav } from '@/components/shared/unified-nav';
 import { useTranslations } from 'next-intl';
@@ -128,11 +128,11 @@ export default function ContactPage() {
                 <CardTitle>{t('sendMessage')}</CardTitle>
                 <CardDescription>{t('sendMessageDescription')}</CardDescription>
               </CardHeader>
-              <CardContent className="pt-0">
-                <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit}>
+                <CardContent className="pt-0 space-y-4">
                   <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">{t('name')} *</Label>
+                    <Field>
+                      <FieldLabel htmlFor="name">{t('name')} *</FieldLabel>
                       <Input
                         id="name"
                         value={formData.name}
@@ -140,10 +140,10 @@ export default function ContactPage() {
                         placeholder={t('namePlaceholder')}
                         required
                       />
-                    </div>
+                    </Field>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="email">{t('email')} *</Label>
+                    <Field>
+                      <FieldLabel htmlFor="email">{t('email')} *</FieldLabel>
                       <Input
                         id="email"
                         type="email"
@@ -154,11 +154,11 @@ export default function ContactPage() {
                         placeholder={t('emailPlaceholder')}
                         required
                       />
-                    </div>
+                    </Field>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="subject">{t('subject')} *</Label>
+                  <Field>
+                    <FieldLabel htmlFor="subject">{t('subject')} *</FieldLabel>
                     <Input
                       id="subject"
                       value={formData.subject}
@@ -168,10 +168,10 @@ export default function ContactPage() {
                       placeholder={t('subjectPlaceholder')}
                       required
                     />
-                  </div>
+                  </Field>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="message">{t('message')} *</Label>
+                  <Field>
+                    <FieldLabel htmlFor="message">{t('message')} *</FieldLabel>
                     <Textarea
                       id="message"
                       value={formData.message}
@@ -182,20 +182,25 @@ export default function ContactPage() {
                       rows={6}
                       required
                     />
-                  </div>
+                  </Field>
 
                   {submitted && (
                     <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg text-green-700 dark:text-green-400">
                       {t('successMessage')}
                     </div>
                   )}
-                </form>
-              </CardContent>
-              <CardFooter className="pt-0 justify-end">
-                <Button type="submit" disabled={isSubmitting} animate>
-                  {isSubmitting ? t('sending') : t('sendMessageButton')}
-                </Button>
-              </CardFooter>
+                </CardContent>
+                <CardFooter className="pt-0 justify-end">
+                  <LoadingButton
+                    type="submit"
+                    isLoading={isSubmitting}
+                    loadingText={t('sending')}
+                    animate
+                  >
+                    {t('sendMessageButton')}
+                  </LoadingButton>
+                </CardFooter>
+              </form>
             </Card>
           </div>
         </div>

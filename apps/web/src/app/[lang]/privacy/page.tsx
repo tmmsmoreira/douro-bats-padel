@@ -37,7 +37,7 @@ export default function PrivacyPage() {
               <CardHeader>
                 <CardTitle>{t('intro.title')}</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="pt-0 space-y-4">
                 {introParagraphs.map((p, i) => (
                   <p key={i} className="text-muted-foreground">
                     {p}
@@ -52,15 +52,16 @@ export default function PrivacyPage() {
               <CardHeader>
                 <CardTitle>{t('collect.title')}</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <h3 className="font-semibold">{t('collect.personalTitle')}</h3>
+              <CardContent className="pt-0 space-y-4">
+                <h3 className="font-semibold ">{t('collect.personalTitle')}</h3>
                 <p className="text-muted-foreground">{t('collect.personalIntro')}</p>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
                   {personalItems.map((item, i) => (
                     <li key={i}>{item}</li>
                   ))}
                 </ul>
-
+              </CardContent>
+              <CardContent className="pt-0 space-y-4">
                 <h3 className="font-semibold mt-4">{t('collect.automaticTitle')}</h3>
                 <p className="text-muted-foreground">{t('collect.automaticIntro')}</p>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
@@ -77,7 +78,7 @@ export default function PrivacyPage() {
               <CardHeader>
                 <CardTitle>{t('use.title')}</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="pt-0 space-y-4">
                 <p className="text-muted-foreground">{t('use.intro')}</p>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
                   {useItems.map((item, i) => (
@@ -93,7 +94,7 @@ export default function PrivacyPage() {
               <CardHeader>
                 <CardTitle>{t('legalBasis.title')}</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="pt-0 space-y-4">
                 <p className="text-muted-foreground">{t('legalBasis.intro')}</p>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
                   {legalBasisItems.map((item, i) => (
@@ -109,7 +110,7 @@ export default function PrivacyPage() {
               <CardHeader>
                 <CardTitle>{t('sharing.title')}</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="pt-0 space-y-4">
                 <p className="text-muted-foreground">{t('sharing.intro')}</p>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
                   {sharingItems.map((item, i) => (
@@ -126,7 +127,7 @@ export default function PrivacyPage() {
               <CardHeader>
                 <CardTitle>{t('security.title')}</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="pt-0">
                 <p className="text-muted-foreground">{t('security.body')}</p>
               </CardContent>
             </Card>
@@ -137,7 +138,7 @@ export default function PrivacyPage() {
               <CardHeader>
                 <CardTitle>{t('retention.title')}</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="pt-0">
                 <p className="text-muted-foreground">{t('retention.body')}</p>
               </CardContent>
             </Card>
@@ -148,7 +149,7 @@ export default function PrivacyPage() {
               <CardHeader>
                 <CardTitle>{t('rights.title')}</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="pt-0">
                 <p className="text-muted-foreground">{t('rights.intro')}</p>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
                   {rightsItems.map((item, i) => (
@@ -171,7 +172,7 @@ export default function PrivacyPage() {
               <CardHeader>
                 <CardTitle>{t('cookies.title')}</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="pt-0">
                 <p className="text-muted-foreground">
                   {t('cookies.prefix')}
                   <Link href="/cookies" className="text-primary hover:underline">
@@ -188,7 +189,7 @@ export default function PrivacyPage() {
               <CardHeader>
                 <CardTitle>{t('thirdParty.title')}</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="pt-0">
                 <p className="text-muted-foreground">{t('thirdParty.body')}</p>
               </CardContent>
             </Card>
@@ -199,7 +200,7 @@ export default function PrivacyPage() {
               <CardHeader>
                 <CardTitle>{t('minors.title')}</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="pt-0">
                 <p className="text-muted-foreground">{t('minors.body')}</p>
               </CardContent>
             </Card>
@@ -210,7 +211,7 @@ export default function PrivacyPage() {
               <CardHeader>
                 <CardTitle>{t('changes.title')}</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="pt-0">
                 <p className="text-muted-foreground">{t('changes.body')}</p>
               </CardContent>
             </Card>

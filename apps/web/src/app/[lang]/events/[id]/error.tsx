@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ErrorPage } from '@/components/shared/error-page';
+import { logRouteError } from '@/lib/utils';
 
 export default function EventError({
   error,
@@ -17,7 +18,7 @@ export default function EventError({
   const router = useRouter();
 
   useEffect(() => {
-    console.error('Event error:', error);
+    logRouteError('event-detail', error);
   }, [error]);
 
   return (

@@ -6,8 +6,8 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "background_color": "#16a34a",
+  "theme_color": "#16a34a",
   "orientation": "portrait-primary",
   "prefer_related_applications": false,
   "display_override": ["window-controls-overlay", "standalone"],
@@ -25,10 +25,22 @@
       "purpose": "any"
     },
     {
+      "src": "/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
       "src": "/icons/icon-128x128.png",
       "sizes": "128x128",
       "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "/icons/icon-144x144.png",

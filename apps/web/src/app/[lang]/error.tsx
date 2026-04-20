@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { ErrorPage } from '@/components/shared/error-page';
+import { logRouteError } from '@/lib/utils';
 
 export default function Error({
   error,
@@ -15,7 +16,7 @@ export default function Error({
   const t = useTranslations('errors');
 
   useEffect(() => {
-    console.error('Application error:', error);
+    logRouteError('app', error);
   }, [error]);
 
   return (

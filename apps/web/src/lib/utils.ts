@@ -33,6 +33,14 @@ export function formatDateNumeric(date: Date | string, locale: string): string {
 }
 
 /**
+ * Log a route-level error with a consistent prefix. Used by App Router
+ * `error.tsx` boundaries so logs are grep-able by scope.
+ */
+export function logRouteError(scope: string, error: Error & { digest?: string }): void {
+  console.error(`[route:${scope}]`, error);
+}
+
+/**
  * Format a time slot string (HH:MM format) for display using the event's date
  * @param timeSlot - Time in HH:MM format (e.g., "20:00")
  * @param eventDate - The event date to use as the base date

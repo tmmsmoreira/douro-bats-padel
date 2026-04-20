@@ -1,8 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
 import * as webpush from 'web-push';
 import type { CreatePushSubscriptionDto } from './dto/push-subscription.dto';
+
+// Push subscriptions are re-upserted (bumping `updatedAt`) every time a client
+// re-subscribes, which happens on every sign-in. Anything untouched for this
+// long is almost certainly a dead endpoint — purge to keep the table tight
+// and reduce dead-letter work for `sendNotification`.
+const STALE_SUBSCRIPTION_THRESHOLD_DAYS = 180;
 
 export interface PushPayload {
   title: string;
@@ -133,6 +140,22 @@ export class PushService {
 
       const message = error instanceof Error ? error.message : String(error);
       this.logger.error(`[PUSH] Failed to send notification: ${message}`);
+    }
+  }
+
+  @Cron(CronExpression.EVERY_WEEK)
+  async pruneStaleSubscriptions() {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - STALE_SUBSCRIPTION_THRESHOLD_DAYS);
+
+    const result = await this.prisma.pushSubscription.deleteMany({
+      where: { updatedAt: { lt: cutoff } },
+    });
+
+    if (result.count > 0) {
+      this.logger.log(
+        `[PUSH] Pruned ${result.count} stale subscription(s) older than ${cutoff.toISOString()}`
+      );
     }
   }
 }

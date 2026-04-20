@@ -3,6 +3,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+// Horizontal distance (px) beyond which we call preventDefault() on touchmove
+// so the browser doesn't treat the swipe as a scroll. Chosen to match the
+// long-press movement tolerance — both model "intentional motion vs. jitter".
+const SWIPE_PREVENT_DEFAULT_PX = 10;
+
 interface UseSwipeBackOptions {
   /**
    * Whether swipe-to-go-back is enabled
@@ -85,8 +90,7 @@ export function useSwipeBack(options: UseSwipeBackOptions = {}): SwipeBackState 
 
       // Only consider horizontal swipes (more horizontal than vertical)
       if (Math.abs(deltaX) > Math.abs(deltaY) && deltaX > 0) {
-        // Prevent default to avoid conflicts with other gestures
-        if (deltaX > 10) {
+        if (deltaX > SWIPE_PREVENT_DEFAULT_PX) {
           e.preventDefault();
         }
 

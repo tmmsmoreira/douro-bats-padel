@@ -21,8 +21,13 @@ export function useEvents(options: UseEventsOptions = {}) {
   const authFetch = useAuthFetch();
   const { from, to, queryKey = ['events'] } = options;
 
+  // Backend filters results by role (editors see DRAFT, viewers don't), so we
+  // key by a stable role digest rather than the raw access token — otherwise
+  // every token refresh busts the cache and refetches the same list.
+  const roleKey = (session?.user?.roles ?? []).slice().sort().join(',') || 'anon';
+
   return useQuery<EventWithRSVP[]>({
-    queryKey: [...queryKey, session?.accessToken, from, to],
+    queryKey: [...queryKey, roleKey, from, to],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (from) params.append('from', from);

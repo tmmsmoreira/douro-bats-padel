@@ -2,6 +2,10 @@
 
 import { useCallback, useRef, useState } from 'react';
 
+// Movement tolerance (px) before a long-press is cancelled. Matches the
+// 10px slop most mobile UX frameworks use to distinguish "hold" from "drag".
+const LONG_PRESS_MOVE_TOLERANCE_PX = 10;
+
 interface UseLongPressOptions {
   /**
    * Duration in milliseconds to trigger long press
@@ -113,8 +117,7 @@ export function useLongPress(options: UseLongPressOptions) {
       const deltaY = Math.abs(clientY - startPosRef.current.y);
       const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
-      // If moved more than 10px, cancel long press
-      if (distance > 10) {
+      if (distance > LONG_PRESS_MOVE_TOLERANCE_PX) {
         clear(event, false);
       }
     },

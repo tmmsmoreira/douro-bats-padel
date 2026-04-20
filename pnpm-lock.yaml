@@ -241,9 +241,6 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
-      date-fns:
-        specifier: ^4.1.0
-        version: 4.1.0
       lucide-animated:
         specifier: ^1.0.0
         version: 1.0.0(motion@12.38.0)(react@19.2.0)
@@ -16650,7 +16647,7 @@ packages:
       '@swc/core': '*'
       esbuild: '*'
       uglify-js: '*'
-      webpack: '>=5.104.1'
+      webpack: '>=5.104.0'
     peerDependenciesMeta:
       '@swc/core':
         optional: true

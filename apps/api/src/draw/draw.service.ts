@@ -99,6 +99,9 @@ export class DrawService {
     selectedCourts?: { masters?: string[]; explorers?: string[] },
     seedOverride?: string
   ) {
+    // Scope the include to only what the draw algorithm + notification logic
+    // reads: player id/rating + user id/name/email. Avoids pulling
+    // passwordHash, reset tokens, phone, etc. for every confirmed RSVP.
     const event = await this.prisma.event.findUnique({
       where: { id: eventId },
       include: {
@@ -109,10 +112,21 @@ export class DrawService {
         },
         rsvps: {
           where: { status: 'CONFIRMED' },
-          include: {
+          select: {
+            id: true,
+            status: true,
+            position: true,
             player: {
-              include: {
-                user: true,
+              select: {
+                id: true,
+                rating: true,
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                  },
+                },
               },
             },
           },

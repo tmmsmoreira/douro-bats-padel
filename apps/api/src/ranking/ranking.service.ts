@@ -54,30 +54,31 @@ export class RankingService {
       throw new BadRequestException('No draw found for this event');
     }
 
-    // Match assignments with match results
+    // Index matches by (round, courtId) once so the lookup below is O(1) per
+    // assignment instead of O(matches) inside an O(assignments) loop.
+    const matchKey = (round: number, courtId: string | null) => `${round}:${courtId ?? ''}`;
+    const matchByRoundCourt = new Map(event.matches.map((m) => [matchKey(m.round, m.courtId), m]));
+
     for (const assignment of draw.assignments) {
-      const match = event.matches.find(
-        (m) => m.round === assignment.round && m.courtId === assignment.courtId
-      );
+      const match = matchByRoundCourt.get(matchKey(assignment.round, assignment.courtId));
+      if (!match) continue;
 
-      if (match) {
-        const [p1, p2] = assignment.teamA;
-        const [p3, p4] = assignment.teamB;
+      const [p1, p2] = assignment.teamA;
+      const [p3, p4] = assignment.teamB;
 
-        playerIds.add(p1);
-        playerIds.add(p2);
-        playerIds.add(p3);
-        playerIds.add(p4);
+      playerIds.add(p1);
+      playerIds.add(p2);
+      playerIds.add(p3);
+      playerIds.add(p4);
 
-        matchResults.push({
-          matchId: match.id,
-          tier: match.tier as Tier,
-          teamA: [p1, p2],
-          teamB: [p3, p4],
-          setsA: match.setsA,
-          setsB: match.setsB,
-        });
-      }
+      matchResults.push({
+        matchId: match.id,
+        tier: match.tier as Tier,
+        teamA: [p1, p2],
+        teamB: [p3, p4],
+        setsA: match.setsA,
+        setsB: match.setsB,
+      });
     }
 
     // Get current ratings

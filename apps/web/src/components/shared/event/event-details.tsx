@@ -12,6 +12,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
 import { StatusBadge, DataStateWrapper } from '@/components/shared';
 import { ConfirmedPlayersSection } from '@/components/shared/event';
+import { EventDetailsSkeleton } from '@/components/shared/event/event-skeletons';
 import { WaitlistSection } from '@/components/shared/draw';
 import { useSession } from 'next-auth/react';
 import { cn } from '@/lib/utils';
@@ -37,6 +38,7 @@ export function EventDetails({ eventId, isEditor = false }: EventDetailsProps) {
       data={event}
       error={error}
       loadingMessage={t('loadingEvent')}
+      loadingComponent={<EventDetailsSkeleton />}
       emptyMessage={t('eventNotFound')}
       errorMessage={isEditor ? t('errorLoadingEvent') : undefined}
     >
@@ -165,10 +167,12 @@ function EventDetailsContent({
                   </>
                 )}
                 {!canRegister && !isConfirmed && !isWaitlisted && (
-                  <div className="text-sm text-muted-foreground text-center">
-                    <p>{now < rsvpOpens ? t('rsvpNotOpenYet') : t('rsvpClosed')}</p>
+                  <div className="w-full sm:w-auto text-sm text-muted-foreground text-center py-4 sm:py-0">
+                    <p className="text-xs">
+                      {now < rsvpOpens ? t('rsvpNotOpenYet') : t('rsvpClosed')}
+                    </p>
                     {now < rsvpOpens && (
-                      <p className="mt-1 flex items-center justify-center gap-1">
+                      <p className="mt-1 flex items-center justify-center gap-1 text-xs font-medium">
                         <Clock className="h-3 w-3" />
                         {t('rsvpOpensOn', {
                           date: rsvpOpens.toLocaleString(locale, {

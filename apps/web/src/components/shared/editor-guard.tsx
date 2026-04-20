@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from '@/i18n/navigation';
 import { notFound } from 'next/navigation';
 import { useIsEditor } from '@/hooks/use-is-editor';
-import { LoadingState } from '@/components/shared/loading-state';
+import { LoadingState } from '@/components/shared/state/loading-state';
 
 interface EditorGuardProps {
   children: React.ReactNode;

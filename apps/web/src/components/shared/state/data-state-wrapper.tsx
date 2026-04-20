@@ -42,6 +42,10 @@ interface DataStateWrapperProps<T> {
    */
   errorComponent?: ReactNode;
   /**
+   * Custom loading state component (e.g. a skeleton). Overrides the default spinner.
+   */
+  loadingComponent?: ReactNode;
+  /**
    * Function to render the content when data is available
    */
   children: (data: T) => ReactNode;
@@ -86,6 +90,7 @@ export function DataStateWrapper<T>({
   errorMessage = 'An error occurred',
   emptyComponent,
   errorComponent,
+  loadingComponent,
   children,
   isEmpty = (data) => !data || (Array.isArray(data) && data.length === 0),
   minLoadingDuration = 500,
@@ -102,7 +107,21 @@ export function DataStateWrapper<T>({
     <div aria-live="polite" aria-busy={showLoading}>
       <AnimatePresence mode="wait">
         {showLoading ? (
-          <LoadingState message={loadingMessage} />
+          loadingComponent ? (
+            <motion.div
+              key="loading"
+              initial={isBackNav ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: isBackNav ? 0 : 0.2 }}
+              role="status"
+              aria-live="polite"
+            >
+              {loadingComponent}
+            </motion.div>
+          ) : (
+            <LoadingState message={loadingMessage} />
+          )
         ) : error ? (
           errorComponent ? (
             <motion.div

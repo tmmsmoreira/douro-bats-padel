@@ -1,5 +1,11 @@
-import { LoadingState } from '@/components/shared/loading-state';
+import { PageLayout } from '@/components/shared';
+import { UnifiedNav } from '@/components/shared/nav/unified-nav';
+import { LeaderboardSkeleton } from '@/components/shared/skeletons';
 
 export default function LeaderboardLoading() {
-  return <LoadingState className="flex items-center justify-center py-16" />;
+  return (
+    <PageLayout nav={<UnifiedNav />}>
+      <LeaderboardSkeleton />
+    </PageLayout>
+  );
 }

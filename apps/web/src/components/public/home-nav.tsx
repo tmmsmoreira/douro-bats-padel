@@ -3,11 +3,11 @@
 import { useState, useEffect } from 'react';
 import { Link } from '@/i18n/navigation';
 import { Button } from '@/components/ui/button';
-import { ThemeToggleButton } from '@/components/shared/theme-toggle-button';
-import { LanguageToggleButton } from '@/components/shared/language-toggle-button';
-import { MenuToggle } from '@/components/shared/menu-toggle';
+import { ThemeToggleButton } from '@/components/shared/theme/theme-toggle-button';
+import { LanguageToggleButton } from '@/components/shared/language/language-toggle-button';
+import { MenuToggle } from '@/components/shared/nav/menu-toggle';
 import { useTranslations } from 'next-intl';
-import { MobileMenu } from '@/components/shared/mobile-menu';
+import { MobileMenu } from '@/components/shared/nav/mobile-menu';
 import Image from 'next/image';
 import { useScrollDirection } from '@/hooks/use-scroll-direction';
 import { cn } from '@/lib/utils';

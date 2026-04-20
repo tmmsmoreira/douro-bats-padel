@@ -3,9 +3,9 @@
 import { motion, useScroll, useTransform } from 'motion/react';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
-import { HomeAdaptiveNav } from '@/components/shared/home-adaptive-nav';
+import { HomeAdaptiveNav } from '@/components/shared/nav/home-adaptive-nav';
 import { Footer } from '@/components/public/footer';
-import { SkipLinks } from '@/components/shared/skip-links';
+import { SkipLinks } from '@/components/shared/nav/skip-links';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from '@/i18n/navigation';
@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils';
 import { HomeUpcomingEvents } from '@/components/home/home-upcoming-events';
 import { usePWAInstall } from '@/hooks/use-pwa-install';
 import { useSplashOffset } from '@/hooks/use-is-standalone';
-import { PWAInstallInstructions } from '@/components/shared/pwa-install-instructions';
+import { PWAInstallInstructions } from '@/components/shared/pwa/pwa-install-instructions';
 import { staggerItem } from '@/lib/animations';
 import Image from 'next/image';
 

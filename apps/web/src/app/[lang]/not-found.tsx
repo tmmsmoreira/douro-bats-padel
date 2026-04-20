@@ -6,8 +6,8 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
-import { ThemeToggleButton } from '@/components/shared/theme-toggle-button';
-import { LanguageToggleButton } from '@/components/shared/language-toggle-button';
+import { ThemeToggleButton } from '@/components/shared/theme/theme-toggle-button';
+import { LanguageToggleButton } from '@/components/shared/language/language-toggle-button';
 
 /**
  * Wait until the app loading screen has fully exited before starting.

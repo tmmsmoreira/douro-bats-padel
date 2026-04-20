@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { EventForm } from '@/components/admin/event-form';
 import { use, useEffect } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { PageHeader } from '@/components/shared/page-header';
+import { PageHeader } from '@/components/shared/layout/page-header';
 import { EditorGuard } from '@/components/shared/editor-guard';
 import { useEventDetails } from '@/hooks';
 

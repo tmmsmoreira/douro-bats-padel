@@ -11,15 +11,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Field, FieldLabel, FieldDescription } from '@/components/ui/field';
 import { FieldFeedback } from '@/components/ui/field-feedback';
-import { DatePicker } from '@/components/shared/date-picker';
+import { DatePicker } from '@/components/shared/pickers/date-picker';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { toast } from 'sonner';
 import { motion } from 'motion/react';
-import { DataStateWrapper } from '@/components/shared/data-state-wrapper';
-import { PageHeader } from '@/components/shared/page-header';
-import { PushNotificationToggle } from '@/components/shared/push-notification-toggle';
-import { EventNotificationsToggle } from '@/components/shared/event-notifications-toggle';
+import { DataStateWrapper } from '@/components/shared/state/data-state-wrapper';
+import { PlayerProfileSkeleton } from '@/components/shared/player';
+import { PageHeader } from '@/components/shared/layout/page-header';
+import { PushNotificationToggle } from '@/components/shared/pwa/push-notification-toggle';
+import { EventNotificationsToggle } from '@/components/shared/pwa/event-notifications-toggle';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
 import { PlayerStatsStrip } from './player-stats-strip';
 import { WeeklyScoresCard } from './weekly-scores-card';
@@ -182,6 +183,7 @@ export function PlayerProfile() {
       isLoading={status === 'loading' || isLoading}
       data={profile}
       loadingMessage={t('loadingProfile')}
+      loadingComponent={<PlayerProfileSkeleton />}
       emptyMessage={t('profileNotFound')}
       error={error as Error}
       errorMessage={`${t('errorLoadingProfile')}: ${(error as Error)?.message || ''}`}

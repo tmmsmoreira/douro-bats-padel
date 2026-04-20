@@ -1,7 +1,7 @@
 'use client';
 
 import { PageHeader, PageLayout } from '@/components/shared';
-import { UnifiedNav } from '@/components/shared/unified-nav';
+import { UnifiedNav } from '@/components/shared/nav/unified-nav';
 import { ActionButton } from '@/components/shared/action-button';
 import { useTranslations } from 'next-intl';
 import { EventsList } from '@/components/shared/event/events-list';

@@ -20,9 +20,9 @@ import {
 } from '@/components/ui/select';
 import { Field, FieldLabel, FieldDescription } from '@/components/ui/field';
 import { FieldFeedback } from '@/components/ui/field-feedback';
-import { DatePicker } from '@/components/shared/date-picker';
-import { TimePicker } from '@/components/shared/time-picker';
-import { DateTimePicker } from '@/components/shared/datetime-picker';
+import { DatePicker } from '@/components/shared/pickers/date-picker';
+import { TimePicker } from '@/components/shared/pickers/time-picker';
+import { DateTimePicker } from '@/components/shared/pickers/datetime-picker';
 import type { CreateEventDto, TierRules } from '@padel/types';
 import { EventFormat } from '@padel/types';
 import { useCreateEvent, useUpdateEvent } from '@/hooks/use-events';

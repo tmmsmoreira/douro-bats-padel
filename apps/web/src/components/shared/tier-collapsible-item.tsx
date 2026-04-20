@@ -3,7 +3,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 import { Clock, ChevronDown } from 'lucide-react';
-import type { TierTimeSlot } from '@/components/shared/draw';
+import type { TierTimeSlot } from '@padel/types';
 import { cn } from '@/lib/utils';
 
 interface TierCollapsibleItemProps {

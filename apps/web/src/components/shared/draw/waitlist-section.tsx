@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlayerListItem } from '@/components/shared/player-list-item';
+import { PlayerListItem } from '@/components/shared/player';
 import { X } from 'lucide-react';
 
 interface WaitlistedPlayerBase {

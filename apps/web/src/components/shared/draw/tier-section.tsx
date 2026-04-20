@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useMemo } from 'react';
 import { MatchAssignment } from './match-assignment';
-import type { Assignment, TierTimeSlot } from './types';
+import type { Assignment, TierTimeSlot } from '@padel/types';
 
 interface TierSectionProps {
   tier: 'MASTERS' | 'EXPLORERS';

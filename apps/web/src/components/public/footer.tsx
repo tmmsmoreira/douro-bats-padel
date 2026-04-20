@@ -4,7 +4,7 @@ import { Link } from '@/i18n/navigation';
 import { FacebookIcon, InstagramIcon, TwitterIcon } from 'lucide-animated';
 import { MapPin, Mail, Phone } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { PWAInstallButton } from '@/components/shared/pwa-install-button';
+import { PWAInstallButton } from '@/components/shared/pwa/pwa-install-button';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();

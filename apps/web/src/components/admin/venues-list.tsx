@@ -21,7 +21,8 @@ import { MoreVertical, MapPin } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { getShimmerDataURL } from '@/lib/image-blur';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
-import { DataStateWrapper } from '@/components/shared/data-state-wrapper';
+import { DataStateWrapper } from '@/components/shared/state/data-state-wrapper';
+import { VenuesListSkeleton } from '@/components/shared/skeletons';
 import { useIsFromBfcache } from '@/hooks';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -52,6 +53,7 @@ export function VenuesList() {
       isLoading={isLoading}
       data={venues}
       loadingMessage={t('loadingVenues')}
+      loadingComponent={<VenuesListSkeleton />}
       emptyMessage={t('noVenuesAvailable')}
     >
       {(venues) => (

@@ -14,7 +14,7 @@ import {
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
 } from '@/components/ui/responsive-dialog';
-import type { Assignment } from '@/components/shared/draw';
+import type { Assignment } from '@padel/types';
 import { PlayerSelectionColumn } from './player-selection-column';
 import { ScrollArea } from '../ui/scroll-area';
 

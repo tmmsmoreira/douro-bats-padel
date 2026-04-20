@@ -11,9 +11,10 @@ import {
   EmptyDescription,
 } from '@/components/ui/empty';
 import { DataStateWrapper } from '@/components/shared';
+import { PlayerResultsSkeleton, TierClassificationTable } from '@/components/shared/results';
 import { BadgeAlertIcon } from 'lucide-animated';
 import { useEventMatches, type Match } from '@/hooks/use-matches';
-import { MatchCard, TierClassificationTable } from '@/components/shared/draw';
+import { MatchCard } from '@/components/shared/draw';
 import { TierCollapsibleItem } from '@/components/shared/tier-collapsible-item';
 
 export function ResultsView({ eventId }: { eventId: string }) {
@@ -27,6 +28,7 @@ export function ResultsView({ eventId }: { eventId: string }) {
       data={matches}
       error={error}
       loadingMessage={t('loadingResults')}
+      loadingComponent={<PlayerResultsSkeleton />}
       errorComponent={
         <Empty>
           <EmptyHeader>

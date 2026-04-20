@@ -18,6 +18,7 @@ import {
   Pagination,
 } from '@/components/shared';
 import { StatusBadge, type EventStatus } from '@/components/shared/status-badge';
+import { EventsListSkeleton } from '@/components/shared/event/event-skeletons';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -81,6 +82,7 @@ export function EventsList() {
       isLoading={isLoading}
       data={events}
       loadingMessage={t('loadingEvents')}
+      loadingComponent={<EventsListSkeleton count={5} withFilters />}
       emptyMessage={t('noEventsFound')}
     >
       {() => (

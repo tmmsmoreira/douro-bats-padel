@@ -8,10 +8,10 @@ import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { locales, type Locale } from '@/i18n/config';
 import { auth } from '@/lib/auth';
-import { AppLoadingScreen } from '@/components/shared/app-loading-screen';
-import { OfflineIndicator } from '@/components/shared/offline-indicator';
-import { ServiceWorkerUpdatePrompt } from '@/components/shared/sw-update-prompt';
-import { PullToRefresh } from '@/components/shared/pull-to-refresh';
+import { AppLoadingScreen } from '@/components/shared/state/app-loading-screen';
+import { OfflineIndicator } from '@/components/shared/pwa/offline-indicator';
+import { ServiceWorkerUpdatePrompt } from '@/components/shared/pwa/sw-update-prompt';
+import { PullToRefresh } from '@/components/native/pull-to-refresh';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-space-grotesk' });

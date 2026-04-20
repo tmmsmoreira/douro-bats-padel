@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
 import { MatchCard } from './match-card';
-import type { Assignment } from './types';
+import type { Assignment } from '@padel/types';
 
 interface MatchAssignmentProps {
   assignment: Assignment;

@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Field, FieldLabel } from '@/components/ui/field';
 import { Mail, Instagram, MapPin, Globe } from 'lucide-react';
-import { UnifiedNav } from '@/components/shared/unified-nav';
+import { UnifiedNav } from '@/components/shared/nav/unified-nav';
 import { useTranslations } from 'next-intl';
 import { PageLayout, PageHeader } from '@/components/shared';
 import { TIMINGS } from '@/lib/constants';

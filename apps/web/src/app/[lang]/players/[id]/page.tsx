@@ -2,8 +2,8 @@
 
 import { use } from 'react';
 import { PublicPlayerProfile } from '@/components/player/public-player-profile';
-import { UnifiedNav } from '@/components/shared/unified-nav';
-import { PageHeader } from '@/components/shared/page-header';
+import { UnifiedNav } from '@/components/shared/nav/unified-nav';
+import { PageHeader } from '@/components/shared/layout/page-header';
 import { PageLayout } from '@/components/shared';
 import { useTranslations } from 'next-intl';
 

@@ -1,5 +1,11 @@
-import { LoadingState } from '@/components/shared/loading-state';
+import { PageLayout } from '@/components/shared';
+import { UnifiedNav } from '@/components/shared/nav/unified-nav';
+import { EventsListSkeleton } from '@/components/shared/event/event-skeletons';
 
 export default function EventsLoading() {
-  return <LoadingState className="flex items-center justify-center py-16" />;
+  return (
+    <PageLayout nav={<UnifiedNav />}>
+      <EventsListSkeleton />
+    </PageLayout>
+  );
 }

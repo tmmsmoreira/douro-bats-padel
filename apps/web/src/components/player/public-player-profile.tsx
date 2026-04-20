@@ -28,9 +28,10 @@ import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { ConfirmationDialog } from '../shared/confirmation-dialog';
 import { motion } from 'motion/react';
-import { DataStateWrapper } from '@/components/shared/data-state-wrapper';
+import { DataStateWrapper } from '@/components/shared/state/data-state-wrapper';
+import { PlayerProfileSkeleton } from '@/components/shared/player';
 import { useIsFromBfcache } from '@/hooks';
-import { PageHeader } from '@/components/shared/page-header';
+import { PageHeader } from '@/components/shared/layout/page-header';
 import { StatusBadge } from '@/components/shared/status-badge';
 import type { PlayerProfileStatus, InvitationStatus } from '@/components/shared/status-badge';
 import { SendIcon, SendIconHandle } from '../icons/send-icon';
@@ -162,6 +163,7 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
       isLoading={isLoading}
       data={player}
       loadingMessage={t('loadingProfile')}
+      loadingComponent={<PlayerProfileSkeleton />}
       emptyMessage={t('profileNotFound')}
       emptyComponent={emptyComponent}
       error={error as Error}

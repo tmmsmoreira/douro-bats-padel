@@ -5,6 +5,7 @@ import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { useUpcomingEvents, useIsFromBfcache } from '@/hooks';
 import { EventCard, EventStats, RSVPBadges, DataStateWrapper } from '@/components/shared';
+import { EventsListSkeleton } from '@/components/shared/event/event-skeletons';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 
@@ -39,6 +40,7 @@ export function HomeUpcomingEvents() {
         isLoading={isLoading}
         data={displayEvents}
         loadingMessage={t('upcomingEvents.loadingEvents')}
+        loadingComponent={<EventsListSkeleton count={3} />}
         emptyMessage={t('upcomingEvents.noEvents')}
       >
         {(events) => (

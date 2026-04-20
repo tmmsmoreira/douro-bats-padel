@@ -4,7 +4,7 @@ import { motion } from 'motion/react';
 import { Footer } from '@/components/public/footer';
 import { pageTransition } from '@/lib/animations';
 import { cn } from '@/lib/utils';
-import { SkipLinks } from '@/components/shared/skip-links';
+import { SkipLinks } from '@/components/shared/nav/skip-links';
 import { useIsFromBfcache } from '@/hooks';
 
 interface PageLayoutProps {

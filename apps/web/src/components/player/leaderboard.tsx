@@ -6,7 +6,8 @@ import { Trophy } from 'lucide-react';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { DataStateWrapper } from '@/components/shared';
-import { PlayerListItem } from '@/components/shared/player-list-item';
+import { PlayerListItem } from '@/components/shared/player';
+import { LeaderboardSkeleton } from '@/components/shared/skeletons';
 import { useIsMobile } from '@/hooks/use-media-query';
 import { useLeaderboard } from '@/hooks/use-rankings';
 import { useIsFromBfcache } from '@/hooks';
@@ -23,6 +24,7 @@ export function Leaderboard() {
       data={leaderboard}
       error={error}
       loadingMessage={t('loadingRankings')}
+      loadingComponent={<LeaderboardSkeleton />}
       emptyMessage={t('noRankingsAvailable')}
     >
       {(leaderboard) => <LeaderboardContent leaderboard={leaderboard} t={t} />}

@@ -20,7 +20,8 @@ import {
   XIconHandle,
 } from 'lucide-animated';
 import { Button } from '@/components/ui/button';
-import { DataStateWrapper } from '@/components/shared/data-state-wrapper';
+import { DataStateWrapper } from '@/components/shared/state/data-state-wrapper';
+import { PlayersListSkeleton } from '@/components/shared/player';
 import { ScrollableFadeContainer, Pagination } from '@/components/shared';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { useIsFromBfcache } from '@/hooks';
@@ -96,6 +97,7 @@ export function PlayersList() {
       isLoading={isLoading}
       data={players}
       loadingMessage={t('loadingPlayers')}
+      loadingComponent={<PlayersListSkeleton />}
       emptyMessage={t('noPlayersFound')}
     >
       {() => (

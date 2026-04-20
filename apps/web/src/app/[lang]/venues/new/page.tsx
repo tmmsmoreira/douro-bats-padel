@@ -1,7 +1,7 @@
 'use client';
 
 import { PageHeader, PageLayout } from '@/components/shared';
-import { UnifiedNav } from '@/components/shared/unified-nav';
+import { UnifiedNav } from '@/components/shared/nav/unified-nav';
 import { EditorGuard } from '@/components/shared/editor-guard';
 import { useTranslations } from 'next-intl';
 import { VenueForm } from '@/components/admin/venue-form';

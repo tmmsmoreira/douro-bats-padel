@@ -1,4 +1,4 @@
-import type { Assignment } from '@/components/shared/draw';
+import type { Assignment } from '@padel/types';
 
 /**
  * Group assignments by round number

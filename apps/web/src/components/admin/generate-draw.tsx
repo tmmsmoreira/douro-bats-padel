@@ -11,7 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useTranslations, useLocale } from 'next-intl';
 import { AlertTriangle, Info, Lightbulb, Clock } from 'lucide-react';
 import { useGenerateDraw, useEventDetails, useDraw } from '@/hooks';
-import { PlayerListItem } from '@/components/shared/player-list-item';
+import { PlayerListItem } from '@/components/shared/player';
 import { formatTimeSlot } from '@/lib/utils';
 import type { EventCourtWithCourt, EventWithPlayersSerialized, Player } from '@padel/types';
 

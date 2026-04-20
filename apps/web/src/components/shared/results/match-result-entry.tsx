@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Save } from 'lucide-react';
-import { MatchCard } from './match-card';
-import type { Assignment } from './types';
+import { MatchCard } from '../draw/match-card';
+import type { Assignment } from '@padel/types';
 
 interface MatchResultEntryProps {
   assignment: Assignment;

@@ -1,5 +1,5 @@
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import type { Assignment } from '@/components/shared/draw';
+import type { Assignment } from '@padel/types';
 
 interface PlayerSelectionColumnProps {
   teamPlayers: string[];

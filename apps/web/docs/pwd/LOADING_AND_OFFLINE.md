@@ -21,7 +21,7 @@ A branded splash screen that displays while the app is hydrating and loading.
 **Usage:**
 
 ```tsx
-import { AppLoadingScreen } from '@/components/shared/app-loading-screen';
+import { AppLoadingScreen } from '@/components/shared/state/app-loading-screen';
 
 // In your layout
 <AppLoadingScreen minDuration={800} />;
@@ -77,7 +77,7 @@ A visual indicator that appears when the user loses internet connection.
 **Usage:**
 
 ```tsx
-import { OfflineIndicator } from '@/components/shared/offline-indicator';
+import { OfflineIndicator } from '@/components/shared/pwa/offline-indicator';
 
 // In your layout
 <OfflineIndicator />;

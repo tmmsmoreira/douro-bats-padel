@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { PlayerListItem } from '@/components/shared/player-list-item';
+import { PlayerListItem } from '@/components/shared/player';
 import { cn } from '@/lib/utils';
 import { X } from 'lucide-react';
 import { UserCheckIcon } from 'lucide-animated';

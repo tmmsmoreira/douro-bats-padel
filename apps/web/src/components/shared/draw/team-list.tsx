@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Users } from 'lucide-react';
-import type { Assignment } from './types';
+import type { Assignment } from '@padel/types';
 import { SquarePenIcon, SquarePenIconHandle } from 'lucide-animated';
 import { useMemo } from 'react';
 

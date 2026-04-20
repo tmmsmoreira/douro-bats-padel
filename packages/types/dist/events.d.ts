@@ -161,4 +161,26 @@ export interface Assignment {
     teamA: Player[];
     teamB: Player[];
 }
+export interface Draw {
+    id: string;
+    eventId: string;
+    event: {
+        id: string;
+        title: string;
+        date: string;
+        startsAt: string;
+        endsAt: string;
+        state?: string;
+        venue?: {
+            id: string;
+            name: string;
+            courts: Array<{
+                id: string;
+                label: string;
+            }>;
+        };
+        tierRules?: TierRules;
+    };
+    assignments: Assignment[];
+}
 //# sourceMappingURL=events.d.ts.map

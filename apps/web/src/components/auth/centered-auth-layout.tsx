@@ -1,7 +1,7 @@
 'use client';
 
-import { ThemeToggleButton } from '@/components/shared/theme-toggle-button';
-import { LanguageToggleButton } from '@/components/shared/language-toggle-button';
+import { ThemeToggleButton } from '@/components/shared/theme/theme-toggle-button';
+import { LanguageToggleButton } from '@/components/shared/language/language-toggle-button';
 import { motion } from 'motion/react';
 import { fadeInScale } from '@/lib/animations';
 

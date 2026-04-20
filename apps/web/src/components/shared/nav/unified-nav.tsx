@@ -8,7 +8,7 @@ import { useIsEditor } from '@/hooks/use-is-editor';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { TabBar } from '@/components/ui/tab-bar';
+import { TabBar } from '@/components/native/tab-bar';
 import Image from 'next/image';
 import {
   DropdownMenu,
@@ -27,11 +27,11 @@ import {
   TrendingUpIcon,
   MapPinIcon,
 } from 'lucide-animated';
-import { ThemeToggle } from '@/components/shared/theme-toggle';
-import { LanguageMenuItems } from '@/components/shared/language-menu-items';
-import { MenuToggle } from '@/components/shared/menu-toggle';
+import { ThemeToggle } from '@/components/shared/theme/theme-toggle';
+import { LanguageMenuItems } from '@/components/shared/language/language-menu-items';
+import { MenuToggle } from '@/components/shared/nav/menu-toggle';
 import { useTranslations } from 'next-intl';
-import { MobileMenu } from '@/components/shared/mobile-menu';
+import { MobileMenu } from '@/components/shared/nav/mobile-menu';
 
 export function UnifiedNav() {
   const pathname = useActivePathname();

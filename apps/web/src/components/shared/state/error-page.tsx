@@ -2,8 +2,8 @@
 
 import { ReactNode } from 'react';
 import { AlertCircle } from 'lucide-react';
-import { PageLayout } from '@/components/shared/page-layout';
-import { UnifiedNav } from '@/components/shared/unified-nav';
+import { PageLayout } from '@/components/shared/layout/page-layout';
+import { UnifiedNav } from '@/components/shared/nav/unified-nav';
 import {
   Empty,
   EmptyHeader,

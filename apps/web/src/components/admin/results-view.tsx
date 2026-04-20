@@ -32,10 +32,10 @@ import {
 } from '@/hooks';
 import type { MatchResultData, Match } from '@/hooks/use-matches';
 import { useTranslations } from 'next-intl';
-import { MatchResultEntry } from '../shared/draw';
-import type { Draw } from '../shared/draw';
+import { MatchResultEntry } from '../shared/results';
+import type { Draw, Assignment as DrawAssignment } from '@padel/types';
 import { DataStateWrapper } from '@/components/shared';
-import type { Assignment as DrawAssignment } from '../shared/draw/types';
+import { ResultsSkeleton } from '@/components/shared/results';
 import { TierCollapsibleItem } from '@/components/shared/tier-collapsible-item';
 
 interface ResultsViewProps {
@@ -216,6 +216,7 @@ export function ResultsView({ eventId }: ResultsViewProps) {
       isLoading={isLoadingData}
       data={event}
       loadingMessage={t('loading')}
+      loadingComponent={<ResultsSkeleton />}
       emptyMessage={t('eventNotFound')}
     >
       {() =>

@@ -4,6 +4,7 @@ import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { usePastEvents, useIsFromBfcache } from '@/hooks';
 import { EventCard, EventStats, StatusBadge, DataStateWrapper } from '@/components/shared';
+import { EventsListSkeleton } from '@/components/shared/event/event-skeletons';
 import { useMemo } from 'react';
 import { motion } from 'motion/react';
 
@@ -26,6 +27,7 @@ export function PastEventsList() {
       isLoading={isLoading}
       data={events}
       loadingMessage={t('loadingEvents')}
+      loadingComponent={<EventsListSkeleton count={3} />}
       emptyMessage={t('noPastEvents')}
     >
       {(events) => (

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import type { AlertAction } from '@/components/ui/alert-native';
+import type { AlertAction } from '@/components/native/alert-native';
 
 export interface AlertState {
   isOpen: boolean;

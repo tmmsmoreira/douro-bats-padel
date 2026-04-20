@@ -2,7 +2,7 @@
 
 import { Leaderboard } from '@/components/player/leaderboard';
 import { useTranslations } from 'next-intl';
-import { UnifiedNav } from '@/components/shared/unified-nav';
+import { UnifiedNav } from '@/components/shared/nav/unified-nav';
 import { PageHeader, PageLayout } from '@/components/shared';
 
 export default function LeaderboardPage() {

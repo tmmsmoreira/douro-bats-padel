@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import { Link } from '@/i18n/navigation';
 import { useUpcomingEvents, useIsFromBfcache } from '@/hooks';
 import { EventCard, EventStats, RSVPBadges, DataStateWrapper } from '@/components/shared';
+import { EventsListSkeleton } from '@/components/shared/event/event-skeletons';
 
 export function EventsList() {
   const t = useTranslations('home');
@@ -19,6 +20,7 @@ export function EventsList() {
       isLoading={isLoading}
       data={events}
       loadingMessage={t('loadingEvents')}
+      loadingComponent={<EventsListSkeleton />}
       emptyMessage={t('noEventsAvailable')}
     >
       {(events) => (

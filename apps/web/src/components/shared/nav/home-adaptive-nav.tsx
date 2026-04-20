@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 import { HomeNav } from '@/components/public/home-nav';
-import { UnifiedNav } from '@/components/shared/unified-nav';
+import { UnifiedNav } from '@/components/shared/nav/unified-nav';
 
 /**
  * Navigation component for the home page that shows:

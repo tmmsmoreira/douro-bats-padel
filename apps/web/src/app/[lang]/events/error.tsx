@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
-import { ErrorPage } from '@/components/shared/error-page';
+import { ErrorPage } from '@/components/shared/state/error-page';
 import { logRouteError } from '@/lib/utils';
 
 export default function EventsError({

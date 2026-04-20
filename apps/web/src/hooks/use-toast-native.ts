@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { ToastType } from '@/components/ui/toast-native';
+import { ToastType } from '@/components/native/toast-native';
 
 interface ToastState {
   isOpen: boolean;

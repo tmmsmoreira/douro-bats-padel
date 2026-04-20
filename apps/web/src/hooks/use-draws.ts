@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useAuthFetch } from './use-api';
-import type { Draw } from '@/components/shared/draw';
+import type { Draw } from '@padel/types';
 
 /**
  * Hook to generate a draw for an event

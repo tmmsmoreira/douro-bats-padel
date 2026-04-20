@@ -8,8 +8,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Session } from 'next-auth';
 import { LogoutIcon, UserIcon } from 'lucide-animated';
 import { signOut } from 'next-auth/react';
-import { ThemeToggleGroup } from '@/components/shared/theme-toggle-button';
-import { LanguageToggleGroup } from '@/components/shared/language-toggle-button';
+import { ThemeToggleGroup } from '@/components/shared/theme/theme-toggle-button';
+import { LanguageToggleGroup } from '@/components/shared/language/language-toggle-button';
 import { useEffect } from 'react';
 
 interface NavItem {

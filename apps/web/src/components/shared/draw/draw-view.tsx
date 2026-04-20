@@ -13,8 +13,9 @@ import {
   EmptyDescription,
 } from '@/components/ui/empty';
 import { DataStateWrapper } from '@/components/shared';
+import { DrawSkeleton } from './draw-skeletons';
 import { WaitlistSection, TeamList, TierSection } from '@/components/shared/draw';
-import type { Draw, Assignment, TierTimeSlot } from '@/components/shared/draw';
+import type { Draw, Assignment, TierTimeSlot } from '@padel/types';
 import { TierCollapsibleItem } from '@/components/shared/tier-collapsible-item';
 import type { EventWithPlayersSerialized } from '@padel/types';
 import { useDraw, useEventDetails, useUpdateAssignment, useIsFromBfcache } from '@/hooks';
@@ -56,6 +57,7 @@ export function DrawView({ eventId, isEditor = false }: DrawViewProps) {
       data={draw}
       error={error}
       loadingMessage={isEditor ? t('loading') : t('loadingDraw')}
+      loadingComponent={<DrawSkeleton />}
       emptyMessage={isEditor ? t('noDraw') : t('drawNotAvailable')}
       emptyComponent={isEditor ? <GenerateDraw eventId={eventId} /> : undefined}
       isEmpty={isEditor ? (data) => !data : undefined}

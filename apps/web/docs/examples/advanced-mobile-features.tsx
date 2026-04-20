@@ -16,8 +16,8 @@ import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
 import { useSwipeBack } from '@/hooks/use-swipe-back';
 import { useToastNative } from '@/hooks/use-toast-native';
 import { useLongPress } from '@/hooks/use-long-press';
-import { BottomSheet } from '@/components/ui/bottom-sheet';
-import { ToastNative } from '@/components/ui/toast-native';
+import { BottomSheet } from '@/components/native/bottom-sheet';
+import { ToastNative } from '@/components/native/toast-native';
 import { Button } from '@/components/ui/button';
 import { SkeletonCard, SkeletonGameNightCard, SkeletonPlayerCard } from '@/components/ui/skeleton';
 

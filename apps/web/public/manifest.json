@@ -3,6 +3,8 @@
   "name": "Douro Bats Padel",
   "short_name": "Douro Bats",
   "description": "Manage padel game nights, RSVPs, draws, and rankings for Douro Bats Padel Club",
+  "lang": "en",
+  "dir": "ltr",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -85,5 +87,51 @@
       "purpose": "maskable"
     }
   ],
-  "categories": ["sports", "lifestyle"]
+  "categories": ["sports", "lifestyle"],
+  "screenshots": [
+    {
+      "src": "/screenshots/mobile-events.png",
+      "sizes": "540x1170",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Upcoming events on mobile"
+    },
+    {
+      "src": "/screenshots/mobile-leaderboard.png",
+      "sizes": "540x1170",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Leaderboard on mobile"
+    },
+    {
+      "src": "/screenshots/desktop-events.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Events dashboard on desktop"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Events",
+      "short_name": "Events",
+      "description": "View upcoming and past events",
+      "url": "/events",
+      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96", "type": "image/png" }]
+    },
+    {
+      "name": "Leaderboard",
+      "short_name": "Leaderboard",
+      "description": "See the player rankings",
+      "url": "/leaderboard",
+      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96", "type": "image/png" }]
+    },
+    {
+      "name": "Profile",
+      "short_name": "Profile",
+      "description": "View and edit your profile",
+      "url": "/profile",
+      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96", "type": "image/png" }]
+    }
+  ]
 }

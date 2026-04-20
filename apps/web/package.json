@@ -9,7 +9,8 @@
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
     "type-check": "tsc --noEmit",
-    "check": "pnpm type-check && pnpm lint"
+    "check": "pnpm type-check && pnpm lint",
+    "icons:ios-splash": "node scripts/generate-ios-splash.mjs"
   },
   "dependencies": {
     "@padel/types": "workspace:*",
@@ -55,6 +56,7 @@
     "zustand": "^5.0.2"
   },
   "devDependencies": {
-    "baseline-browser-mapping": "^2.10.0"
+    "baseline-browser-mapping": "^2.10.0",
+    "sharp": "^0.34.5"
   }
 }

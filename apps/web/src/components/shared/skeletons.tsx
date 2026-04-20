@@ -1,6 +1,27 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
+export function PageHeaderSkeleton({
+  withAction = false,
+  withBackButton = false,
+}: {
+  withAction?: boolean;
+  withBackButton?: boolean;
+}) {
+  return (
+    <div className="space-y-4" aria-hidden>
+      {withBackButton && <Skeleton className="h-5 w-24" />}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-2 min-w-0 flex-1">
+          <Skeleton className="h-8 w-56 max-w-full" />
+          <Skeleton className="h-4 w-80 max-w-full" />
+        </div>
+        {withAction && <Skeleton className="h-10 w-full sm:w-36 rounded-md shrink-0" />}
+      </div>
+    </div>
+  );
+}
+
 export function LeaderboardSkeleton() {
   return (
     <div className="space-y-6" aria-hidden>
@@ -41,6 +62,45 @@ export function LeaderboardSkeleton() {
           ))}
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+export function VenueFormSkeleton() {
+  return (
+    <div className="space-y-6" aria-hidden>
+      <div className="space-y-2">
+        <Skeleton className="h-8 w-56" />
+        <Skeleton className="h-4 w-80 max-w-full" />
+      </div>
+      <Card className="glass-card">
+        <CardHeader className="space-y-2">
+          <Skeleton className="h-5 w-40" />
+          <Skeleton className="h-4 w-64 max-w-full" />
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-10 w-full rounded-md" />
+            </div>
+          ))}
+          <div className="space-y-3">
+            <Skeleton className="h-4 w-20" />
+            {Array.from({ length: 2 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <Skeleton className="h-10 flex-1 rounded-md" />
+                <Skeleton className="h-10 w-10 rounded-md" />
+              </div>
+            ))}
+            <Skeleton className="h-9 w-32 rounded-md" />
+          </div>
+        </CardContent>
+      </Card>
+      <div className="flex justify-end gap-3">
+        <Skeleton className="h-10 w-24 rounded-md" />
+        <Skeleton className="h-10 w-28 rounded-md" />
+      </div>
     </div>
   );
 }

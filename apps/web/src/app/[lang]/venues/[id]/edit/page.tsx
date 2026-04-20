@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl';
 import { PageHeader, PageLayout } from '@/components/shared';
 import { UnifiedNav } from '@/components/shared/nav/unified-nav';
 import { EditorGuard } from '@/components/shared/editor-guard';
-import { LoadingState } from '@/components/shared/state/loading-state';
+import { VenueFormSkeleton } from '@/components/shared/skeletons';
 import { useMinimumLoading } from '@/hooks/use-minimum-loading';
 import { Card, CardContent } from '@/components/ui/card';
 import { API_URL } from '@/lib/constants';
@@ -41,7 +41,7 @@ export default function EditVenuePage() {
   if (showLoading) {
     return (
       <PageLayout nav={<UnifiedNav />} maxWidth="4xl">
-        <LoadingState message={t('loadingVenue')} />
+        <VenueFormSkeleton />
       </PageLayout>
     );
   }

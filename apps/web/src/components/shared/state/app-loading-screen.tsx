@@ -105,7 +105,7 @@ export function AppLoadingScreen({ minDuration = 1000, show = true }: AppLoading
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-9999 flex items-center justify-center bg-background"
+          className="fixed inset-0 z-9999 flex items-center justify-center bg-[#16a34a] text-white"
         >
           <div className="flex flex-col items-center gap-6">
             {/* Logo */}
@@ -134,8 +134,8 @@ export function AppLoadingScreen({ minDuration = 1000, show = true }: AppLoading
               transition={{ duration: 0.4, ease: 'easeOut', delay: 0.1 }}
               className="text-center"
             >
-              <h1 className="text-2xl font-bold text-foreground">Douro Bats Padel</h1>
-              <p className="text-sm text-muted-foreground mt-1">Loading your experience...</p>
+              <h1 className="text-2xl font-bold text-white">Douro Bats Padel</h1>
+              <p className="text-sm text-white/80 mt-1">Loading your experience...</p>
             </motion.div>
 
             {/* Loading Spinner */}
@@ -155,7 +155,7 @@ export function AppLoadingScreen({ minDuration = 1000, show = true }: AppLoading
                   repeat: Infinity,
                   ease: 'easeInOut',
                 }}
-                className="w-2 h-2 rounded-full bg-primary"
+                className="w-2 h-2 rounded-full bg-white"
               />
               <motion.div
                 animate={{
@@ -168,7 +168,7 @@ export function AppLoadingScreen({ minDuration = 1000, show = true }: AppLoading
                   ease: 'easeInOut',
                   delay: 0.2,
                 }}
-                className="w-2 h-2 rounded-full bg-primary"
+                className="w-2 h-2 rounded-full bg-white"
               />
               <motion.div
                 animate={{
@@ -181,7 +181,7 @@ export function AppLoadingScreen({ minDuration = 1000, show = true }: AppLoading
                   ease: 'easeInOut',
                   delay: 0.4,
                 }}
-                className="w-2 h-2 rounded-full bg-primary"
+                className="w-2 h-2 rounded-full bg-white"
               />
             </motion.div>
           </div>

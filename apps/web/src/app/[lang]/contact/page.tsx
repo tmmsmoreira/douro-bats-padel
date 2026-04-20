@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Mail, Phone, MapPin, Clock } from 'lucide-react';
+import { Mail, Instagram, MapPin, Globe } from 'lucide-react';
 import { UnifiedNav } from '@/components/shared/unified-nav';
 import { useTranslations } from 'next-intl';
 import { PageLayout, PageHeader } from '@/components/shared';
@@ -76,37 +76,45 @@ export default function ContactPage() {
                   <div>
                     <h3 className="font-medium">{t('email')}</h3>
                     <a
-                      href="mailto:info@dourobatspadel.com"
+                      href="mailto:dourobats@gmail.com"
                       className="text-sm text-muted-foreground hover:text-primary"
                     >
-                      info@dourobatspadel.com
+                      dourobats@gmail.com
                     </a>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
                   <div className="p-2 bg-primary/10 rounded-lg">
-                    <Phone className="h-5 w-5 text-primary" />
+                    <Instagram className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-medium">{t('phone')}</h3>
+                    <h3 className="font-medium">{t('instagram')}</h3>
                     <a
-                      href="tel:+351123456789"
+                      href="https://www.instagram.com/dourobats"
+                      target="_blank"
+                      rel="noreferrer"
                       className="text-sm text-muted-foreground hover:text-primary"
                     >
-                      +351 123 456 789
+                      @dourobats
                     </a>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
                   <div className="p-2 bg-primary/10 rounded-lg">
-                    <Clock className="h-5 w-5 text-primary" />
+                    <Globe className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-medium">{t('businessHours')}</h3>
-                    <p className="text-sm text-muted-foreground">{t('businessHoursWeekdays')}</p>
-                    <p className="text-sm text-muted-foreground">{t('businessHoursWeekends')}</p>
+                    <h3 className="font-medium">{t('website')}</h3>
+                    <a
+                      href="https://www.dourobats.pt"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-sm text-muted-foreground hover:text-primary"
+                    >
+                      www.dourobats.pt
+                    </a>
                   </div>
                 </div>
               </CardContent>

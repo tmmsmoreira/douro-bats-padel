@@ -139,6 +139,7 @@ function VenuesListContent({
                           src={venue.logo}
                           alt={t('logo', { venueName: venue.name })}
                           fill
+                          unoptimized
                           placeholder="blur"
                           blurDataURL={getShimmerDataURL(56, 56)}
                           className="object-contain p-1"

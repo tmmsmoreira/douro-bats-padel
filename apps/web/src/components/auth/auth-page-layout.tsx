@@ -4,7 +4,6 @@ import { ThemeToggleButton } from '@/components/shared/theme-toggle-button';
 import { LanguageToggleButton } from '@/components/shared/language-toggle-button';
 import Image from 'next/image';
 import Link from 'next/link';
-import { LOGO_BLUR_DATA_URL } from '@/lib/image-blur';
 import { motion } from 'motion/react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useSplashOffset } from '@/hooks/use-is-standalone';
@@ -29,8 +28,6 @@ export function AuthPageLayout({ children }: AuthPageLayoutProps) {
             width={36}
             height={36}
             priority
-            placeholder="blur"
-            blurDataURL={LOGO_BLUR_DATA_URL}
             className="object-contain"
           />
           <span className="font-heading gradient-text text-lg font-bold">Douro Bats Padel</span>
@@ -87,8 +84,6 @@ export function AuthPageLayout({ children }: AuthPageLayoutProps) {
                 width={40}
                 height={40}
                 priority
-                placeholder="blur"
-                blurDataURL={LOGO_BLUR_DATA_URL}
                 className="object-contain"
               />
               <span className="font-heading gradient-text text-xl font-bold">Douro Bats Padel</span>

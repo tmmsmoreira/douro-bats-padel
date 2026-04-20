@@ -602,7 +602,8 @@
     "failedToUpdate": "Failed to update venue",
     "failedToCreate": "Failed to create venue",
     "pleaseEnterVenueName": "Please enter a venue name",
-    "pleaseAddAtLeastOneCourt": "Please add at least one court"
+    "pleaseAddAtLeastOneCourt": "Please add at least one court",
+    "noChangesToSave": "No changes to save"
   },
   "eventForm": {
     "eventTitle": "Event Title",
@@ -677,7 +678,8 @@
     "validationExplorersCourts": "Please select at least one court for EXPLORERS time slot",
     "validationMasterCount": "Please enter a valid master count (non-negative number)",
     "validationMasterCountExceeds": "Master count ({count}) cannot exceed event capacity ({capacity})",
-    "validationMasterPercentage": "Please enter a valid master percentage (0-100)"
+    "validationMasterPercentage": "Please enter a valid master percentage (0-100)",
+    "noChangesToSave": "No changes to save"
   },
   "eventsList": {
     "loadingEvents": "Loading events...",
@@ -850,41 +852,43 @@
   },
   "aboutPage": {
     "title": "About Douro Bats Padel",
-    "subtitle": "Your premier padel tournament management platform",
+    "subtitle": "The padel section of Associação Desportiva Douro Bats",
     "ourMission": "Our Mission",
-    "missionParagraph1": "Douro Bats Padel is dedicated to bringing the padel community together through organized, competitive, and fun tournaments. We believe in creating an inclusive environment where players of all skill levels can compete, improve, and enjoy the sport they love.",
-    "missionParagraph2": "Our platform simplifies tournament management, player rankings, and event organization, making it easier than ever to participate in competitive padel.",
-    "competitiveTournaments": "Competitive Tournaments",
-    "competitiveTournamentsDescription": "Participate in professionally organized tournaments with fair matchmaking and transparent scoring systems.",
+    "missionParagraph1": "Douro Bats Padel is the padel platform of Associação Desportiva Douro Bats (ADDB), a non-profit sports association founded in 2021 with an inclusive character. Our mission is to bring our members together through organised, competitive and fun padel activities that reflect ADDB's spirit: ANDA BATER, TU BATS BEM!",
+    "missionParagraph2": "This platform simplifies internal tournament management, player rankings and event organisation, making it easier for every ADDB member to sign up, play and track their progress in the sport.",
+    "competitiveTournaments": "Internal Tournaments",
+    "competitiveTournamentsDescription": "Take part in internal ADDB padel tournaments and events, organised throughout the season with fair matchmaking and transparent scoring.",
     "playerRankings": "Player Rankings",
-    "playerRankingsDescription": "Track your progress with our comprehensive ranking system that rewards consistent performance and skill development.",
+    "playerRankingsDescription": "Follow your progress with a ranking system that rewards consistent participation and performance across ADDB padel events.",
     "communityDriven": "Community Driven",
-    "communityDrivenDescription": "Join a vibrant community of padel enthusiasts, make new friends, and connect with players who share your passion.",
+    "communityDrivenDescription": "Join a welcoming community of ADDB members who share a passion for padel, meet new partners and build lasting friendships on and off the court.",
     "easyEventManagement": "Easy Event Management",
-    "easyEventManagementDescription": "Simple registration, automated draws, and real-time updates make participating in events hassle-free.",
+    "easyEventManagementDescription": "Simple registration, automated draws and real-time updates help ADDB organisers run padel events without friction.",
     "ourStory": "Our Story",
-    "storyParagraph1": "Founded in Porto, Portugal, Douro Bats Padel emerged from a passion for the sport and a desire to create a better tournament experience for players and organizers alike.",
-    "storyParagraph2": "What started as a small local tournament series has grown into a comprehensive platform serving the padel community with state-of-the-art technology and a commitment to fair play.",
-    "storyParagraph3": "Today, we continue to innovate and improve, always listening to our community and striving to provide the best possible experience for everyone involved in the sport.",
+    "storyParagraph1": "Associação Desportiva Douro Bats was founded in 2021 as a non-profit, inclusive sports association, starting with futsal, volleyball and running, and growing alongside the passion of its members.",
+    "storyParagraph2": "As interest in padel kept rising within our community, we launched a dedicated padel section and this platform to bring that same spirit to the court: organised events, fair competition and space for players of every level.",
+    "storyParagraph3": "Today, Douro Bats Padel is where ADDB members sign up for tournaments, track their matches, follow the internal rankings and stay connected with the rest of the padel community.",
     "ourValues": "Our Values",
     "valueFairPlay": "Fair Play:",
-    "valueFairPlayDescription": "We believe in transparent rules and equal opportunities for all players.",
+    "valueFairPlayDescription": "Transparent rules and equal opportunities for every ADDB member on the court.",
     "valueCommunity": "Community:",
-    "valueCommunityDescription": "Building lasting connections and friendships through sport.",
+    "valueCommunityDescription": "Building lasting connections and friendships through sport, aligned with ADDB's associative spirit.",
     "valueExcellence": "Excellence:",
-    "valueExcellenceDescription": "Continuously improving our platform and services.",
+    "valueExcellenceDescription": "Continuously improving our events, our platform and the experience we offer to members.",
     "valueInclusivity": "Inclusivity:",
-    "valueInclusivityDescription": "Welcoming players of all backgrounds and skill levels."
+    "valueInclusivityDescription": "Welcoming players of every background, gender and skill level, as an inclusive association."
   },
   "contactPage": {
     "title": "Contact Us",
-    "subtitle": "Have questions? We'd love to hear from you.",
+    "subtitle": "Questions about ADDB padel? We'd love to hear from you.",
     "getInTouch": "Get in Touch",
-    "getInTouchDescription": "We're here to help and answer any questions you might have",
-    "address": "Address",
-    "addressValue": "Porto, Portugal",
+    "getInTouchDescription": "Reach out to the padel section of Associação Desportiva Douro Bats",
+    "address": "Based in",
+    "addressValue": "Portugal · Associação Desportiva Douro Bats",
     "email": "Email",
     "phone": "Phone",
+    "instagram": "Instagram",
+    "website": "Website",
     "businessHours": "Business Hours",
     "businessHoursWeekdays": "Mon - Fri: 9:00 AM - 6:00 PM",
     "businessHoursWeekends": "Sat - Sun: 10:00 AM - 4:00 PM",
@@ -1193,5 +1197,398 @@
   "accessibility": {
     "skipToMainContent": "Skip to main content",
     "skipToNavigation": "Skip to navigation"
+  },
+  "termsPage": {
+    "title": "Terms and Conditions",
+    "lastUpdated": "Last updated: April 2026",
+    "intro": {
+      "title": "1. Introduction",
+      "paragraphs": [
+        "Welcome to Douro Bats Padel, the official padel platform of Associação Desportiva Douro Bats (ADDB), a non-profit sports association founded in 2021 and based in Portugal. These Terms and Conditions govern your use of the platform and the participation in padel activities, tournaments and rankings organised by ADDB.",
+        "By accessing or using this platform, you agree to be bound by these terms as well as by the Statutes and General Regulations of ADDB. If you do not agree with any part of these terms, please do not use the platform or take part in our padel activities."
+      ]
+    },
+    "accounts": {
+      "title": "2. Membership and User Accounts",
+      "intro": "Douro Bats Padel is an invitation-only platform reserved for members and guests of ADDB. Accounts are created through an invitation sent by an administrator of the padel section. By creating an account, you are responsible for:",
+      "items": [
+        "Maintaining the confidentiality of your account credentials",
+        "All activities that occur under your account",
+        "Providing accurate and up-to-date information",
+        "Keeping your ADDB membership status in good standing, where applicable, to access competitive features",
+        "Notifying us immediately of any unauthorised use of your account"
+      ]
+    },
+    "tournaments": {
+      "title": "3. Tournament and Match Participation",
+      "intro": "When taking part in tournaments, leagues or friendly matches organised by the ADDB padel section, you agree to:",
+      "items": [
+        "Abide by the rules of each competition and by ADDB's General Regulations",
+        "Respect other players, partners, opponents, referees and venue staff",
+        "Arrive on time for scheduled matches and communicate any absence",
+        "Accept the decisions of tournament organisers and referees",
+        "Play fairly and uphold the inclusive spirit of ADDB"
+      ],
+      "footer": "Failure to comply with these requirements may result in disqualification, suspension from future events or, in serious cases, revocation of access to the platform in accordance with ADDB's disciplinary rules."
+    },
+    "ranking": {
+      "title": "4. Ranking System",
+      "intro": "Our internal ranking system is designed to fairly reflect the performance of ADDB padel players. Rankings are calculated based on match results and participation in the competitions we organise. ADDB reserves the right to:",
+      "items": [
+        "Adjust or recompute the ranking algorithm to improve fairness",
+        "Review rankings in cases of suspected manipulation, collusion or unsporting behaviour",
+        "Reset or archive rankings at the beginning of each season"
+      ]
+    },
+    "conduct": {
+      "title": "5. Code of Conduct",
+      "intro": "ADDB is an inclusive association and expects all players on this platform to contribute to a welcoming, respectful and safe environment. Users must not:",
+      "items": [
+        "Engage in harassment, bullying or discriminatory behaviour of any kind",
+        "Use offensive, abusive or inappropriate language",
+        "Attempt to manipulate rankings, match results or tournament draws",
+        "Share account credentials with others",
+        "Interfere with the platform's operation or security",
+        "Violate any applicable Portuguese or European law"
+      ]
+    },
+    "fees": {
+      "title": "6. Fees and Payments",
+      "body": "Some tournaments and events may require an entry fee to cover court rental, equipment, prizes or other organisational costs. Fees are paid directly to ADDB and are non-refundable unless the event is cancelled by the organisers. Payment must be made in full before the registration deadline of each event."
+    },
+    "ip": {
+      "title": "7. Intellectual Property",
+      "body": "The Douro Bats name, logo, visual identity and all content on this platform, including text, graphics and software, are the property of Associação Desportiva Douro Bats or its licensors and are protected by copyright and other intellectual property laws."
+    },
+    "liability": {
+      "title": "8. Limitation of Liability",
+      "body": "Padel is a physical sport and participation involves inherent risks. Players take part at their own risk and are responsible for their own health, physical condition and safety. To the extent permitted by law, ADDB is not liable for injuries, losses or damages that may occur during training, matches or tournaments organised through the platform."
+    },
+    "changes": {
+      "title": "9. Changes to Terms",
+      "body": "ADDB may update these terms whenever needed to reflect changes in the platform, in our regulations or in applicable law. Updates become effective as soon as they are published on this page. Continued use of the platform after changes are posted constitutes acceptance of the updated terms."
+    },
+    "contactSection": {
+      "title": "10. Contact Information",
+      "prefix": "For any questions about these Terms and Conditions, please contact the Associação Desportiva Douro Bats at "
+    }
+  },
+  "privacyPage": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated: April 2026",
+    "intro": {
+      "title": "1. Introduction",
+      "paragraphs": [
+        "Associação Desportiva Douro Bats (\"ADDB\", \"we\", \"us\") is the data controller of the personal data processed through the Douro Bats Padel platform. We take your privacy seriously and process personal data in accordance with the EU General Data Protection Regulation (GDPR) and the applicable Portuguese data protection law.",
+        "This Privacy Policy explains what information we collect, how we use it and what rights you have. Please read it carefully. If you do not agree with these terms, please do not use the platform."
+      ]
+    },
+    "collect": {
+      "title": "2. Information We Collect",
+      "personalTitle": "Personal Information",
+      "personalIntro": "We may collect personal information that you provide to us when signing up or taking part in ADDB padel activities, including:",
+      "personalItems": [
+        "Name and email address",
+        "Profile photo",
+        "Contact information (phone number, address)",
+        "ADDB membership data, where applicable",
+        "Payment information for tournament fees",
+        "Tournament participation, match results and ranking history"
+      ],
+      "automaticTitle": "Automatically Collected Information",
+      "automaticIntro": "When you access the platform, we may automatically collect:",
+      "automaticItems": [
+        "IP address and browser type",
+        "Device information",
+        "Usage data and analytics",
+        "Cookies and similar tracking technologies"
+      ]
+    },
+    "use": {
+      "title": "3. How We Use Your Information",
+      "intro": "We use the information we collect to, among other things:",
+      "items": [
+        "Create and manage your account on the padel platform",
+        "Organise and manage tournaments, registrations and payments",
+        "Calculate and display player rankings and match results",
+        "Send you notifications about tournaments, matches and ADDB news",
+        "Improve the platform and our services",
+        "Communicate with you about updates and announcements",
+        "Prevent fraud and ensure platform security",
+        "Comply with legal obligations and with ADDB's statutes and regulations"
+      ]
+    },
+    "legalBasis": {
+      "title": "4. Legal Basis for Processing",
+      "intro": "We process personal data on the following legal bases under the GDPR:",
+      "items": [
+        "Contract: to provide the platform, manage your ADDB membership and run the competitions you register for.",
+        "Legitimate interests: to keep the platform secure, improve our services and communicate about our activities.",
+        "Consent: for optional communications and non-essential cookies, where required.",
+        "Legal obligation: to comply with accounting, tax and sports regulations."
+      ]
+    },
+    "sharing": {
+      "title": "5. Information Sharing and Disclosure",
+      "intro": "We may share your information with:",
+      "items": [
+        "Other players (name, profile photo and ranking information, as part of the normal functioning of competitions)",
+        "Tournament organisers, referees and venue operators",
+        "Service providers who help us operate the platform (hosting, authentication, email delivery, analytics)",
+        "Public authorities or regulators when required by law or by sports governance rules"
+      ],
+      "footer": "We never sell your personal information to third parties."
+    },
+    "security": {
+      "title": "6. Data Security",
+      "body": "We apply appropriate technical and organisational measures to protect your personal information, including encryption in transit, access controls and regular reviews. However, no method of transmission or storage is 100% secure, and we cannot guarantee absolute security."
+    },
+    "retention": {
+      "title": "7. Data Retention",
+      "body": "We keep your personal information for as long as necessary to provide our services, manage your ADDB membership and comply with legal obligations. Historical match and ranking data may be kept in anonymised or aggregated form for statistical purposes. You may request deletion of your account and associated data at any time."
+    },
+    "rights": {
+      "title": "8. Your Privacy Rights",
+      "intro": "Under the GDPR, you have the right to:",
+      "items": [
+        "Access and review your personal information",
+        "Request correction of inaccurate data",
+        "Request deletion of your account and data",
+        "Opt-out of marketing communications",
+        "Object to or restrict certain processing activities",
+        "Export your data in a portable format",
+        "Lodge a complaint with the Portuguese data protection authority (CNPD)"
+      ],
+      "contactPrefix": "To exercise these rights, please contact us at "
+    },
+    "cookies": {
+      "title": "9. Cookies and Tracking Technologies",
+      "prefix": "We use cookies and similar tracking technologies to keep you signed in, remember your preferences and improve the platform. You can control cookie settings through your browser preferences. For more information, see our ",
+      "link": "Cookie Policy",
+      "suffix": "."
+    },
+    "thirdParty": {
+      "title": "10. Third-Party Services",
+      "body": "The platform may contain links to third-party websites (such as ADDB's main site at dourobats.pt or our social channels) or integrate with third-party services (such as Google OAuth for authentication). We are not responsible for the privacy practices of those third parties and encourage you to review their own privacy policies."
+    },
+    "minors": {
+      "title": "11. Minors",
+      "body": "Participation by minors in ADDB padel activities requires the prior authorisation of a parent or legal guardian in accordance with ADDB's General Regulations. We do not knowingly collect personal information from children without such authorisation. If you believe that information has been collected from a minor without consent, please contact us immediately."
+    },
+    "changes": {
+      "title": "12. Changes to This Privacy Policy",
+      "body": "We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new version on this page and updating the \"Last updated\" date at the top."
+    },
+    "contactSection": {
+      "title": "13. Contact Us",
+      "prefix": "If you have questions or concerns about this Privacy Policy or about how we handle your personal data, please contact the Associação Desportiva Douro Bats at "
+    }
+  },
+  "cookiesPage": {
+    "title": "Cookie Policy",
+    "lastUpdated": "Last updated: April 2026",
+    "whatAreCookies": {
+      "title": "1. What Are Cookies?",
+      "body": "Cookies are small text files placed on your device when you visit the Douro Bats Padel platform, operated by Associação Desportiva Douro Bats (ADDB). They help us provide a better experience by keeping you signed in, remembering your preferences and understanding how the platform is used."
+    },
+    "types": {
+      "title": "2. Types of Cookies We Use",
+      "essentialTitle": "Essential Cookies",
+      "essentialBody": "These cookies are necessary for the platform to function properly. They enable core functionality such as security, authentication and accessibility. The platform cannot work without them.",
+      "essentialItems": [
+        "Authentication tokens (session management)",
+        "Security cookies (CSRF protection)",
+        "Load balancing cookies"
+      ],
+      "functionalTitle": "Functional Cookies",
+      "functionalBody": "These cookies enable enhanced functionality and personalisation, such as remembering your preferences and settings.",
+      "functionalItems": [
+        "Language preferences",
+        "Theme preferences (light/dark mode)",
+        "User interface customisations"
+      ],
+      "analyticsTitle": "Analytics Cookies",
+      "analyticsBody": "These cookies help us understand how members use the platform by collecting and reporting information anonymously.",
+      "analyticsItems": [
+        "Page views and navigation patterns",
+        "Time spent on pages",
+        "Error tracking and performance monitoring"
+      ],
+      "performanceTitle": "Performance Cookies",
+      "performanceBody": "These cookies let us count visits and traffic sources so we can measure and improve the performance of the platform."
+    },
+    "thirdParty": {
+      "title": "3. Third-Party Cookies",
+      "intro": "We may use third-party services that set cookies on your device. These include:",
+      "items": [
+        "Google OAuth: for authentication and single sign-on functionality",
+        "Analytics Services: to understand platform usage and improve our services"
+      ],
+      "footer": "These third parties have their own privacy and cookie policies. We recommend reviewing them to understand how they use cookies."
+    },
+    "duration": {
+      "title": "4. How Long Do Cookies Last?",
+      "sessionTitle": "Session Cookies",
+      "sessionBody": "These are temporary cookies that expire when you close your browser. They are used to maintain your session while you navigate the platform.",
+      "persistentTitle": "Persistent Cookies",
+      "persistentBody": "These cookies remain on your device for a set period or until you delete them. They are used to remember your preferences across multiple sessions.",
+      "persistentItems": [
+        "Authentication tokens: up to 7 days",
+        "Preference cookies: up to 1 year",
+        "Analytics cookies: up to 2 years"
+      ]
+    },
+    "managing": {
+      "title": "5. How to Manage Cookies",
+      "intro": "You are free to accept or reject cookies. You can manage your preferences through your browser settings:",
+      "browserTitle": "Browser Settings",
+      "browserIntro": "Most web browsers let you control cookies through their settings. You can:",
+      "browserItems": [
+        "View what cookies are stored and delete them individually",
+        "Block third-party cookies",
+        "Block all cookies from specific websites",
+        "Block all cookies from being set",
+        "Delete all cookies when you close your browser"
+      ],
+      "note": "Please note that blocking or deleting cookies may prevent some features of the platform from working correctly, and you may not be able to access certain areas.",
+      "specificTitle": "Browser-Specific Instructions",
+      "specificItems": [
+        "Chrome: Settings → Privacy and security → Cookies and other site data",
+        "Firefox: Settings → Privacy & Security → Cookies and Site Data",
+        "Safari: Preferences → Privacy → Manage Website Data",
+        "Edge: Settings → Cookies and site permissions → Cookies and site data"
+      ]
+    },
+    "changes": {
+      "title": "6. Changes to This Cookie Policy",
+      "body": "We may update this Cookie Policy from time to time to reflect changes in our practices or for other operational, legal or regulatory reasons. Please check this page periodically for updates."
+    },
+    "contactSection": {
+      "title": "7. Contact Us",
+      "prefix": "If you have questions about our use of cookies, please contact us at "
+    }
+  },
+  "faqPage": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "Answers to common questions about Douro Bats Padel and the ADDB padel section",
+    "stillHaveQuestions": "Still have questions?",
+    "stillHaveQuestionsText": "If you could not find the answer you were looking for, reach out to the Douro Bats padel team.",
+    "contactUs": "Contact Us",
+    "categories": {
+      "gettingStarted": "Getting Started",
+      "tournaments": "Tournaments",
+      "rankings": "Rankings",
+      "account": "Account",
+      "technical": "Technical",
+      "payment": "Payment",
+      "association": "Association"
+    },
+    "items": [
+      {
+        "category": "gettingStarted",
+        "question": "What is Douro Bats Padel?",
+        "answer": "Douro Bats Padel is the official platform of the padel section of Associação Desportiva Douro Bats (ADDB), a non-profit inclusive sports association founded in 2021. It is where members sign up for padel events, follow results and check the internal ranking."
+      },
+      {
+        "category": "gettingStarted",
+        "question": "Who can use the platform?",
+        "answer": "The platform is reserved for ADDB members and guests invited by the padel section. Accounts are created by invitation to make sure every participant is part of the community."
+      },
+      {
+        "category": "gettingStarted",
+        "question": "How do I create an account?",
+        "answer": "Once you join ADDB or are invited to take part in our padel activities, an administrator sends you an invitation email with a unique registration link. Click the link and complete the short registration form to activate your account."
+      },
+      {
+        "category": "gettingStarted",
+        "question": "Do I need to verify my email?",
+        "answer": "Yes. After signing up, you'll receive a verification email. Clicking the link confirms your address so you can participate in tournaments and receive match notifications."
+      },
+      {
+        "category": "tournaments",
+        "question": "How do I register for a tournament?",
+        "answer": "Browse the upcoming padel events on the Events page, open the one you are interested in and click the registration button. Make sure to register before the deadline shown on the event page."
+      },
+      {
+        "category": "tournaments",
+        "question": "Can I cancel my tournament registration?",
+        "answer": "You can cancel your registration before the registration deadline. Entry fees are non-refundable unless the event is cancelled by ADDB."
+      },
+      {
+        "category": "tournaments",
+        "question": "What happens if I miss my match?",
+        "answer": "Please be on time for all scheduled matches. Missing a match without prior notice may lead to disqualification. If you have any issue, notify the organisers as soon as possible."
+      },
+      {
+        "category": "tournaments",
+        "question": "Which competitions does ADDB run?",
+        "answer": "ADDB organises internal padel events throughout the season, aligned with the association's calendar (such as winter tournaments and the Bats Intercup spirit that runs across modalities). Specific padel events are always announced on the Events page."
+      },
+      {
+        "category": "rankings",
+        "question": "How does the ranking system work?",
+        "answer": "The internal ranking reflects your results in ADDB padel events. A rating algorithm takes into account wins, losses, opponent strength and your participation over time."
+      },
+      {
+        "category": "rankings",
+        "question": "What are the different tiers?",
+        "answer": "Players are grouped into five tiers: Explorers (beginner), Navigators (intermediate), Pioneers (advanced), Champions (expert) and Legends (elite). Your tier depends on your rating and how consistently you play."
+      },
+      {
+        "category": "rankings",
+        "question": "How often are rankings updated?",
+        "answer": "Rankings are updated after each event is concluded and all results are published. You can check your current ranking and history on your profile page."
+      },
+      {
+        "category": "account",
+        "question": "How do I update my profile information?",
+        "answer": "Open your account settings to update your name, email, profile photo and other personal details. Some changes may require re-verifying your email."
+      },
+      {
+        "category": "account",
+        "question": "I forgot my password. What should I do?",
+        "answer": "Click the \"Forgot Password\" link on the login page and enter your email address. You will receive instructions to reset it."
+      },
+      {
+        "category": "account",
+        "question": "Can I delete my account?",
+        "answer": "Yes. You can request account deletion by contacting ADDB at dourobats@gmail.com. Please note the action is permanent and, where applicable, your historical results may be kept in anonymised form for statistics."
+      },
+      {
+        "category": "technical",
+        "question": "What browsers are supported?",
+        "answer": "The platform works best on modern browsers including Chrome, Firefox, Safari and Edge. We recommend keeping your browser up to date for the best experience."
+      },
+      {
+        "category": "technical",
+        "question": "Is there a mobile app?",
+        "answer": "There is no standalone mobile app yet. The platform is fully responsive and works smoothly on smartphones and tablets."
+      },
+      {
+        "category": "technical",
+        "question": "I'm experiencing technical issues. Who can I contact?",
+        "answer": "Please contact us at dourobats@gmail.com with a short description of the issue. Including your browser and any error messages helps us solve it faster."
+      },
+      {
+        "category": "payment",
+        "question": "What payment methods are accepted?",
+        "answer": "Payment methods depend on the event. For most events, ADDB collects fees via bank transfer, MB WAY or directly on-site. Each event page shows the accepted options."
+      },
+      {
+        "category": "payment",
+        "question": "Are tournament fees refundable?",
+        "answer": "Tournament fees are generally non-refundable unless the event is cancelled by ADDB. Please check each event's specific terms before registering."
+      },
+      {
+        "category": "association",
+        "question": "How do I become a member of Associação Desportiva Douro Bats?",
+        "answer": "Membership and other association-level information are handled on the main ADDB website at www.dourobats.pt and the members portal at www.associados.dourobats.pt. For any questions, you can also reach out at dourobats@gmail.com."
+      },
+      {
+        "category": "association",
+        "question": "What other sports does ADDB organise?",
+        "answer": "Beyond padel, ADDB has long-running sections in futsal, volleyball and running. This platform is dedicated exclusively to the padel activities of the association."
+      }
+    ]
   }
 }

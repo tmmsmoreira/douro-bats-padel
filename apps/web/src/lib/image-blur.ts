@@ -5,20 +5,6 @@
  */
 
 /**
- * Blur placeholder for the Douro Bats Padel logo
- * This is a 10x10px version of the logo encoded as base64
- */
-export const LOGO_BLUR_DATA_URL =
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFklEQVR42mN8//HLfwYiAOOoQvoqBABbWyZJf74GZgAAAABJRU5ErkJggg==';
-
-/**
- * Generic blur placeholder for venue logos and other images
- * A simple gray gradient that works for most images
- */
-export const GENERIC_BLUR_DATA_URL =
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
-
-/**
  * Shimmer effect blur placeholder
  * Creates a subtle shimmer animation effect
  */

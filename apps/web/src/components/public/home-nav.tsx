@@ -9,7 +9,6 @@ import { MenuToggle } from '@/components/shared/menu-toggle';
 import { useTranslations } from 'next-intl';
 import { MobileMenu } from '@/components/shared/mobile-menu';
 import Image from 'next/image';
-import { LOGO_BLUR_DATA_URL } from '@/lib/image-blur';
 import { useScrollDirection } from '@/hooks/use-scroll-direction';
 import { cn } from '@/lib/utils';
 
@@ -56,8 +55,6 @@ export function HomeNav() {
                   width={40}
                   height={40}
                   priority
-                  placeholder="blur"
-                  blurDataURL={LOGO_BLUR_DATA_URL}
                   className="object-contain"
                 />
                 <span className="font-heading gradient-text text-xl font-bold">

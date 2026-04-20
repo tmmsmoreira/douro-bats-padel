@@ -28,7 +28,6 @@ import {
   MapPinIcon,
 } from 'lucide-animated';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
-import { LOGO_BLUR_DATA_URL } from '@/lib/image-blur';
 import { LanguageMenuItems } from '@/components/shared/language-menu-items';
 import { MenuToggle } from '@/components/shared/menu-toggle';
 import { useTranslations } from 'next-intl';
@@ -205,8 +204,6 @@ export function UnifiedNav() {
                   width={40}
                   height={40}
                   priority
-                  placeholder="blur"
-                  blurDataURL={LOGO_BLUR_DATA_URL}
                   className="object-contain"
                 />
                 <span className="font-heading gradient-text text-xl font-bold">

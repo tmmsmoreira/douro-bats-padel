@@ -6,7 +6,6 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
-import { LOGO_BLUR_DATA_URL } from '@/lib/image-blur';
 import { ThemeToggleButton } from '@/components/shared/theme-toggle-button';
 import { LanguageToggleButton } from '@/components/shared/language-toggle-button';
 
@@ -324,8 +323,6 @@ export default function NotFound() {
             width={36}
             height={36}
             priority
-            placeholder="blur"
-            blurDataURL={LOGO_BLUR_DATA_URL}
             className="object-contain"
           />
           <span className="font-heading gradient-text text-lg font-bold">Douro Bats Padel</span>

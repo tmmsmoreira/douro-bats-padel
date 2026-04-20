@@ -1,17 +1,29 @@
 'use client';
 
 import { motion } from 'motion/react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { UnifiedNav } from '@/components/shared/unified-nav';
 import { PageLayout, PageHeader } from '@/components/shared';
 import { staggerContainer, staggerItem } from '@/lib/animations';
 
+const CONTACT_EMAIL = 'dourobats@gmail.com';
+
 export default function CookiesPage() {
+  const t = useTranslations('cookiesPage');
+
+  const essentialItems = t.raw('types.essentialItems') as string[];
+  const functionalItems = t.raw('types.functionalItems') as string[];
+  const analyticsItems = t.raw('types.analyticsItems') as string[];
+  const thirdPartyItems = t.raw('thirdParty.items') as string[];
+  const persistentItems = t.raw('duration.persistentItems') as string[];
+  const browserItems = t.raw('managing.browserItems') as string[];
+  const specificItems = t.raw('managing.specificItems') as string[];
+
   return (
     <PageLayout nav={<UnifiedNav />}>
       <div className="space-y-6 sm:space-y-8">
-        {/* Header */}
-        <PageHeader title="Cookie Policy" description="Last updated: February 2026" />
+        <PageHeader title={t('title')} description={t('lastUpdated')} />
 
         <motion.div
           variants={staggerContainer}
@@ -19,208 +31,139 @@ export default function CookiesPage() {
           animate="show"
           className="space-y-6 sm:space-y-8"
         >
-          {/* Introduction */}
           <motion.div variants={staggerItem}>
             <Card>
               <CardHeader>
-                <CardTitle>1. What Are Cookies?</CardTitle>
+                <CardTitle>{t('whatAreCookies.title')}</CardTitle>
               </CardHeader>
               <CardContent className="pt-0 space-y-4">
-                <p className="text-muted-foreground">
-                  Cookies are small text files that are placed on your device when you visit our
-                  platform. They help us provide you with a better experience by remembering your
-                  preferences and understanding how you use our platform.
-                </p>
+                <p className="text-muted-foreground">{t('whatAreCookies.body')}</p>
               </CardContent>
             </Card>
           </motion.div>
 
-          {/* Types of Cookies */}
           <motion.div variants={staggerItem}>
             <Card>
               <CardHeader>
-                <CardTitle>2. Types of Cookies We Use</CardTitle>
+                <CardTitle>{t('types.title')}</CardTitle>
               </CardHeader>
               <CardContent className="pt-0 space-y-4">
-                <h3 className="font-semibold">Essential Cookies</h3>
-                <p className="text-muted-foreground">
-                  These cookies are necessary for the platform to function properly. They enable
-                  core functionality such as security, authentication, and accessibility. The
-                  platform cannot function properly without these cookies.
-                </p>
+                <h3 className="font-semibold">{t('types.essentialTitle')}</h3>
+                <p className="text-muted-foreground">{t('types.essentialBody')}</p>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
-                  <li>Authentication tokens (session management)</li>
-                  <li>Security cookies (CSRF protection)</li>
-                  <li>Load balancing cookies</li>
+                  {essentialItems.map((item, i) => (
+                    <li key={i}>{item}</li>
+                  ))}
                 </ul>
 
-                <h3 className="font-semibold mt-4">Functional Cookies</h3>
-                <p className="text-muted-foreground">
-                  These cookies enable enhanced functionality and personalization, such as
-                  remembering your preferences and settings.
-                </p>
+                <h3 className="font-semibold mt-4">{t('types.functionalTitle')}</h3>
+                <p className="text-muted-foreground">{t('types.functionalBody')}</p>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
-                  <li>Language preferences</li>
-                  <li>Theme preferences (light/dark mode)</li>
-                  <li>User interface customizations</li>
+                  {functionalItems.map((item, i) => (
+                    <li key={i}>{item}</li>
+                  ))}
                 </ul>
 
-                <h3 className="font-semibold mt-4">Analytics Cookies</h3>
-                <p className="text-muted-foreground">
-                  These cookies help us understand how visitors interact with our platform by
-                  collecting and reporting information anonymously.
-                </p>
+                <h3 className="font-semibold mt-4">{t('types.analyticsTitle')}</h3>
+                <p className="text-muted-foreground">{t('types.analyticsBody')}</p>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
-                  <li>Page views and navigation patterns</li>
-                  <li>Time spent on pages</li>
-                  <li>Error tracking and performance monitoring</li>
+                  {analyticsItems.map((item, i) => (
+                    <li key={i}>{item}</li>
+                  ))}
                 </ul>
 
-                <h3 className="font-semibold mt-4">Performance Cookies</h3>
-                <p className="text-muted-foreground">
-                  These cookies allow us to count visits and traffic sources so we can measure and
-                  improve the performance of our platform.
-                </p>
+                <h3 className="font-semibold mt-4">{t('types.performanceTitle')}</h3>
+                <p className="text-muted-foreground">{t('types.performanceBody')}</p>
               </CardContent>
             </Card>
           </motion.div>
 
-          {/* Third-Party Cookies */}
           <motion.div variants={staggerItem}>
             <Card>
               <CardHeader>
-                <CardTitle>3. Third-Party Cookies</CardTitle>
+                <CardTitle>{t('thirdParty.title')}</CardTitle>
               </CardHeader>
               <CardContent className="pt-0 space-y-4">
-                <p className="text-muted-foreground">
-                  We may use third-party services that set cookies on your device. These include:
-                </p>
+                <p className="text-muted-foreground">{t('thirdParty.intro')}</p>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
-                  <li>
-                    <strong>Google OAuth:</strong> For authentication and single sign-on
-                    functionality
-                  </li>
-                  <li>
-                    <strong>Analytics Services:</strong> To understand platform usage and improve
-                    our services
-                  </li>
+                  {thirdPartyItems.map((item, i) => (
+                    <li key={i}>{item}</li>
+                  ))}
                 </ul>
-                <p className="text-muted-foreground">
-                  These third parties have their own privacy policies and cookie policies. We
-                  recommend reviewing them to understand how they use cookies.
-                </p>
+                <p className="text-muted-foreground">{t('thirdParty.footer')}</p>
               </CardContent>
             </Card>
           </motion.div>
 
-          {/* Cookie Duration */}
           <motion.div variants={staggerItem}>
             <Card>
               <CardHeader>
-                <CardTitle>4. How Long Do Cookies Last?</CardTitle>
+                <CardTitle>{t('duration.title')}</CardTitle>
               </CardHeader>
               <CardContent className="pt-0 space-y-4">
-                <h3 className="font-semibold">Session Cookies</h3>
-                <p className="text-muted-foreground">
-                  These are temporary cookies that expire when you close your browser. They are used
-                  to maintain your session while you navigate the platform.
-                </p>
+                <h3 className="font-semibold">{t('duration.sessionTitle')}</h3>
+                <p className="text-muted-foreground">{t('duration.sessionBody')}</p>
 
-                <h3 className="font-semibold mt-4">Persistent Cookies</h3>
-                <p className="text-muted-foreground">
-                  These cookies remain on your device for a set period or until you delete them.
-                  They are used to remember your preferences and settings across multiple sessions.
-                </p>
+                <h3 className="font-semibold mt-4">{t('duration.persistentTitle')}</h3>
+                <p className="text-muted-foreground">{t('duration.persistentBody')}</p>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
-                  <li>Authentication tokens: Up to 7 days</li>
-                  <li>Preference cookies: Up to 1 year</li>
-                  <li>Analytics cookies: Up to 2 years</li>
+                  {persistentItems.map((item, i) => (
+                    <li key={i}>{item}</li>
+                  ))}
                 </ul>
               </CardContent>
             </Card>
           </motion.div>
 
-          {/* Managing Cookies */}
           <motion.div variants={staggerItem}>
             <Card>
               <CardHeader>
-                <CardTitle>5. How to Manage Cookies</CardTitle>
+                <CardTitle>{t('managing.title')}</CardTitle>
               </CardHeader>
               <CardContent className="pt-0 space-y-4">
-                <p className="text-muted-foreground">
-                  You have the right to decide whether to accept or reject cookies. You can manage
-                  your cookie preferences through your browser settings:
-                </p>
+                <p className="text-muted-foreground">{t('managing.intro')}</p>
 
-                <h3 className="font-semibold mt-4">Browser Settings</h3>
-                <p className="text-muted-foreground">
-                  Most web browsers allow you to control cookies through their settings. You can:
-                </p>
+                <h3 className="font-semibold mt-4">{t('managing.browserTitle')}</h3>
+                <p className="text-muted-foreground">{t('managing.browserIntro')}</p>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
-                  <li>View what cookies are stored and delete them individually</li>
-                  <li>Block third-party cookies</li>
-                  <li>Block all cookies from specific websites</li>
-                  <li>Block all cookies from being set</li>
-                  <li>Delete all cookies when you close your browser</li>
+                  {browserItems.map((item, i) => (
+                    <li key={i}>{item}</li>
+                  ))}
                 </ul>
 
-                <p className="text-muted-foreground mt-4">
-                  Please note that if you choose to block or delete cookies, some features of our
-                  platform may not function properly, and you may not be able to access certain
-                  areas of the platform.
-                </p>
+                <p className="text-muted-foreground mt-4">{t('managing.note')}</p>
 
-                <h3 className="font-semibold mt-4">Browser-Specific Instructions</h3>
+                <h3 className="font-semibold mt-4">{t('managing.specificTitle')}</h3>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
-                  <li>
-                    <strong>Chrome:</strong> Settings → Privacy and security → Cookies and other
-                    site data
-                  </li>
-                  <li>
-                    <strong>Firefox:</strong> Settings → Privacy & Security → Cookies and Site Data
-                  </li>
-                  <li>
-                    <strong>Safari:</strong> Preferences → Privacy → Manage Website Data
-                  </li>
-                  <li>
-                    <strong>Edge:</strong> Settings → Cookies and site permissions → Cookies and
-                    site data
-                  </li>
+                  {specificItems.map((item, i) => (
+                    <li key={i}>{item}</li>
+                  ))}
                 </ul>
               </CardContent>
             </Card>
           </motion.div>
 
-          {/* Updates */}
           <motion.div variants={staggerItem}>
             <Card>
               <CardHeader>
-                <CardTitle>6. Changes to This Cookie Policy</CardTitle>
+                <CardTitle>{t('changes.title')}</CardTitle>
               </CardHeader>
               <CardContent className="pt-0 space-y-4">
-                <p className="text-muted-foreground">
-                  We may update this Cookie Policy from time to time to reflect changes in our
-                  practices or for other operational, legal, or regulatory reasons. Please check
-                  this page periodically for updates.
-                </p>
+                <p className="text-muted-foreground">{t('changes.body')}</p>
               </CardContent>
             </Card>
           </motion.div>
 
-          {/* Contact */}
           <motion.div variants={staggerItem}>
             <Card>
               <CardHeader>
-                <CardTitle>7. Contact Us</CardTitle>
+                <CardTitle>{t('contactSection.title')}</CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
                 <p className="text-muted-foreground">
-                  If you have questions about our use of cookies, please contact us at{' '}
-                  <a
-                    href="mailto:privacy@dourobatspadel.com"
-                    className="text-primary hover:underline"
-                  >
-                    privacy@dourobatspadel.com
+                  {t('contactSection.prefix')}
+                  <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary hover:underline">
+                    {CONTACT_EMAIL}
                   </a>
                   .
                 </p>

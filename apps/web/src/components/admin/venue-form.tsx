@@ -176,6 +176,7 @@ export function VenueForm({ venueId, initialData }: VenueFormProps) {
                     src={formData.logo}
                     alt={t('logoPreviewAlt')}
                     fill
+                    unoptimized
                     placeholder="blur"
                     blurDataURL={getShimmerDataURL(64, 64)}
                     className="object-contain"

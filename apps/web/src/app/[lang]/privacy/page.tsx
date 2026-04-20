@@ -2,17 +2,29 @@
 
 import Link from 'next/link';
 import { motion } from 'motion/react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { UnifiedNav } from '@/components/shared/unified-nav';
 import { PageLayout, PageHeader } from '@/components/shared';
 import { staggerContainer, staggerItem } from '@/lib/animations';
 
+const CONTACT_EMAIL = 'dourobats@gmail.com';
+
 export default function PrivacyPage() {
+  const t = useTranslations('privacyPage');
+
+  const introParagraphs = t.raw('intro.paragraphs') as string[];
+  const personalItems = t.raw('collect.personalItems') as string[];
+  const automaticItems = t.raw('collect.automaticItems') as string[];
+  const useItems = t.raw('use.items') as string[];
+  const legalBasisItems = t.raw('legalBasis.items') as string[];
+  const sharingItems = t.raw('sharing.items') as string[];
+  const rightsItems = t.raw('rights.items') as string[];
+
   return (
     <PageLayout nav={<UnifiedNav />}>
       <div className="space-y-6 sm:space-y-8">
-        {/* Header */}
-        <PageHeader title="Privacy Policy" description="Last updated: February 2026" />
+        <PageHeader title={t('title')} description={t('lastUpdated')} />
 
         <motion.div
           variants={staggerContainer}
@@ -20,157 +32,133 @@ export default function PrivacyPage() {
           animate="show"
           className="space-y-6 sm:space-y-8"
         >
-          {/* Introduction */}
           <motion.div variants={staggerItem}>
             <Card className="glass-card">
               <CardHeader>
-                <CardTitle>1. Introduction</CardTitle>
+                <CardTitle>{t('intro.title')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-muted-foreground">
-                  At Douro Bats Padel, we take your privacy seriously. This Privacy Policy explains
-                  how we collect, use, disclose, and safeguard your information when you use our
-                  platform.
-                </p>
-                <p className="text-muted-foreground">
-                  Please read this privacy policy carefully. If you do not agree with the terms of
-                  this privacy policy, please do not access the platform.
-                </p>
+                {introParagraphs.map((p, i) => (
+                  <p key={i} className="text-muted-foreground">
+                    {p}
+                  </p>
+                ))}
               </CardContent>
             </Card>
           </motion.div>
 
-          {/* Information We Collect */}
           <motion.div variants={staggerItem}>
             <Card className="glass-card">
               <CardHeader>
-                <CardTitle>2. Information We Collect</CardTitle>
+                <CardTitle>{t('collect.title')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <h3 className="font-semibold">Personal Information</h3>
-                <p className="text-muted-foreground">
-                  We may collect personal information that you provide to us, including:
-                </p>
+                <h3 className="font-semibold">{t('collect.personalTitle')}</h3>
+                <p className="text-muted-foreground">{t('collect.personalIntro')}</p>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
-                  <li>Name and email address</li>
-                  <li>Profile photo</li>
-                  <li>Contact information (phone number, address)</li>
-                  <li>Payment information for tournament fees</li>
-                  <li>Tournament participation and match results</li>
+                  {personalItems.map((item, i) => (
+                    <li key={i}>{item}</li>
+                  ))}
                 </ul>
 
-                <h3 className="font-semibold mt-4">Automatically Collected Information</h3>
-                <p className="text-muted-foreground">
-                  When you access our platform, we may automatically collect:
-                </p>
+                <h3 className="font-semibold mt-4">{t('collect.automaticTitle')}</h3>
+                <p className="text-muted-foreground">{t('collect.automaticIntro')}</p>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
-                  <li>IP address and browser type</li>
-                  <li>Device information</li>
-                  <li>Usage data and analytics</li>
-                  <li>Cookies and similar tracking technologies</li>
+                  {automaticItems.map((item, i) => (
+                    <li key={i}>{item}</li>
+                  ))}
                 </ul>
               </CardContent>
             </Card>
           </motion.div>
 
-          {/* How We Use Your Information */}
           <motion.div variants={staggerItem}>
             <Card className="glass-card">
               <CardHeader>
-                <CardTitle>3. How We Use Your Information</CardTitle>
+                <CardTitle>{t('use.title')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-muted-foreground">We use the information we collect to:</p>
+                <p className="text-muted-foreground">{t('use.intro')}</p>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
-                  <li>Create and manage your account</li>
-                  <li>Process tournament registrations and payments</li>
-                  <li>Calculate and display player rankings</li>
-                  <li>Send you notifications about tournaments and matches</li>
-                  <li>Improve our platform and services</li>
-                  <li>Communicate with you about updates and announcements</li>
-                  <li>Prevent fraud and ensure platform security</li>
-                  <li>Comply with legal obligations</li>
+                  {useItems.map((item, i) => (
+                    <li key={i}>{item}</li>
+                  ))}
                 </ul>
               </CardContent>
             </Card>
           </motion.div>
 
-          {/* Information Sharing */}
           <motion.div variants={staggerItem}>
             <Card className="glass-card">
               <CardHeader>
-                <CardTitle>4. Information Sharing and Disclosure</CardTitle>
+                <CardTitle>{t('legalBasis.title')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-muted-foreground">We may share your information with:</p>
+                <p className="text-muted-foreground">{t('legalBasis.intro')}</p>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
-                  <li>Other players (name, profile photo, and ranking information)</li>
-                  <li>Tournament organizers and venue operators</li>
-                  <li>Service providers who assist in operating our platform</li>
-                  <li>Law enforcement or regulatory authorities when required by law</li>
+                  {legalBasisItems.map((item, i) => (
+                    <li key={i}>{item}</li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div variants={staggerItem}>
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle>{t('sharing.title')}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-muted-foreground">{t('sharing.intro')}</p>
+                <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
+                  {sharingItems.map((item, i) => (
+                    <li key={i}>{item}</li>
+                  ))}
+                </ul>
+                <p className="text-muted-foreground">{t('sharing.footer')}</p>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div variants={staggerItem}>
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle>{t('security.title')}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-muted-foreground">{t('security.body')}</p>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div variants={staggerItem}>
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle>{t('retention.title')}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-muted-foreground">{t('retention.body')}</p>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div variants={staggerItem}>
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle>{t('rights.title')}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-muted-foreground">{t('rights.intro')}</p>
+                <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
+                  {rightsItems.map((item, i) => (
+                    <li key={i}>{item}</li>
+                  ))}
                 </ul>
                 <p className="text-muted-foreground">
-                  We do not sell your personal information to third parties.
-                </p>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Data Security */}
-          <motion.div variants={staggerItem}>
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle>5. Data Security</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-muted-foreground">
-                  We implement appropriate technical and organizational security measures to protect
-                  your personal information. However, no method of transmission over the internet or
-                  electronic storage is 100% secure, and we cannot guarantee absolute security.
-                </p>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Data Retention */}
-          <motion.div variants={staggerItem}>
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle>6. Data Retention</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-muted-foreground">
-                  We retain your personal information for as long as necessary to provide our
-                  services and comply with legal obligations. You may request deletion of your
-                  account and associated data at any time.
-                </p>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Your Rights */}
-          <motion.div variants={staggerItem}>
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle>7. Your Privacy Rights</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-muted-foreground">You have the right to:</p>
-                <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
-                  <li>Access and review your personal information</li>
-                  <li>Request correction of inaccurate data</li>
-                  <li>Request deletion of your account and data</li>
-                  <li>Opt-out of marketing communications</li>
-                  <li>Object to certain data processing activities</li>
-                  <li>Export your data in a portable format</li>
-                </ul>
-                <p className="text-muted-foreground">
-                  To exercise these rights, please contact us at{' '}
-                  <a
-                    href="mailto:privacy@dourobatspadel.com"
-                    className="text-primary hover:underline"
-                  >
-                    privacy@dourobatspadel.com
+                  {t('rights.contactPrefix')}
+                  <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary hover:underline">
+                    {CONTACT_EMAIL}
                   </a>
                   .
                 </p>
@@ -178,89 +166,66 @@ export default function PrivacyPage() {
             </Card>
           </motion.div>
 
-          {/* Cookies */}
           <motion.div variants={staggerItem}>
             <Card className="glass-card">
               <CardHeader>
-                <CardTitle>8. Cookies and Tracking Technologies</CardTitle>
+                <CardTitle>{t('cookies.title')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-muted-foreground">
-                  We use cookies and similar tracking technologies to enhance your experience on our
-                  platform. You can control cookie settings through your browser preferences. For
-                  more information, see our{' '}
+                  {t('cookies.prefix')}
                   <Link href="/cookies" className="text-primary hover:underline">
-                    Cookie Policy
+                    {t('cookies.link')}
                   </Link>
-                  .
+                  {t('cookies.suffix')}
                 </p>
               </CardContent>
             </Card>
           </motion.div>
 
-          {/* Third-Party Services */}
           <motion.div variants={staggerItem}>
             <Card className="glass-card">
               <CardHeader>
-                <CardTitle>9. Third-Party Services</CardTitle>
+                <CardTitle>{t('thirdParty.title')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-muted-foreground">
-                  Our platform may contain links to third-party websites or integrate with
-                  third-party services (such as Google OAuth). We are not responsible for the
-                  privacy practices of these third parties. We encourage you to review their privacy
-                  policies.
-                </p>
+                <p className="text-muted-foreground">{t('thirdParty.body')}</p>
               </CardContent>
             </Card>
           </motion.div>
 
-          {/* Children's Privacy */}
           <motion.div variants={staggerItem}>
             <Card className="glass-card">
               <CardHeader>
-                <CardTitle>10. Children&apos;s Privacy</CardTitle>
+                <CardTitle>{t('minors.title')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-muted-foreground">
-                  Our platform is not intended for children under 13 years of age. We do not
-                  knowingly collect personal information from children under 13. If you believe we
-                  have collected information from a child under 13, please contact us immediately.
-                </p>
+                <p className="text-muted-foreground">{t('minors.body')}</p>
               </CardContent>
             </Card>
           </motion.div>
 
-          {/* Changes to Privacy Policy */}
           <motion.div variants={staggerItem}>
             <Card className="glass-card">
               <CardHeader>
-                <CardTitle>11. Changes to This Privacy Policy</CardTitle>
+                <CardTitle>{t('changes.title')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-muted-foreground">
-                  We may update this Privacy Policy from time to time. We will notify you of any
-                  changes by posting the new Privacy Policy on this page and updating the &quot;Last
-                  updated&quot; date.
-                </p>
+                <p className="text-muted-foreground">{t('changes.body')}</p>
               </CardContent>
             </Card>
           </motion.div>
 
-          {/* Contact */}
           <motion.div variants={staggerItem}>
             <Card className="glass-card">
               <CardHeader>
-                <CardTitle>12. Contact Us</CardTitle>
+                <CardTitle>{t('contactSection.title')}</CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
                 <p className="text-muted-foreground">
-                  If you have questions or concerns about this Privacy Policy, please contact us at{' '}
-                  <a
-                    href="mailto:privacy@dourobatspadel.com"
-                    className="text-primary hover:underline"
-                  >
-                    privacy@dourobatspadel.com
+                  {t('contactSection.prefix')}
+                  <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary hover:underline">
+                    {CONTACT_EMAIL}
                   </a>
                   .
                 </p>

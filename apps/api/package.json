@@ -9,7 +9,10 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "tsx prisma/seed.ts",
-    "prisma:seed-test-events": "tsx prisma/seed-test-events.ts"
+    "prisma:seed-test-events": "tsx prisma/seed-test-events.ts",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.15",

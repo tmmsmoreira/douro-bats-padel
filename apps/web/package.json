@@ -10,7 +10,10 @@
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
     "type-check": "tsc --noEmit",
     "check": "pnpm type-check && pnpm lint",
-    "icons:ios-splash": "node scripts/generate-ios-splash.mjs"
+    "icons:ios-splash": "node scripts/generate-ios-splash.mjs",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage"
   },
   "dependencies": {
     "@padel/types": "workspace:*",

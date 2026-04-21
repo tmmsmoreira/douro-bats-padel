@@ -10,6 +10,27 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-04-21] — Add test infrastructure and unit tests across monorepo
+
+**Commit:** `c080e14`
+
+### Infrastructure
+
+- **`jest.config.js`** — New Jest + ts-jest configs per workspace with `@padel/types` resolved to source so tests don't require a prebuilt dist
+- **`apps/api/package.json`** — Added `test`, `test:watch`, and `test:cov` scripts wired to Jest
+- **`test/prisma-mock`** — Shared Prisma mock helper for service/controller specs
+- **React Testing Library + jsdom** — Web app test harness with stubs for `motion` and `next-intl`
+
+### Backend
+
+- **`AuthController` spec** — Covers DTO passthrough, `user.sub` extraction for refresh/profile/photo updates, and error propagation from the service layer
+- **`AuthService` spec** — Covers signup invitation validation, email/invitation mismatch rejection, duplicate-email conflicts, password hashing, and verification-email dispatch (bcrypt mocked to keep the suite fast)
+
+### Frontend
+
+- **Domain + UI coverage** — 262 tests total spanning ranking formulas, draw generation, RSVP flows, service orchestration, controllers, and UI components
+
+
 ## [2026-04-21] — Fix changelog post-commit hook infinite loop
 
 **Commit:** `607c01b`

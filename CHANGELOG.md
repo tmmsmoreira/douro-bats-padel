@@ -4,16 +4,925 @@ All notable changes to the Douro Bats Padel project are documented here. Changes
 
 ---
 
+## Recent Changes
+
+_Auto-generated on every commit from the actual diff._
+
 <!-- CHANGELOG_INSERT_POINT -->
 
-### [2026-04-21] UI polish: animations, typography, and automated changelog
+## [2026-04-21] — Move changelog generation to post-commit hook with improved format
 
-- Added `.husky/changelog.mjs` pre-commit hook that auto-generates changelog entries via `claude -p` on each commit
-- Unified tap animation scale to `0.96` across `AlertNative`, `ContextMenu`, `TabBar`, `ConfirmationDialog`, `HomeUpcomingEvents`, and `PastEventsList`; updated spring transitions to `{ duration: 0.3, bounce: 0 }` for a crisper feel
-- Added `tabular-nums` to numeric fields in `EventStats` (confirmed count, capacity, waitlist) to prevent layout shift
-- Applied `text-wrap: balance` to headings and `text-wrap: pretty` to paragraphs in `globals.css`; added explicit `-webkit-font-smoothing: antialiased` for sharper text rendering
-- Refactored animation exports in `animations.ts` to use `ANIMATION_VARIANTS` namespace; updated `PageLayout` and `SectionHeader` to consume the new export
-- Removed `whileTap` scale from `PageHeader` back-nav button
+**Commit:** `e2ebb21`
+
+### Infrastructure
+
+- **`changelog.mjs`** — Switched from staged diff (`git diff --cached`) to committed diff (`git show <hash>`) so the entry reflects the actual commit; added commit hash to the generated prompt and output format; amends the commit after writing to include `CHANGELOG.md` automatically
+- **`post-commit`** — New hook that runs `changelog.mjs` after every commit, replacing the previous pre-commit invocation
+- **`pre-commit`** — Removed changelog generation, now only runs `lint-staged`
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with improved format
+
+**Commit:** `237009b`
+
+### Infrastructure
+
+- **`.husky/changelog.mjs`** — Switched from staged diff (`git diff --cached`) to committed diff (`git show <hash>`), passes commit hash to prompt, and amends the commit to include the updated `CHANGELOG.md` after generation
+- **`.husky/post-commit`** — New hook that runs `changelog.mjs` after each commit, replacing the pre-commit approach
+- **`.husky/pre-commit`** — Removed changelog generation; now only runs `lint-staged`
+
+
+## [2026-04-21] — Automated changelog now runs post-commit with correct hash
+
+**Commit:** `bed8d94`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook that runs the changelog script after commit, so the actual commit hash is available instead of a pre-commit placeholder
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit, leaving only `lint-staged`
+- **`.husky/changelog.mjs`** — Switched from `git diff --cached` to `git show <hash>` so the diff reflects the real commit; passes hash into prompt and amends the commit with `--no-verify` to embed the updated `CHANGELOG.md`
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with improved format
+
+**Commit:** `8aa257c`
+
+### Infrastructure
+
+- **`.husky/changelog.mjs`** — Switched from staged diff (`git diff --cached`) to committed diff (`git show <hash>`), added commit hash to prompt and output, updated prompt to enforce the structured format with h2 heading, commit reference, and h3 subsections
+- **`.husky/post-commit`** — New hook that runs `changelog.mjs` after commit, so the correct commit hash is available; amends the commit to include the updated `CHANGELOG.md`
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit; now only runs `lint-staged`
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with improved format
+
+**Commit:** `ddaf988`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook introduced to run changelog generation after commit, so the correct commit hash is available
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit; now only runs `lint-staged`
+- **`.husky/changelog.mjs`** — Switched from `getStagedDiff` (cached diff) to `getCommitDiff` using `git show <hash>` on the actual commit; passes commit hash into the prompt and amends the commit to include the updated `CHANGELOG.md`
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with improved format
+
+**Commit:** `e5de778`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook that runs `changelog.mjs` after commit so the correct commit hash is available
+- **`.husky/pre-commit`** — Removed changelog generation, now only runs `lint-staged`
+- **`.husky/changelog.mjs`** — Switched from `git diff --cached` to `git show <hash>` to diff the actual commit; added commit hash to prompt and updated output format to use `h2` headings with a `**Commit:**` reference and structured `h3` subsections; amends the commit after writing the changelog via `git commit --amend --no-edit --no-verify`
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with improved entry format
+
+**Commit:** `06e90f2`
+
+### Infrastructure
+
+- **`.husky/changelog.mjs`** — Switched from `git diff --cached` (pre-commit staged diff) to `git show <hash>` (post-commit diff using actual commit hash), so the changelog entry references the real commit; updated `buildPrompt` to include the commit hash and enforce a structured h2/h3 format with bold-backtick bullets
+- **`.husky/post-commit`** — New hook that runs `changelog.mjs` after each commit, replacing the previous pre-commit invocation
+- **`.husky/pre-commit`** — Removed changelog generation step; now only runs `lint-staged`
+
+
+## [2026-04-21] — Improve automated changelog: post-commit hook with correct hash and matching format
+
+**Commit:** `432a48d`
+
+### Infrastructure
+
+- **`changelog.mjs`** — Switched from staged diff (`git diff --cached`) to committed diff (`git show <hash>`) so the changelog reflects the actual commit; added commit hash to the generated entry format; updated prompt to enforce the new structured format with h2 heading, commit reference, and h3 subsections
+- **`post-commit`** — New hook that runs `changelog.mjs` after a commit is created, replacing the pre-commit trigger so the correct commit hash is available
+- **`pre-commit`** — Removed changelog generation, now only runs `lint-staged`
+
+
+## [2026-04-21] — Improve automated changelog: post-commit hook with correct hash and matching format
+
+**Commit:** `d8c52bd`
+
+### Infrastructure
+
+- **`.husky/changelog.mjs`** — Switched from `getStagedDiff` (pre-commit staged diff) to `getCommitDiff` using `git show` so the changelog reflects the actual committed changes; added commit hash injection into the prompt for richer, correctly-formatted entries; amends the commit after writing the changelog to include `CHANGELOG.md` in the same commit
+- **`.husky/post-commit`** — New hook that runs `changelog.mjs` after the commit is made, replacing the previous pre-commit invocation
+- **`.husky/pre-commit`** — Removed `changelog.mjs` call; now only runs `lint-staged`
+
+
+## [2026-04-21] — Improve automated changelog: post-commit hook with correct hash and matching format
+
+**Commit:** `002517f`
+
+### Infrastructure
+
+- **`changelog.mjs`** — Switched from reading staged diff (`git diff --cached`) to reading the actual commit diff (`git show <hash>`), so the changelog reflects what was committed rather than what was staged; also injects the commit hash into the prompt and amends the commit to include the updated `CHANGELOG.md`
+- **`post-commit`** — New hook that runs `changelog.mjs` after the commit is created, replacing the previous pre-commit invocation so the real commit hash is available
+- **`.husky/pre-commit`** — Removed `changelog.mjs` invocation, leaving only `lint-staged`
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with improved format
+
+**Commit:** `d03efd3`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook created to run changelog generation after commit, so the correct commit hash is available
+- **`.husky/pre-commit`** — Removed changelog script from pre-commit; now only runs `lint-staged`
+- **`.husky/changelog.mjs`** — Switched from `git diff --cached` to `git show <hash>` to diff the actual commit; updated `buildPrompt` to include the commit hash and use the new structured format with h2 heading, `**Commit:**` reference, and h3 subsections; amends the commit after writing `CHANGELOG.md` to avoid a separate changelog-only commit
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with correct hash
+
+**Commit:** `256ba1d`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook that runs changelog generation after the commit exists, so the real commit hash is available
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit to avoid using a staged-diff approach with no hash
+- **`.husky/changelog.mjs`** — Replaced `getStagedDiff` (pre-commit staged diff) with `getCommitDiff(hash)` using `git show`; updated `buildPrompt` to accept and embed the commit hash; added `git commit --amend --no-edit --no-verify` to fold the updated `CHANGELOG.md` back into the triggering commit
+
+
+## [2026-04-21] — Automated changelog now runs post-commit with correct hash
+
+**Commit:** `e7dcf23`
+
+### Infrastructure
+
+- **`.husky/changelog.mjs`** — Switched from diffing staged changes (`git diff --cached`) to diffing the actual commit (`git show <hash>`), so the changelog always reflects the real commit content; also amended the commit after updating `CHANGELOG.md` to include it in the same commit
+- **`.husky/post-commit`** — New hook that runs `changelog.mjs` after each commit, replacing the pre-commit placement so the commit hash is available
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit (moved to post-commit); now only runs `lint-staged`
+
+
+## [2026-04-21] — Improve automated changelog to run post-commit with correct hash
+
+**Commit:** `3c79ca9`
+
+### Infrastructure
+
+- **`changelog.mjs`** — Switched from pre-commit staged diff to post-commit `git show` so the entry uses the real commit hash; updated `buildPrompt` to embed the hash and match the new structured format with h2 heading, commit reference, and h3 subsections
+- **`.husky/post-commit`** — New hook that runs `changelog.mjs` after the commit lands, then amends the commit to include the updated `CHANGELOG.md`
+- **`.husky/pre-commit`** — Removed `changelog.mjs` invocation; now only runs `lint-staged`
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with improved format
+
+**Commit:** `3577cfd`
+
+### Infrastructure
+
+- **`.husky/changelog.mjs`** — Switched from reading staged diff (`git diff --cached`) to reading the committed diff (`git show <hash>`), so the changelog reflects the actual commit; amended commit now includes the updated `CHANGELOG.md`
+- **`.husky/post-commit`** — New hook that runs `changelog.mjs` after commit, replacing the pre-commit approach to ensure the correct commit hash is available
+- **`.husky/pre-commit`** — Removed changelog generation step; hook now only runs `lint-staged`
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with improved format
+
+**Commit:** `6c28b12`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook added to run changelog generation after commit, replacing the pre-commit approach so the correct commit hash is available
+- **`.husky/pre-commit`** — Removed changelog script invocation; now only runs `lint-staged`
+- **`.husky/changelog.mjs`** — Switched from `git diff --cached` to `git show <hash>` so the diff reflects the actual commit; updated prompt format to include commit hash, h2 heading, `**Commit:**` reference, and structured h3 subsections; amended the commit after writing changelog to bundle it in the same commit
+
+
+## [2026-04-21] — Move changelog generation from pre-commit to post-commit hook
+
+**Commit:** `d53b739`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook added to run changelog generation after commit, so the real commit hash is available
+- **`.husky/pre-commit`** — Removed changelog script invocation; now only runs `lint-staged`
+- **`.husky/changelog.mjs`** — Switched from `git diff --cached` (staged diff) to `git show <hash>` (committed diff); passes commit hash into prompt for inclusion in changelog entries; amends the commit after writing `CHANGELOG.md` to bundle the changelog update into the same commit
+
+
+## [2026-04-21] — Automated changelog now runs post-commit with correct hash
+
+**Commit:** `82473da`
+
+### Infrastructure
+
+- **`.husky/changelog.mjs`** — Switched from reading staged diff (`git diff --cached`) to reading the committed diff (`git show <hash>`), so the changelog reflects the actual commit; also updated `buildPrompt` to include the commit hash and use the new structured format with h2 heading, commit reference, and h3 subsections
+- **`.husky/post-commit`** — New hook that runs `changelog.mjs` after commit, replacing the pre-commit trigger so the real commit hash is available
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit; now only runs `lint-staged`
+
+
+## [2026-04-21] — Improve automated changelog to run post-commit with correct hash
+
+**Commit:** `01ed7c3`
+
+### Infrastructure
+
+- **`.husky/changelog.mjs`** — Switched from reading staged diff (`git diff --cached`) to reading the committed diff (`git show <hash>`), so the changelog accurately reflects what was committed; added `git commit --amend --no-edit --no-verify` to include the updated `CHANGELOG.md` in the same commit
+- **`.husky/post-commit`** — New hook that runs `changelog.mjs` after the commit lands, replacing the pre-commit approach so the correct commit hash is available
+- **`.husky/pre-commit`** — Removed changelog generation; now only runs `lint-staged`
+
+
+## [2026-04-21] — Improve automated changelog: post-commit hook with correct hash and format
+
+**Commit:** `bee415c`
+
+### Infrastructure
+
+- **`changelog.mjs`** — Switched from reading the staged diff to reading the actual commit diff via `git show`, so the changelog reflects the real commit rather than pre-commit staged state; added commit hash injection into the prompt and the generated entry format
+- **`changelog.mjs`** — Updated prompt template to use the new structured format with h2 heading, commit reference, and h3 subsections matching the project's changelog style
+- **`changelog.mjs`** — After writing the changelog, amends the current commit to include `CHANGELOG.md` using `--no-verify` to prevent hook re-entry
+- **`post-commit`** — New hook that runs `changelog.mjs` after each commit, replacing the previous `pre-commit` trigger so the commit hash is available
+- **`pre-commit`** — Removed `changelog.mjs` invocation; now only runs `lint-staged`
+
+
+## [2026-04-21] — Improve automated changelog to run post-commit with correct hash
+
+**Commit:** `6315ec2`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook created to run `changelog.mjs` after commit, replacing the pre-commit approach so the real commit hash is available
+- **`.husky/pre-commit`** — Removed changelog generation step; now only runs `lint-staged`
+- **`.husky/changelog.mjs`** — Switched from `getStagedDiff` (pre-commit cached diff) to `getCommitDiff(hash)` using `git show` on the actual commit hash; added `git commit --amend --no-edit --no-verify` to fold the updated `CHANGELOG.md` back into the commit; updated prompt format to include commit hash and structured h2/h3 output template
+
+
+## [2026-04-21] — Improve automated changelog to run post-commit with correct hash
+
+**Commit:** `b69086a`
+
+### Infrastructure
+
+- **`.husky/changelog.mjs`** — Switched from `getStagedDiff` (pre-commit staged diff) to `getCommitDiff(hash)` (post-commit `git show`) so the script operates on the actual committed changes; added commit hash to the prompt and updated the output format to include an h2 heading, `**Commit:**` reference, and structured h3 subsections
+- **`.husky/post-commit`** — New hook that runs `changelog.mjs` after each commit, replacing the pre-commit trigger
+- **`.husky/pre-commit`** — Removed `changelog.mjs` invocation; now only runs `lint-staged`
+
+
+## [2026-04-21] — Improve automated changelog to run post-commit with correct hash
+
+**Commit:** `8aeec04`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook created to run `changelog.mjs` after commit, so the real commit hash is available
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit to avoid running before the hash exists
+- **`.husky/changelog.mjs`** — Switched from `getStagedDiff` to `getCommitDiff(hash)` using `git show`; passes commit hash into prompt; amends the commit with `--no-edit --no-verify` to include the updated `CHANGELOG.md`; updated prompt format to require h2 heading, `**Commit:**` reference, and h3 subsections
+
+
+## [2026-04-21] — Improve automated changelog: post-commit hook with correct hash and matching format
+
+**Commit:** `782eb7c`
+
+### Infrastructure
+
+- **`.husky/changelog.mjs`** — Switched from `git diff --cached` (staged diff) to `git show <hash>` so the changelog reflects the actual commit; injected commit hash into the prompt and updated the format template to match the structured h2/h3 layout with bold backtick entries; amends the commit after writing CHANGELOG.md to include it in the same commit
+- **`.husky/post-commit`** — New post-commit hook that runs `changelog.mjs` after the commit is created, replacing the pre-commit approach so the correct commit hash is available
+- **`.husky/pre-commit`** — Removed `changelog.mjs` invocation; now only runs `lint-staged`
+
+
+## [2026-04-21] — Improve automated changelog: post-commit hook with correct hash and format
+
+**Commit:** `6ad1b5a`
+
+### Infrastructure
+
+- **`.husky/changelog.mjs`** — Switched from `getStagedDiff` (pre-commit staged diff) to `getCommitDiff` using `git show` so the changelog reflects the actual committed hash; updated `buildPrompt` to accept and embed the commit hash; amended the commit after writing changelog to include `CHANGELOG.md` in the same commit
+- **`.husky/post-commit`** — New hook that runs `changelog.mjs` after the commit is made, replacing the previous pre-commit approach
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit; now only runs `lint-staged`
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with correct hash
+
+**Commit:** `1d60481`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook that runs changelog generation after the commit, so the real commit hash is available instead of a pre-commit placeholder
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit; now only runs `lint-staged`
+- **`.husky/changelog.mjs`** — Switched from `git diff --cached` to `git show <hash>` to diff the actual commit; passes the resolved short hash into the prompt and amends the commit to include the updated `CHANGELOG.md`
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with improved format
+
+**Commit:** `5fb4f4f`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook that runs changelog generation after commit, so the correct commit hash is available
+- **`.husky/pre-commit`** — Removed changelog generation, leaving only `lint-staged`
+- **`.husky/changelog.mjs`** — Switched from `git diff --cached` to `git show <hash>` to diff the actual commit; added commit hash to the generated entry format; amends the commit after writing `CHANGELOG.md` to include it in the same commit
+
+
+## [2026-04-21] — Migrate changelog automation from pre-commit to post-commit hook
+
+**Commit:** `6674c18`
+
+### Infrastructure
+
+- **`.husky/changelog.mjs`** — Replaced staged-diff approach with `git show` on the actual commit hash, so the changelog reflects the real commit rather than cached changes; prompt now includes commit hash and enforces a structured format with h2 heading, commit reference, and h3 subsections; script amends the commit after writing the changelog entry
+- **`.husky/post-commit`** — New hook that runs `changelog.mjs` after the commit is created, providing access to the correct commit hash
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit, leaving only `lint-staged`
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with correct hash
+
+**Commit:** `805b63a`
+
+### Infrastructure
+
+- **`changelog.mjs`** — Replaced `getStagedDiff` (pre-commit staged diff) with `getCommitDiff(hash)` using `git show`, so the changelog reflects the actual commit rather than staged changes; added commit hash injection into the prompt and entry format
+- **`post-commit`** — New hook that runs `changelog.mjs` after the commit exists, enabling access to the real commit hash via `git rev-parse --short HEAD`
+- **`pre-commit`** — Removed changelog generation step; now only runs `lint-staged`
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with correct hash
+
+**Commit:** `1a0b437`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook added to run changelog generation after commit, so the correct commit hash is available
+- **`.husky/pre-commit`** — Removed changelog generation, leaving only `lint-staged`
+- **`.husky/changelog.mjs`** — Switched from `getStagedDiff` (pre-commit) to `getCommitDiff(hash)` using `git show` on the real commit hash; updated prompt format to include structured h2/h3 sections with commit reference and bold-backtick bullet style; amends the commit with `--no-verify` to include the updated `CHANGELOG.md`
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with correct hash
+
+**Commit:** `a1f3d0b`
+
+### Infrastructure
+
+- **`changelog.mjs`** — Switched from staged diff (`git diff --cached`) to committed diff (`git show <hash>`) so the entry reflects the actual commit; passes the real short hash into the prompt and amends the commit to include the updated `CHANGELOG.md`
+- **`.husky/post-commit`** — New hook that runs `changelog.mjs` after the commit exists, replacing the pre-commit invocation so the commit hash is available
+- **`.husky/pre-commit`** — Removed `changelog.mjs` invocation; now only runs `lint-staged`
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with correct commit hash
+
+**Commit:** `9283ae0`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook that runs `changelog.mjs` after commit, so the correct commit hash is available
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit; now only runs `lint-staged`
+- **`.husky/changelog.mjs`** — Replaced `getStagedDiff` (used `--cached`) with `getCommitDiff` which reads the actual commit via `git show`; passes the real short hash into the prompt and the generated entry; amends the commit with `--no-verify` to include the updated `CHANGELOG.md`
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with correct hash
+
+**Commit:** `01fffc9`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook that runs changelog generation after commit, so the real commit hash is available instead of a pre-commit placeholder
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit; now only runs `lint-staged`
+- **`.husky/changelog.mjs`** — Replaced `getStagedDiff` (using `git diff --cached`) with `getCommitDiff` (using `git show <hash>`); passes commit hash into the prompt and amends the commit to include the updated `CHANGELOG.md`
+
+
+## [2026-04-21] — Improve automated changelog to run post-commit with correct hash
+
+**Commit:** `6153b2e`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook introduced to run the changelog script after commit, so the real commit hash is available
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit to avoid running it before the hash exists
+- **`.husky/changelog.mjs`** — Replaced `getStagedDiff` (using `git diff --cached`) with `getCommitDiff` (using `git show <hash>`); updated `buildPrompt` to include the commit hash and use a more structured format with h2 heading, commit reference, and h3 subsections; amended the commit after writing `CHANGELOG.md` so the changelog update is included in the same commit
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with improved format
+
+**Commit:** `abec9b6`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook added to run changelog generation after commit, so the correct commit hash is available via `git rev-parse --short HEAD`
+- **`.husky/pre-commit`** — Removed changelog generation; now only runs `lint-staged`
+- **`.husky/changelog.mjs`** — Switched from `getStagedDiff` (pre-commit) to `getCommitDiff(hash)` using `git show`; updated `buildPrompt` to include the commit hash and enforce a structured format with h2 heading, commit reference, and h3 subsections; amends the just-created commit to include the updated `CHANGELOG.md`
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook
+
+**Commit:** `0f7a351`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook added to run changelog generation after commit, so the correct commit hash is available
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit; now only runs `lint-staged`
+- **`.husky/changelog.mjs`** — Switched from `git diff --cached` to `git show <hash>` to diff the actual commit; updated `buildPrompt` to include commit hash and use the new structured format with h2 heading, commit reference, and h3 subsections; amends the commit after writing `CHANGELOG.md` to include it in the same commit
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with correct hash and structured format
+
+**Commit:** `2a9d403`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook added to run changelog generation after commit, replacing the pre-commit approach so the real commit hash is available
+- **`.husky/pre-commit`** — Removed changelog generation step; now only runs `lint-staged`
+- **`.husky/changelog.mjs`** — Switched from `git diff --cached` to `git show <hash>` so the diff reflects the actual commit; updated prompt format to include commit hash, h2 heading, and structured h3 subsections; amends the commit after writing changelog to include `CHANGELOG.md` in the same commit
+
+
+## [2026-04-21] — Improve automated changelog: post-commit hook with correct hash and matching format
+
+**Commit:** `64b10a9`
+
+### Infrastructure
+
+- **`changelog.mjs`** — Switched from reading staged diff (`git diff --cached`) to reading the committed diff (`git show <hash>`), so the changelog reflects the actual commit content; added `git commit --amend --no-edit --no-verify` at the end to include the updated `CHANGELOG.md` in the same commit
+- **`changelog.mjs`** — Updated prompt to enforce the new structured format with h2 heading, `**Commit:**` reference, and h3 subsections (Frontend / Backend / Infrastructure)
+- **`post-commit`** — New hook that runs `changelog.mjs` after each commit, replacing the previous `pre-commit` invocation
+- **`pre-commit`** — Removed changelog generation; now only runs `lint-staged`
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with correct hash
+
+**Commit:** `1e52e45`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook added to run changelog generation after commit, so the correct commit hash is available
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit; now only runs `lint-staged`
+- **`.husky/changelog.mjs`** — Switched from `getStagedDiff` (pre-commit staged diff) to `getCommitDiff(hash)` using `git show` on the actual commit hash; updated `buildPrompt` to include the hash and use the new structured format with h2 heading, commit reference, and h3 subsections; amends the commit after writing the changelog to bundle the entry into the same commit
+
+
+## [2026-04-21] — Improve automated changelog: post-commit hook with correct hash and matching format
+
+**Commit:** `167f011`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New post-commit hook that runs the changelog script after the commit exists, so the correct commit hash is available
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit to avoid running before the commit hash is known
+- **`.husky/changelog.mjs`** — Switched from `getStagedDiff` (pre-commit staged diff) to `getCommitDiff` (using `git show` on the real commit hash); updated `buildPrompt` to include the commit hash and emit the new structured format with h2 heading, bold commit reference, and h3 subsections; amended the commit after writing `CHANGELOG.md` to include it in the same commit
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with improved format
+
+**Commit:** `e79ab72`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook added to run changelog generation after commit, so the correct commit hash is available via `git rev-parse --short HEAD`
+- **`.husky/pre-commit`** — Removed changelog generation step; now only runs `lint-staged`
+- **`.husky/changelog.mjs`** — Switched from `git diff --cached` to `git show <hash>` to diff the actual commit; updated prompt format to require h2 headings, commit reference, and h3 subsections; amends the commit after writing changelog to include `CHANGELOG.md` in the same commit
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with improved format
+
+**Commit:** `ba995a4`
+
+### Infrastructure
+
+- **`.husky/changelog.mjs`** — Switched from `git diff --cached` to `git show <hash>` so the diff is read after commit, added commit hash to prompt and output format, and amended the commit to include the updated `CHANGELOG.md`
+- **`.husky/post-commit`** — New hook that runs `changelog.mjs` after each commit, replacing the previous pre-commit execution
+- **`.husky/pre-commit`** — Removed changelog generation, leaving only `lint-staged`
+
+
+## [2026-04-21] — Improve automated changelog to run post-commit with correct hash
+
+**Commit:** `53780a2`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook added to run changelog generation after the commit, so the real commit hash is available
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit to avoid running before the hash exists
+- **`.husky/changelog.mjs`** — Switched from `getStagedDiff` (pre-commit staged diff) to `getCommitDiff` using the actual commit hash; updated `buildPrompt` to include the hash and use the new structured format with h2 heading, commit reference, and h3 subsections; amends the commit after writing `CHANGELOG.md` to bundle the changelog update into the same commit
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with improved format
+
+**Commit:** `4b29f22`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook added to run changelog generation after commit, so the correct commit hash is available via `git rev-parse --short HEAD`
+- **`.husky/pre-commit`** — Removed changelog script from pre-commit; now only runs `lint-staged`
+- **`.husky/changelog.mjs`** — Switched from `git diff --cached` to `git show <hash>` to diff the actual commit; updated prompt format to include commit hash, structured h2/h3 sections, and bold-backtick bullet style; amends the commit after writing changelog to include `CHANGELOG.md` in the same commit
+
+
+## [2026-04-21] — Move changelog generation from pre-commit to post-commit hook
+
+**Commit:** `17ff270`
+
+### Infrastructure
+
+- **`changelog.mjs`** — Replaced `getStagedDiff()` with `getCommitDiff(hash)` so the changelog reads the actual commit diff instead of the staged index; updated `buildPrompt` to include the commit hash and enforce a structured format with h2 heading, commit reference, and h3 subsections
+- **`post-commit`** — New hook that runs `changelog.mjs` after the commit exists, enabling the script to resolve the real commit hash and amend it to include the updated `CHANGELOG.md`
+- **`pre-commit`** — Removed changelog generation step; now only runs `lint-staged`
+
+
+## [2026-04-21] — Improve automated changelog: post-commit hook with correct hash and matching format
+
+**Commit:** `bb8bc98`
+
+### Infrastructure
+
+- **`.husky/changelog.mjs`** — Switched from reading staged diff to reading the committed diff via `git show <hash>`, so the changelog always reflects the actual commit; added commit hash to the generated entry format; updated prompt template to match the new structured format with h2 heading, commit reference, and h3 subsections
+- **`.husky/post-commit`** — New hook that runs `changelog.mjs` after each commit, then amends the commit to include the updated `CHANGELOG.md`
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit (moved to post-commit) so only `lint-staged` runs before the commit
+
+
+## [2026-04-21] — Improve automated changelog: post-commit hook with correct hash and matching format
+
+**Commit:** `58d81ea`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook added to run changelog generation after commit, so the correct commit hash is available
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit (moved to post-commit)
+- **`.husky/changelog.mjs`** — Switched from staged diff (`git diff --cached`) to committed diff (`git show <hash>`); added commit hash injection into the prompt; updated prompt format to require h2 heading, `**Commit:**` reference, and bold-backtick bullet style; amended the commit after updating `CHANGELOG.md` to include the changelog in the same commit
+
+
+## [2026-04-21] — Improve automated changelog with post-commit hook and structured format
+
+**Commit:** `b96e1e0`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook added to run changelog generation after commit, so the correct commit hash is available via `git rev-parse --short HEAD`
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit to avoid running before the commit hash exists
+- **`.husky/changelog.mjs`** — Switched from `git diff --cached` to `git show <hash>` to diff the actual commit; updated prompt to include commit hash and enforce a structured format with h2 heading, commit reference, and h3 subsections per category; amends the commit after writing to include `CHANGELOG.md` in the same commit
+
+
+## [2026-04-21] — Improve automated changelog with post-commit hook and correct format
+
+**Commit:** `b5ca10e`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook created to run the changelog script after commit, so the correct commit hash is available
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit; it now runs post-commit instead
+- **`.husky/changelog.mjs`** — Switched from staged diff (`git diff --cached`) to committed diff (`git show <hash>`), passed the commit hash into the prompt, updated the prompt template to match the structured format with h2 heading, commit reference, and h3 subsections, and added `git commit --amend --no-verify` to fold the updated `CHANGELOG.md` back into the commit
+
+
+## [2026-04-21] — Improve automated changelog to run post-commit with correct hash
+
+**Commit:** `23e7985`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook added to run changelog generation after commit, so the correct commit hash is available
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit to avoid running before the hash exists
+- **`.husky/changelog.mjs`** — Switched from `git diff --cached` to `git show <hash>` so the diff reflects the actual commit; added commit hash to the prompt and updated the output format to include an h2 heading with `**Commit:**` reference and structured h3 subsections; amends the commit after writing `CHANGELOG.md` using `--no-verify` to avoid hook recursion
+
+
+## [2026-04-21] — Improve automated changelog: post-commit hook with correct hash and matching format
+
+**Commit:** `cf41eda`
+
+### Infrastructure
+
+- **`.husky/changelog.mjs`** — Switched from `git diff --cached` (pre-commit staged diff) to `git show <hash>` (post-commit diff) so the changelog reflects the actual committed content; added commit hash to the generated entry format; updated prompt template to use the new structured h2/h3 format with bold backtick bullets; amends the commit after writing CHANGELOG.md to include it in the same commit
+- **`.husky/post-commit`** — New hook that runs `changelog.mjs` after a commit, replacing the previous pre-commit invocation
+- **`.husky/pre-commit`** — Removed `changelog.mjs` invocation; now only runs `lint-staged`
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with correct hash
+
+**Commit:** `f5a806a`
+
+### Infrastructure
+
+- **`changelog.mjs`** — Replaced `getStagedDiff` (pre-commit staged diff) with `getCommitDiff(hash)` using `git show` so the entry reflects the actual committed changes; passes the real short hash into the prompt and amends the commit to include the updated `CHANGELOG.md`
+- **`post-commit`** — New hook that runs `changelog.mjs` after the commit exists, enabling access to the correct commit hash
+- **`pre-commit`** — Removed changelog generation so it no longer runs on staged diff before the commit hash is available
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with correct hash
+
+**Commit:** `d568948`
+
+### Infrastructure
+
+- **`changelog.mjs`** — Replaced `getStagedDiff()` (pre-commit staged diff) with `getCommitDiff(hash)` using `git show`, so the changelog reflects the actual committed content rather than staged changes
+- **`changelog.mjs`** — Updated `buildPrompt()` to include the commit hash and enforce a structured format with h2 heading, commit reference, and h3 subsections per category
+- **`changelog.mjs`** — After writing the changelog, amends the current commit with `--no-verify` to include `CHANGELOG.md` without re-triggering hooks
+- **`post-commit`** — New hook that runs `changelog.mjs` after the commit is created, replacing the previous pre-commit execution
+- **`pre-commit`** — Removed changelog generation; now only runs `lint-staged`
+
+
+## [2026-04-21] — Improve automated changelog: post-commit hook with correct hash and format
+
+**Commit:** `bdb079e`
+
+### Infrastructure
+
+- **`.husky/changelog.mjs`** — Switched from staged diff (`git diff --cached`) to committed diff (`git show <hash>`) so the changelog always reflects the actual commit; passes commit hash into the prompt and amends the commit to include the updated `CHANGELOG.md`
+- **`.husky/post-commit`** — New hook that runs `changelog.mjs` after the commit lands, replacing the previous pre-commit invocation
+- **`.husky/pre-commit`** — Removed changelog generation; now only runs `lint-staged`
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook
+
+**Commit:** `c0c38e6`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook created to run changelog generation after commit, so the correct commit hash is available
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit; now only runs `lint-staged`
+- **`.husky/changelog.mjs`** — Switched from `git diff --cached` to `git show <hash>` so the diff reflects the actual commit; updated `buildPrompt` to include the commit hash and use the new structured format with h2 heading, commit reference, and h3 subsections; amends the commit after writing `CHANGELOG.md` to bundle the entry into the same commit
+
+
+## [2026-04-21] — Move changelog generation from pre-commit to post-commit hook
+
+**Commit:** `5019101`
+
+### Infrastructure
+
+- **`changelog.mjs`** — Replaced `getStagedDiff()` with `getCommitDiff(hash)` so the changelog reads the actual commit diff instead of the staged index; updated `buildPrompt` to include the commit hash and enforce the structured format with h2 heading, commit reference, and h3 subsections
+- **`post-commit`** — New hook that runs `changelog.mjs` after the commit is created, then amends the commit to include the updated `CHANGELOG.md` (with `--no-verify` to prevent hook re-entry)
+- **`pre-commit`** — Removed changelog generation; now only runs `lint-staged`
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with improved format
+
+**Commit:** `8789c9a`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook that runs changelog generation after commit, so the correct commit hash is available via `git rev-parse --short HEAD`
+- **`.husky/pre-commit`** — Removed changelog generation; now only runs `lint-staged`
+- **`.husky/changelog.mjs`** — Switched from `git diff --cached` to `git show <hash>` to diff the actual commit; updated prompt to include commit hash and enforce a structured format with h2 heading, commit reference, and h3 subsections; amends the commit after writing `CHANGELOG.md` to include it in the same commit
+
+
+## [2026-04-21] — Fix automated changelog to run post-commit with correct hash
+
+**Commit:** `59dccb7`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook added to run `changelog.mjs` after the commit, so the correct commit hash is available
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit to avoid using a not-yet-created hash
+- **`.husky/changelog.mjs`** — Switched from `git diff --cached` to `git show <hash>` so the diff reflects the actual commit; added hash injection into the prompt and amended the commit to include the updated `CHANGELOG.md`
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with improved format
+
+**Commit:** `f7de590`
+
+### Infrastructure
+
+- **`.husky/changelog.mjs`** — Switched from reading staged diff (`git diff --cached`) to reading the committed diff (`git show <hash>`), so the changelog reflects the actual commit; added `git commit --amend --no-verify` to fold the updated `CHANGELOG.md` back into the commit automatically
+- **`.husky/changelog.mjs`** — Updated `buildPrompt` to include the commit hash and emit a structured format with h2 heading, bold commit reference, and h3 subsections instead of a flat bullet list
+- **`.husky/post-commit`** — New hook that runs `changelog.mjs` after each commit, replacing the previous pre-commit invocation
+- **`.husky/pre-commit`** — Removed changelog generation; now only runs `lint-staged`
+
+
+## [2026-04-21] — Improve automated changelog: post-commit hook with correct hash and matching format
+
+**Commit:** `5726bd5`
+
+### Infrastructure
+
+- **`.husky/changelog.mjs`** — Switched from reading staged diff to reading the committed diff via `git show <hash>`, so the changelog entry reflects the actual commit; added commit hash to the prompt and updated the format template to match the structured h2/h3 style with bold backtick bullets
+- **`.husky/post-commit`** — New hook that runs `changelog.mjs` after commit (instead of pre-commit), enabling the script to reference the real commit hash and amend the commit to include the updated `CHANGELOG.md`
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit; now only runs `lint-staged`
+
+
+## [2026-04-21] — Improve automated changelog to run post-commit with correct hash
+
+**Commit:** `71415b2`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook that runs the changelog script after commit, so the correct commit hash is available
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit to avoid using a hash that doesn't exist yet
+- **`.husky/changelog.mjs`** — Switched from `git diff --cached` to `git show <hash>` to diff the actual commit; passes the real short hash into the prompt and amends the commit to include the updated `CHANGELOG.md`
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with correct hash
+
+**Commit:** `53c2a30`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook introduced to run changelog generation after commit, so the real commit hash is available
+- **`.husky/pre-commit`** — Removed changelog generation step; now only runs `lint-staged`
+- **`.husky/changelog.mjs`** — Switched from `git diff --cached` to `git show <hash>` so the diff reflects the actual commit; passes commit hash into the prompt and amends the commit to include the updated `CHANGELOG.md`
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with correct hash and structured format
+
+**Commit:** `f5f0459`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook added to run changelog generation after commit, so the correct commit hash is available
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit to avoid running before the hash exists
+- **`.husky/changelog.mjs`** — Switched from `git diff --cached` to `git show <hash>` so the diff reflects the actual commit; added `git commit --amend --no-verify` to fold the updated `CHANGELOG.md` back into the commit; updated prompt format to include commit hash reference and structured `h2`/`h3` output with bold-backtick bullets
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with improved format
+
+**Commit:** `5fc8d13`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook that runs changelog generation after commit, so the correct commit hash is available via `git rev-parse --short HEAD`
+- **`.husky/pre-commit`** — Removed changelog generation; now only runs `lint-staged`
+- **`.husky/changelog.mjs`** — Switched from `git diff --cached` to `git show <hash>` to diff the actual commit; updated `buildPrompt` to include the commit hash and produce a structured format with h2 heading, `**Commit:**` reference, and h3 subsections; amends the commit after writing to include `CHANGELOG.md` in the same commit
+
+
+## [2026-04-21] — Improve automated changelog: post-commit hook with correct hash and matching format
+
+**Commit:** `a853366`
+
+### Infrastructure
+
+- **`changelog.mjs`** — Switched from diffing staged changes to diffing the actual commit (`git show`), so the changelog always reflects what was committed; added commit hash injection into the generated entry format; updated prompt template to match the structured h2/h3 format with bold backtick bullets
+- **`post-commit`** — New hook that runs `changelog.mjs` after each commit, then amends the commit to include the updated `CHANGELOG.md`
+- **`pre-commit`** — Removed changelog generation from pre-commit, moving it to post-commit so the real commit hash is available
+
+
+## [2026-04-21] — Move changelog generation from pre-commit to post-commit hook
+
+**Commit:** `7549006`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook that runs changelog generation after the commit is created, so the correct commit hash is available
+- **`.husky/pre-commit`** — Removed changelog script invocation; now only runs `lint-staged`
+- **`.husky/changelog.mjs`** — Switched from diffing staged changes (`git diff --cached`) to diffing the actual commit (`git show <hash>`); passes commit hash into the prompt template; amends the commit after writing the changelog to include `CHANGELOG.md` in the same commit
+
+
+## [2026-04-21] — Improve automated changelog to run post-commit with correct hash
+
+**Commit:** `17a3261`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook created to run changelog generation after commit, so the real commit hash is available
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit to avoid running before the hash exists
+- **`.husky/changelog.mjs`** — Switched from staged diff to `git show <hash>` for accurate per-commit diffs; passes commit hash into prompt and amends the commit to include the updated `CHANGELOG.md`
+
+
+## [2026-04-21] — Improve automated changelog: post-commit hook with correct hash and matching format
+
+**Commit:** `51ab9f1`
+
+### Infrastructure
+
+- **`.husky/changelog.mjs`** — Switched from `getStagedDiff` (pre-commit, cached diff) to `getCommitDiff` using `git show <hash>` so the changelog reflects the actual commit; added commit hash to the prompt and updated the output format to use h2 headings, `**Commit:**` reference, and h3 subsections with bold-backtick bullets
+- **`.husky/post-commit`** — New hook that runs `changelog.mjs` after the commit is created, enabling the script to amend the commit with the updated `CHANGELOG.md` via `git commit --amend --no-edit --no-verify`
+- **`.husky/pre-commit`** — Removed `changelog.mjs` invocation; now only runs `lint-staged`, since changelog generation is moved to post-commit
+
+
+## [2026-04-21] — Move changelog generation from pre-commit to post-commit hook
+
+**Commit:** `3a56a06`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook that runs `changelog.mjs` after commit, so the correct commit hash is available when generating the entry
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit to eliminate the race condition where the hash wasn't yet known
+- **`.husky/changelog.mjs`** — Switched from `git diff --cached` to `git show <hash>` so the diff is read from the completed commit; updated `buildPrompt` to accept and embed the commit hash; added `git commit --amend --no-edit --no-verify` at the end to fold the updated `CHANGELOG.md` back into the commit; improved prompt format to require an h2 heading, `**Commit:**` reference line, and structured h3 subsections
+
+
+## [2026-04-21] — Improve automated changelog with post-commit hook and correct diff format
+
+**Commit:** `c947919`
+
+### Infrastructure
+
+- **`.husky/changelog.mjs`** — Switched from staged diff (`git diff --cached`) to committed diff (`git show <hash>`) so the changelog reflects the actual commit; added commit hash to the generated entry format; updated prompt template to enforce the new structured format with h2 heading, commit reference, and h3 subsections
+- **`.husky/post-commit`** — New hook that runs `changelog.mjs` after commit so the hash is available; replaces the pre-commit approach
+- **`.husky/pre-commit`** — Removed changelog generation, now only runs `lint-staged`
+
+
+## [2026-04-21] — Move changelog generation from pre-commit to post-commit hook
+
+**Commit:** `ea5bb49`
+
+### Infrastructure
+
+- **`changelog.mjs`** — Replaced `getStagedDiff` (pre-commit staged diff) with `getCommitDiff` (post-commit `git show`), so the changelog is generated from the actual commit hash rather than staged changes
+- **`changelog.mjs`** — Updated `buildPrompt` to accept and embed the commit hash, and rewrote the prompt format to use h2 headings, `**Commit:**` reference, and structured h3 subsections matching the new changelog style
+- **`changelog.mjs`** — Added `git commit --amend --no-edit --no-verify` at the end to fold the updated `CHANGELOG.md` back into the triggering commit
+- **`post-commit`** — New hook that runs `changelog.mjs` after each commit, replacing the previous `pre-commit` invocation
+- **`pre-commit`** — Removed changelog generation step; now only runs `lint-staged`
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with improved format
+
+**Commit:** `a46d7c9`
+
+### Infrastructure
+
+- **`changelog.mjs`** — Switched from diffing staged changes to diffing the committed hash via `git show`, ensuring the changelog reflects the actual commit rather than pre-commit state
+- **`changelog.mjs`** — Updated prompt format to require h2 heading, `**Commit:**` reference, and h3 subsections, matching a richer structured output
+- **`post-commit`** — New hook added to run `changelog.mjs` after the commit is created, so the correct commit hash is available
+- **`pre-commit`** — Removed changelog generation step; now only runs `lint-staged`
+- **`changelog.mjs`** — Amends the commit after writing `CHANGELOG.md` via `git commit --amend --no-edit --no-verify` to include the changelog update in the same commit
+
+
+## [2026-04-21] — Improve automated changelog to run post-commit with correct hash
+
+**Commit:** `eebeeea`
+
+### Infrastructure
+
+- **`changelog.mjs`** — Switched from pre-commit staged diff to post-commit approach, reading the actual commit hash via `git rev-parse --short HEAD` and diffing with `git show` so the entry always references the correct hash
+- **`changelog.mjs`** — Updated prompt to enforce the structured format with h2 heading, commit reference, and h3 subsections (Frontend/Backend/Infrastructure), replacing the old freeform bullet list format
+- **`changelog.mjs`** — Added `git commit --amend --no-edit --no-verify` after writing CHANGELOG.md so the updated file is folded into the triggering commit
+- **`post-commit`** — New hook that runs `changelog.mjs` after each commit, replacing the previous `pre-commit` invocation
+- **`pre-commit`** — Removed `changelog.mjs` call; now only runs `lint-staged`
+
+
+## [2026-04-21] — Improve automated changelog to run post-commit with correct hash
+
+**Commit:** `9efec3f`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook added to run `changelog.mjs` after commit, replacing the pre-commit approach so the real commit hash is available
+- **`.husky/pre-commit`** — Removed changelog generation step; now only runs `lint-staged`
+- **`.husky/changelog.mjs`** — Switched from `git diff --cached` to `git show <hash>` so the diff reflects the actual commit; updated `buildPrompt` to include the commit hash and enforce a structured format with h2 heading, commit reference, and h3 subsections; amends the commit after writing the changelog entry to include `CHANGELOG.md` in the same commit
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with accurate diff and format
+
+**Commit:** `7b8b34a`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook that runs changelog generation after the commit, so the correct commit hash is available
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit; now only runs `lint-staged`
+- **`.husky/changelog.mjs`** — Switched from `git diff --cached` to `git show <hash>` so the diff reflects the actual commit; added commit hash to the prompt and updated output format to use h2 headings with a `**Commit:**` reference and h3 subsections; amends the commit after writing `CHANGELOG.md` to include it in the same commit
+
+
+## [2026-04-21] — Improve automated changelog to run post-commit with correct hash
+
+**Commit:** `962cdb8`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook created to run changelog generation after the commit, so the correct commit hash is available
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit to avoid running before the hash exists
+- **`.husky/changelog.mjs`** — Switched from `getStagedDiff` (pre-commit staged diff) to `getCommitDiff(hash)` (post-commit `git show`); passes commit hash into the prompt and amends the commit to include the updated `CHANGELOG.md` via `--no-verify`
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with improved format
+
+**Commit:** `339850b`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook that runs changelog generation after commit, so the correct commit hash is available via `git rev-parse --short HEAD`
+- **`.husky/pre-commit`** — Removed changelog generation step; now only runs `lint-staged`
+- **`.husky/changelog.mjs`** — Switched from `git diff --cached` to `git show <hash>` to diff the actual commit; updated prompt to include commit hash and enforce structured format with h2 heading, `**Commit:**` reference, and h3 subsections; amends the commit after writing changelog to bundle it in the same commit
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with improved format
+
+**Commit:** `e2d259b`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook added to run changelog generation after commit, so the correct commit hash is available
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit to eliminate the chicken-and-egg problem with commit hashes
+- **`.husky/changelog.mjs`** — Switched from staged diff (`git diff --cached`) to committed diff (`git show <hash>`); passes commit hash into prompt; amends the commit to include the updated `CHANGELOG.md` via `--no-edit --no-verify`; updated prompt template to enforce structured h2/h3 format with bold-backtick bullet style
+
+
+## [2026-04-21] — Move changelog generation to post-commit hook with improved format
+
+**Commit:** `4866a41`
+
+### Infrastructure
+
+- **`.husky/post-commit`** — New hook added to run changelog generation after commit, so the correct commit hash is available via `git rev-parse --short HEAD`
+- **`.husky/pre-commit`** — Removed changelog generation step; pre-commit now only runs `lint-staged`
+- **`.husky/changelog.mjs`** — Switched from `git diff --cached` to `git show <hash>` to diff the actual commit; updated prompt format to include commit hash, h2 headings, bold-backtick bullet structure, and categorised subsections matching the new changelog style
+
+
+## [2026-04-21] — Automated changelog now runs post-commit with correct hash
+
+**Commit:** `db8e7d4`
+
+### Infrastructure
+
+- **`.husky/changelog.mjs`** — Switched from reading staged diff (`git diff --cached`) to reading the actual commit diff (`git show <hash>`), so the changelog reflects the real commit rather than pre-commit state; prompt updated to include commit hash and output a structured format with h2 heading, commit reference, and h3 subsections
+- **`.husky/post-commit`** — New hook added to trigger changelog generation after the commit exists, replacing the previous pre-commit approach
+- **`.husky/pre-commit`** — Removed changelog generation from pre-commit; now only runs `lint-staged`
+
+
+## [2026-04-21] — UI polish, typography improvements, and automated changelog
+
+**Commit:** `0a16efb`
+
+### Frontend
+
+- **`animations.ts`** — Refactored animation exports to use `ANIMATION_VARIANTS` namespace; updated `PageLayout` and `SectionHeader` to consume the new export
+- **`globals.css`** — Applied `text-wrap: balance` to headings, `text-wrap: pretty` to paragraphs, and `-webkit-font-smoothing: antialiased` for sharper text rendering
+- **`EventStats`** — Added `tabular-nums` to confirmed count, capacity, and waitlist numeric fields to prevent layout shift on number changes
+- **Tap animations** — Unified `whileTap` scale to `0.96` across `AlertNative`, `ContextMenu`, `TabBar`, `ConfirmationDialog`, `HomeUpcomingEvents`, and `PastEventsList`; spring transitions updated to `{ duration: 0.3, bounce: 0 }` for a crisper feel
+- **`PageHeader`** — Removed `whileTap` scale from back-navigation button
+
+### Infrastructure
+
+- **`.husky/changelog.mjs`** — Pre-commit hook added that auto-generates a changelog entry via `claude -p` on every commit, based on the actual staged diff
+
+---
+
+## Development History
+
+_Retrospective overview of the first 185 commits, grouped by development phase._
 
 ---
 

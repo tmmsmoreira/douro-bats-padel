@@ -1,2 +1,1 @@
-node .husky/changelog.mjs
 pnpm exec lint-staged

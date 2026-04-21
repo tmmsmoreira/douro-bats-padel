@@ -217,6 +217,8 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     /* Prevent pull-to-refresh on body (we have custom implementation) */
     overscroll-behavior-y: contain;
   }
@@ -228,6 +230,11 @@
   h5,
   h6 {
     font-family: var(--font-heading);
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
   }
 
   /* Hide scrollbars on mobile for native feel */

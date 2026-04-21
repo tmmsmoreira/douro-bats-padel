@@ -154,7 +154,7 @@ export function AlertNative({
                     onClick={() => handleActionClick(action)}
                     className={cn(
                       'touch-target no-tap-highlight transition-colors',
-                      'active:scale-[0.98]',
+                      'active:scale-[0.96]',
                       isIOS
                         ? cn(
                             'flex-1 py-3 text-base font-medium',

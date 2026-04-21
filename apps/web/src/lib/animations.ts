@@ -95,7 +95,7 @@ export const staggerItem: Variants = {
  */
 export const cardHover = {
   whileHover: { y: -2, scale: 1.01 },
-  whileTap: { scale: 0.99 },
+  whileTap: { scale: 0.96 },
   transition: { duration: 0.2 },
 };
 

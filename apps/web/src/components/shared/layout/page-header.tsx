@@ -42,7 +42,6 @@ export function PageHeader({
           initial={isBackNav ? false : { opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: isBackNav ? 0 : 0.25, ease: 'easeOut' }}
-          whileTap={{ scale: 0.97 }}
           onMouseEnter={() => arrowLeftIconRef.current?.startAnimation()}
           onMouseLeave={() => arrowLeftIconRef.current?.stopAnimation()}
           style={{ display: 'inline-block' }}

@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { slideDown } from '@/lib/animations';
+import { ANIMATION_VARIANTS } from '@/lib/animations';
 import { cn } from '@/lib/utils';
 
 interface SectionHeaderProps {
@@ -83,7 +83,7 @@ export function SectionHeader({
   );
 
   if (animate) {
-    return <motion.div {...slideDown}>{content}</motion.div>;
+    return <motion.div {...ANIMATION_VARIANTS.slideDown}>{content}</motion.div>;
   }
 
   return content;

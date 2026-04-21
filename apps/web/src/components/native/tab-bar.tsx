@@ -115,7 +115,7 @@ export function TabBar({ items, activeTab, onTabChange, className, variant = 'io
                 'touch-target no-tap-highlight',
                 'transition-colors duration-200',
                 'disabled:opacity-40 disabled:cursor-not-allowed',
-                !item.disabled && 'active:scale-95'
+                !item.disabled && 'active:scale-[0.96]'
               )}
             >
               {/* Icon */}

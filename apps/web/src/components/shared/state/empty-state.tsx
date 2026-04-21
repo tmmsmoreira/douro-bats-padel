@@ -2,7 +2,7 @@
 
 import { motion } from 'motion/react';
 import { Card, CardContent } from '@/components/ui/card';
-import { fadeInScale } from '@/lib/animations';
+import { ANIMATION_VARIANTS } from '@/lib/animations';
 import { cn } from '@/lib/utils';
 import type { LucideIcon } from 'lucide-react';
 
@@ -85,7 +85,7 @@ export function EmptyState({
   );
 
   if (animate) {
-    return <motion.div {...fadeInScale}>{content}</motion.div>;
+    return <motion.div {...ANIMATION_VARIANTS.fadeInScale}>{content}</motion.div>;
   }
 
   return content;

@@ -211,7 +211,7 @@ export function ContextMenu({
                       item.destructive
                         ? 'text-destructive hover:bg-destructive/10 active:bg-destructive/20'
                         : 'text-foreground hover:bg-accent active:bg-accent/80',
-                      !item.disabled && 'active:scale-[0.98]'
+                      !item.disabled && 'active:scale-[0.96]'
                     )}
                     role="menuitem"
                   >

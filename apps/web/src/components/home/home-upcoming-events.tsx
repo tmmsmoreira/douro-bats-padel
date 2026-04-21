@@ -75,8 +75,8 @@ export function HomeUpcomingEvents() {
                     },
                   }}
                   whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                  whileTap={{ scale: 0.96 }}
+                  transition={{ type: 'spring', duration: 0.3, bounce: 0 }}
                 >
                   <Link href={`/events/${event.id}`} className="block">
                     <EventCard

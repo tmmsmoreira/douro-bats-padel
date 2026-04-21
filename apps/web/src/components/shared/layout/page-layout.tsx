@@ -2,7 +2,7 @@
 
 import { motion } from 'motion/react';
 import { Footer } from '@/components/public/footer';
-import { pageTransition } from '@/lib/animations';
+import { ANIMATION_VARIANTS } from '@/lib/animations';
 import { cn } from '@/lib/utils';
 import { SkipLinks } from '@/components/shared/nav/skip-links';
 import { useIsFromBfcache } from '@/hooks';
@@ -115,7 +115,7 @@ export function PageLayout({
       {/* Add padding-top to account for fixed navbar (4rem height + safe-area-inset + 1px border) */}
       <div style={{ paddingTop: 'calc(4rem + env(safe-area-inset-top, 0px) + 1px)' }}>
         {animate && !isBackNav ? (
-          <motion.div {...pageTransition} className="flex-1 flex flex-col">
+          <motion.div {...ANIMATION_VARIANTS.pageTransition} className="flex-1 flex flex-col">
             {mainContent}
           </motion.div>
         ) : (

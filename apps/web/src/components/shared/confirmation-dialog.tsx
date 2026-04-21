@@ -52,14 +52,16 @@ export function ConfirmationDialog({
         <AlertDialogFooter>
           <motion.div
             whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            whileTap={{ scale: 0.96 }}
+            transition={{ type: 'spring', duration: 0.3, bounce: 0 }}
             className="flex flex-col"
           >
             <AlertDialogCancel disabled={isLoading}>{cancelText}</AlertDialogCancel>
           </motion.div>
           <motion.div
             whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            whileTap={{ scale: 0.96 }}
+            transition={{ type: 'spring', duration: 0.3, bounce: 0 }}
             className="flex flex-col"
           >
             <AlertDialogAction

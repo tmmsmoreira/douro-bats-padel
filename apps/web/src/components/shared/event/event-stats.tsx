@@ -24,8 +24,10 @@ export function EventStats({
       <Users className="w-4 h-4 text-muted-foreground shrink-0" />
       <div className="flex items-center gap-3 text-sm flex-1 sm:flex-none">
         <span className="whitespace-nowrap">
-          <span className="font-bold text-foreground text-base">{event.confirmedCount}</span>
-          <span className="text-muted-foreground">
+          <span className="font-bold text-foreground text-base tabular-nums">
+            {event.confirmedCount}
+          </span>
+          <span className="text-muted-foreground tabular-nums">
             {' '}
             / {event.capacity} {confirmedLabel}
           </span>
@@ -42,7 +44,7 @@ export function EventStats({
         )}
       </div>
       {event.waitlistCount > 0 && (
-        <span className="text-sm text-muted-foreground whitespace-nowrap">
+        <span className="text-sm text-muted-foreground whitespace-nowrap tabular-nums">
           {event.waitlistCount} {waitlistedLabel}
         </span>
       )}

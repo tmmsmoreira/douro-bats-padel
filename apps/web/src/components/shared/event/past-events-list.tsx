@@ -60,8 +60,8 @@ export function PastEventsList() {
                     show: { opacity: 1, y: 0, transition: { duration: isFromBfcache ? 0 : 0.4 } },
                   }}
                   className="opacity-90"
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
+                  whileTap={{ scale: 0.96 }}
+                  transition={{ type: 'spring', duration: 0.3, bounce: 0 }}
                 >
                   <Link href={`/events/${event.id}`} className="block">
                     <EventCard

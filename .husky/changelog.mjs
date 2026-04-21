@@ -2,6 +2,12 @@
 import { execSync } from "child_process";
 import { readFileSync, writeFileSync } from "fs";
 
+// Guard against re-entry: --no-verify skips pre-commit/commit-msg but NOT post-commit,
+// so the amend at the end would trigger this hook again infinitely.
+if (process.env.CHANGELOG_RUNNING) {
+  process.exit(0);
+}
+
 const INSERT_MARKER = "<!-- CHANGELOG_INSERT_POINT -->";
 
 function getCommitDiff(hash) {
@@ -98,5 +104,7 @@ const updated =
 writeFileSync("CHANGELOG.md", updated);
 execSync("git add CHANGELOG.md");
 // Amend the commit to include CHANGELOG.md; --no-verify prevents re-running hooks
-execSync("git commit --amend --no-edit --no-verify");
+execSync("git commit --amend --no-edit --no-verify", {
+  env: { ...process.env, CHANGELOG_RUNNING: "1" },
+});
 console.log("✓ Changelog updated");

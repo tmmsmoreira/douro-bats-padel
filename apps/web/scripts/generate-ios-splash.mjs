@@ -2,9 +2,13 @@
 /**
  * Generates iOS PWA startup (splash) images.
  *
- * Composites `public/icons/logo.png` (centered, ~33% of shortest side)
- * onto a solid brand-green background, in portrait + landscape for each
- * supported device. Output: `public/icons/splash/apple-splash-{w}-{h}.png`.
+ * Renders the home-page background (base color + `primary/20 → secondary/20`
+ * top-right gradient) and composites `public/icons/logo.png` centered on top.
+ * Output: `public/icons/splash/apple-splash-{w}-{h}.png`.
+ *
+ * Colors mirror the `--primary` / `--secondary` / `--background` tokens in
+ * `src/app/globals.css`. Update here AND in the inline critical CSS in
+ * `src/app/[lang]/layout.tsx` if those oklch tokens change.
  *
  * Device list matches the `<link rel="apple-touch-startup-image">` tags in
  * `src/app/[lang]/layout.tsx`. When adding a new device, update both.
@@ -20,7 +24,13 @@ const PUBLIC_DIR = join(__dirname, '..', 'public');
 const LOGO = join(PUBLIC_DIR, 'icons', 'logo.png');
 const OUT_DIR = join(PUBLIC_DIR, 'icons', 'splash');
 
-const BACKGROUND = { r: 0x16, g: 0xa3, b: 0x4a, alpha: 1 }; // #16a34a
+// Mirrors globals.css light-mode tokens (oklch → sRGB hex, pre-computed).
+// Dark-mode splash not generated: iOS manifest doesn't support per-scheme
+// startup images without doubling the PNG count + media queries.
+const BASE = '#fafafa'; // --background (light)
+const PRIMARY = 'rgb(167,216,0)'; // --primary
+const SECONDARY = 'rgb(74,139,222)'; // --secondary
+const GRADIENT_OPACITY = 0.2;
 const LOGO_RATIO = 0.33;
 
 // Portrait dimensions: [width, height, label]. Landscape is flipped automatically.
@@ -39,6 +49,21 @@ const DEVICES = [
   [1488, 2266, 'iPad mini 6'],
 ];
 
+function buildBackgroundSvg(width, height) {
+  // Gradient goes from bottom-left (primary) to top-right (secondary),
+  // matching Tailwind's `bg-linear-to-tr from-primary/20 to-secondary/20`.
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="${PRIMARY}" stop-opacity="${GRADIENT_OPACITY}"/>
+      <stop offset="100%" stop-color="${SECONDARY}" stop-opacity="${GRADIENT_OPACITY}"/>
+    </linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="${BASE}"/>
+  <rect width="100%" height="100%" fill="url(#g)"/>
+</svg>`;
+}
+
 await mkdir(OUT_DIR, { recursive: true });
 
 for (const [pw, ph, label] of DEVICES) {
@@ -55,10 +80,10 @@ for (const [pw, ph, label] of DEVICES) {
       .png()
       .toBuffer();
 
+    const bgSvg = Buffer.from(buildBackgroundSvg(width, height));
     const filename = `apple-splash-${width}-${height}.png`;
-    await sharp({
-      create: { width, height, channels: 4, background: BACKGROUND },
-    })
+
+    await sharp(bgSvg)
       .composite([{ input: logoBuffer, gravity: 'center' }])
       .png({ compressionLevel: 9 })
       .toFile(join(OUT_DIR, filename));

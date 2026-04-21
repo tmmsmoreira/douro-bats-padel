@@ -141,3 +141,118 @@ describe('MatchesService.publishMatches', () => {
     await expect(service.publishMatches('e1')).resolves.toBeDefined();
   });
 });
+
+describe('MatchesService.getMatches', () => {
+  let prisma: PrismaMock;
+  let service: MatchesService;
+
+  beforeEach(() => {
+    prisma = createPrismaMock();
+    service = new MatchesService(prisma as any, { computeRankingsForEvent: jest.fn() } as any);
+  });
+
+  it('returns the raw match list when no draw exists for the event', async () => {
+    const matches = [{ id: 'm1', round: 1, courtId: 'c1', setsA: 2, setsB: 1, court: {} }];
+    prisma.match.findMany.mockResolvedValue(matches);
+    prisma.draw.findFirst.mockResolvedValue(null);
+
+    const result = await service.getMatches('e1');
+
+    // Without a draw, the service has no way to resolve team rosters — hand back
+    // the raw matches so the controller still returns something useful.
+    expect(result).toEqual(matches);
+    expect(prisma.playerProfile.findMany).not.toHaveBeenCalled();
+  });
+
+  it('enriches matches with team player names, ratings, and rating deltas from snapshots', async () => {
+    prisma.match.findMany.mockResolvedValue([
+      { id: 'm1', round: 1, courtId: 'c1', setsA: 2, setsB: 1, court: { id: 'c1' } },
+    ]);
+    prisma.draw.findFirst.mockResolvedValue({
+      id: 'draw-1',
+      assignments: [{ round: 1, courtId: 'c1', teamA: ['p1', 'p2'], teamB: ['p3', 'p4'] }],
+    });
+    prisma.playerProfile.findMany.mockResolvedValue([
+      { id: 'p1', rating: 320, user: { name: 'P1', profilePhoto: 'p1.jpg' } },
+      { id: 'p2', rating: 310, user: { name: 'P2', profilePhoto: null } },
+      { id: 'p3', rating: 290, user: { name: 'P3', profilePhoto: null } },
+      { id: 'p4', rating: 280, user: { name: 'P4', profilePhoto: null } },
+    ]);
+    prisma.rankingSnapshot.findMany.mockResolvedValue([
+      { playerId: 'p1', before: 300, after: 320 }, // +20
+      { playerId: 'p3', before: 300, after: 290 }, // -10
+    ]);
+
+    const [enriched] = await service.getMatches('e1');
+
+    expect(enriched.teamA).toEqual([
+      { id: 'p1', name: 'P1', rating: 320, profilePhoto: 'p1.jpg', ratingDelta: 20 },
+      { id: 'p2', name: 'P2', rating: 310, profilePhoto: null, ratingDelta: undefined },
+    ]);
+    expect(enriched.teamB).toEqual([
+      { id: 'p3', name: 'P3', rating: 290, profilePhoto: null, ratingDelta: -10 },
+      { id: 'p4', name: 'P4', rating: 280, profilePhoto: null, ratingDelta: undefined },
+    ]);
+  });
+
+  it('leaves teamA/teamB undefined when no assignment exists for a match slot', async () => {
+    // Stale match with no corresponding assignment (e.g. draw was regenerated
+    // without the old round/court combo). Should still return the match.
+    prisma.match.findMany.mockResolvedValue([
+      { id: 'm1', round: 5, courtId: 'c-ghost', setsA: 0, setsB: 0, court: null },
+    ]);
+    prisma.draw.findFirst.mockResolvedValue({
+      id: 'draw-1',
+      assignments: [{ round: 1, courtId: 'c1', teamA: ['p1', 'p2'], teamB: ['p3', 'p4'] }],
+    });
+    prisma.playerProfile.findMany.mockResolvedValue([]);
+    prisma.rankingSnapshot.findMany.mockResolvedValue([]);
+
+    const [match] = await service.getMatches('e1');
+
+    expect(match.id).toBe('m1');
+    expect(match.teamA).toBeUndefined();
+    expect(match.teamB).toBeUndefined();
+  });
+
+  it('handles missing player profiles gracefully (returns undefined name/rating)', async () => {
+    prisma.match.findMany.mockResolvedValue([
+      { id: 'm1', round: 1, courtId: 'c1', setsA: 2, setsB: 1, court: {} },
+    ]);
+    prisma.draw.findFirst.mockResolvedValue({
+      id: 'draw-1',
+      assignments: [{ round: 1, courtId: 'c1', teamA: ['ghost', 'p2'], teamB: ['p3', 'p4'] }],
+    });
+    prisma.playerProfile.findMany.mockResolvedValue([
+      { id: 'p2', rating: 310, user: { name: 'P2', profilePhoto: null } },
+      { id: 'p3', rating: 290, user: { name: 'P3', profilePhoto: null } },
+      { id: 'p4', rating: 280, user: { name: 'P4', profilePhoto: null } },
+    ]);
+    prisma.rankingSnapshot.findMany.mockResolvedValue([]);
+
+    const [match] = await service.getMatches('e1');
+
+    expect(match.teamA[0]).toEqual({
+      id: 'ghost',
+      name: undefined,
+      rating: undefined,
+      profilePhoto: undefined,
+      ratingDelta: undefined,
+    });
+    expect(match.teamA[1].name).toBe('P2');
+  });
+
+  it('queries matches for the given event ordered by (round, courtId)', async () => {
+    prisma.match.findMany.mockResolvedValue([]);
+    prisma.draw.findFirst.mockResolvedValue(null);
+
+    await service.getMatches('e-xyz');
+
+    expect(prisma.match.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { eventId: 'e-xyz' },
+        orderBy: [{ round: 'asc' }, { courtId: 'asc' }],
+      })
+    );
+  });
+});

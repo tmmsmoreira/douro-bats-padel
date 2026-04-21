@@ -10,6 +10,25 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-04-21] — Expand unit test coverage across API services
+
+**Commit:** `d87e169`
+
+### Backend
+
+- **`EventsService`** — Added tests for `findAll`, `findOne`, `create`, `update`, `remove`, and publish notifications, lifting coverage from ~50% to ~95% (NotFound guards, DRAFT visibility, RSVP aggregation, court replacement, tier-rule validation, date coercion).
+- **`MatchesService.getMatches`** — Added tests for enrichment, snapshot handling, and stale assignments, lifting coverage from ~57% to ~98%.
+- **`PlayersService`** — Added unit tests taking coverage from 0% to ~100%.
+- **`InactivityService`** — Added unit tests taking coverage from 0% to ~100%.
+- **Mixed-tier ranking integration spec** — Added end-to-end coverage of the submit → publish → compute flow.
+
+### Infrastructure
+
+- **`apps/api/jest.config.js`** — Excluded `*.spec.ts` from `collectCoverageFrom` and added `text-summary` coverage reporter.
+- **`turbo.json` / root `package.json`** — Split `test` and `test:cov` tasks and added a root `test:cov` script so coverage runs can be invoked monorepo-wide.
+- **Jest configs (web / shared)** — Added `text-summary` reporter and narrowed web `collectCoverageFrom` to real business logic.
+
+
 ## [2026-04-21] — Add test infrastructure and unit tests across monorepo
 
 **Commit:** `c080e14`

@@ -31,6 +31,7 @@ module.exports = {
   },
   collectCoverageFrom: [
     'src/**/*.ts',
+    '!src/**/*.spec.ts',
     '!src/**/*.module.ts',
     '!src/**/*.dto.ts',
     '!src/**/dto/**',
@@ -38,5 +39,6 @@ module.exports = {
     '!src/index.ts',
   ],
   coverageDirectory: 'coverage',
+  coverageReporters: ['text', 'text-summary'],
   clearMocks: true,
 };

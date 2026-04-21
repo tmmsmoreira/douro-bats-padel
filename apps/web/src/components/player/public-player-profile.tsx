@@ -30,6 +30,7 @@ import { ConfirmationDialog } from '../shared/confirmation-dialog';
 import { motion } from 'motion/react';
 import { DataStateWrapper } from '@/components/shared/state/data-state-wrapper';
 import { PlayerProfileSkeleton } from '@/components/shared/player';
+import { PageHeaderSkeleton } from '@/components/shared/skeletons';
 import { useIsFromBfcache } from '@/hooks';
 import { PageHeader } from '@/components/shared/layout/page-header';
 import { StatusBadge } from '@/components/shared/status-badge';
@@ -163,33 +164,47 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
       isLoading={isLoading}
       data={player}
       loadingMessage={t('loadingProfile')}
-      loadingComponent={<PlayerProfileSkeleton />}
+      loadingComponent={
+        <div className="space-y-4 sm:space-y-6">
+          <PageHeaderSkeleton withBackButton />
+          <PlayerProfileSkeleton />
+        </div>
+      }
       emptyMessage={t('profileNotFound')}
       emptyComponent={emptyComponent}
       error={error as Error}
       errorMessage={`${t('errorLoadingProfile')}: ${(error as Error)?.message || ''}`}
     >
       {(player) => (
-        <PublicPlayerProfileContent
-          player={player}
-          leaderboard={leaderboard}
-          isAdminOrEditor={isAdminOrEditor}
-          handleDeleteUser={handleDeleteUser}
-          isDeleting={isDeleting}
-          showDeleteDialog={showDeleteDialog}
-          setShowDeleteDialog={setShowDeleteDialog}
-          showRevokeDialog={showRevokeDialog}
-          setShowRevokeDialog={setShowRevokeDialog}
-          setIsDeleting={setIsDeleting}
-          deleteMutation={deleteMutation}
-          revokeMutation={revokeMutation}
-          resendMutation={resendMutation}
-          copyInvitationLink={copyInvitationLink}
-          t={t}
-          tList={tList}
-          tActions={tActions}
-          locale={locale}
-        />
+        <div className="space-y-4 sm:space-y-6">
+          <PageHeader
+            title={tList('playerProfile')}
+            description={tList('playerProfileDescription')}
+            showBackButton
+            backButtonHref="/players"
+            backButtonLabel={tList('backToPlayers')}
+          />
+          <PublicPlayerProfileContent
+            player={player}
+            leaderboard={leaderboard}
+            isAdminOrEditor={isAdminOrEditor}
+            handleDeleteUser={handleDeleteUser}
+            isDeleting={isDeleting}
+            showDeleteDialog={showDeleteDialog}
+            setShowDeleteDialog={setShowDeleteDialog}
+            showRevokeDialog={showRevokeDialog}
+            setShowRevokeDialog={setShowRevokeDialog}
+            setIsDeleting={setIsDeleting}
+            deleteMutation={deleteMutation}
+            revokeMutation={revokeMutation}
+            resendMutation={resendMutation}
+            copyInvitationLink={copyInvitationLink}
+            t={t}
+            tList={tList}
+            tActions={tActions}
+            locale={locale}
+          />
+        </div>
       )}
     </DataStateWrapper>
   );

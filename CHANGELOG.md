@@ -10,6 +10,17 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-04-21] — Show page header skeleton during player profile load
+
+**Commit:** `031ac6e`
+
+### Frontend
+
+- **`PlayerProfilePage`** — Removed the always-rendered `PageHeader` from the page shell so the header no longer flashes in before the profile data resolves
+- **`PublicPlayerProfile`** — Moved `PageHeader` into the data-loaded branch and added `PageHeaderSkeleton` (with back button) to the `DataStateWrapper` loading component to keep the header placeholder visible during the async fetch
+- **`ProfileLoading`** — Added `PageHeaderSkeleton` above `PlayerProfileSkeleton` in the server-side loading fallback so the route-level suspense boundary matches the loaded layout
+
+
 ## [2026-04-21] — Expand unit test coverage across API services
 
 **Commit:** `d87e169`

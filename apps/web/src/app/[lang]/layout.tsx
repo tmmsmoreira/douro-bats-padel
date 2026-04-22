@@ -76,10 +76,10 @@ export default async function LangLayout({
   return (
     <html lang={lang} suppressHydrationWarning>
       <head>
-        {/* Inline critical CSS: background color + static splash screen visible before JS loads */}
+        {/* Inline critical CSS: background matches iOS native splash so the handoff to the React splash is seamless */}
         <style
           dangerouslySetInnerHTML={{
-            __html: `html{background:#fafafa;color:#1a1a1a}@media(prefers-color-scheme:dark){html{background:#1a1a1a;color:#f5f5f5}}.dark html,html.dark{background:#1a1a1a;color:#f5f5f5}#static-splash{display:none}@media(display-mode:standalone){html{--sg:linear-gradient(to top right,rgba(167,216,0,.2),rgba(74,139,222,.2));background:var(--sg),#fafafa;color:#1a1a1a}@media(prefers-color-scheme:dark){html{background:var(--sg),#1a1a1a;color:#f5f5f5}}.dark html,html.dark{background:var(--sg),#1a1a1a;color:#f5f5f5}#static-splash{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:var(--sg),#fafafa;color:#1a1a1a}@media(prefers-color-scheme:dark){#static-splash{background:var(--sg),#1a1a1a;color:#f5f5f5}}.dark #static-splash{background:var(--sg),#1a1a1a;color:#f5f5f5}}`,
+            __html: `html{background:#fafafa;color:#1a1a1a}@media(prefers-color-scheme:dark){html{background:#1a1a1a;color:#f5f5f5}}.dark html,html.dark{background:#1a1a1a;color:#f5f5f5}@media(display-mode:standalone){html{--sg:linear-gradient(to top right,rgba(167,216,0,.2),rgba(74,139,222,.2));background:var(--sg),#fafafa;color:#1a1a1a}@media(prefers-color-scheme:dark){html{background:var(--sg),#1a1a1a;color:#f5f5f5}}.dark html,html.dark{background:var(--sg),#1a1a1a;color:#f5f5f5}}`,
           }}
         />
         <meta name="application-name" content="Douro Bats Padel" />
@@ -226,28 +226,6 @@ export default async function LangLayout({
         className={`${inter.variable} ${spaceGrotesk.variable} ${inter.className}`}
         suppressHydrationWarning
       >
-        {/* Static splash screen: visible on first paint, before JS loads */}
-        <div id="static-splash" aria-hidden="true">
-          <div style={{ textAlign: 'center' }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/icons/logo.png"
-              alt=""
-              width={128}
-              height={128}
-              style={{ margin: '0 auto' }}
-            />
-            <p
-              style={{
-                fontSize: '1.5rem',
-                fontWeight: 700,
-                marginTop: '1.5rem',
-              }}
-            >
-              Douro Bats Padel
-            </p>
-          </div>
-        </div>
         <Providers session={session}>
           <NextIntlClientProvider locale={lang} messages={messages}>
             <AppLoadingScreen minDuration={1000} />

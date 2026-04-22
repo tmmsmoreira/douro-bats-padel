@@ -10,6 +10,16 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-04-22] — Align PWA splash with iOS native startup image
+
+**Commit:** `437136d`
+
+### Frontend
+
+- **`AppLoadingScreen`** — Locked logo to true viewport center at 33vmin (matching `apple-touch-startup-image` PNG ratio) and removed its scale/fade entrance animation so the iOS native splash → React splash handoff no longer shifts or re-fades the logo; title and loading dots now position below the logo without affecting its placement
+- **`LangLayout`** — Removed the intermediate static HTML splash (`#static-splash`) whose centered logo+title group pushed the logo off-center from the native image; kept the html background gradient so the body paints the same color the native PNG ends on
+
+
 ## [2026-04-21] — Show page header skeleton during player profile load
 
 **Commit:** `031ac6e`

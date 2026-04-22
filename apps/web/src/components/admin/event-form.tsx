@@ -760,12 +760,6 @@ export function EventForm({ eventId, initialData }: EventFormProps = {}) {
               </div>
             </div>
           </div>
-
-          {(createMutation.isError || updateMutation.isError) && (
-            <div className="text-sm text-destructive">
-              {t('error')}: {((createMutation.error || updateMutation.error) as Error)?.message}
-            </div>
-          )}
         </CardContent>
         <CardFooter className="flex pt-0 justify-end gap-2">
           <Button

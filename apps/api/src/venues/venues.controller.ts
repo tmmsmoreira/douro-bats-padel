@@ -25,21 +25,21 @@ export class VenuesController {
 
   @Post()
   @UseGuards(RolesGuard)
-  @Roles(Role.EDITOR, Role.ADMIN)
+  @Roles(Role.ADMIN)
   async create(@Body() dto: CreateVenueDto) {
     return this.venuesService.create(dto);
   }
 
   @Patch(':id')
   @UseGuards(RolesGuard)
-  @Roles(Role.EDITOR, Role.ADMIN)
+  @Roles(Role.ADMIN)
   async update(@Param('id') id: string, @Body() dto: UpdateVenueDto) {
     return this.venuesService.update(id, dto);
   }
 
   @Delete(':id')
   @UseGuards(RolesGuard)
-  @Roles(Role.EDITOR, Role.ADMIN)
+  @Roles(Role.ADMIN)
   async delete(@Param('id') id: string) {
     return this.venuesService.delete(id);
   }

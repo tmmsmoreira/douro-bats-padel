@@ -18,7 +18,7 @@ export class InvitationsController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.EDITOR)
+  @Roles(Role.ADMIN)
   async create(@Body() dto: CreateInvitationDto, @Req() req: RequestWithUser): Promise<Invitation> {
     return this.invitationsService.create(dto, req.user.sub);
   }
@@ -30,30 +30,28 @@ export class InvitationsController {
 
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.EDITOR)
-  async list(@Req() req: RequestWithUser): Promise<Invitation[]> {
-    // Admins can see all invitations, editors only see their own
-    const userId = req.user.roles.includes(Role.ADMIN) ? undefined : req.user.sub;
-    return this.invitationsService.list(userId);
+  @Roles(Role.ADMIN)
+  async list(): Promise<Invitation[]> {
+    return this.invitationsService.list();
   }
 
   @Get(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.EDITOR)
+  @Roles(Role.ADMIN)
   async getById(@Param('id') id: string): Promise<Invitation> {
     return this.invitationsService.getById(id);
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.EDITOR)
+  @Roles(Role.ADMIN)
   async revoke(@Param('id') id: string, @Req() req: RequestWithUser): Promise<void> {
     return this.invitationsService.revoke(id, req.user.sub);
   }
 
   @Post(':id/resend')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.EDITOR)
+  @Roles(Role.ADMIN)
   async resend(@Param('id') id: string, @Req() req: RequestWithUser): Promise<Invitation> {
     return this.invitationsService.resend(id, req.user.sub);
   }

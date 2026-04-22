@@ -43,9 +43,8 @@ export class EventsController {
     const toDate = to ? new Date(to) : undefined;
     const userId = req.user?.sub;
 
-    // Automatically determine if user should see unpublished events based on their roles
     const userRoles = req.user?.roles || [];
-    const isAdminOrEditor = userRoles.includes(Role.ADMIN) || userRoles.includes(Role.EDITOR);
+    const isAdmin = userRoles.includes(Role.ADMIN);
 
     // Debug logging
     if (process.env.NODE_ENV === 'development') {
@@ -57,10 +56,10 @@ export class EventsController {
               : 'not authenticated'
           )
       );
-      this.logger.log('GET /events - includeUnpublished: ' + isAdminOrEditor);
+      this.logger.log('GET /events - includeUnpublished: ' + isAdmin);
     }
 
-    return this.eventsService.findAll(fromDate, toDate, userId, isAdminOrEditor);
+    return this.eventsService.findAll(fromDate, toDate, userId, isAdmin);
   }
 
   @Public()
@@ -68,44 +67,43 @@ export class EventsController {
   async findOne(@Param('id') id: string, @Request() req: RequestWithOptionalUser) {
     const userId = req.user?.sub;
 
-    // Automatically determine if user should see unpublished events based on their roles
     const userRoles = req.user?.roles || [];
-    const isAdminOrEditor = userRoles.includes(Role.ADMIN) || userRoles.includes(Role.EDITOR);
+    const isAdmin = userRoles.includes(Role.ADMIN);
 
-    return this.eventsService.findOne(id, userId, isAdminOrEditor);
+    return this.eventsService.findOne(id, userId, isAdmin);
   }
 
   @Post()
   @UseGuards(RolesGuard)
-  @Roles(Role.EDITOR, Role.ADMIN)
+  @Roles(Role.ADMIN)
   async create(@Body() dto: CreateEventDto, @Request() req: RequestWithUser) {
     return this.eventsService.create(dto, req.user.sub);
   }
 
   @Patch(':id')
   @UseGuards(RolesGuard)
-  @Roles(Role.EDITOR, Role.ADMIN)
+  @Roles(Role.ADMIN)
   async update(@Param('id') id: string, @Body() dto: Partial<CreateEventDto>) {
     return this.eventsService.update(id, dto);
   }
 
   @Post(':id/publish')
   @UseGuards(RolesGuard)
-  @Roles(Role.EDITOR, Role.ADMIN)
+  @Roles(Role.ADMIN)
   async publish(@Param('id') id: string) {
     return this.eventsService.publish(id);
   }
 
   @Post(':id/freeze')
   @UseGuards(RolesGuard)
-  @Roles(Role.EDITOR, Role.ADMIN)
+  @Roles(Role.ADMIN)
   async freeze(@Param('id') id: string) {
     return this.eventsService.freeze(id);
   }
 
   @Post(':id/unfreeze')
   @UseGuards(RolesGuard)
-  @Roles(Role.EDITOR, Role.ADMIN)
+  @Roles(Role.ADMIN)
   async unfreeze(@Param('id') id: string) {
     return this.eventsService.unfreeze(id);
   }
@@ -118,21 +116,21 @@ export class EventsController {
 
   @Post(':id/promote-waitlist')
   @UseGuards(RolesGuard)
-  @Roles(Role.EDITOR, Role.ADMIN)
+  @Roles(Role.ADMIN)
   async promoteWaitlist(@Param('id') id: string) {
     return this.rsvpService.autoPromoteWaitlist(id);
   }
 
   @Delete(':id/players/:playerId')
   @UseGuards(RolesGuard)
-  @Roles(Role.EDITOR, Role.ADMIN)
+  @Roles(Role.ADMIN)
   async removePlayerFromEvent(@Param('id') id: string, @Param('playerId') playerId: string) {
     return this.rsvpService.removePlayerFromEvent(id, playerId);
   }
 
   @Delete(':id')
   @UseGuards(RolesGuard)
-  @Roles(Role.EDITOR, Role.ADMIN)
+  @Roles(Role.ADMIN)
   async remove(@Param('id') id: string) {
     return this.eventsService.remove(id);
   }

@@ -663,7 +663,6 @@
     "explorersEndTimePlaceholder": "ex., 23:00",
     "courtsAvailable": "Campos Disponíveis",
     "courtsSelected": "{count} campo(s) selecionado(s)",
-    "error": "Erro",
     "updating": "A atualizar...",
     "updateEvent": "Atualizar Evento",
     "creating": "A criar...",

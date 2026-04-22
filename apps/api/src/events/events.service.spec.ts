@@ -270,14 +270,35 @@ describe('EventsService.update — edit guards', () => {
     prisma.event.findUnique.mockResolvedValue({
       id: 'e1',
       state: EventState.OPEN,
-      endsAt: new Date('2099-01-01'),
+      date: new Date('2099-01-01'),
+      startsAt: new Date('2099-01-01T18:00:00Z'),
+      endsAt: new Date('2099-01-01T20:00:00Z'),
       capacity: 16,
       rsvps: [{ id: 'r1', status: 'CONFIRMED' }],
     });
 
-    await expect(service.update('e1', { date: '2026-08-10T00:00:00Z' })).rejects.toThrow(
+    await expect(service.update('e1', { date: new Date('2026-08-10T00:00:00Z') })).rejects.toThrow(
       /Cannot edit event timing/
     );
+  });
+
+  it('allows editing when timing fields match current values with confirmed players', async () => {
+    const date = new Date('2099-01-01');
+    const startsAt = new Date('2099-01-01T18:00:00Z');
+    const endsAt = new Date('2099-01-01T20:00:00Z');
+    prisma.event.findUnique.mockResolvedValue({
+      id: 'e1',
+      state: EventState.OPEN,
+      date,
+      startsAt,
+      endsAt,
+      capacity: 16,
+      rsvps: [{ id: 'r1', status: 'CONFIRMED' }],
+    });
+
+    await expect(
+      service.update('e1', { date, startsAt, endsAt, title: 'Renamed' })
+    ).resolves.toBeDefined();
   });
 
   it('refuses to edit a past event that was already drawn', async () => {

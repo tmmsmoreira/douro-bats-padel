@@ -663,7 +663,6 @@
     "explorersEndTimePlaceholder": "e.g., 11:00 PM",
     "courtsAvailable": "Courts Available",
     "courtsSelected": "{count} court(s) selected",
-    "error": "Error",
     "updating": "Updating...",
     "updateEvent": "Update Event",
     "creating": "Creating...",

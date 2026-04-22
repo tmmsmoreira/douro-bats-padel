@@ -14,7 +14,7 @@ export class RankingController {
 
   @Post('compute/:eventId')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.EDITOR, Role.ADMIN)
+  @Roles(Role.ADMIN)
   async computeRankings(@Param('eventId') eventId: string) {
     return this.rankingService.computeRankingsForEvent(eventId);
   }

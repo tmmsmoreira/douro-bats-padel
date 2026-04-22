@@ -156,11 +156,8 @@ export class InvitationsService {
     });
   }
 
-  async list(userId?: string): Promise<Invitation[]> {
-    const where = userId ? { invitedBy: userId } : {};
-
+  async list(): Promise<Invitation[]> {
     const invitations = await this.prisma.invitation.findMany({
-      where,
       include: {
         invitedByUser: {
           select: {

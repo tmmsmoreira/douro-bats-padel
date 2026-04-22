@@ -27,7 +27,7 @@ export class PlayersController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.EDITOR, Role.ADMIN)
+  @Roles(Role.ADMIN)
   async remove(@Param('id') id: string) {
     return this.playersService.remove(id);
   }

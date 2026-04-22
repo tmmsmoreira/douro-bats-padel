@@ -29,7 +29,7 @@ export class DrawController {
 
   @Post('events/:eventId')
   @UseGuards(RolesGuard)
-  @Roles(Role.EDITOR, Role.ADMIN)
+  @Roles(Role.ADMIN)
   async generateDraw(
     @Param('eventId') eventId: string,
     @Body()
@@ -54,7 +54,7 @@ export class DrawController {
 
   @Patch('assignments/:assignmentId')
   @UseGuards(RolesGuard)
-  @Roles(Role.EDITOR, Role.ADMIN)
+  @Roles(Role.ADMIN)
   async updateAssignment(
     @Param('assignmentId') assignmentId: string,
     @Body() body: { teamA: string[]; teamB: string[] },
@@ -65,21 +65,21 @@ export class DrawController {
 
   @Post('events/:eventId/publish')
   @UseGuards(RolesGuard)
-  @Roles(Role.EDITOR, Role.ADMIN)
+  @Roles(Role.ADMIN)
   async publishDraw(@Param('eventId') eventId: string) {
     return this.drawService.publishDraw(eventId);
   }
 
   @Post('events/:eventId/unpublish')
   @UseGuards(RolesGuard)
-  @Roles(Role.EDITOR, Role.ADMIN)
+  @Roles(Role.ADMIN)
   async unpublishDraw(@Param('eventId') eventId: string) {
     return this.drawService.unpublishDraw(eventId);
   }
 
   @Delete('events/:eventId')
   @UseGuards(RolesGuard)
-  @Roles(Role.EDITOR, Role.ADMIN)
+  @Roles(Role.ADMIN)
   async deleteDraw(@Param('eventId') eventId: string) {
     return this.drawService.deleteDraw(eventId);
   }

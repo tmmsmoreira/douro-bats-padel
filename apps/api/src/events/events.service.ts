@@ -267,7 +267,7 @@ export class EventsService {
       throw new NotFoundException('Event not found');
     }
 
-    // If not admin/editor, only allow access to published events
+    // If not admin, only allow access to published events
     // Must match the same state filter as findAll()
     if (!includeUnpublished) {
       const allowedStates: string[] = [
@@ -350,15 +350,22 @@ export class EventsService {
       throw new BadRequestException('Cannot update a past event that has been drawn or published');
     }
 
-    // Check if trying to edit timing fields when players are already registered
-    const isEditingTiming =
-      dto.date !== undefined || dto.startsAt !== undefined || dto.endsAt !== undefined;
-    const hasConfirmedPlayers = event.rsvps.length > 0;
+    // When players are registered, block edits that actually change event timing.
+    // Compare values — the frontend sends the full DTO on every update, so presence
+    // alone would flag unchanged timing as an edit.
+    if (event.rsvps.length > 0) {
+      const isChanged = (incoming: Date | string | undefined, current: Date) =>
+        incoming !== undefined && new Date(incoming).getTime() !== current.getTime();
+      const isEditingTiming =
+        isChanged(dto.date, event.date) ||
+        isChanged(dto.startsAt, event.startsAt) ||
+        isChanged(dto.endsAt, event.endsAt);
 
-    if (isEditingTiming && hasConfirmedPlayers) {
-      throw new BadRequestException(
-        'Cannot edit event timing (date, start time, or end time) when players are already registered'
-      );
+      if (isEditingTiming) {
+        throw new BadRequestException(
+          'Cannot edit event timing (date, start time, or end time) when players are already registered'
+        );
+      }
     }
 
     // Validate tier rules if provided

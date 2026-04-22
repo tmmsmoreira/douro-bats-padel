@@ -144,34 +144,34 @@ export function PlayerListItem({
       </div>
 
       <div className="flex items-center gap-6">
-        {/* Delta */}
-        {delta !== undefined && (
-          <div className="flex items-center gap-1 text-sm min-w-[60px] justify-end">
-            {delta > 0 && (
-              <>
-                <ArrowUp className="h-3.5 w-3.5 text-green-600" />
-                <span className="text-green-600 font-semibold">+{delta}</span>
-              </>
+        {/* Rating + Delta stack */}
+        <div className="flex flex-col items-end">
+          <span
+            className={cn(
+              'text-muted-foreground font-heading gradient-text tabular-nums font-bold leading-none',
+              !isMobile ? 'text-2xl' : 'text-md'
             )}
-            {delta < 0 && (
-              <>
-                <ArrowDown className="h-3.5 w-3.5 text-red-600" />
-                <span className="text-red-600 font-semibold">{delta}</span>
-              </>
-            )}
-            {delta === 0 && <Minus className="h-3.5 w-3.5 text-muted-foreground" />}
-          </div>
-        )}
-
-        {/* Rating */}
-        <span
-          className={cn(
-            'text-muted-foreground font-heading gradient-text tabular-nums font-bold',
-            !isMobile ? 'text-2xl' : 'text-md'
+          >
+            {rating}
+          </span>
+          {delta !== undefined && (
+            <div className="flex items-center gap-0.5 text-xs font-heading tabular-nums mt-1">
+              {delta > 0 && (
+                <>
+                  <ArrowUp className="h-3 w-3 text-green-600" />
+                  <span className="text-green-600 font-semibold">{delta}</span>
+                </>
+              )}
+              {delta < 0 && (
+                <>
+                  <ArrowDown className="h-3 w-3 text-red-600" />
+                  <span className="text-red-600 font-semibold">{Math.abs(delta)}</span>
+                </>
+              )}
+              {delta === 0 && <Minus className="h-3 w-3 text-muted-foreground" />}
+            </div>
           )}
-        >
-          {rating}
-        </span>
+        </div>
 
         {/* Delete Action (Admin Only) */}
         {showDeleteAction && onDelete && (

@@ -212,7 +212,6 @@ model Invitation {
 
 enum Role {
   VIEWER
-  EDITOR
   ADMIN
 }
 

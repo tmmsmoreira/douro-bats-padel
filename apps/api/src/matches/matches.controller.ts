@@ -23,14 +23,14 @@ export class MatchesController {
 
   @Post()
   @UseGuards(RolesGuard)
-  @Roles(Role.EDITOR, Role.ADMIN)
+  @Roles(Role.ADMIN)
   async submitMatch(@Body() dto: SubmitMatchDto, @Request() req: RequestWithUser) {
     return this.matchesService.submitMatch(dto, req.user.sub);
   }
 
   @Post('events/:eventId/publish')
   @UseGuards(RolesGuard)
-  @Roles(Role.EDITOR, Role.ADMIN)
+  @Roles(Role.ADMIN)
   async publishMatches(@Param('eventId') eventId: string) {
     return this.matchesService.publishMatches(eventId);
   }

@@ -91,7 +91,7 @@ export class PlayersService {
   }
 
   async findOne(id: string, requester?: { roles?: Role[] | string[] } | null) {
-    const isAdminOrEditor = !!requester?.roles?.some((r) => r === Role.ADMIN || r === Role.EDITOR);
+    const isAdmin = !!requester?.roles?.some((r) => r === Role.ADMIN);
 
     // First try to find as a registered user
     const user = await this.prisma.user.findUnique({
@@ -124,7 +124,7 @@ export class PlayersService {
         player: user.player,
       };
 
-      if (!isAdminOrEditor) {
+      if (!isAdmin) {
         return publicFields;
       }
 
@@ -140,8 +140,8 @@ export class PlayersService {
       };
     }
 
-    // Invitation lookups are admin/editor-only — don't leak invitation metadata publicly
-    if (isAdminOrEditor) {
+    // Invitation lookups are admin-only — don't leak invitation metadata publicly
+    if (isAdmin) {
       const invitation = await this.prisma.invitation.findUnique({
         where: { id },
         include: {

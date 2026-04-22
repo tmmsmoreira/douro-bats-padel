@@ -762,8 +762,7 @@ export class DrawService {
       throw new NotFoundException('Draw not found for this event');
     }
 
-    // Check if user is admin/editor
-    const isAdmin = user?.roles?.includes('ADMIN') || user?.roles?.includes('EDITOR');
+    const isAdmin = user?.roles?.includes('ADMIN');
 
     // If user is not admin and event is not published, don't show the draw
     if (!isAdmin && draw.event.state !== EventState.PUBLISHED) {

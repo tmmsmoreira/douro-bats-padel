@@ -19,8 +19,8 @@ export function AuthPageLayout({ children }: AuthPageLayoutProps) {
 
   return (
     <div className="min-h-screen flex relative">
-      {/* Mobile header — absolute so content centers in the full viewport */}
-      <header className="lg:hidden absolute top-0 inset-x-0 z-20 flex items-center justify-between px-4 h-16 border-b border-border/50 bg-background">
+      {/* Mobile header — fixed so it stays pinned to the viewport top regardless of scroll, with safe-area inset so the logo sits below the iOS translucent status bar in PWA mode. */}
+      <header className="lg:hidden fixed top-0 inset-x-0 z-20 flex items-center justify-between px-4 h-16 pt-[env(safe-area-inset-top)] box-content border-b border-border/50 bg-background">
         <Link href={`/${locale}`} className="flex items-center gap-3">
           <Image
             src="/icons/logo.png"
@@ -103,8 +103,8 @@ export function AuthPageLayout({ children }: AuthPageLayoutProps) {
         </div>
       </div>
 
-      {/* Right side — form. py-20 on mobile reserves space for the absolute header while keeping the content symmetrically centered in the full viewport. */}
-      <div className="flex-1 flex flex-col items-center justify-center bg-background px-4 py-20 lg:py-8">
+      {/* Right side — form. Mobile padding compensates for the fixed navbar on top and the home-indicator safe-area on the bottom; the asymmetry is exactly what's needed to land the content's center on the visible-area center below the navbar. */}
+      <div className="flex-1 flex flex-col items-center justify-center bg-background px-4 pt-[calc(4rem+env(safe-area-inset-top))] pb-[env(safe-area-inset-bottom)] lg:py-8">
         {/* Mobile branding text */}
         <motion.div
           className="lg:hidden text-center mb-6"

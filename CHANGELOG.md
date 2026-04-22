@@ -10,6 +10,15 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-04-22] — Exclude test files from web tsconfig to fix Vercel build
+
+**Commit:** `bfe5cc7`
+
+### Infrastructure
+
+- **`apps/web/tsconfig.json`** — Excluded `test/`, `*.spec.ts(x)`, and `*.test.ts(x)` from the Next.js typecheck include set. Next typechecks everything in `include`, which pulled in jest-dependent files; `@types/jest` is a root-only devDependency and isn't hoisted into Vercel's scoped web install, so production builds failed on `jest.fn()`. Jest's own ts-jest config is unaffected.
+
+
 ## [2026-04-22] — Fix JSX namespace in motion test mock
 
 **Commit:** `35d029d`

@@ -1,0 +1,123 @@
+{
+  "emails": {
+    "common": {
+      "greeting": "Hi {name},",
+      "orPaste": "Or copy and paste this link into your browser:",
+      "footerCopyright": "© {year} Douro Bats Padel. All rights reserved.",
+      "footerTagline": "Exclusive padel community · Game nights · Rankings · Draws"
+    },
+    "verification": {
+      "subject": "Verify Your Email - Douro Bats Padel",
+      "preview": "Verify your email to complete your Douro Bats Padel registration",
+      "heading": "Welcome to the Club! 🎾",
+      "body1": "Thank you for joining Douro Bats Padel! We're excited to have you as part of our exclusive padel community.",
+      "body2": "To get started and access all features including event registration, draw viewing, and rankings, please verify your email address:",
+      "cta": "Verify Email Address",
+      "expires": "⏱️ This link will expire in 24 hours",
+      "ignore": "If you didn't create an account, you can safely ignore this email."
+    },
+    "passwordReset": {
+      "subject": "Reset Your Password - Douro Bats Padel",
+      "preview": "Reset your Douro Bats Padel password",
+      "heading": "Password Reset Request 🔐",
+      "body1": "We received a request to reset your password for your Douro Bats Padel account.",
+      "body2": "Click the button below to create a new password and regain access to your account:",
+      "cta": "Reset Password",
+      "expires": "⏱️ This link will expire in 1 hour",
+      "ignore": "If you didn't request a password reset, you can safely ignore this email. Your password will remain unchanged.",
+      "security": "🔒 For security reasons, this link can only be used once."
+    },
+    "invitation": {
+      "subject": "You're Invited to Join Douro Bats Padel",
+      "preview": "You've been invited to join Douro Bats Padel",
+      "heading": "You're Invited! 🎾",
+      "body1": "{inviterName} has invited you to join Douro Bats Padel, our exclusive padel community.",
+      "body2": "Douro Bats Padel is a members-only platform designed for passionate padel players who want to take their game to the next level.",
+      "featuresTitle": "What you'll get access to:",
+      "feature1": "🎯 Register for exclusive game nights",
+      "feature2": "🎲 Automated draw generation for fair matchups",
+      "feature3": "📊 Track your performance and rankings",
+      "feature4": "🏆 View results and match history",
+      "feature5": "👥 Connect with fellow padel enthusiasts",
+      "cta": "Accept Invitation & Join Now",
+      "expires": "⏱️ This invitation will expire in 7 days",
+      "ignore": "If you weren't expecting this invitation, you can safely ignore this email."
+    },
+    "rsvpConfirmation": {
+      "subject": "You're confirmed for {event} - Douro Bats Padel",
+      "preview": "You're confirmed for {event}!",
+      "heading": "You're In!",
+      "bodyWithDate": "Great news! You are confirmed for {event} on {date}.",
+      "bodyNoDate": "Great news! You are confirmed for {event}.",
+      "body2": "Make sure to arrive on time and bring your A-game. See you on the court!",
+      "info": "If you can no longer attend, please update your RSVP so another player can take your spot."
+    },
+    "waitlist": {
+      "subject": "Waitlisted for {event} - Douro Bats Padel",
+      "preview": "You're on the waitlist for {event}",
+      "heading": "Waitlisted - Position #{position}",
+      "body1": "The event {event} is currently full, but you've been added to the waitlist at position #{position}.",
+      "body2": "If a spot opens up, you'll be automatically promoted and notified. Hang tight!",
+      "info": "You'll receive an email notification if you get promoted to a confirmed spot."
+    },
+    "promotion": {
+      "subject": "You're in! Promoted from waitlist - Douro Bats Padel",
+      "preview": "You've been promoted from the waitlist for {event}!",
+      "heading": "You're In!",
+      "body1": "A spot has opened up and you've been promoted from the waitlist for {event}.",
+      "body2": "You are now confirmed! Make sure to arrive on time and bring your A-game.",
+      "info": "If you can no longer attend, please update your RSVP so another player can take your spot."
+    },
+    "drawPublished": {
+      "subject": "Draw published for {event} - Douro Bats Padel",
+      "preview": "The draw for {event} has been published!",
+      "heading": "Draw Published",
+      "body": "The draw for {event} has been published. Check the app to see your court and team assignments."
+    },
+    "resultsPublished": {
+      "subject": "Results available for {event} - Douro Bats Padel",
+      "preview": "Results for {event} are now available!",
+      "heading": "Results Are In!",
+      "body": "The results for {event} are now available. Check the app to see scores, rankings updates, and match details."
+    },
+    "eventOpen": {
+      "subject": "RSVP now open for {event} - Douro Bats Padel",
+      "preview": "RSVP is now open for {event}!",
+      "heading": "RSVP Now Open",
+      "body": "Registration is now open for {event}. Head to the app to confirm your spot before it fills up!"
+    },
+    "defaults": {
+      "playerName": "Player",
+      "gameNight": "Game Night",
+      "upcomingGameNight": "the upcoming game night",
+      "theGameNight": "the game night",
+      "nextGameNight": "the next game night"
+    }
+  },
+  "push": {
+    "rsvpConfirmed": {
+      "title": "You're confirmed!",
+      "body": "You're in for {event}"
+    },
+    "waitlist": {
+      "title": "Waitlisted",
+      "body": "Position #{position} for {event}"
+    },
+    "promotion": {
+      "title": "You're in!",
+      "body": "Promoted from waitlist for {event}"
+    },
+    "drawPublished": {
+      "title": "Draw is out!",
+      "body": "Check your matches for {event}"
+    },
+    "eventOpen": {
+      "title": "RSVP Now Open",
+      "body": "{event} is now open"
+    },
+    "resultsPublished": {
+      "title": "Results are in!",
+      "body": "See your scores for {event}"
+    }
+  }
+}

@@ -12,67 +12,59 @@ import {
   Text,
 } from '@react-email/components';
 import * as React from 'react';
+import { Locale } from '@padel/types';
+import { t } from '../i18n';
 
 interface PasswordResetEmailProps {
   name: string;
   resetUrl: string;
+  locale: Locale;
 }
 
 export const PasswordResetEmail = ({
   name = 'Player',
   resetUrl = 'https://example.com/reset-password',
+  locale = Locale.PT,
 }: PasswordResetEmailProps) => {
   const currentYear = new Date().getFullYear();
 
   return (
     <Html>
       <Head />
-      <Preview>Reset your Douro Bats Padel password</Preview>
+      <Preview>{t(locale, 'emails.passwordReset.preview')}</Preview>
       <Body style={main}>
         <Container style={container}>
-          {/* Header with gradient */}
           <Section style={header}>
             <Heading style={brandName}>Douro Bats Padel</Heading>
           </Section>
 
-          {/* Main content */}
           <Section style={content}>
-            <Heading style={heading}>Password Reset Request 🔐</Heading>
-            <Text style={paragraph}>Hi {name},</Text>
-            <Text style={paragraph}>
-              We received a request to reset your password for your Douro Bats Padel account.
-            </Text>
-            <Text style={paragraph}>
-              Click the button below to create a new password and regain access to your account:
-            </Text>
+            <Heading style={heading}>{t(locale, 'emails.passwordReset.heading')}</Heading>
+            <Text style={paragraph}>{t(locale, 'emails.common.greeting', { name })}</Text>
+            <Text style={paragraph}>{t(locale, 'emails.passwordReset.body1')}</Text>
+            <Text style={paragraph}>{t(locale, 'emails.passwordReset.body2')}</Text>
             <Section style={buttonContainer}>
               <Button style={button} href={resetUrl}>
-                Reset Password
+                {t(locale, 'emails.passwordReset.cta')}
               </Button>
             </Section>
-            <Text style={smallText}>Or copy and paste this link into your browser:</Text>
+            <Text style={smallText}>{t(locale, 'emails.common.orPaste')}</Text>
             <Link href={resetUrl} style={link}>
               {resetUrl}
             </Link>
             <Hr style={divider} />
             <Text style={warningText}>
-              <strong>⏱️ This link will expire in 1 hour</strong>
+              <strong>{t(locale, 'emails.passwordReset.expires')}</strong>
             </Text>
-            <Text style={infoText}>
-              If you didn't request a password reset, you can safely ignore this email. Your
-              password will remain unchanged.
-            </Text>
-            <Text style={securityText}>
-              🔒 For security reasons, this link can only be used once.
-            </Text>
+            <Text style={infoText}>{t(locale, 'emails.passwordReset.ignore')}</Text>
+            <Text style={securityText}>{t(locale, 'emails.passwordReset.security')}</Text>
           </Section>
 
-          {/* Footer */}
           <Section style={footer}>
-            <Text style={footerText}>© {currentYear} Douro Bats Padel. All rights reserved.</Text>
             <Text style={footerText}>
-              Exclusive padel community · Game nights · Rankings · Draws
+              {t(locale, 'emails.common.footerCopyright', { year: currentYear })}
             </Text>
+            <Text style={footerText}>{t(locale, 'emails.common.footerTagline')}</Text>
           </Section>
         </Container>
       </Body>
@@ -80,9 +72,11 @@ export const PasswordResetEmail = ({
   );
 };
 
+export const getPasswordResetSubject = (locale: Locale) =>
+  t(locale, 'emails.passwordReset.subject');
+
 export default PasswordResetEmail;
 
-// Styles - Matching Douro Bats Padel branding
 const main = {
   backgroundColor: '#f5f5f5',
   fontFamily:

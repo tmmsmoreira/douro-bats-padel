@@ -12,65 +12,58 @@ import {
   Text,
 } from '@react-email/components';
 import * as React from 'react';
+import { Locale } from '@padel/types';
+import { t } from '../i18n';
 
 interface VerificationEmailProps {
   name: string;
   verificationUrl: string;
+  locale: Locale;
 }
 
 export const VerificationEmail = ({
   name = 'Player',
   verificationUrl = 'https://example.com/verify',
+  locale = Locale.PT,
 }: VerificationEmailProps) => {
   const currentYear = new Date().getFullYear();
 
   return (
     <Html>
       <Head />
-      <Preview>Verify your email to complete your Douro Bats Padel registration</Preview>
+      <Preview>{t(locale, 'emails.verification.preview')}</Preview>
       <Body style={main}>
         <Container style={container}>
-          {/* Header with gradient */}
           <Section style={header}>
             <Heading style={brandName}>Douro Bats Padel</Heading>
           </Section>
 
-          {/* Main content */}
           <Section style={content}>
-            <Heading style={heading}>Welcome to the Club! 🎾</Heading>
-            <Text style={paragraph}>Hi {name},</Text>
-            <Text style={paragraph}>
-              Thank you for joining Douro Bats Padel! We're excited to have you as part of our
-              exclusive padel community.
-            </Text>
-            <Text style={paragraph}>
-              To get started and access all features including event registration, draw viewing, and
-              rankings, please verify your email address:
-            </Text>
+            <Heading style={heading}>{t(locale, 'emails.verification.heading')}</Heading>
+            <Text style={paragraph}>{t(locale, 'emails.common.greeting', { name })}</Text>
+            <Text style={paragraph}>{t(locale, 'emails.verification.body1')}</Text>
+            <Text style={paragraph}>{t(locale, 'emails.verification.body2')}</Text>
             <Section style={buttonContainer}>
               <Button style={button} href={verificationUrl}>
-                Verify Email Address
+                {t(locale, 'emails.verification.cta')}
               </Button>
             </Section>
-            <Text style={smallText}>Or copy and paste this link into your browser:</Text>
+            <Text style={smallText}>{t(locale, 'emails.common.orPaste')}</Text>
             <Link href={verificationUrl} style={link}>
               {verificationUrl}
             </Link>
             <Hr style={divider} />
             <Text style={infoText}>
-              <strong>⏱️ This link will expire in 24 hours</strong>
+              <strong>{t(locale, 'emails.verification.expires')}</strong>
             </Text>
-            <Text style={infoText}>
-              If you didn't create an account, you can safely ignore this email.
-            </Text>
+            <Text style={infoText}>{t(locale, 'emails.verification.ignore')}</Text>
           </Section>
 
-          {/* Footer */}
           <Section style={footer}>
-            <Text style={footerText}>© {currentYear} Douro Bats Padel. All rights reserved.</Text>
             <Text style={footerText}>
-              Exclusive padel community · Game nights · Rankings · Draws
+              {t(locale, 'emails.common.footerCopyright', { year: currentYear })}
             </Text>
+            <Text style={footerText}>{t(locale, 'emails.common.footerTagline')}</Text>
           </Section>
         </Container>
       </Body>
@@ -78,9 +71,10 @@ export const VerificationEmail = ({
   );
 };
 
+export const getVerificationSubject = (locale: Locale) => t(locale, 'emails.verification.subject');
+
 export default VerificationEmail;
 
-// Styles - Matching Douro Bats Padel branding
 const main = {
   backgroundColor: '#f5f5f5',
   fontFamily:

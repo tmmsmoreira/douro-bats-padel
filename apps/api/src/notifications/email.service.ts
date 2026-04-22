@@ -2,9 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
 import { render } from '@react-email/components';
-import VerificationEmail from '../emails/verification-email';
-import PasswordResetEmail from '../emails/password-reset-email';
-import InvitationEmail from '../emails/invitation-email';
+import { Locale } from '@padel/types';
+import VerificationEmail, { getVerificationSubject } from '../emails/verification-email';
+import PasswordResetEmail, { getPasswordResetSubject } from '../emails/password-reset-email';
+import InvitationEmail, { getInvitationSubject } from '../emails/invitation-email';
 
 @Injectable()
 export class EmailService {
@@ -47,27 +48,27 @@ export class EmailService {
     }
   }
 
-  async sendVerificationEmail(email: string, name: string, token: string) {
+  async sendVerificationEmail(email: string, name: string, token: string, locale: Locale) {
     const verificationUrl = `${this.configService.get<string>('FRONTEND_URL')}/verify-email?token=${token}`;
 
-    const html = await render(VerificationEmail({ name, verificationUrl }));
+    const html = await render(VerificationEmail({ name, verificationUrl, locale }));
 
-    return this.sendEmail(email, 'Verify Your Email - Douro Bats Padel', html);
+    return this.sendEmail(email, getVerificationSubject(locale), html);
   }
 
-  async sendPasswordResetEmail(email: string, name: string, token: string) {
+  async sendPasswordResetEmail(email: string, name: string, token: string, locale: Locale) {
     const resetUrl = `${this.configService.get<string>('FRONTEND_URL')}/reset-password?token=${token}`;
 
-    const html = await render(PasswordResetEmail({ name, resetUrl }));
+    const html = await render(PasswordResetEmail({ name, resetUrl, locale }));
 
-    return this.sendEmail(email, 'Reset Your Password - Douro Bats Padel', html);
+    return this.sendEmail(email, getPasswordResetSubject(locale), html);
   }
 
-  async sendInvitationEmail(email: string, token: string, invitedByName: string) {
+  async sendInvitationEmail(email: string, token: string, invitedByName: string, locale: Locale) {
     const invitationUrl = `${this.configService.get<string>('FRONTEND_URL')}/register?invitation=${token}`;
 
-    const html = await render(InvitationEmail({ invitationUrl, invitedByName }));
+    const html = await render(InvitationEmail({ invitationUrl, invitedByName, locale }));
 
-    return this.sendEmail(email, "You're Invited to Join Douro Bats Padel", html);
+    return this.sendEmail(email, getInvitationSubject(locale), html);
   }
 }

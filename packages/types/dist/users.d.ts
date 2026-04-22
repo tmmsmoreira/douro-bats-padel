@@ -1,4 +1,4 @@
-import type { Role, PlayerStatus } from './common';
+import type { Locale, Role, PlayerStatus } from './common';
 import type { Invitation } from './auth';
 /**
  * User entity
@@ -12,6 +12,7 @@ export interface User {
     profilePhoto?: string | null;
     roles: Role[];
     emailVerified: boolean;
+    preferredLanguage: Locale;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -59,6 +60,7 @@ export interface UserWithPlayer {
     profilePhoto?: string | null;
     roles: string[];
     emailVerified: boolean;
+    preferredLanguage: Locale;
     createdAt: string;
     player: {
         id: string;

@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import seedrandom from 'seedrandom';
-import { EventState, Tier, type TierRules, type TierTimeSlot } from '@padel/types';
+import { EventState, Locale, Tier, type TierRules, type TierTimeSlot } from '@padel/types';
 import { NotificationService } from '../notifications/notification.service';
 
 function isTierTimeSlot(value: unknown): value is TierTimeSlot {
@@ -901,6 +901,7 @@ export class DrawService {
               r.player.user.email,
               r.player.user.name || 'Player',
               event,
+              r.player.user.preferredLanguage as Locale,
               r.player.user.id
             )
           )

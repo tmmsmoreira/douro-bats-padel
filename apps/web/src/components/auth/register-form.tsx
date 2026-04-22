@@ -110,6 +110,7 @@ export function RegisterForm() {
         email,
         password,
         invitationToken,
+        language: locale.toUpperCase(),
       });
 
       setSuccess(true);

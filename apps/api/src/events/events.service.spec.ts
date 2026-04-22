@@ -703,8 +703,8 @@ describe('EventsService.publish — notifications', () => {
     prisma.event.findUnique.mockResolvedValue({ id: 'e1', state: EventState.DRAFT });
     prisma.event.update.mockResolvedValue({ id: 'e1', state: EventState.OPEN });
     prisma.playerProfile.findMany.mockResolvedValue([
-      { id: 'p1', user: { id: 'u1', email: 'alice@x.com' } },
-      { id: 'p2', user: { id: 'u2', email: 'bob@x.com' } },
+      { id: 'p1', user: { id: 'u1', email: 'alice@x.com', preferredLanguage: 'PT' } },
+      { id: 'p2', user: { id: 'u2', email: 'bob@x.com', preferredLanguage: 'EN' } },
     ]);
 
     await service.publish('e1');
@@ -713,8 +713,8 @@ describe('EventsService.publish — notifications', () => {
     // verify the service hands those recipients to the notification layer.
     expect(notificationService.announceEventOpen).toHaveBeenCalledWith(
       [
-        { email: 'alice@x.com', userId: 'u1' },
-        { email: 'bob@x.com', userId: 'u2' },
+        { email: 'alice@x.com', userId: 'u1', preferredLanguage: 'PT' },
+        { email: 'bob@x.com', userId: 'u2', preferredLanguage: 'EN' },
       ],
       expect.objectContaining({ id: 'e1' })
     );

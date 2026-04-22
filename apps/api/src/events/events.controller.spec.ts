@@ -29,19 +29,10 @@ describe('EventsController', () => {
     controller = new EventsController(eventsService as any, rsvpService as any);
   });
 
-  describe('findAll — isAdminOrEditor flag', () => {
+  describe('findAll — includeUnpublished flag', () => {
     it('passes includeUnpublished=true for admin users', async () => {
       eventsService.findAll.mockResolvedValue([]);
       const req = { user: { sub: 'u1', roles: [Role.ADMIN], email: 'a@x' } } as any;
-
-      await controller.findAll(req);
-
-      expect(eventsService.findAll).toHaveBeenCalledWith(undefined, undefined, 'u1', true);
-    });
-
-    it('passes includeUnpublished=true for editor users', async () => {
-      eventsService.findAll.mockResolvedValue([]);
-      const req = { user: { sub: 'u1', roles: [Role.EDITOR], email: 'e@x' } } as any;
 
       await controller.findAll(req);
 
@@ -78,7 +69,7 @@ describe('EventsController', () => {
   });
 
   describe('findOne — role-based unpublished access', () => {
-    it('forwards isAdminOrEditor=true for admins', async () => {
+    it('forwards isAdmin=true for admins', async () => {
       eventsService.findOne.mockResolvedValue({});
       await controller.findOne('event-1', {
         user: { sub: 'u1', roles: [Role.ADMIN] },
@@ -87,7 +78,7 @@ describe('EventsController', () => {
       expect(eventsService.findOne).toHaveBeenCalledWith('event-1', 'u1', true);
     });
 
-    it('forwards isAdminOrEditor=false for viewers', async () => {
+    it('forwards isAdmin=false for viewers', async () => {
       eventsService.findOne.mockResolvedValue({});
       await controller.findOne('event-1', {
         user: { sub: 'u1', roles: [Role.VIEWER] },

@@ -1,6 +1,5 @@
 export declare enum Role {
     VIEWER = "VIEWER",
-    EDITOR = "EDITOR",
     ADMIN = "ADMIN"
 }
 export declare enum Tier {
@@ -27,5 +26,9 @@ export declare enum PlayerStatus {
 }
 export declare enum EventFormat {
     NON_STOP = "NON_STOP"
+}
+export declare enum Locale {
+    EN = "EN",
+    PT = "PT"
 }
 //# sourceMappingURL=common.d.ts.map

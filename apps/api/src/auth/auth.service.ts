@@ -20,9 +20,10 @@ import type {
   ResetPasswordDto,
   GoogleAuthDto,
 } from '@padel/types';
-import { Role } from '@padel/types';
+import { Locale, Role } from '@padel/types';
 import { EmailService } from '../notifications/email.service';
 import { InvitationsService } from '../invitations/invitations.service';
+import { normalizeLocale } from '../i18n';
 
 const BCRYPT_SALT_ROUNDS = 10;
 const VERIFICATION_TOKEN_TTL_MS = 86400000; // 24 hours
@@ -76,6 +77,8 @@ export class AuthService {
       .digest('hex');
     const emailVerificationExpires = new Date(Date.now() + VERIFICATION_TOKEN_TTL_MS); // 24 hours from now
 
+    const preferredLanguage = normalizeLocale(dto.language);
+
     const user = await this.prisma.user.create({
       data: {
         email: dto.email,
@@ -85,6 +88,7 @@ export class AuthService {
         emailVerified: false,
         emailVerificationToken,
         emailVerificationExpires,
+        preferredLanguage,
         player: {
           create: {
             rating: 0,
@@ -110,7 +114,8 @@ export class AuthService {
       await this.emailService.sendVerificationEmail(
         user.email,
         user.name || 'User',
-        verificationToken
+        verificationToken,
+        user.preferredLanguage as Locale
       );
     } catch (error) {
       this.logger.error('Failed to send verification email:', error);
@@ -182,6 +187,7 @@ export class AuthService {
           profilePhoto: dto.profilePhoto,
           roles: [Role.VIEWER],
           emailVerified: true, // Google already verifies emails
+          preferredLanguage: normalizeLocale(dto.language),
           player: {
             create: {
               rating: 0,
@@ -253,6 +259,7 @@ export class AuthService {
       phoneNumber: user.phoneNumber,
       profilePhoto: user.profilePhoto,
       roles: user.roles,
+      preferredLanguage: user.preferredLanguage,
       player: user.player,
     };
   }
@@ -282,7 +289,12 @@ export class AuthService {
 
     // Send password reset email
     try {
-      await this.emailService.sendPasswordResetEmail(user.email, user.name || 'User', resetToken);
+      await this.emailService.sendPasswordResetEmail(
+        user.email,
+        user.name || 'User',
+        resetToken,
+        user.preferredLanguage as Locale
+      );
     } catch (error) {
       this.logger.error('Failed to send password reset email:', error);
       // Don't fail the request if email fails
@@ -387,6 +399,7 @@ export class AuthService {
       phoneNumber?: string;
       profilePhoto?: string;
       notificationsPaused?: boolean;
+      preferredLanguage?: Locale;
     }
   ) {
     if (data.profilePhoto) {
@@ -398,12 +411,16 @@ export class AuthService {
       phoneNumber?: string;
       profilePhoto?: string;
       dateOfBirth?: Date | null;
+      preferredLanguage?: Locale;
     } = {};
     if (data.name !== undefined) updateData.name = data.name;
     if (data.phoneNumber !== undefined) updateData.phoneNumber = data.phoneNumber;
     if (data.profilePhoto !== undefined) updateData.profilePhoto = data.profilePhoto;
     if (data.dateOfBirth !== undefined) {
       updateData.dateOfBirth = data.dateOfBirth ? new Date(data.dateOfBirth) : null;
+    }
+    if (data.preferredLanguage !== undefined) {
+      updateData.preferredLanguage = data.preferredLanguage;
     }
 
     let user;
@@ -439,6 +456,7 @@ export class AuthService {
       phoneNumber: user.phoneNumber,
       profilePhoto: user.profilePhoto,
       roles: user.roles,
+      preferredLanguage: user.preferredLanguage,
       player: user.player,
     };
   }
@@ -508,7 +526,8 @@ export class AuthService {
       await this.emailService.sendVerificationEmail(
         user.email,
         user.name || 'User',
-        verificationToken
+        verificationToken,
+        user.preferredLanguage as Locale
       );
     } catch (error) {
       this.logger.error('Failed to send verification email:', error);

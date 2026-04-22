@@ -1,4 +1,4 @@
-import type { Role } from './common';
+import type { Locale, Role } from './common';
 
 export interface AuthUser {
   id: string;
@@ -18,6 +18,7 @@ export interface SignupDto {
   password: string;
   name?: string;
   invitationToken: string;
+  language?: Locale;
 }
 
 export interface AuthTokens {
@@ -82,4 +83,5 @@ export interface GoogleAuthDto {
   name?: string | null;
   profilePhoto?: string | null;
   invitationToken?: string;
+  language?: Locale;
 }

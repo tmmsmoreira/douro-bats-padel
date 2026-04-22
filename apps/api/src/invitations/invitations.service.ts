@@ -8,6 +8,7 @@ import {
 import * as crypto from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { EmailService } from '../notifications/email.service';
+import { Locale } from '@padel/types';
 import type { CreateInvitationDto, Invitation, InvitationValidationResponse } from '@padel/types';
 
 @Injectable()
@@ -70,18 +71,20 @@ export class InvitationsService {
             id: true,
             name: true,
             email: true,
+            preferredLanguage: true,
           },
         },
       },
     });
 
-    // Send invitation email
+    // Send invitation email in the inviter's language (invitee has no account yet).
     let emailSent = true;
     try {
       await this.emailService.sendInvitationEmail(
         dto.email,
         token,
-        invitation.invitedByUser?.name || 'Admin'
+        invitation.invitedByUser?.name || 'Admin',
+        (invitation.invitedByUser?.preferredLanguage as Locale) ?? Locale.PT
       );
     } catch (error) {
       this.logger.error('Failed to send invitation email:', error);
@@ -233,6 +236,7 @@ export class InvitationsService {
             id: true,
             name: true,
             email: true,
+            preferredLanguage: true,
           },
         },
       },
@@ -270,7 +274,8 @@ export class InvitationsService {
       await this.emailService.sendInvitationEmail(
         invitation.email,
         invitation.token,
-        invitation.invitedByUser?.name || 'Admin'
+        invitation.invitedByUser?.name || 'Admin',
+        (invitation.invitedByUser?.preferredLanguage as Locale) ?? Locale.PT
       );
     } catch (error) {
       this.logger.error('Failed to resend invitation email:', error);

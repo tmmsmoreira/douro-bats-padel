@@ -486,6 +486,12 @@
     "pushSubscribed": "Push notifications enabled",
     "pushUnsubscribed": "Push notifications disabled",
     "pushError": "Failed to update notification preferences",
+    "notificationLanguage": "Email & push language",
+    "notificationLanguageDescription": "Language used for emails and push notifications",
+    "languages": {
+      "EN": "English",
+      "PT": "Português"
+    },
     "rank": "Rank",
     "noRank": "—",
     "account": "Account",

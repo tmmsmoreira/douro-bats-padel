@@ -10,49 +10,47 @@ import {
   Text,
 } from '@react-email/components';
 import * as React from 'react';
+import { Locale } from '@padel/types';
+import { t } from '../i18n';
 
 interface WaitlistNotificationEmailProps {
   name: string;
   eventTitle: string;
   position: number;
+  locale: Locale;
 }
 
 export const WaitlistNotificationEmail = ({
   name = 'Player',
   eventTitle = 'Game Night',
   position = 1,
+  locale = Locale.PT,
 }: WaitlistNotificationEmailProps) => {
   const currentYear = new Date().getFullYear();
+  const resolvedEventTitle = eventTitle || t(locale, 'emails.defaults.upcomingGameNight');
 
   return (
     <Html>
       <Head />
-      <Preview>You're on the waitlist for {eventTitle}</Preview>
+      <Preview>{t(locale, 'emails.waitlist.preview', { event: resolvedEventTitle })}</Preview>
       <Body style={main}>
         <Container style={container}>
           <Section style={header}>
             <Heading style={brandName}>Douro Bats Padel</Heading>
           </Section>
           <Section style={content}>
-            <Heading style={heading}>Waitlisted - Position #{position}</Heading>
+            <Heading style={heading}>{t(locale, 'emails.waitlist.heading', { position })}</Heading>
+            <Text style={paragraph}>{t(locale, 'emails.common.greeting', { name })}</Text>
             <Text style={paragraph}>
-              Hi <strong>{name}</strong>,
+              {t(locale, 'emails.waitlist.body1', { event: resolvedEventTitle, position })}
             </Text>
-            <Text style={paragraph}>
-              The event <strong>{eventTitle || 'the upcoming game night'}</strong> is currently
-              full, but you've been added to the waitlist at <strong>position #{position}</strong>.
-            </Text>
-            <Text style={paragraph}>
-              If a spot opens up, you'll be automatically promoted and notified. Hang tight!
-            </Text>
+            <Text style={paragraph}>{t(locale, 'emails.waitlist.body2')}</Text>
             <Hr style={divider} />
-            <Text style={infoText}>
-              You'll receive an email notification if you get promoted to a confirmed spot.
-            </Text>
+            <Text style={infoText}>{t(locale, 'emails.waitlist.info')}</Text>
           </Section>
           <Section style={footer}>
             <Text style={footerText}>
-              &copy; {currentYear} Douro Bats Padel. All rights reserved.
+              {t(locale, 'emails.common.footerCopyright', { year: currentYear })}
             </Text>
           </Section>
         </Container>
@@ -60,6 +58,11 @@ export const WaitlistNotificationEmail = ({
     </Html>
   );
 };
+
+export const getWaitlistSubject = (locale: Locale, eventTitle: string) =>
+  t(locale, 'emails.waitlist.subject', {
+    event: eventTitle || t(locale, 'emails.defaults.gameNight'),
+  });
 
 export default WaitlistNotificationEmail;
 

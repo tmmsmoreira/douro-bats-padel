@@ -486,6 +486,12 @@
     "pushSubscribed": "Notificações push ativadas",
     "pushUnsubscribed": "Notificações push desativadas",
     "pushError": "Falha ao atualizar preferências de notificação",
+    "notificationLanguage": "Idioma de emails e notificações",
+    "notificationLanguageDescription": "Idioma usado para emails e notificações push",
+    "languages": {
+      "EN": "English",
+      "PT": "Português"
+    },
     "rank": "Posição",
     "noRank": "—",
     "account": "Conta",

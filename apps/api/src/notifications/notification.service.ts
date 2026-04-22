@@ -1,17 +1,33 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { render } from '@react-email/components';
+import { Locale } from '@padel/types';
 import { EmailService } from './email.service';
 import { PushService } from '../push/push.service';
 import type { PushPayload } from '../push/push.service';
-import RSVPConfirmationEmail from '../emails/rsvp-confirmation-email';
-import WaitlistNotificationEmail from '../emails/waitlist-notification-email';
-import PromotionNotificationEmail from '../emails/promotion-notification-email';
-import EventNotificationEmail from '../emails/event-notification-email';
+import RSVPConfirmationEmail, {
+  getRsvpConfirmationSubject,
+} from '../emails/rsvp-confirmation-email';
+import WaitlistNotificationEmail, {
+  getWaitlistSubject,
+} from '../emails/waitlist-notification-email';
+import PromotionNotificationEmail, {
+  getPromotionSubject,
+} from '../emails/promotion-notification-email';
+import EventNotificationEmail, {
+  getEventNotificationSubject,
+} from '../emails/event-notification-email';
+import { t } from '../i18n';
 
 export interface EventNotificationData {
   id: string;
   title?: string | null;
   date: Date | string;
+}
+
+export interface NotificationRecipient {
+  email: string;
+  userId: string;
+  preferredLanguage: Locale;
 }
 
 @Injectable()
@@ -36,21 +52,24 @@ export class NotificationService {
     email: string,
     name: string,
     event: EventNotificationData,
+    locale: Locale,
     userId?: string
   ) {
+    const eventTitle = event.title || t(locale, 'emails.defaults.gameNight');
     try {
       const eventDate =
         event.date instanceof Date ? event.date.toLocaleDateString() : String(event.date);
       const html = await render(
         RSVPConfirmationEmail({
           name,
-          eventTitle: event.title || 'Game Night',
+          eventTitle,
           eventDate,
+          locale,
         })
       );
       await this.emailService.sendEmail(
         email,
-        `You're confirmed for ${event.title || 'Game Night'} - Douro Bats Padel`,
+        getRsvpConfirmationSubject(locale, eventTitle),
         html
       );
     } catch (error) {
@@ -58,8 +77,8 @@ export class NotificationService {
     }
 
     await this.sendPush(userId, {
-      title: "You're confirmed!",
-      body: `You're in for ${event.title || 'Game Night'}`,
+      title: t(locale, 'push.rsvpConfirmed.title'),
+      body: t(locale, 'push.rsvpConfirmed.body', { event: eventTitle }),
       icon: '/icons/icon-192x192.png',
       badge: '/icons/icon-96x96.png',
       url: `/events/${event.id}`,
@@ -72,28 +91,27 @@ export class NotificationService {
     name: string,
     event: EventNotificationData,
     position: number,
+    locale: Locale,
     userId?: string
   ) {
+    const eventTitle = event.title || t(locale, 'emails.defaults.gameNight');
     try {
       const html = await render(
         WaitlistNotificationEmail({
           name,
-          eventTitle: event.title || 'Game Night',
+          eventTitle,
           position,
+          locale,
         })
       );
-      await this.emailService.sendEmail(
-        email,
-        `Waitlisted for ${event.title || 'Game Night'} - Douro Bats Padel`,
-        html
-      );
+      await this.emailService.sendEmail(email, getWaitlistSubject(locale, eventTitle), html);
     } catch (error) {
       this.logger.error(`Failed to send waitlist notification to ${email}:`, error);
     }
 
     await this.sendPush(userId, {
-      title: 'Waitlisted',
-      body: `Position #${position} for ${event.title || 'Game Night'}`,
+      title: t(locale, 'push.waitlist.title'),
+      body: t(locale, 'push.waitlist.body', { event: eventTitle, position }),
       icon: '/icons/icon-192x192.png',
       badge: '/icons/icon-96x96.png',
       url: `/events/${event.id}`,
@@ -105,27 +123,26 @@ export class NotificationService {
     email: string,
     name: string,
     event: EventNotificationData,
+    locale: Locale,
     userId?: string
   ) {
+    const eventTitle = event.title || t(locale, 'emails.defaults.gameNight');
     try {
       const html = await render(
         PromotionNotificationEmail({
           name,
-          eventTitle: event.title || 'Game Night',
+          eventTitle,
+          locale,
         })
       );
-      await this.emailService.sendEmail(
-        email,
-        `You're in! Promoted from waitlist - Douro Bats Padel`,
-        html
-      );
+      await this.emailService.sendEmail(email, getPromotionSubject(locale), html);
     } catch (error) {
       this.logger.error(`Failed to send promotion notification to ${email}:`, error);
     }
 
     await this.sendPush(userId, {
-      title: "You're in!",
-      body: `Promoted from waitlist for ${event.title || 'Game Night'}`,
+      title: t(locale, 'push.promotion.title'),
+      body: t(locale, 'push.promotion.body', { event: eventTitle }),
       icon: '/icons/icon-192x192.png',
       badge: '/icons/icon-96x96.png',
       url: `/events/${event.id}`,
@@ -137,19 +154,22 @@ export class NotificationService {
     email: string,
     name: string,
     event: EventNotificationData,
+    locale: Locale,
     userId?: string
   ) {
+    const eventTitle = event.title || t(locale, 'emails.defaults.gameNight');
     try {
       const html = await render(
         EventNotificationEmail({
           name,
-          eventTitle: event.title || 'Game Night',
+          eventTitle,
           type: 'draw-published',
+          locale,
         })
       );
       await this.emailService.sendEmail(
         email,
-        `Draw published for ${event.title || 'Game Night'} - Douro Bats Padel`,
+        getEventNotificationSubject(locale, 'draw-published', eventTitle),
         html
       );
     } catch (error) {
@@ -157,8 +177,8 @@ export class NotificationService {
     }
 
     await this.sendPush(userId, {
-      title: 'Draw is out!',
-      body: `Check your matches for ${event.title || 'Game Night'}`,
+      title: t(locale, 'push.drawPublished.title'),
+      body: t(locale, 'push.drawPublished.body', { event: eventTitle }),
       icon: '/icons/icon-192x192.png',
       badge: '/icons/icon-96x96.png',
       url: `/events/${event.id}`,
@@ -166,22 +186,22 @@ export class NotificationService {
     });
   }
 
-  async announceEventOpen(
-    recipients: { email: string; userId: string }[],
-    event: EventNotificationData
-  ) {
+  async announceEventOpen(recipients: NotificationRecipient[], event: EventNotificationData) {
     const results = await Promise.allSettled(
       recipients.map(async (recipient) => {
+        const eventTitle =
+          event.title || t(recipient.preferredLanguage, 'emails.defaults.gameNight');
         const html = await render(
           EventNotificationEmail({
-            name: 'Player',
-            eventTitle: event.title || 'Game Night',
+            name: t(recipient.preferredLanguage, 'emails.defaults.playerName'),
+            eventTitle,
             type: 'event-open',
+            locale: recipient.preferredLanguage,
           })
         );
         return this.emailService.sendEmail(
           recipient.email,
-          `RSVP now open for ${event.title || 'Game Night'} - Douro Bats Padel`,
+          getEventNotificationSubject(recipient.preferredLanguage, 'event-open', eventTitle),
           html
         );
       })
@@ -197,38 +217,51 @@ export class NotificationService {
       `Event open announcement sent to ${recipients.length - failed}/${recipients.length} recipients`
     );
 
-    const userIds = recipients.map((r) => r.userId);
-    try {
-      await this.pushService.sendToUsers(userIds, {
-        title: 'RSVP Now Open',
-        body: `${event.title || 'Game Night'} is now open`,
-        icon: '/icons/icon-192x192.png',
-        badge: '/icons/icon-96x96.png',
-        url: `/events/${event.id}`,
-        tag: `event-open-${event.id}`,
-      });
-    } catch (error) {
-      this.logger.error('Failed to send push for event open announcement:', error);
+    // Group recipients by locale so push sends hit the DB once per language
+    // (typically 1–2 queries total) instead of once per user — keeps Railway's
+    // small Postgres pool from thrashing on large announcements.
+    const byLocale = new Map<Locale, string[]>();
+    for (const recipient of recipients) {
+      const userIds = byLocale.get(recipient.preferredLanguage) ?? [];
+      userIds.push(recipient.userId);
+      byLocale.set(recipient.preferredLanguage, userIds);
     }
+
+    await Promise.allSettled(
+      Array.from(byLocale.entries()).map(([locale, userIds]) => {
+        const eventTitle = event.title || t(locale, 'emails.defaults.gameNight');
+        return this.pushService.sendToUsers(userIds, {
+          title: t(locale, 'push.eventOpen.title'),
+          body: t(locale, 'push.eventOpen.body', { event: eventTitle }),
+          icon: '/icons/icon-192x192.png',
+          badge: '/icons/icon-96x96.png',
+          url: `/events/${event.id}`,
+          tag: `event-open-${event.id}`,
+        });
+      })
+    );
   }
 
   async sendResultsPublished(
     email: string,
     name: string,
     event: EventNotificationData,
+    locale: Locale,
     userId?: string
   ) {
+    const eventTitle = event.title || t(locale, 'emails.defaults.gameNight');
     try {
       const html = await render(
         EventNotificationEmail({
           name,
-          eventTitle: event.title || 'Game Night',
+          eventTitle,
           type: 'results-published',
+          locale,
         })
       );
       await this.emailService.sendEmail(
         email,
-        `Results available for ${event.title || 'Game Night'} - Douro Bats Padel`,
+        getEventNotificationSubject(locale, 'results-published', eventTitle),
         html
       );
     } catch (error) {
@@ -236,8 +269,8 @@ export class NotificationService {
     }
 
     await this.sendPush(userId, {
-      title: 'Results are in!',
-      body: `See your scores for ${event.title || 'Game Night'}`,
+      title: t(locale, 'push.resultsPublished.title'),
+      body: t(locale, 'push.resultsPublished.body', { event: eventTitle }),
       icon: '/icons/icon-192x192.png',
       badge: '/icons/icon-96x96.png',
       url: `/events/${event.id}`,

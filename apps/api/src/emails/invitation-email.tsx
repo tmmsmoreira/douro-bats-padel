@@ -12,58 +12,55 @@ import {
   Text,
 } from '@react-email/components';
 import * as React from 'react';
+import { Locale } from '@padel/types';
+import { t } from '../i18n';
 
 interface InvitationEmailProps {
   invitationUrl: string;
   invitedByName: string;
+  locale: Locale;
 }
 
 export const InvitationEmail = ({
   invitationUrl = 'https://example.com/register',
   invitedByName = 'Admin',
+  locale = Locale.PT,
 }: InvitationEmailProps) => {
   const currentYear = new Date().getFullYear();
 
   return (
     <Html>
       <Head />
-      <Preview>You've been invited to join Douro Bats Padel</Preview>
+      <Preview>{t(locale, 'emails.invitation.preview')}</Preview>
       <Body style={main}>
         <Container style={container}>
-          {/* Header with gradient */}
           <Section style={header}>
             <Heading style={brandName}>Douro Bats Padel</Heading>
           </Section>
 
-          {/* Main content */}
           <Section style={content}>
-            <Heading style={heading}>You're Invited! 🎾</Heading>
+            <Heading style={heading}>{t(locale, 'emails.invitation.heading')}</Heading>
             <Text style={paragraph}>
-              <strong>{invitedByName}</strong> has invited you to join Douro Bats Padel, our
-              exclusive padel community.
+              {t(locale, 'emails.invitation.body1', { inviterName: invitedByName })}
             </Text>
-            <Text style={paragraph}>
-              Douro Bats Padel is a members-only platform designed for passionate padel players who
-              want to take their game to the next level.
-            </Text>
+            <Text style={paragraph}>{t(locale, 'emails.invitation.body2')}</Text>
 
-            {/* Features list */}
             <Section style={featuresBox}>
-              <Text style={featuresTitle}>What you'll get access to:</Text>
-              <Text style={featureItem}>🎯 Register for exclusive game nights</Text>
-              <Text style={featureItem}>🎲 Automated draw generation for fair matchups</Text>
-              <Text style={featureItem}>📊 Track your performance and rankings</Text>
-              <Text style={featureItem}>🏆 View results and match history</Text>
-              <Text style={featureItem}>👥 Connect with fellow padel enthusiasts</Text>
+              <Text style={featuresTitle}>{t(locale, 'emails.invitation.featuresTitle')}</Text>
+              <Text style={featureItem}>{t(locale, 'emails.invitation.feature1')}</Text>
+              <Text style={featureItem}>{t(locale, 'emails.invitation.feature2')}</Text>
+              <Text style={featureItem}>{t(locale, 'emails.invitation.feature3')}</Text>
+              <Text style={featureItem}>{t(locale, 'emails.invitation.feature4')}</Text>
+              <Text style={featureItem}>{t(locale, 'emails.invitation.feature5')}</Text>
             </Section>
 
             <Section style={buttonContainer}>
               <Button style={button} href={invitationUrl}>
-                Accept Invitation & Join Now
+                {t(locale, 'emails.invitation.cta')}
               </Button>
             </Section>
 
-            <Text style={smallText}>Or copy and paste this link into your browser:</Text>
+            <Text style={smallText}>{t(locale, 'emails.common.orPaste')}</Text>
             <Link href={invitationUrl} style={link}>
               {invitationUrl}
             </Link>
@@ -71,19 +68,16 @@ export const InvitationEmail = ({
             <Hr style={divider} />
 
             <Text style={infoText}>
-              <strong>⏱️ This invitation will expire in 7 days</strong>
+              <strong>{t(locale, 'emails.invitation.expires')}</strong>
             </Text>
-            <Text style={infoText}>
-              If you weren't expecting this invitation, you can safely ignore this email.
-            </Text>
+            <Text style={infoText}>{t(locale, 'emails.invitation.ignore')}</Text>
           </Section>
 
-          {/* Footer */}
           <Section style={footer}>
-            <Text style={footerText}>© {currentYear} Douro Bats Padel. All rights reserved.</Text>
             <Text style={footerText}>
-              Exclusive padel community · Game nights · Rankings · Draws
+              {t(locale, 'emails.common.footerCopyright', { year: currentYear })}
             </Text>
+            <Text style={footerText}>{t(locale, 'emails.common.footerTagline')}</Text>
           </Section>
         </Container>
       </Body>
@@ -91,9 +85,10 @@ export const InvitationEmail = ({
   );
 };
 
+export const getInvitationSubject = (locale: Locale) => t(locale, 'emails.invitation.subject');
+
 export default InvitationEmail;
 
-// Styles - Matching Douro Bats Padel branding
 const main = {
   backgroundColor: '#f5f5f5',
   fontFamily:

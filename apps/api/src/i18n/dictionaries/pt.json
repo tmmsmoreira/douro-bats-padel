@@ -1,0 +1,123 @@
+{
+  "emails": {
+    "common": {
+      "greeting": "Olá {name},",
+      "orPaste": "Ou copia e cola este link no teu browser:",
+      "footerCopyright": "© {year} Douro Bats Padel. Todos os direitos reservados.",
+      "footerTagline": "Comunidade exclusiva de padel · Noites de jogo · Rankings · Sorteios"
+    },
+    "verification": {
+      "subject": "Confirma o teu email - Douro Bats Padel",
+      "preview": "Confirma o teu email para completar o registo no Douro Bats Padel",
+      "heading": "Bem-vindo ao Clube! 🎾",
+      "body1": "Obrigado por te juntares ao Douro Bats Padel! Estamos entusiasmados por te ter na nossa comunidade exclusiva de padel.",
+      "body2": "Para começares e aceder a todas as funcionalidades, incluindo inscrição em eventos, sorteios e rankings, confirma o teu endereço de email:",
+      "cta": "Confirmar Email",
+      "expires": "⏱️ Este link expira em 24 horas",
+      "ignore": "Se não criaste uma conta, podes ignorar este email em segurança."
+    },
+    "passwordReset": {
+      "subject": "Redefinir a tua password - Douro Bats Padel",
+      "preview": "Redefine a tua password do Douro Bats Padel",
+      "heading": "Pedido de redefinição de password 🔐",
+      "body1": "Recebemos um pedido para redefinir a password da tua conta Douro Bats Padel.",
+      "body2": "Clica no botão abaixo para criar uma nova password e voltar a aceder à tua conta:",
+      "cta": "Redefinir Password",
+      "expires": "⏱️ Este link expira em 1 hora",
+      "ignore": "Se não pediste a redefinição da password, podes ignorar este email em segurança. A tua password não será alterada.",
+      "security": "🔒 Por razões de segurança, este link só pode ser utilizado uma vez."
+    },
+    "invitation": {
+      "subject": "Foste convidado para o Douro Bats Padel",
+      "preview": "Foste convidado para te juntares ao Douro Bats Padel",
+      "heading": "Estás convidado! 🎾",
+      "body1": "{inviterName} convidou-te para te juntares ao Douro Bats Padel, a nossa comunidade exclusiva de padel.",
+      "body2": "O Douro Bats Padel é uma plataforma exclusiva para membros, pensada para jogadores de padel apaixonados que querem levar o seu jogo ao próximo nível.",
+      "featuresTitle": "O que vais poder fazer:",
+      "feature1": "🎯 Inscrever-te em noites de jogo exclusivas",
+      "feature2": "🎲 Sorteios automáticos para jogos equilibrados",
+      "feature3": "📊 Acompanhar o teu desempenho e ranking",
+      "feature4": "🏆 Ver resultados e histórico de jogos",
+      "feature5": "👥 Conhecer outros apaixonados por padel",
+      "cta": "Aceitar Convite e Juntar-me",
+      "expires": "⏱️ Este convite expira em 7 dias",
+      "ignore": "Se não estavas à espera deste convite, podes ignorar este email em segurança."
+    },
+    "rsvpConfirmation": {
+      "subject": "Inscrição confirmada para {event} - Douro Bats Padel",
+      "preview": "Estás confirmado para {event}!",
+      "heading": "Estás dentro!",
+      "bodyWithDate": "Boas notícias! Estás confirmado para {event} a {date}.",
+      "bodyNoDate": "Boas notícias! Estás confirmado para {event}.",
+      "body2": "Não te atrases e vem com tudo. Vemo-nos em campo!",
+      "info": "Se já não puderes comparecer, atualiza a tua inscrição para que outro jogador possa ocupar o teu lugar."
+    },
+    "waitlist": {
+      "subject": "Em lista de espera para {event} - Douro Bats Padel",
+      "preview": "Estás em lista de espera para {event}",
+      "heading": "Em lista de espera - Posição #{position}",
+      "body1": "O evento {event} está atualmente cheio, mas foste adicionado à lista de espera na posição #{position}.",
+      "body2": "Se abrir uma vaga, serás promovido automaticamente e notificado. Aguenta firme!",
+      "info": "Vais receber um email se fores promovido a uma vaga confirmada."
+    },
+    "promotion": {
+      "subject": "Estás dentro! Promovido da lista de espera - Douro Bats Padel",
+      "preview": "Foste promovido da lista de espera para {event}!",
+      "heading": "Estás dentro!",
+      "body1": "Abriu uma vaga e foste promovido da lista de espera para {event}.",
+      "body2": "A tua inscrição está confirmada! Não te atrases e vem com tudo.",
+      "info": "Se já não puderes comparecer, atualiza a tua inscrição para que outro jogador possa ocupar o teu lugar."
+    },
+    "drawPublished": {
+      "subject": "Sorteio publicado para {event} - Douro Bats Padel",
+      "preview": "O sorteio para {event} foi publicado!",
+      "heading": "Sorteio publicado",
+      "body": "O sorteio para {event} foi publicado. Abre a app para ver o teu campo e equipa."
+    },
+    "resultsPublished": {
+      "subject": "Resultados disponíveis para {event} - Douro Bats Padel",
+      "preview": "Os resultados de {event} já estão disponíveis!",
+      "heading": "Resultados chegaram!",
+      "body": "Os resultados de {event} já estão disponíveis. Abre a app para ver pontuações, atualizações de ranking e detalhes dos jogos."
+    },
+    "eventOpen": {
+      "subject": "Inscrições abertas para {event} - Douro Bats Padel",
+      "preview": "As inscrições para {event} estão abertas!",
+      "heading": "Inscrições abertas",
+      "body": "As inscrições para {event} estão abertas. Vai à app e garante o teu lugar antes que esgote!"
+    },
+    "defaults": {
+      "playerName": "Jogador",
+      "gameNight": "Noite de Jogo",
+      "upcomingGameNight": "a próxima noite de jogo",
+      "theGameNight": "a noite de jogo",
+      "nextGameNight": "a próxima noite de jogo"
+    }
+  },
+  "push": {
+    "rsvpConfirmed": {
+      "title": "Estás dentro!",
+      "body": "Inscrição confirmada para {event}"
+    },
+    "waitlist": {
+      "title": "Em lista de espera",
+      "body": "Posição #{position} em {event}"
+    },
+    "promotion": {
+      "title": "Estás dentro!",
+      "body": "Promovido da lista de espera em {event}"
+    },
+    "drawPublished": {
+      "title": "Sorteio publicado!",
+      "body": "Vê os teus jogos em {event}"
+    },
+    "eventOpen": {
+      "title": "Inscrições abertas",
+      "body": "{event} está aberto para inscrições"
+    },
+    "resultsPublished": {
+      "title": "Resultados chegaram!",
+      "body": "Vê as tuas pontuações em {event}"
+    }
+  }
+}

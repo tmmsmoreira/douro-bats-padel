@@ -22,6 +22,7 @@ import { PageHeaderSkeleton } from '@/components/shared/skeletons';
 import { PageHeader } from '@/components/shared/layout/page-header';
 import { PushNotificationToggle } from '@/components/shared/pwa/push-notification-toggle';
 import { EventNotificationsToggle } from '@/components/shared/pwa/event-notifications-toggle';
+import { NotificationLanguagePreference } from '@/components/shared/language/notification-language-preference';
 import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
 import { PlayerStatsStrip } from './player-stats-strip';
 import { WeeklyScoresCard } from './weekly-scores-card';
@@ -682,6 +683,7 @@ function AccountCard({ t }: { t: ReturnType<typeof useTranslations> }) {
         <CardContent className="pt-0 space-y-4">
           <EventNotificationsToggle />
           <PushNotificationToggle />
+          <NotificationLanguagePreference />
         </CardContent>
         <CardFooter className="border-t">
           <Button

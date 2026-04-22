@@ -10,51 +10,54 @@ import {
   Text,
 } from '@react-email/components';
 import * as React from 'react';
+import { Locale } from '@padel/types';
+import { t } from '../i18n';
 
 interface RSVPConfirmationEmailProps {
   name: string;
   eventTitle: string;
   eventDate: string;
+  locale: Locale;
 }
 
 export const RSVPConfirmationEmail = ({
   name = 'Player',
   eventTitle = 'Game Night',
   eventDate = '',
+  locale = Locale.PT,
 }: RSVPConfirmationEmailProps) => {
   const currentYear = new Date().getFullYear();
+  const resolvedEventTitle = eventTitle || t(locale, 'emails.defaults.upcomingGameNight');
 
   return (
     <Html>
       <Head />
-      <Preview>You're confirmed for {eventTitle}!</Preview>
+      <Preview>
+        {t(locale, 'emails.rsvpConfirmation.preview', { event: resolvedEventTitle })}
+      </Preview>
       <Body style={main}>
         <Container style={container}>
           <Section style={header}>
             <Heading style={brandName}>Douro Bats Padel</Heading>
           </Section>
           <Section style={content}>
-            <Heading style={heading}>You're In!</Heading>
+            <Heading style={heading}>{t(locale, 'emails.rsvpConfirmation.heading')}</Heading>
+            <Text style={paragraph}>{t(locale, 'emails.common.greeting', { name })}</Text>
             <Text style={paragraph}>
-              Hi <strong>{name}</strong>,
+              {eventDate
+                ? t(locale, 'emails.rsvpConfirmation.bodyWithDate', {
+                    event: resolvedEventTitle,
+                    date: eventDate,
+                  })
+                : t(locale, 'emails.rsvpConfirmation.bodyNoDate', { event: resolvedEventTitle })}
             </Text>
-            <Text style={paragraph}>
-              Great news! You are confirmed for{' '}
-              <strong>{eventTitle || 'the upcoming game night'}</strong>
-              {eventDate ? ` on ${eventDate}` : ''}.
-            </Text>
-            <Text style={paragraph}>
-              Make sure to arrive on time and bring your A-game. See you on the court!
-            </Text>
+            <Text style={paragraph}>{t(locale, 'emails.rsvpConfirmation.body2')}</Text>
             <Hr style={divider} />
-            <Text style={infoText}>
-              If you can no longer attend, please update your RSVP so another player can take your
-              spot.
-            </Text>
+            <Text style={infoText}>{t(locale, 'emails.rsvpConfirmation.info')}</Text>
           </Section>
           <Section style={footer}>
             <Text style={footerText}>
-              &copy; {currentYear} Douro Bats Padel. All rights reserved.
+              {t(locale, 'emails.common.footerCopyright', { year: currentYear })}
             </Text>
           </Section>
         </Container>
@@ -62,6 +65,11 @@ export const RSVPConfirmationEmail = ({
     </Html>
   );
 };
+
+export const getRsvpConfirmationSubject = (locale: Locale, eventTitle: string) =>
+  t(locale, 'emails.rsvpConfirmation.subject', {
+    event: eventTitle || t(locale, 'emails.defaults.gameNight'),
+  });
 
 export default RSVPConfirmationEmail;
 

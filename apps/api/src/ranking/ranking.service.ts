@@ -7,7 +7,7 @@ import {
   type PlayerHistory,
   toTier,
 } from '@padel/types';
-import { EventState, type Tier } from '@padel/types';
+import { EventState, Locale, type Tier } from '@padel/types';
 import { NotificationService } from '../notifications/notification.service';
 
 @Injectable()
@@ -174,6 +174,7 @@ export class RankingService {
               p.user.email,
               p.user.name || 'Player',
               event,
+              p.user.preferredLanguage as Locale,
               p.userId
             )
           )

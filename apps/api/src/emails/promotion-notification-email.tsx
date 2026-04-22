@@ -10,48 +10,45 @@ import {
   Text,
 } from '@react-email/components';
 import * as React from 'react';
+import { Locale } from '@padel/types';
+import { t } from '../i18n';
 
 interface PromotionNotificationEmailProps {
   name: string;
   eventTitle: string;
+  locale: Locale;
 }
 
 export const PromotionNotificationEmail = ({
   name = 'Player',
   eventTitle = 'Game Night',
+  locale = Locale.PT,
 }: PromotionNotificationEmailProps) => {
   const currentYear = new Date().getFullYear();
+  const resolvedEventTitle = eventTitle || t(locale, 'emails.defaults.upcomingGameNight');
 
   return (
     <Html>
       <Head />
-      <Preview>You've been promoted from the waitlist for {eventTitle}!</Preview>
+      <Preview>{t(locale, 'emails.promotion.preview', { event: resolvedEventTitle })}</Preview>
       <Body style={main}>
         <Container style={container}>
           <Section style={header}>
             <Heading style={brandName}>Douro Bats Padel</Heading>
           </Section>
           <Section style={content}>
-            <Heading style={heading}>You're In!</Heading>
+            <Heading style={heading}>{t(locale, 'emails.promotion.heading')}</Heading>
+            <Text style={paragraph}>{t(locale, 'emails.common.greeting', { name })}</Text>
             <Text style={paragraph}>
-              Hi <strong>{name}</strong>,
+              {t(locale, 'emails.promotion.body1', { event: resolvedEventTitle })}
             </Text>
-            <Text style={paragraph}>
-              A spot has opened up and you've been <strong>promoted from the waitlist</strong> for{' '}
-              <strong>{eventTitle || 'the upcoming game night'}</strong>.
-            </Text>
-            <Text style={paragraph}>
-              You are now confirmed! Make sure to arrive on time and bring your A-game.
-            </Text>
+            <Text style={paragraph}>{t(locale, 'emails.promotion.body2')}</Text>
             <Hr style={divider} />
-            <Text style={infoText}>
-              If you can no longer attend, please update your RSVP so another player can take your
-              spot.
-            </Text>
+            <Text style={infoText}>{t(locale, 'emails.promotion.info')}</Text>
           </Section>
           <Section style={footer}>
             <Text style={footerText}>
-              &copy; {currentYear} Douro Bats Padel. All rights reserved.
+              {t(locale, 'emails.common.footerCopyright', { year: currentYear })}
             </Text>
           </Section>
         </Container>
@@ -59,6 +56,8 @@ export const PromotionNotificationEmail = ({
     </Html>
   );
 };
+
+export const getPromotionSubject = (locale: Locale) => t(locale, 'emails.promotion.subject');
 
 export default PromotionNotificationEmail;
 

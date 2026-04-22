@@ -21,6 +21,7 @@ model User {
   emailVerificationExpires  DateTime?
   resetPasswordToken        String?        @unique
   resetPasswordExpires      DateTime?
+  preferredLanguage         Locale         @default(PT)
   player                    PlayerProfile?
   invitationsSent           Invitation[]
   pushSubscriptions         PushSubscription[]
@@ -250,6 +251,11 @@ enum RSVPStatus {
   WAITLISTED
   DECLINED
   CANCELLED
+}
+
+enum Locale {
+  EN
+  PT
 }
 
 model PushSubscription {

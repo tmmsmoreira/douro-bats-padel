@@ -1,4 +1,13 @@
-import { IsBoolean, IsEmail, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsEmail,
+  IsEnum,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
+import { Locale } from '@padel/types';
 
 export class UpdateProfilePhotoDto {
   @IsString()
@@ -31,6 +40,10 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsBoolean()
   notificationsPaused?: boolean;
+
+  @IsOptional()
+  @IsEnum(Locale)
+  preferredLanguage?: Locale;
 }
 
 export class VerifyEmailDto {

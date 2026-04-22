@@ -97,13 +97,13 @@ describe('PlayersService.findOne', () => {
     profilePhoto: null,
     emailVerified: new Date(),
     createdAt: new Date('2026-01-01'),
-    roles: [Role.PLAYER],
+    roles: [Role.VIEWER],
     dateOfBirth: new Date('1990-01-01'),
     phoneNumber: '+351900000000',
     player: { id: 'p1', rating: 300, weeklyScores: [], rankingSnapshots: [] },
   };
 
-  it('returns only public fields when the requester is not an admin/editor', async () => {
+  it('returns only public fields when the requester is not an admin', async () => {
     prisma.user.findUnique.mockResolvedValue(registeredUser);
 
     const result = await service.findOne('u1', null);
@@ -125,20 +125,12 @@ describe('PlayersService.findOne', () => {
     expect(result).toMatchObject({
       id: 'u1',
       email: 'alice@x.com',
-      roles: [Role.PLAYER],
+      roles: [Role.VIEWER],
       phoneNumber: '+351900000000',
     });
   });
 
-  it('returns the full record for editor requesters', async () => {
-    prisma.user.findUnique.mockResolvedValue(registeredUser);
-
-    const result = await service.findOne('u1', { roles: [Role.EDITOR] });
-
-    expect(result).toMatchObject({ email: 'alice@x.com' });
-  });
-
-  it('looks up invitations as a fallback for admin/editor requesters', async () => {
+  it('looks up invitations as a fallback for admin requesters', async () => {
     prisma.user.findUnique.mockResolvedValue(null);
     prisma.invitation.findUnique.mockResolvedValue({
       id: 'inv1',
@@ -153,16 +145,16 @@ describe('PlayersService.findOne', () => {
       createdAt: new Date('2026-01-02'),
     });
 
-    const result = await service.findOne('inv1', { roles: [Role.ADMIN] });
+    const result = (await service.findOne('inv1', { roles: [Role.ADMIN] })) as any;
 
     expect(result).toMatchObject({ id: 'inv1', email: 'bob@x.com', player: null });
     expect(result.invitation).toMatchObject({ status: 'PENDING', token: 'tok' });
   });
 
-  it('never queries invitations for non-admin/editor requesters (prevents invitation metadata leak)', async () => {
+  it('never queries invitations for non-admin requesters (prevents invitation metadata leak)', async () => {
     prisma.user.findUnique.mockResolvedValue(null);
 
-    await expect(service.findOne('inv1', { roles: [Role.PLAYER] })).rejects.toBeInstanceOf(
+    await expect(service.findOne('inv1', { roles: [Role.VIEWER] })).rejects.toBeInstanceOf(
       NotFoundException
     );
     expect(prisma.invitation.findUnique).not.toHaveBeenCalled();
@@ -196,7 +188,7 @@ describe('PlayersService.remove', () => {
   });
 
   it('deletes a non-admin user and returns a success message', async () => {
-    prisma.user.findUnique.mockResolvedValue({ id: 'u1', roles: [Role.PLAYER] });
+    prisma.user.findUnique.mockResolvedValue({ id: 'u1', roles: [Role.VIEWER] });
     prisma.user.delete.mockResolvedValue({});
 
     const result = await service.remove('u1');
@@ -213,7 +205,7 @@ describe('PlayersService.remove', () => {
   });
 
   it('refuses to delete admin users', async () => {
-    prisma.user.findUnique.mockResolvedValue({ id: 'u1', roles: [Role.ADMIN, Role.PLAYER] });
+    prisma.user.findUnique.mockResolvedValue({ id: 'u1', roles: [Role.ADMIN, Role.VIEWER] });
 
     await expect(service.remove('u1')).rejects.toBeInstanceOf(BadRequestException);
     expect(prisma.user.delete).not.toHaveBeenCalled();

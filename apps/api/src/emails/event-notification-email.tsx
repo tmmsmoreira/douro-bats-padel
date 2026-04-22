@@ -9,61 +9,61 @@ import {
   Text,
 } from '@react-email/components';
 import * as React from 'react';
+import { Locale } from '@padel/types';
+import { t } from '../i18n';
+
+type EventNotificationType = 'draw-published' | 'results-published' | 'event-open';
 
 interface EventNotificationEmailProps {
   name: string;
   eventTitle: string;
-  type: 'draw-published' | 'results-published' | 'event-open';
+  type: EventNotificationType;
+  locale: Locale;
 }
 
-const config = {
-  'draw-published': {
-    preview: (title: string) => `The draw for ${title} has been published!`,
-    heading: 'Draw Published',
-    body: (title: string) =>
-      `The draw for **${title || 'the upcoming game night'}** has been published. Check the app to see your court and team assignments.`,
-  },
-  'results-published': {
-    preview: (title: string) => `Results for ${title} are now available!`,
-    heading: 'Results Are In!',
-    body: (title: string) =>
-      `The results for **${title || 'the game night'}** are now available. Check the app to see scores, rankings updates, and match details.`,
-  },
-  'event-open': {
-    preview: (title: string) => `RSVP is now open for ${title}!`,
-    heading: 'RSVP Now Open',
-    body: (title: string) =>
-      `Registration is now open for **${title || 'the next game night'}**. Head to the app to confirm your spot before it fills up!`,
-  },
-};
+const keyFor = (type: EventNotificationType) =>
+  type === 'draw-published'
+    ? 'drawPublished'
+    : type === 'results-published'
+      ? 'resultsPublished'
+      : 'eventOpen';
+
+const defaultTitleKey = (type: EventNotificationType) =>
+  type === 'draw-published'
+    ? 'emails.defaults.upcomingGameNight'
+    : type === 'results-published'
+      ? 'emails.defaults.theGameNight'
+      : 'emails.defaults.nextGameNight';
 
 export const EventNotificationEmail = ({
   name = 'Player',
   eventTitle = 'Game Night',
   type = 'draw-published',
+  locale = Locale.PT,
 }: EventNotificationEmailProps) => {
   const currentYear = new Date().getFullYear();
-  const cfg = config[type];
+  const base = `emails.${keyFor(type)}`;
+  const resolvedEventTitle = eventTitle || t(locale, defaultTitleKey(type));
 
   return (
     <Html>
       <Head />
-      <Preview>{cfg.preview(eventTitle)}</Preview>
+      <Preview>{t(locale, `${base}.preview`, { event: resolvedEventTitle })}</Preview>
       <Body style={main}>
         <Container style={container}>
           <Section style={header}>
             <Heading style={brandName}>Douro Bats Padel</Heading>
           </Section>
           <Section style={content}>
-            <Heading style={headingStyle}>{cfg.heading}</Heading>
+            <Heading style={headingStyle}>{t(locale, `${base}.heading`)}</Heading>
+            <Text style={paragraph}>{t(locale, 'emails.common.greeting', { name })}</Text>
             <Text style={paragraph}>
-              Hi <strong>{name}</strong>,
+              {t(locale, `${base}.body`, { event: resolvedEventTitle })}
             </Text>
-            <Text style={paragraph}>{cfg.body(eventTitle)}</Text>
           </Section>
           <Section style={footer}>
             <Text style={footerText}>
-              &copy; {currentYear} Douro Bats Padel. All rights reserved.
+              {t(locale, 'emails.common.footerCopyright', { year: currentYear })}
             </Text>
           </Section>
         </Container>
@@ -71,6 +71,15 @@ export const EventNotificationEmail = ({
     </Html>
   );
 };
+
+export const getEventNotificationSubject = (
+  locale: Locale,
+  type: EventNotificationType,
+  eventTitle: string
+) =>
+  t(locale, `emails.${keyFor(type)}.subject`, {
+    event: eventTitle || t(locale, 'emails.defaults.gameNight'),
+  });
 
 export default EventNotificationEmail;
 

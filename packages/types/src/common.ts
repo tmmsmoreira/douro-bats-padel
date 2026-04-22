@@ -32,3 +32,8 @@ export enum PlayerStatus {
 export enum EventFormat {
   NON_STOP = 'NON_STOP',
 }
+
+export enum Locale {
+  EN = 'EN',
+  PT = 'PT',
+}

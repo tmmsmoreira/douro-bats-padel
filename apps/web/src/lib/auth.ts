@@ -1,6 +1,7 @@
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
+import { cookies } from 'next/headers';
 import type { AuthTokens, AuthUser } from '@padel/types';
 import type { JWT } from 'next-auth/jwt';
 
@@ -112,6 +113,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // Handle Google OAuth sign-in
       if (account?.provider === 'google' && profile?.email) {
         try {
+          // Read the UI locale cookie the language switcher sets so new Google
+          // users get emails in the language they signed up in. Backend
+          // validates and falls back to PT for unknown values.
+          const cookieStore = await cookies();
+          const language = cookieStore.get('NEXT_LOCALE')?.value?.toUpperCase();
+
           // Try to get or create user in backend and get JWT tokens
           const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/google`, {
             method: 'POST',
@@ -120,6 +127,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               email: profile.email,
               name: profile.name,
               profilePhoto: profile.picture,
+              language,
             }),
           });
 

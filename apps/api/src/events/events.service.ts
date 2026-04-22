@@ -3,7 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { NotificationService } from '../notifications/notification.service';
 import type { Prisma } from '@prisma/client';
 import type { CreateEventDto, EventWithRSVP, TierRules } from '@padel/types';
-import { EventState, RSVPStatus } from '@padel/types';
+import { EventState, Locale, RSVPStatus } from '@padel/types';
 
 @Injectable()
 export class EventsService {
@@ -439,11 +439,17 @@ export class EventsService {
           notificationsPaused: false,
           user: { email: { not: '' } },
         },
-        include: { user: { select: { id: true, email: true } } },
+        include: {
+          user: { select: { id: true, email: true, preferredLanguage: true } },
+        },
       });
       const recipients = activePlayers
         .filter((p) => p.user.email)
-        .map((p) => ({ email: p.user.email, userId: p.user.id }));
+        .map((p) => ({
+          email: p.user.email,
+          userId: p.user.id,
+          preferredLanguage: p.user.preferredLanguage as Locale,
+        }));
       await this.notificationService.announceEventOpen(recipients, updated);
     } catch (err) {
       this.logger.error('Failed to send event open announcement', err);

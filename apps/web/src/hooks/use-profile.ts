@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
+import { Locale } from '@padel/types';
 import { useAuthFetch } from './use-api';
 
 interface UserProfile {
@@ -12,6 +13,7 @@ interface UserProfile {
   profilePhoto: string | null;
   roles: string[];
   emailVerified: boolean;
+  preferredLanguage: Locale;
   createdAt: string;
   player: {
     id: string;
@@ -43,6 +45,7 @@ interface UpdateProfileData {
   phoneNumber?: string;
   profilePhoto?: string;
   notificationsPaused?: boolean;
+  preferredLanguage?: Locale;
 }
 
 /**

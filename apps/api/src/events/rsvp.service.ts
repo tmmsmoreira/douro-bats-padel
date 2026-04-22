@@ -1,7 +1,7 @@
 import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import type { RSVPDto, RSVPResponse } from '@padel/types';
-import { RSVPStatus, PlayerStatus } from '@padel/types';
+import { Locale, RSVPStatus, PlayerStatus } from '@padel/types';
 import {
   NotificationService,
   type EventNotificationData,
@@ -143,6 +143,7 @@ export class RSVPService {
           player.user.email,
           player.user.name || 'Player',
           event,
+          player.user.preferredLanguage as Locale,
           player.user.id
         );
 
@@ -190,6 +191,7 @@ export class RSVPService {
           player.user.name || 'Player',
           event,
           position,
+          player.user.preferredLanguage as Locale,
           player.user.id
         );
 
@@ -314,6 +316,7 @@ export class RSVPService {
           promoted.player.user.email,
           promoted.player.user.name || 'Player',
           { id: eventId } as EventNotificationData,
+          promoted.player.user.preferredLanguage as Locale,
           promoted.player.user.id
         );
       } catch (err) {
@@ -385,6 +388,7 @@ export class RSVPService {
           rsvp.player.user.email,
           rsvp.player.user.name || 'Player',
           event,
+          rsvp.player.user.preferredLanguage as Locale,
           rsvp.player.user.id
         )
       )

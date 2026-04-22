@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'default',
+    statusBarStyle: 'black-translucent',
     title: 'Douro Bats',
   },
   formatDetection: {
@@ -76,15 +76,15 @@ export default async function LangLayout({
   return (
     <html lang={lang} suppressHydrationWarning>
       <head>
-        {/* Inline critical CSS: background matches iOS native splash so the handoff to the React splash is seamless */}
+        {/* Inline critical CSS: background + static splash matching the iOS native PNG and the React splash so the handoff is seamless */}
         <style
           dangerouslySetInnerHTML={{
-            __html: `html{background:#fafafa;color:#1a1a1a}@media(prefers-color-scheme:dark){html{background:#1a1a1a;color:#f5f5f5}}.dark html,html.dark{background:#1a1a1a;color:#f5f5f5}@media(display-mode:standalone){html{--sg:linear-gradient(to top right,rgba(167,216,0,.2),rgba(74,139,222,.2));background:var(--sg),#fafafa;color:#1a1a1a}@media(prefers-color-scheme:dark){html{background:var(--sg),#1a1a1a;color:#f5f5f5}}.dark html,html.dark{background:var(--sg),#1a1a1a;color:#f5f5f5}}`,
+            __html: `html{background:#fafafa;color:#1a1a1a}@media(prefers-color-scheme:dark){html{background:#1a1a1a;color:#f5f5f5}}.dark html,html.dark{background:#1a1a1a;color:#f5f5f5}#static-splash{display:none}@media(display-mode:standalone){html{--sg:linear-gradient(to top right,rgba(167,216,0,.2),rgba(74,139,222,.2));background:var(--sg),#fafafa;color:#1a1a1a}@media(prefers-color-scheme:dark){html{background:var(--sg),#1a1a1a;color:#f5f5f5}}.dark html,html.dark{background:var(--sg),#1a1a1a;color:#f5f5f5}#static-splash{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:var(--sg),#fafafa}@media(prefers-color-scheme:dark){#static-splash{background:var(--sg),#1a1a1a}}.dark #static-splash{background:var(--sg),#1a1a1a}#static-splash img{width:33vmin;height:33vmin;object-fit:contain}}`,
           }}
         />
         <meta name="application-name" content="Douro Bats Padel" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Douro Bats" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
@@ -226,6 +226,11 @@ export default async function LangLayout({
         className={`${inter.variable} ${spaceGrotesk.variable} ${inter.className}`}
         suppressHydrationWarning
       >
+        {/* Static splash: covers the page during hydration. Only the logo — no text/dots — at the same 33vmin position as the React splash so the handoff is invisible. */}
+        <div id="static-splash" aria-hidden="true">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/icons/logo.png" alt="" width={128} height={128} />
+        </div>
         <Providers session={session}>
           <NextIntlClientProvider locale={lang} messages={messages}>
             <AppLoadingScreen minDuration={1000} />

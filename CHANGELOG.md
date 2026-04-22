@@ -10,6 +10,17 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-04-22] — Seamless PWA splash handoff and under-notch layout
+
+**Commit:** `404a664`
+
+### Frontend
+
+- **`LangLayout`** — Added a static HTML `#static-splash` element (logo at 33vmin, matching the React splash position) rendered inline in the body so there is no paint gap between the iOS native startup image and React hydration; inline critical CSS extended to style and gate the static splash to standalone display mode.
+- **`LangLayout`** — Flipped `apple-mobile-web-app-status-bar-style` (and the matching `appleWebApp.statusBarStyle` metadata) to `black-translucent` so the splash and app extend under the notch.
+- **`AppLoadingScreen`** — Hides the static HTML splash on mount (both when the React splash is skipped and when it takes over), preventing the static splash from reappearing as the React splash fades out; removed the now-unused `startTime`/`elapsed`/`remaining` computation in favor of using `minDuration` directly.
+
+
 ## [2026-04-22] — Exclude test files from web tsconfig to fix Vercel build
 
 **Commit:** `bfe5cc7`

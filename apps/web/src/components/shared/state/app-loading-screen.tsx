@@ -43,19 +43,26 @@ export function AppLoadingScreen({ minDuration = 1000, show = true }: AppLoading
     setIsHydrated(true);
 
     if (!isStandalone || hasShownSplash) {
+      // Hide the static HTML splash even if we skip the React splash,
+      // otherwise it would stay on top of the app in non-standalone contexts
+      // (it's CSS-gated, but defense in depth).
+      const staticSplash = document.getElementById('static-splash');
+      if (staticSplash) staticSplash.style.display = 'none';
       setIsVisible(false);
       return;
     }
 
     hasShownSplash = true;
 
-    const startTime = Date.now();
-    const elapsed = Date.now() - startTime;
-    const remaining = Math.max(0, minDuration - elapsed);
+    // React splash is now on screen with the same logo in the same position
+    // as the static splash. Hide the static one so it doesn't re-appear when
+    // the React splash fades out.
+    const staticSplash = document.getElementById('static-splash');
+    if (staticSplash) staticSplash.style.display = 'none';
 
     const timeout = setTimeout(() => {
       setIsVisible(false);
-    }, remaining);
+    }, minDuration);
 
     return () => clearTimeout(timeout);
   }, [minDuration, isStandalone]);

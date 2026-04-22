@@ -8,11 +8,11 @@ import { EventsListSkeleton } from '@/components/shared/event/event-skeletons';
 import { useMemo } from 'react';
 import { motion } from 'motion/react';
 
-export function PastEventsList() {
+export function PastEventsList({ to }: { to?: string } = {}) {
   const t = useTranslations('home');
   const isFromBfcache = useIsFromBfcache();
 
-  const { data: allEvents, isLoading } = usePastEvents();
+  const { data: allEvents, isLoading } = usePastEvents({ to });
 
   // Sort by date descending (most recent first) and take only the last 10
   const events = useMemo(() => {

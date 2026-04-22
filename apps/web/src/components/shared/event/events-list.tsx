@@ -7,13 +7,11 @@ import { useUpcomingEvents, useIsFromBfcache } from '@/hooks';
 import { EventCard, EventStats, RSVPBadges, DataStateWrapper } from '@/components/shared';
 import { EventsListSkeleton } from '@/components/shared/event/event-skeletons';
 
-export function EventsList() {
+export function EventsList({ from }: { from?: string } = {}) {
   const t = useTranslations('home');
   const isFromBfcache = useIsFromBfcache();
 
-  const { data: events, isLoading } = useUpcomingEvents();
-
-  console.log('🎬 EventsList render:', { isFromBfcache, isLoading, hasEvents: !!events });
+  const { data: events, isLoading } = useUpcomingEvents({ from });
 
   return (
     <DataStateWrapper

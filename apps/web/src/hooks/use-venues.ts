@@ -70,6 +70,18 @@ export function useVenues() {
 }
 
 /**
+ * Hook to fetch a single venue by ID (with its courts).
+ */
+export function useVenue(venueId: string) {
+  const authFetch = useAuthFetch();
+
+  return useQuery<Venue>({
+    queryKey: ['venue', venueId],
+    queryFn: () => authFetch.get(`/venues/${venueId}`),
+  });
+}
+
+/**
  * Hook to delete a venue
  */
 export function useDeleteVenue(onSuccessCallback?: () => void) {

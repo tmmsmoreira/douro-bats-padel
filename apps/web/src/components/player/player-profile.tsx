@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { motion } from 'motion/react';
 import { DataStateWrapper } from '@/components/shared/state/data-state-wrapper';
 import { PlayerProfileSkeleton } from '@/components/shared/player';
+import { PageHeaderSkeleton } from '@/components/shared/skeletons';
 import { PageHeader } from '@/components/shared/layout/page-header';
 import { PushNotificationToggle } from '@/components/shared/pwa/push-notification-toggle';
 import { EventNotificationsToggle } from '@/components/shared/pwa/event-notifications-toggle';
@@ -183,7 +184,12 @@ export function PlayerProfile() {
       isLoading={status === 'loading' || isLoading}
       data={profile}
       loadingMessage={t('loadingProfile')}
-      loadingComponent={<PlayerProfileSkeleton />}
+      loadingComponent={
+        <div className="space-y-6">
+          <PageHeaderSkeleton />
+          <PlayerProfileSkeleton />
+        </div>
+      }
       emptyMessage={t('profileNotFound')}
       error={error as Error}
       errorMessage={`${t('errorLoadingProfile')}: ${(error as Error)?.message || ''}`}

@@ -40,23 +40,36 @@ export function useEvents(options: UseEventsOptions = {}) {
 }
 
 /**
- * Hook to fetch upcoming events (from today onwards)
+ * Hook to fetch upcoming events (from today onwards). Accepts an optional
+ * `from` override so SSR prefetchers can pin the cache key to a server-resolved
+ * timestamp, avoiding a client/server hydration mismatch on the cache key.
  */
-export function useUpcomingEvents(queryKey: string[] = ['events']) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const from = today.toISOString();
+export function useUpcomingEvents(options: { from?: string; queryKey?: string[] } = {}) {
+  const { from: fromOverride, queryKey } = options;
+  const from =
+    fromOverride ??
+    (() => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return today.toISOString();
+    })();
 
   return useEvents({ from, queryKey });
 }
 
 /**
- * Hook to fetch past events (before today)
+ * Hook to fetch past events (before today). Accepts an optional `to` override
+ * so SSR prefetchers can pin the cache key.
  */
-export function usePastEvents(queryKey: string[] = ['past-events']) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const to = today.toISOString();
+export function usePastEvents(options: { to?: string; queryKey?: string[] } = {}) {
+  const { to: toOverride, queryKey = ['past-events'] } = options;
+  const to =
+    toOverride ??
+    (() => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return today.toISOString();
+    })();
 
   return useEvents({ to, queryKey });
 }

@@ -10,6 +10,15 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-04-22] — Fix JSX namespace in motion test mock
+
+**Commit:** `35d029d`
+
+### Bug Fixes
+
+- **`test/mocks/motion.ts`** — Replaced the bare global `JSX.IntrinsicElements` reference with `React.JSX.IntrinsicElements` so `next build` and `tsc --noEmit` no longer fail now that the global `JSX` namespace is no longer exposed.
+
+
 ## [2026-04-22] — Align PWA splash with iOS native startup image
 
 **Commit:** `437136d`

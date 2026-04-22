@@ -45,7 +45,7 @@ const stripMotionProps = (props: AnyObj): AnyObj => {
   return out;
 };
 
-type IntrinsicTag = keyof JSX.IntrinsicElements;
+type IntrinsicTag = keyof React.JSX.IntrinsicElements;
 
 const makeMotionComponent = (tag: IntrinsicTag) =>
   React.forwardRef<unknown, AnyObj>(({ children, ...rest }, ref) =>

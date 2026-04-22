@@ -2,10 +2,13 @@
 builder = "nixpacks"
 
 [build.nixpacksPlan.phases.install]
-cmd = "pnpm install --frozen-lockfile"
+cmds = [
+  "pnpm install --frozen-lockfile",
+  "chmod -R +x node_modules/.bin apps/*/node_modules/.bin packages/*/node_modules/.bin 2>/dev/null || true"
+]
 
 [build.nixpacksPlan.phases.build]
-cmd = "pnpm --filter @padel/types build && pnpm --filter @padel/api prisma generate && pnpm --filter @padel/api build"
+cmd = "pnpm --filter @padel/types build && pnpm --filter @padel/api build"
 
 [deploy]
 startCommand = "chmod +x apps/api/scripts/migrate-and-start.sh && bash apps/api/scripts/migrate-and-start.sh"

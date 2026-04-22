@@ -105,14 +105,6 @@ export function CreateInvitationDialog() {
             </div>
           </div>
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setOpen(false)}
-              className="w-full"
-            >
-              {t('cancel')}
-            </Button>
             <Button type="submit" disabled={createMutation.isPending} className="w-full">
               {createMutation.isPending ? t('sending') : t('send')}
             </Button>

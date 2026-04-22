@@ -192,9 +192,6 @@ export function EditTeamDialog({
         </ScrollArea>
 
         <ResponsiveDialogFooter className="shrink-0">
-          <Button variant="outline" onClick={onClose} disabled={isSaving} className="w-full">
-            {t('cancel')}
-          </Button>
           <Button
             onClick={handleSave}
             disabled={isSaving || teamPlayers.length !== 2}

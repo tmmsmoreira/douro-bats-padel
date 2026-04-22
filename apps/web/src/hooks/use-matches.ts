@@ -1,6 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import type { MatchWithTeams } from '@padel/types';
 import { useAuthFetch } from './use-api';
+
+export type Match = MatchWithTeams;
 
 export interface MatchResultData {
   eventId: string;
@@ -35,32 +38,6 @@ export function useSaveMatchResults(eventId: string) {
       toast.error(error.message || 'Failed to save results');
     },
   });
-}
-
-export interface Match {
-  id: string;
-  eventId?: string;
-  courtId: string;
-  court?: { label: string };
-  round: number;
-  setsA: number;
-  setsB: number;
-  tier: string;
-  publishedAt?: string | null;
-  teamA?: Array<{
-    id: string;
-    name: string;
-    rating?: number;
-    ratingDelta?: number;
-    profilePhoto?: string | null;
-  }>;
-  teamB?: Array<{
-    id: string;
-    name: string;
-    rating?: number;
-    ratingDelta?: number;
-    profilePhoto?: string | null;
-  }>;
 }
 
 /**

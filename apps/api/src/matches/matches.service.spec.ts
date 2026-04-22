@@ -1,7 +1,7 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { MatchesService } from './matches.service';
 import { createPrismaMock, type PrismaMock } from '../../test/prisma-mock';
-import { Tier } from '@padel/types';
+import { Tier, type MatchWithTeams } from '@padel/types';
 
 const baseDto = () => ({
   eventId: 'event-1',
@@ -143,16 +143,6 @@ describe('MatchesService.publishMatches', () => {
 });
 
 describe('MatchesService.getMatches', () => {
-  type Matches = Awaited<ReturnType<MatchesService['getMatches']>>;
-  type TeamPlayer = {
-    id: string;
-    name: string | undefined;
-    rating: number | undefined;
-    profilePhoto: string | null | undefined;
-    ratingDelta: number | undefined;
-  };
-  type EnrichedMatch = Matches[number] & { teamA?: TeamPlayer[]; teamB?: TeamPlayer[] };
-
   let prisma: PrismaMock;
   let service: MatchesService;
 
@@ -193,7 +183,7 @@ describe('MatchesService.getMatches', () => {
       { playerId: 'p3', before: 300, after: 290 }, // -10
     ]);
 
-    const [enriched] = (await service.getMatches('e1')) as EnrichedMatch[];
+    const [enriched] = (await service.getMatches('e1')) as unknown as MatchWithTeams[];
 
     expect(enriched.teamA).toEqual([
       { id: 'p1', name: 'P1', rating: 320, profilePhoto: 'p1.jpg', ratingDelta: 20 },
@@ -218,7 +208,7 @@ describe('MatchesService.getMatches', () => {
     prisma.playerProfile.findMany.mockResolvedValue([]);
     prisma.rankingSnapshot.findMany.mockResolvedValue([]);
 
-    const [match] = (await service.getMatches('e1')) as EnrichedMatch[];
+    const [match] = (await service.getMatches('e1')) as unknown as MatchWithTeams[];
 
     expect(match.id).toBe('m1');
     expect(match.teamA).toBeUndefined();
@@ -240,7 +230,7 @@ describe('MatchesService.getMatches', () => {
     ]);
     prisma.rankingSnapshot.findMany.mockResolvedValue([]);
 
-    const [match] = (await service.getMatches('e1')) as EnrichedMatch[];
+    const [match] = (await service.getMatches('e1')) as unknown as MatchWithTeams[];
 
     expect(match.teamA[0]).toEqual({
       id: 'ghost',

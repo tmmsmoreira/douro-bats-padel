@@ -52,7 +52,7 @@ describe('DrawController', () => {
 
   it('getDraw forwards the full user object so the service can check roles', async () => {
     drawService.getDraw.mockResolvedValue({});
-    const user = { sub: 'u1', roles: ['EDITOR'] };
+    const user = { sub: 'u1', roles: ['ADMIN'] };
 
     await controller.getDraw('event-1', { user } as any);
 

@@ -10,7 +10,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
   const queryClient = getQueryClient();
 
   const roles = session?.user?.roles ?? [];
-  const isEditor = roles.includes('EDITOR') || roles.includes('ADMIN');
+  const isEditor = roles.includes('ADMIN');
 
   const eventDescriptor = queries.event(id);
   await queryClient.prefetchQuery({

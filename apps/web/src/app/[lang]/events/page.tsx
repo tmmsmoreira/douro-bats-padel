@@ -19,7 +19,7 @@ function todayMidnightIso(): string {
 export default async function EventsPage() {
   const session = await getServerSession();
   const roles = session?.user?.roles ?? [];
-  const isEditor = roles.includes('EDITOR') || roles.includes('ADMIN');
+  const isEditor = roles.includes('ADMIN');
   const roleKey = rolesToRoleKey(roles);
 
   const queryClient = getQueryClient();

@@ -1,7 +1,7 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { MatchesService } from './matches.service';
 import { createPrismaMock, type PrismaMock } from '../../test/prisma-mock';
-import { Tier, type MatchWithTeams } from '@padel/types';
+import { EventState, Tier, type MatchWithTeams } from '@padel/types';
 
 const baseDto = () => ({
   eventId: 'event-1',
@@ -32,7 +32,7 @@ describe('MatchesService.submitMatch', () => {
   });
 
   it('rejects negative set scores', async () => {
-    prisma.event.findUnique.mockResolvedValue({ id: 'event-1' });
+    prisma.event.findUnique.mockResolvedValue({ id: 'event-1', state: EventState.DRAWN });
 
     await expect(service.submitMatch({ ...baseDto(), setsA: -1 }, 'user-1')).rejects.toBeInstanceOf(
       BadRequestException
@@ -40,7 +40,7 @@ describe('MatchesService.submitMatch', () => {
   });
 
   it('rejects set scores greater than 20', async () => {
-    prisma.event.findUnique.mockResolvedValue({ id: 'event-1' });
+    prisma.event.findUnique.mockResolvedValue({ id: 'event-1', state: EventState.DRAWN });
 
     await expect(service.submitMatch({ ...baseDto(), setsB: 21 }, 'user-1')).rejects.toThrow(
       /cannot exceed 20/i
@@ -48,7 +48,7 @@ describe('MatchesService.submitMatch', () => {
   });
 
   it('creates a new match when none exists for (event, court, round)', async () => {
-    prisma.event.findUnique.mockResolvedValue({ id: 'event-1' });
+    prisma.event.findUnique.mockResolvedValue({ id: 'event-1', state: EventState.DRAWN });
     prisma.match.findFirst.mockResolvedValue(null);
     prisma.match.create.mockResolvedValue({ id: 'm1' });
 
@@ -71,7 +71,7 @@ describe('MatchesService.submitMatch', () => {
   });
 
   it('updates the existing match when one already exists for the same slot', async () => {
-    prisma.event.findUnique.mockResolvedValue({ id: 'event-1' });
+    prisma.event.findUnique.mockResolvedValue({ id: 'event-1', state: EventState.DRAWN });
     prisma.match.findFirst.mockResolvedValue({ id: 'existing-match' });
     prisma.match.update.mockResolvedValue({ id: 'existing-match' });
 
@@ -87,7 +87,7 @@ describe('MatchesService.submitMatch', () => {
   });
 
   it('accepts 0-0 (edge: unplayed but recorded) as valid input', async () => {
-    prisma.event.findUnique.mockResolvedValue({ id: 'event-1' });
+    prisma.event.findUnique.mockResolvedValue({ id: 'event-1', state: EventState.DRAWN });
     prisma.match.findFirst.mockResolvedValue(null);
     prisma.match.create.mockResolvedValue({});
 

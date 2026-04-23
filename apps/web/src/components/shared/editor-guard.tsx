@@ -13,9 +13,10 @@ interface EditorGuardProps {
 }
 
 /**
- * Wraps editor-only content with role-based access control.
+ * Wraps admin-only content with role-based access control.
  * Shows a loading state while the session is being checked,
- * triggers a 404 if the user doesn't have EDITOR/ADMIN role.
+ * triggers a 404 if the user doesn't have the ADMIN role.
+ * (Historically named "editor" before the EDITOR role was merged into ADMIN.)
  */
 export function EditorGuard({ children, loadingMessage }: EditorGuardProps) {
   const { status } = useSession();

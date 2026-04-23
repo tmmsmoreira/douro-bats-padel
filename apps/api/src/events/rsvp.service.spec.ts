@@ -123,7 +123,8 @@ describe('RSVPService', () => {
       prisma.event.findUnique.mockResolvedValue(buildEvent({ capacity: 4 }));
       prisma.playerProfile.findUnique.mockResolvedValue(buildPlayer());
       prisma.rSVP.count.mockResolvedValue(4);
-      prisma.rSVP.aggregate.mockResolvedValue({ _max: { position: 3 } });
+      // Simulates the `SELECT ... FOR UPDATE` scan returning 3 existing rows.
+      prisma.$queryRaw.mockResolvedValue([{ position: 1 }, { position: 2 }, { position: 3 }]);
       prisma.rSVP.upsert.mockResolvedValue({});
 
       const result = await service.handleRSVP('event-1', 'user-1', { status: 'IN' });
@@ -137,7 +138,7 @@ describe('RSVPService', () => {
       prisma.event.findUnique.mockResolvedValue(buildEvent({ capacity: 4 }));
       prisma.playerProfile.findUnique.mockResolvedValue(buildPlayer());
       prisma.rSVP.count.mockResolvedValue(4);
-      prisma.rSVP.aggregate.mockResolvedValue({ _max: { position: null } });
+      prisma.$queryRaw.mockResolvedValue([]);
       prisma.rSVP.upsert.mockResolvedValue({});
 
       const result = await service.handleRSVP('event-1', 'user-1', { status: 'IN' });

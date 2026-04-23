@@ -15,6 +15,41 @@ export class EventsService {
   ) {}
 
   /**
+   * Validate chronological invariants on event timing. All four fields must be
+   * parseable and the order must be: rsvpOpensAt < rsvpClosesAt ≤ startsAt < endsAt.
+   */
+  private validateEventDates(dto: {
+    rsvpOpensAt?: Date | string;
+    rsvpClosesAt?: Date | string;
+    startsAt?: Date | string;
+    endsAt?: Date | string;
+  }): void {
+    const parse = (v: Date | string | undefined, label: string): Date => {
+      if (v === undefined) throw new BadRequestException(`${label} is required`);
+      const d = v instanceof Date ? v : new Date(v);
+      if (Number.isNaN(d.getTime())) {
+        throw new BadRequestException(`${label} is not a valid date`);
+      }
+      return d;
+    };
+
+    const rsvpOpensAt = parse(dto.rsvpOpensAt, 'rsvpOpensAt');
+    const rsvpClosesAt = parse(dto.rsvpClosesAt, 'rsvpClosesAt');
+    const startsAt = parse(dto.startsAt, 'startsAt');
+    const endsAt = parse(dto.endsAt, 'endsAt');
+
+    if (rsvpOpensAt >= rsvpClosesAt) {
+      throw new BadRequestException('rsvpOpensAt must be before rsvpClosesAt');
+    }
+    if (rsvpClosesAt > startsAt) {
+      throw new BadRequestException('rsvpClosesAt must be on or before startsAt');
+    }
+    if (startsAt >= endsAt) {
+      throw new BadRequestException('startsAt must be before endsAt');
+    }
+  }
+
+  /**
    * Validate tier rules configuration
    */
   private validateTierRules(tierRules: TierRules | undefined, capacity: number): void {
@@ -105,7 +140,13 @@ export class EventsService {
   }
 
   async create(dto: CreateEventDto, _createdBy: string) {
-    // Validate tier rules
+    // Validate tier rules and chronological invariants
+    this.validateEventDates({
+      rsvpOpensAt: dto.rsvpOpensAt,
+      rsvpClosesAt: dto.rsvpClosesAt,
+      startsAt: dto.startsAt,
+      endsAt: dto.endsAt,
+    });
     this.validateTierRules(dto.tierRules, dto.capacity);
 
     const event = await this.prisma.event.create({
@@ -366,6 +407,22 @@ export class EventsService {
           'Cannot edit event timing (date, start time, or end time) when players are already registered'
         );
       }
+    }
+
+    // Re-validate chronological invariants whenever any timing field changes.
+    // Merges incoming dto with existing values so partial updates still pass.
+    if (
+      dto.rsvpOpensAt !== undefined ||
+      dto.rsvpClosesAt !== undefined ||
+      dto.startsAt !== undefined ||
+      dto.endsAt !== undefined
+    ) {
+      this.validateEventDates({
+        rsvpOpensAt: dto.rsvpOpensAt ?? event.rsvpOpensAt,
+        rsvpClosesAt: dto.rsvpClosesAt ?? event.rsvpClosesAt,
+        startsAt: dto.startsAt ?? event.startsAt,
+        endsAt: dto.endsAt ?? event.endsAt,
+      });
     }
 
     // Validate tier rules if provided

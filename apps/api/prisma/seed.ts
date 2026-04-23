@@ -4,6 +4,13 @@ import * as bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
+  // Seed script bootstraps demo accounts with well-known passwords. Running
+  // this against a production database would provision admin@dorobats.com with
+  // `admin123`, so hard-block it.
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('Refusing to run seed script in production (NODE_ENV=production)');
+  }
+
   console.log('🌱 Seeding database...');
 
   // Create Admin
@@ -15,7 +22,7 @@ async function main() {
       email: 'admin@dorobats.com',
       name: 'Admin User',
       passwordHash: adminPassword,
-      roles: [Role.ADMIN, Role.EDITOR, Role.VIEWER],
+      roles: [Role.ADMIN, Role.VIEWER],
       emailVerified: true,
       player: {
         create: {
@@ -27,17 +34,17 @@ async function main() {
   });
   console.log('✅ Created admin:', admin.email);
 
-  // Create Editors
-  const editorPassword = await bcrypt.hash('editor123', 10);
-  const editors = await Promise.all([
+  // Additional admins (previously "editors" — EDITOR role was removed).
+  const secondaryAdminPassword = await bcrypt.hash('editor123', 10);
+  const admins = await Promise.all([
     prisma.user.upsert({
       where: { email: 'tiago@dorobats.com' },
       update: {},
       create: {
         email: 'tiago@dorobats.com',
         name: 'Tiago Moreira',
-        passwordHash: editorPassword,
-        roles: [Role.EDITOR, Role.VIEWER],
+        passwordHash: secondaryAdminPassword,
+        roles: [Role.ADMIN, Role.VIEWER],
         emailVerified: true,
         player: {
           create: {
@@ -53,8 +60,8 @@ async function main() {
       create: {
         email: 'pablo@dorobats.com',
         name: 'Pablo Silva',
-        passwordHash: editorPassword,
-        roles: [Role.EDITOR, Role.VIEWER],
+        passwordHash: secondaryAdminPassword,
+        roles: [Role.ADMIN, Role.VIEWER],
         emailVerified: true,
         player: {
           create: {
@@ -65,7 +72,7 @@ async function main() {
       },
     }),
   ]);
-  console.log('✅ Created editors:', editors.length);
+  console.log('✅ Created secondary admins:', admins.length);
 
   // Create Viewers (Players)
   const viewerPassword = await bcrypt.hash('player123', 10);

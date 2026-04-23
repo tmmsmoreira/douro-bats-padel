@@ -29,10 +29,11 @@ export default async function proxy(req: NextRequest) {
     return intlResponse;
   }
 
-  // Step 2.5: Enable back-forward cache (bfcache) by changing Cache-Control header
+  // Step 2.5: Enable back-forward cache (bfcache) by changing Cache-Control header.
   // Next.js sends 'private, no-cache, no-store, max-age=0, must-revalidate' by default
-  // which prevents bfcache. We change it to allow bfcache while still preventing stale content.
-  intlResponse.headers.set('Cache-Control', 'public, no-cache, max-age=0, must-revalidate');
+  // which prevents bfcache. Dropping `no-store` re-enables bfcache, but we keep
+  // `private` so shared caches (CDN, corporate proxy) do not store authenticated HTML.
+  intlResponse.headers.set('Cache-Control', 'private, no-cache, max-age=0, must-revalidate');
 
   // Step 3: Get the session for auth checks
   const session = await auth();
@@ -86,18 +87,20 @@ export default async function proxy(req: NextRequest) {
     return NextResponse.redirect(new URL(`/${locale}/login`, req.url));
   }
 
-  // Editor-only pages require EDITOR or ADMIN role
-  const isEditorOnlyPage =
+  // Admin-only pages (historically "editor" pages; the EDITOR role was merged
+  // into ADMIN). The page-level EditorGuard still does the hard 404; this
+  // check exists so the middleware can short-circuit when a guard exists.
+  const isAdminOnlyPage =
     pathnameWithoutLocale === '/players' ||
     pathnameWithoutLocale.startsWith('/venues') ||
     pathnameWithoutLocale === '/events/new' ||
     /^\/events\/[^/]+\/edit$/.test(pathnameWithoutLocale) ||
     /^\/events\/[^/]+\/draw\/generate$/.test(pathnameWithoutLocale);
 
-  if (isEditorOnlyPage) {
+  if (isAdminOnlyPage) {
     const roles = session?.user?.roles || [];
-    const isEditor = roles.includes('EDITOR') || roles.includes('ADMIN');
-    if (!isEditor) {
+    const isAdmin = roles.includes('ADMIN');
+    if (!isAdmin) {
       // Let the page render — EditorGuard will call notFound()
       return intlResponse;
     }

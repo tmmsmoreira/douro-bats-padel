@@ -875,6 +875,15 @@ export class DrawService {
       throw new NotFoundException('Event not found');
     }
 
+    // State machine: only DRAWN events can advance to PUBLISHED. Without this
+    // check, an admin can force-publish from OPEN/FROZEN if a stale draw
+    // happens to be lying around, skipping the intended progression.
+    if (event.state !== EventState.DRAWN) {
+      throw new BadRequestException(
+        `Cannot publish draw from state ${event.state}. Event must be in DRAWN state.`
+      );
+    }
+
     // Check if event has passed
     const eventEndTime = new Date(event.endsAt);
     const hasEventPassed = eventEndTime < new Date();

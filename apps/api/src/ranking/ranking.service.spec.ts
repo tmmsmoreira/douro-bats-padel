@@ -48,9 +48,21 @@ describe('RankingService.computeRankingsForEvent', () => {
     );
   });
 
+  it('rejects when the event is not in DRAWN state', async () => {
+    prisma.event.findUnique.mockResolvedValue({
+      id: 'e1',
+      state: EventState.PUBLISHED,
+      date: new Date('2026-06-10'),
+      matches: [],
+    });
+
+    await expect(service.computeRankingsForEvent('e1')).rejects.toThrow(/must be in DRAWN state/);
+  });
+
   it('rejects when the event has no published matches', async () => {
     prisma.event.findUnique.mockResolvedValue({
       id: 'e1',
+      state: EventState.DRAWN,
       date: new Date('2026-06-10'),
       matches: [],
     });
@@ -61,6 +73,7 @@ describe('RankingService.computeRankingsForEvent', () => {
   it('rejects when no draw exists for the event', async () => {
     prisma.event.findUnique.mockResolvedValue({
       id: 'e1',
+      state: EventState.DRAWN,
       date: new Date('2026-06-10'),
       matches: [{ id: 'm1', round: 1, courtId: 'c1', setsA: 2, setsB: 1, tier: Tier.MASTERS }],
     });
@@ -73,6 +86,7 @@ describe('RankingService.computeRankingsForEvent', () => {
     const eventDate = new Date('2026-06-10T20:00:00Z');
     prisma.event.findUnique.mockResolvedValue({
       id: 'e1',
+      state: EventState.DRAWN,
       date: eventDate,
       matches: [
         {
@@ -149,6 +163,7 @@ describe('RankingService.computeRankingsForEvent', () => {
   it('skips match results for assignments with no matching match (match deleted / not published)', async () => {
     prisma.event.findUnique.mockResolvedValue({
       id: 'e1',
+      state: EventState.DRAWN,
       date: new Date('2026-06-10'),
       matches: [
         {
@@ -187,6 +202,7 @@ describe('RankingService.computeRankingsForEvent', () => {
   it('sends results-published notifications only when notify=true', async () => {
     prisma.event.findUnique.mockResolvedValue({
       id: 'e1',
+      state: EventState.DRAWN,
       date: new Date('2026-06-10'),
       matches: [
         {
@@ -226,6 +242,7 @@ describe('RankingService.computeRankingsForEvent', () => {
   it('feeds previous weekly scores into the 5-week moving average', async () => {
     prisma.event.findUnique.mockResolvedValue({
       id: 'e1',
+      state: EventState.DRAWN,
       date: new Date('2026-06-10'),
       matches: [
         {

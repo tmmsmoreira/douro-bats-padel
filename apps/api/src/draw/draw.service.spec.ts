@@ -362,12 +362,24 @@ describe('DrawService.publishDraw', () => {
     prisma.event.findUnique.mockResolvedValue({
       id: 'event-1',
       endsAt: new Date('2099-01-01'),
-      state: EventState.FROZEN,
+      state: EventState.DRAWN,
       draws: [],
       rsvps: [],
     });
 
     await expect(service.publishDraw('event-1')).rejects.toThrow(/no draw generated/i);
+  });
+
+  it('rejects publishing when the event is not in DRAWN state', async () => {
+    prisma.event.findUnique.mockResolvedValue({
+      id: 'event-1',
+      endsAt: new Date('2099-01-01'),
+      state: EventState.FROZEN,
+      draws: [{ id: 'draw-1' }],
+      rsvps: [],
+    });
+
+    await expect(service.publishDraw('event-1')).rejects.toThrow(/must be in DRAWN state/);
   });
 
   it('rejects publishing for a past event', async () => {

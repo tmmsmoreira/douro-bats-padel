@@ -1,14 +1,7 @@
 import { Controller, Post, UseGuards, Get, Req, Body, Patch } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
-import type {
-  LoginDto,
-  SignupDto,
-  AuthTokens,
-  ForgotPasswordDto,
-  ResetPasswordDto,
-  GoogleAuthDto,
-} from '@padel/types';
+import type { AuthTokens } from '@padel/types';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import type { RequestWithUser } from './types';
@@ -18,6 +11,13 @@ import {
   UpdateProfilePhotoDto,
   VerifyEmailDto,
 } from './dto/profile.dto';
+import {
+  ForgotPasswordDtoClass,
+  GoogleAuthDtoClass,
+  LoginDtoClass,
+  ResetPasswordDtoClass,
+  SignupDtoClass,
+} from './dto/auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -25,19 +25,19 @@ export class AuthController {
 
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @Post('signup')
-  async signup(@Body() dto: SignupDto) {
+  async signup(@Body() dto: SignupDtoClass) {
     return this.authService.signup(dto);
   }
 
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('login')
-  async login(@Body() dto: LoginDto): Promise<AuthTokens> {
+  async login(@Body() dto: LoginDtoClass): Promise<AuthTokens> {
     return this.authService.login(dto);
   }
 
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('google')
-  async googleAuth(@Body() dto: GoogleAuthDto): Promise<AuthTokens> {
+  async googleAuth(@Body() dto: GoogleAuthDtoClass): Promise<AuthTokens> {
     return this.authService.googleAuth(dto);
   }
 
@@ -55,13 +55,13 @@ export class AuthController {
 
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @Post('forgot-password')
-  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+  async forgotPassword(@Body() dto: ForgotPasswordDtoClass) {
     return this.authService.forgotPassword(dto);
   }
 
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @Post('reset-password')
-  async resetPassword(@Body() dto: ResetPasswordDto) {
+  async resetPassword(@Body() dto: ResetPasswordDtoClass) {
     return this.authService.resetPassword(dto);
   }
 

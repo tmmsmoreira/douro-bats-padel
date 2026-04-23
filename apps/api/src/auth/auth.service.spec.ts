@@ -399,10 +399,16 @@ describe('AuthService', () => {
       expect(prisma.user.update).not.toHaveBeenCalled();
     });
 
-    it('rejects when the email is already verified', async () => {
+    it('returns the uniform neutral message when the email is already verified', async () => {
+      // Defense against email enumeration: the response must not distinguish
+      // "not registered" from "already verified" — both return the same text.
       prisma.user.findUnique.mockResolvedValue({ id: 'u1', emailVerified: true });
 
-      await expect(service.resendVerificationEmail('x@y.com')).rejects.toThrow(/already verified/);
+      const result = await service.resendVerificationEmail('x@y.com');
+
+      expect(result.message).toMatch(/If the email exists and is not verified/);
+      expect(prisma.user.update).not.toHaveBeenCalled();
+      expect(emailService.sendVerificationEmail).not.toHaveBeenCalled();
     });
 
     it('issues a new token and sends the email when user exists and is unverified', async () => {

@@ -4,17 +4,8 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '@padel/types';
-import type { Tier } from '@padel/types';
 import type { RequestWithUser } from '../auth/types';
-
-interface SubmitMatchDto {
-  eventId: string;
-  courtId: string;
-  round: number;
-  setsA: number;
-  setsB: number;
-  tier: Tier;
-}
+import { SubmitMatchDto } from './dto/submit-match.dto';
 
 @Controller('matches')
 @UseGuards(JwtAuthGuard)

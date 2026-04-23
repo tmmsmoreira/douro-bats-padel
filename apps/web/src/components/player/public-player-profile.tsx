@@ -99,7 +99,7 @@ export function PublicPlayerProfile({ playerId }: { playerId: string }) {
   const [showRevokeDialog, setShowRevokeDialog] = useState(false);
 
   const userRoles = session?.user?.roles || [];
-  const isAdminOrEditor = userRoles.includes('ADMIN') || userRoles.includes('EDITOR');
+  const isAdminOrEditor = userRoles.includes('ADMIN');
 
   const {
     data: player,

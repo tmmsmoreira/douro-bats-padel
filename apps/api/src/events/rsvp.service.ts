@@ -152,18 +152,19 @@ export class RSVPService {
           message: 'You are confirmed for this event!',
         };
       } else {
-        // Add to waitlist
-        const maxPosition = await tx.rSVP.aggregate({
-          where: {
-            eventId: event.id,
-            status: RSVPStatus.WAITLISTED,
-          },
-          _max: {
-            position: true,
-          },
-        });
-
-        const position = (maxPosition._max.position || 0) + 1;
+        // Add to waitlist.
+        // Under PostgreSQL's default Read Committed isolation two concurrent
+        // requests could both read the same `max(position)` and both write the
+        // same next slot. Acquire a row-level lock (`FOR UPDATE`) on this
+        // event's waitlist before computing the next position so concurrent
+        // writers serialize behind us and each gets a distinct slot.
+        const lockedRows = await tx.$queryRaw<{ position: number }[]>`
+          SELECT "position" FROM "RSVP"
+          WHERE "eventId" = ${event.id} AND "status" = 'WAITLISTED'
+          FOR UPDATE
+        `;
+        const currentMax = lockedRows.reduce((max, r) => (r.position > max ? r.position : max), 0);
+        const position = currentMax + 1;
 
         await tx.rSVP.upsert({
           where: {

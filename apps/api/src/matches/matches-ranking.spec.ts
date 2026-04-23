@@ -67,7 +67,7 @@ describe('Mixed-tier results insertion → ranking calculation', () => {
 
   it('inserts MASTERS + EXPLORERS results, publishes them, and computes per-tier rankings correctly', async () => {
     // ---- 1. Insertion ----
-    prisma.event.findUnique.mockResolvedValue({ id: eventId });
+    prisma.event.findUnique.mockResolvedValue({ id: eventId, state: EventState.DRAWN });
     prisma.match.findFirst.mockResolvedValue(null);
     prisma.match.create
       .mockResolvedValueOnce({ id: 'match-masters', tier: Tier.MASTERS })
@@ -131,6 +131,7 @@ describe('Mixed-tier results insertion → ranking calculation', () => {
     ];
     prisma.event.findUnique.mockResolvedValue({
       id: eventId,
+      state: EventState.DRAWN,
       date: eventDate,
       matches: publishedMatches,
     });

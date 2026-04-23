@@ -1,16 +1,8 @@
 import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { RankingService } from '../ranking/ranking.service';
-import type { Tier } from '@padel/types';
-
-interface SubmitMatchDto {
-  eventId: string;
-  courtId: string;
-  round: number;
-  setsA: number;
-  setsB: number;
-  tier: Tier;
-}
+import { EventState } from '@padel/types';
+import { SubmitMatchDto } from './dto/submit-match.dto';
 
 @Injectable()
 export class MatchesService {
@@ -28,6 +20,15 @@ export class MatchesService {
 
     if (!event) {
       throw new NotFoundException('Event not found');
+    }
+
+    // Match results may only be submitted on a DRAWN event (before publication).
+    // Allowing writes in other states lets admins mutate matches after rankings
+    // have been computed from PUBLISHED, silently rewriting the leaderboard.
+    if (event.state !== EventState.DRAWN) {
+      throw new BadRequestException(
+        `Cannot submit match results when event is in state ${event.state}. Event must be in DRAWN state.`
+      );
     }
 
     // Validate sets

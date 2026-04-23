@@ -34,6 +34,15 @@ export class RankingService {
       throw new NotFoundException('Event not found');
     }
 
+    // Rankings must only be computed from a DRAWN event (transitioning it to
+    // PUBLISHED). Computing from PUBLISHED would double-count; from earlier
+    // states would bypass the state machine.
+    if (event.state !== EventState.DRAWN) {
+      throw new BadRequestException(
+        `Cannot compute rankings from state ${event.state}. Event must be in DRAWN state.`
+      );
+    }
+
     if (event.matches.length === 0) {
       throw new BadRequestException('No published matches found for this event');
     }
@@ -210,7 +219,8 @@ export class RankingService {
     const affectedPlayerIds = Array.from(new Set(snapshots.map((s) => s.playerId)));
     const weekStart = this.getWeekStart(event.date);
 
-    // Revert player ratings to the state before the previous compute
+    // Revert player ratings and roll the event state back to DRAWN so that
+    // computeRankingsForEvent's state guard lets us re-run from a clean slate.
     await this.prisma.$transaction([
       ...snapshots.map((snapshot) =>
         this.prisma.playerProfile.update({
@@ -224,6 +234,10 @@ export class RankingService {
           playerId: { in: affectedPlayerIds },
           weekStart,
         },
+      }),
+      this.prisma.event.update({
+        where: { id: eventId },
+        data: { state: EventState.DRAWN },
       }),
     ]);
 

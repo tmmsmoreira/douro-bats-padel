@@ -50,19 +50,34 @@ export class PushService {
   }
 
   async subscribe(userId: string, dto: CreatePushSubscriptionDto) {
-    return this.prisma.pushSubscription.upsert({
-      where: { endpoint: dto.endpoint },
-      update: {
-        userId,
-        p256dh: dto.p256dh,
-        auth: dto.auth,
-      },
-      create: {
-        userId,
-        endpoint: dto.endpoint,
-        p256dh: dto.p256dh,
-        auth: dto.auth,
-      },
+    // The unique key on the table is `endpoint` alone, so a naive upsert lets
+    // a later user inherit an earlier user's subscription just by presenting
+    // the same endpoint — effectively hijacking their push notifications.
+    // Instead: if the endpoint already belongs to another user, drop that
+    // stale record (the previous user signed out on this device) and create
+    // a fresh one for the current user.
+    return this.prisma.$transaction(async (tx) => {
+      const existing = await tx.pushSubscription.findUnique({
+        where: { endpoint: dto.endpoint },
+      });
+
+      if (existing && existing.userId !== userId) {
+        await tx.pushSubscription.delete({ where: { endpoint: dto.endpoint } });
+      }
+
+      return tx.pushSubscription.upsert({
+        where: { endpoint: dto.endpoint },
+        update: {
+          p256dh: dto.p256dh,
+          auth: dto.auth,
+        },
+        create: {
+          userId,
+          endpoint: dto.endpoint,
+          p256dh: dto.p256dh,
+          auth: dto.auth,
+        },
+      });
     });
   }
 

@@ -42,6 +42,8 @@ export interface PrismaMock {
   venue: ModelMock;
   court: ModelMock;
   $transaction: jest.Mock;
+  $queryRaw: jest.Mock;
+  $executeRaw: jest.Mock;
 }
 
 /**
@@ -78,6 +80,12 @@ export function createPrismaMock(): PrismaMock {
     }
     return undefined;
   }) as jest.Mock;
+
+  // Raw-SQL helpers default to returning an empty result so tests that don't
+  // configure them don't crash; tests that care (e.g. waitlist `FOR UPDATE`
+  // locking) override with mockResolvedValue before invoking the service.
+  prisma.$queryRaw = jest.fn().mockResolvedValue([]) as jest.Mock;
+  prisma.$executeRaw = jest.fn().mockResolvedValue(0) as jest.Mock;
 
   return prisma as PrismaMock;
 }

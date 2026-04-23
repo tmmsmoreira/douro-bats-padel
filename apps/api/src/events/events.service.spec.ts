@@ -286,12 +286,16 @@ describe('EventsService.update — edit guards', () => {
     const date = new Date('2099-01-01');
     const startsAt = new Date('2099-01-01T18:00:00Z');
     const endsAt = new Date('2099-01-01T20:00:00Z');
+    const rsvpOpensAt = new Date('2098-12-01T00:00:00Z');
+    const rsvpClosesAt = new Date('2098-12-31T00:00:00Z');
     prisma.event.findUnique.mockResolvedValue({
       id: 'e1',
       state: EventState.OPEN,
       date,
       startsAt,
       endsAt,
+      rsvpOpensAt,
+      rsvpClosesAt,
       capacity: 16,
       rsvps: [{ id: 'r1', status: 'CONFIRMED' }],
     });
@@ -374,7 +378,10 @@ describe('EventsService.update — edit guards', () => {
     prisma.event.findUnique.mockResolvedValue({
       id: 'e1',
       state: EventState.DRAFT,
-      endsAt: new Date('2099-01-01'),
+      startsAt: new Date('2026-07-10T20:00:00Z'),
+      endsAt: new Date('2026-07-10T22:00:00Z'),
+      rsvpOpensAt: new Date('2026-06-01T00:00:00Z'),
+      rsvpClosesAt: new Date('2026-07-01T00:00:00Z'),
       capacity: 16,
       rsvps: [],
     });

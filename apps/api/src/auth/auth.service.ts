@@ -490,19 +490,19 @@ export class AuthService {
   }
 
   async resendVerificationEmail(email: string): Promise<{ message: string }> {
+    // Uniform response — never signal whether the email is registered or
+    // already verified. Any branch that returns/throws something different
+    // lets an attacker enumerate accounts by comparing response shapes.
+    const uniformResponse = {
+      message: 'If the email exists and is not verified, a verification email has been sent',
+    };
+
     const user = await this.prisma.user.findUnique({
       where: { email },
     });
 
-    if (!user) {
-      // Don't reveal if user exists or not for security
-      return {
-        message: 'If the email exists and is not verified, a verification email has been sent',
-      };
-    }
-
-    if (user.emailVerified) {
-      throw new BadRequestException('Email is already verified');
+    if (!user || user.emailVerified) {
+      return uniformResponse;
     }
 
     // Generate new verification token
@@ -521,7 +521,8 @@ export class AuthService {
       },
     });
 
-    // Send verification email
+    // Send verification email — log failures but keep the response uniform so
+    // email-send outcomes are not observable to unauthenticated callers.
     try {
       await this.emailService.sendVerificationEmail(
         user.email,
@@ -531,11 +532,8 @@ export class AuthService {
       );
     } catch (error) {
       this.logger.error('Failed to send verification email:', error);
-      throw new BadRequestException('Failed to send verification email');
     }
 
-    return {
-      message: 'Verification email sent! Please check your inbox.',
-    };
+    return uniformResponse;
   }
 }

@@ -10,6 +10,31 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-04-23] — Harden state machine, DTO validation, and auth/push hygiene
+
+**Commit:** `b203d40`
+
+### Backend
+
+- **`AuthController`** — Swapped inbound bodies on `signup`, `login`, `google`, `forgot-password`, and `reset-password` to class-validator DTOs so request payloads are validated at the controller boundary
+- **`auth.dto.ts`** — New class-validator DTOs (`LoginDtoClass`, `SignupDtoClass`, `ForgotPasswordDtoClass`, `ResetPasswordDtoClass`, `GoogleAuthDtoClass`) enforcing 8–72 char passwords with uppercase+digit requirements and bounded email/token/name lengths
+- **`AuthService.resendVerificationEmail`** — Returns one uniform neutral response across all branches (missing user, already verified, send failure) to close the email-enumeration side channel
+- **`EventsService`** — Enforces `rsvpOpensAt < rsvpClosesAt ≤ startsAt < endsAt` on event create and on any update that touches a timing field
+- **`RsvpService`** — Serializes concurrent waitlist writers with `SELECT ... FOR UPDATE` so waitlist `position` stays strictly monotonic
+- **`PushService.subscribe`** — Deletes stale foreign-user subscriptions by endpoint inside the transaction so a later user cannot inherit an earlier user's push subscription
+- **State machine guards** — `publishDraw`, `submitMatch`, and `computeRankingsForEvent` now enforce DRAWN-only state; the recompute flow rolls state back to DRAWN so it re-enters the guarded path
+- **DTO validation** — Matches and draw generation endpoints now validate inbound bodies as class-validator DTOs
+
+### Infrastructure
+
+- **`prisma/seed.ts`** — Refuses to run under `NODE_ENV=production` and replaces the removed `Role.EDITOR` with `ADMIN` on seeded accounts
+- **`proxy` Cache-Control`** — Changed `public` → `private` so shared caches cannot store authenticated HTML (bfcache still works without `no-store`)
+
+### Frontend
+
+- **EDITOR role checks** — Dropped dead `Role.EDITOR` references across the web app following removal of the role
+
+
 ## [2026-04-22] — Seamless PWA splash handoff and under-notch layout
 
 **Commit:** `404a664`

@@ -15,12 +15,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '@padel/types';
 import type { RequestWithUser } from '../auth/types';
-
-interface DrawConstraintsDto {
-  avoidRecentSessions?: number;
-  balanceStrength?: boolean;
-  allowTierMixing?: boolean;
-}
+import { GenerateDrawDto, UpdateAssignmentDto } from './dto/generate-draw.dto';
 
 @Controller('draws')
 @UseGuards(JwtAuthGuard)
@@ -32,11 +27,7 @@ export class DrawController {
   @Roles(Role.ADMIN)
   async generateDraw(
     @Param('eventId') eventId: string,
-    @Body()
-    body: {
-      constraints?: DrawConstraintsDto;
-      selectedCourts?: { masters?: string[]; explorers?: string[] };
-    },
+    @Body() body: GenerateDrawDto,
     @Request() req: RequestWithUser
   ) {
     return this.drawService.generateDraw(
@@ -57,7 +48,7 @@ export class DrawController {
   @Roles(Role.ADMIN)
   async updateAssignment(
     @Param('assignmentId') assignmentId: string,
-    @Body() body: { teamA: string[]; teamB: string[] },
+    @Body() body: UpdateAssignmentDto,
     @Request() req: RequestWithUser
   ) {
     return this.drawService.updateAssignment(assignmentId, body.teamA, body.teamB, req.user.sub);

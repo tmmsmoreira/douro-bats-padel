@@ -51,8 +51,8 @@ lerna-debug.log*
 *.swo
 *~
 
-# PWA / Service Worker
-public/sw.js
-public/sw.js.map
-public/workbox-*.js
-public/workbox-*.js.map
+# PWA / Service Worker (Serwist generates these at build time)
+**/public/sw.js
+**/public/sw.js.map
+**/public/swe-worker-*.js
+**/public/swe-worker-*.js.map

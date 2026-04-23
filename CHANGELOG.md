@@ -10,6 +10,21 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-04-23] — Migrate PWA from next-pwa to @serwist/next
+
+**Commit:** `f39b46d`
+
+### Frontend
+
+- **`sw.ts`** — New Serwist service worker at `apps/web/src/app/sw.ts` replacing the `next-pwa` generated worker; preserves Workbox-style runtime caching (Google Fonts, static fonts/images, `_next/image`, JS/CSS, `_next/data`) using `CacheFirst`/`StaleWhileRevalidate` with matching `ExpirationPlugin` limits. Keeps `skipWaiting: false` so `<ServiceWorkerUpdatePrompt>` retains control of reloads via the `SKIP_WAITING` message (now handled by Serwist's built-in listener).
+
+### Infrastructure
+
+- **`next.config.mjs`** — Replaces the deleted `next.config.js`; swaps `withPWA` for `withSerwistInit` (ESM), wires `swSrc`/`swDest`, enables `cacheOnNavigation`, and precaches `/offline.html` with a revision derived from `git rev-parse HEAD` (falling back to a random UUID) so the offline shell busts on every deploy.
+- **`apps/web/package.json`** — Drops `next-pwa`, adds `@serwist/next` and `serwist` (both `^9.5.7`); pins `build` to `next build --webpack` since Serwist's plugin doesn't yet support Turbopack builds.
+- **`.gitignore`** — Updates PWA ignore globs to match Serwist's output (`**/public/sw.js{,.map}`, `**/public/swe-worker-*.js{,.map}`) instead of the old `workbox-*` artifacts.
+
+
 ## [2026-04-23] — Surface real error states when data fetches fail
 
 **Commit:** `f14cd85`

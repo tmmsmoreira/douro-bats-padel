@@ -10,6 +10,16 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-04-23] — Fix Railway build by chmodding pnpm store directly
+
+**Commit:** `7a3512c`
+
+### Infrastructure
+
+- **`nixpacks.toml`** — Replaced symlink-following `find -L node_modules/.bin` chmod with a direct `find node_modules/.pnpm -type f -exec chmod +x` to reliably make all real bin targets executable and unblock `prisma generate` on Railway
+- **`railway.toml`** — Applied the same pnpm store chmod change to the Railway build plan to avoid silent failures from missing `apps/*/node_modules/.bin` glob paths and cached install layers
+
+
 ## [2026-04-23] — Revoke refresh tokens on password reset; anonymize users on delete
 
 **Commit:** `f0abfcd`

@@ -1,7 +1,7 @@
 [phases.install]
 cmds = [
   "pnpm install --frozen-lockfile",
-  "find -L node_modules/.bin apps/*/node_modules/.bin packages/*/node_modules/.bin -maxdepth 1 -type f -exec chmod +x {} + 2>/dev/null || true"
+  "find node_modules/.pnpm -type f -exec chmod +x {} + 2>/dev/null || true"
 ]
 
 [phases.build]

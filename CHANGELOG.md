@@ -10,6 +10,15 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-04-23] — Mark migrate-and-start.sh executable in git
+
+**Commit:** `7c2c64c`
+
+### Infrastructure
+
+- **`migrate-and-start.sh`** — Changed file mode from 100644 to 100755 so the script is executable on checkout; the runtime chmod in nixpacks.toml/railway.toml stays as a safety net.
+
+
 ## [2026-04-23] — Duplicate pnpm bin chmod into build phase to survive Railway cache
 
 **Commit:** `14533f4`

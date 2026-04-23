@@ -41,6 +41,7 @@ export interface PrismaMock {
   eventCourt: ModelMock;
   venue: ModelMock;
   court: ModelMock;
+  pushSubscription: ModelMock;
   $transaction: jest.Mock;
   $queryRaw: jest.Mock;
   $executeRaw: jest.Mock;
@@ -69,6 +70,7 @@ export function createPrismaMock(): PrismaMock {
     eventCourt: makeModelMock(),
     venue: makeModelMock(),
     court: makeModelMock(),
+    pushSubscription: makeModelMock(),
   };
 
   prisma.$transaction = jest.fn((arg: unknown) => {

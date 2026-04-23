@@ -62,13 +62,13 @@ describe('AuthController', () => {
     expect(authService.googleAuth).toHaveBeenCalledWith(dto);
   });
 
-  it('extracts user.sub from the request for refresh', async () => {
+  it('forwards user.sub and user.tv from the request for refresh', async () => {
     authService.refresh.mockResolvedValue({ accessToken: 'a', refreshToken: 'r' });
 
-    const req = { user: { sub: 'user-123' } } as any;
+    const req = { user: { sub: 'user-123', tv: 7 } } as any;
     await controller.refresh(req);
 
-    expect(authService.refresh).toHaveBeenCalledWith('user-123');
+    expect(authService.refresh).toHaveBeenCalledWith('user-123', 7);
   });
 
   it('extracts user.sub from the request for getProfile', async () => {

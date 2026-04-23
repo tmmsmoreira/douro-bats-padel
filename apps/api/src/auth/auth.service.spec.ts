@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { AuthService } from './auth.service';
@@ -170,6 +170,7 @@ describe('AuthService', () => {
       passwordHash: 'hashed',
       emailVerified: true,
       roles: [Role.VIEWER],
+      tokenVersion: 0,
     });
 
     it('rejects when the user does not exist', async () => {
@@ -215,6 +216,52 @@ describe('AuthService', () => {
         refreshToken: 'signed.jwt.token',
       });
       // Signs twice: once for access (default secret), once for refresh (different secret)
+      expect(jwtService.signAsync).toHaveBeenCalledTimes(2);
+    });
+
+    it('embeds the user tokenVersion as `tv` in signed payloads', async () => {
+      prisma.user.findUnique.mockResolvedValue({ ...baseUser(), tokenVersion: 3 });
+
+      await service.login({ email: 'x@y.com', password: 'pw' } as any);
+
+      const signedPayload = (jwtService.signAsync as jest.Mock).mock.calls[0][0];
+      expect(signedPayload).toMatchObject({ sub: 'u1', tv: 3 });
+    });
+  });
+
+  describe('refresh', () => {
+    it('rejects when the user no longer exists', async () => {
+      prisma.user.findUnique.mockResolvedValue(null);
+
+      await expect(service.refresh('u1', 0)).rejects.toBeInstanceOf(UnauthorizedException);
+    });
+
+    it('rejects when the refresh tokenVersion is stale (e.g. password was reset)', async () => {
+      prisma.user.findUnique.mockResolvedValue({
+        id: 'u1',
+        email: 'x@y.com',
+        roles: [Role.VIEWER],
+        tokenVersion: 5,
+      });
+
+      await expect(service.refresh('u1', 4)).rejects.toThrow(/revoked/i);
+      expect(jwtService.signAsync).not.toHaveBeenCalled();
+    });
+
+    it('issues fresh tokens when the version matches', async () => {
+      prisma.user.findUnique.mockResolvedValue({
+        id: 'u1',
+        email: 'x@y.com',
+        roles: [Role.VIEWER],
+        tokenVersion: 5,
+      });
+
+      const result = await service.refresh('u1', 5);
+
+      expect(result).toEqual({
+        accessToken: 'signed.jwt.token',
+        refreshToken: 'signed.jwt.token',
+      });
       expect(jwtService.signAsync).toHaveBeenCalledTimes(2);
     });
   });
@@ -337,7 +384,7 @@ describe('AuthService', () => {
       ).rejects.toThrow(/Invalid or expired/);
     });
 
-    it('updates the password and clears the reset token on success', async () => {
+    it('updates the password, clears the reset token, and bumps tokenVersion on success', async () => {
       prisma.user.findFirst.mockResolvedValue({ id: 'u1' });
       prisma.user.update.mockResolvedValue({});
 
@@ -349,6 +396,7 @@ describe('AuthService', () => {
         passwordHash: 'hashed-password',
         resetPasswordToken: null,
         resetPasswordExpires: null,
+        tokenVersion: { increment: 1 },
       });
     });
 

@@ -187,13 +187,41 @@ describe('PlayersService.remove', () => {
     service = new PlayersService(prisma as any);
   });
 
-  it('deletes a non-admin user and returns a success message', async () => {
-    prisma.user.findUnique.mockResolvedValue({ id: 'u1', roles: [Role.VIEWER] });
-    prisma.user.delete.mockResolvedValue({});
+  it('anonymizes a non-admin user, preserving ranking history', async () => {
+    prisma.user.findUnique.mockResolvedValue({
+      id: 'u1',
+      roles: [Role.VIEWER],
+      player: { id: 'p1' },
+    });
+    prisma.user.update.mockResolvedValue({});
+    prisma.playerProfile.update.mockResolvedValue({});
+    prisma.pushSubscription.deleteMany.mockResolvedValue({ count: 0 });
 
     const result = await service.remove('u1');
 
-    expect(prisma.user.delete).toHaveBeenCalledWith({ where: { id: 'u1' } });
+    // PII is scrubbed and tokens invalidated, but no hard delete of the user
+    expect(prisma.user.delete).not.toHaveBeenCalled();
+    expect(prisma.user.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'u1' },
+        data: expect.objectContaining({
+          email: 'deleted-u1@dorobats.invalid',
+          name: null,
+          passwordHash: null,
+          phoneNumber: null,
+          profilePhoto: null,
+          tokenVersion: { increment: 1 },
+          roles: [Role.VIEWER],
+        }),
+      })
+    );
+    // PlayerProfile is flipped to DELETED so leaderboard/history hide it,
+    // but the row itself is not deleted — WeeklyScore/RankingSnapshot survive.
+    expect(prisma.playerProfile.update).toHaveBeenCalledWith({
+      where: { id: 'p1' },
+      data: { status: 'DELETED' },
+    });
+    expect(prisma.pushSubscription.deleteMany).toHaveBeenCalledWith({ where: { userId: 'u1' } });
     expect(result).toEqual({ message: 'User deleted successfully' });
   });
 
@@ -201,20 +229,23 @@ describe('PlayersService.remove', () => {
     prisma.user.findUnique.mockResolvedValue(null);
 
     await expect(service.remove('missing')).rejects.toBeInstanceOf(NotFoundException);
-    expect(prisma.user.delete).not.toHaveBeenCalled();
+    expect(prisma.user.update).not.toHaveBeenCalled();
   });
 
-  it('refuses to delete admin users', async () => {
+  it('refuses to anonymize admin users', async () => {
     prisma.user.findUnique.mockResolvedValue({ id: 'u1', roles: [Role.ADMIN, Role.VIEWER] });
 
     await expect(service.remove('u1')).rejects.toBeInstanceOf(BadRequestException);
-    expect(prisma.user.delete).not.toHaveBeenCalled();
+    expect(prisma.user.update).not.toHaveBeenCalled();
   });
 
-  it('handles users with no roles array (treated as non-admin)', async () => {
-    prisma.user.findUnique.mockResolvedValue({ id: 'u1', roles: null });
-    prisma.user.delete.mockResolvedValue({});
+  it('handles users without a PlayerProfile (treated as non-admin)', async () => {
+    prisma.user.findUnique.mockResolvedValue({ id: 'u1', roles: null, player: null });
+    prisma.user.update.mockResolvedValue({});
+    prisma.pushSubscription.deleteMany.mockResolvedValue({ count: 0 });
 
     await expect(service.remove('u1')).resolves.toEqual({ message: 'User deleted successfully' });
+    // No PlayerProfile update when there is no profile to flip
+    expect(prisma.playerProfile.update).not.toHaveBeenCalled();
   });
 });

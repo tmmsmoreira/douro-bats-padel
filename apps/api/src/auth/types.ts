@@ -5,6 +5,12 @@ export interface JwtPayload {
   sub: string;
   email: string;
   roles: Role[];
+  /**
+   * Token version at issue time. Matched against the user's current
+   * `tokenVersion` on refresh so a bump (e.g. after password reset) revokes
+   * every previously-issued refresh token.
+   */
+  tv: number;
 }
 
 export interface RequestWithUser extends Request {

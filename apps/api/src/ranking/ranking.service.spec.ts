@@ -391,6 +391,19 @@ describe('RankingService.getPlayerHistory', () => {
     await expect(service.getPlayerHistory('missing')).rejects.toBeInstanceOf(NotFoundException);
   });
 
+  it('treats anonymized (DELETED) players as not found so their history is not surfaced', async () => {
+    prisma.playerProfile.findUnique.mockResolvedValue({
+      id: 'p1',
+      rating: 200,
+      status: 'DELETED',
+      user: { name: null },
+      weeklyScores: [{ weekStart: new Date(), score: 100 }],
+      rankingSnapshots: [],
+    });
+
+    await expect(service.getPlayerHistory('p1')).rejects.toBeInstanceOf(NotFoundException);
+  });
+
   it('returns current rating and history entries', async () => {
     const week = new Date('2026-06-08T00:00:00Z'); // a Monday
     prisma.playerProfile.findUnique.mockResolvedValue({

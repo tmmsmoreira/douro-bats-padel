@@ -7,7 +7,7 @@ import {
   type PlayerHistory,
   toTier,
 } from '@padel/types';
-import { EventState, Locale, type Tier } from '@padel/types';
+import { EventState, Locale, PlayerStatus, type Tier } from '@padel/types';
 import { NotificationService } from '../notifications/notification.service';
 
 @Injectable()
@@ -313,6 +313,12 @@ export class RankingService {
     });
 
     if (!player) {
+      throw new NotFoundException('Player not found');
+    }
+
+    // Anonymized users keep their PlayerProfile row for leaderboard integrity,
+    // but their personal history should not be surfaced — treat as not found.
+    if (player.status === PlayerStatus.DELETED) {
       throw new NotFoundException('Player not found');
     }
 

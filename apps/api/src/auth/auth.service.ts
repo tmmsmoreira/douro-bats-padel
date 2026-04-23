@@ -147,7 +147,7 @@ export class AuthService {
       throw new UnauthorizedException('Please verify your email before logging in');
     }
 
-    return this.generateTokens(user.id, user.email, user.roles as Role[]);
+    return this.generateTokens(user.id, user.email, user.roles as Role[], user.tokenVersion);
   }
 
   async googleAuth(dto: GoogleAuthDto): Promise<AuthTokens> {
@@ -224,10 +224,10 @@ export class AuthService {
       });
     }
 
-    return this.generateTokens(user.id, user.email, user.roles as Role[]);
+    return this.generateTokens(user.id, user.email, user.roles as Role[], user.tokenVersion);
   }
 
-  async refresh(userId: string): Promise<AuthTokens> {
+  async refresh(userId: string, tokenVersion: number): Promise<AuthTokens> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
@@ -236,7 +236,14 @@ export class AuthService {
       throw new UnauthorizedException('User not found');
     }
 
-    return this.generateTokens(user.id, user.email, user.roles as Role[]);
+    // Reject refresh tokens that were issued before the current tokenVersion.
+    // Bumping tokenVersion (e.g. on password reset) revokes every outstanding
+    // refresh token without needing a per-token blacklist.
+    if (user.tokenVersion !== tokenVersion) {
+      throw new UnauthorizedException('Token has been revoked');
+    }
+
+    return this.generateTokens(user.id, user.email, user.roles as Role[], user.tokenVersion);
   }
 
   async validateUser(userId: string) {
@@ -323,20 +330,37 @@ export class AuthService {
 
     const passwordHash = await bcrypt.hash(dto.password, BCRYPT_SALT_ROUNDS);
 
+    // Bumping tokenVersion invalidates every refresh token issued before the
+    // password change, which is the whole point of resetting it — if someone
+    // is resetting because they lost control of a session, that session must
+    // not survive the reset.
     await this.prisma.user.update({
       where: { id: user.id },
       data: {
         passwordHash,
         resetPasswordToken: null,
         resetPasswordExpires: null,
+        tokenVersion: { increment: 1 },
       },
     });
 
     return { message: 'Password has been reset successfully' };
   }
 
-  private async generateTokens(userId: string, email: string, roles: Role[]): Promise<AuthTokens> {
-    const payload = { sub: userId, email, roles, iss: 'padel-api', aud: 'padel-app' };
+  private async generateTokens(
+    userId: string,
+    email: string,
+    roles: Role[],
+    tokenVersion: number
+  ): Promise<AuthTokens> {
+    const payload = {
+      sub: userId,
+      email,
+      roles,
+      tv: tokenVersion,
+      iss: 'padel-api',
+      aud: 'padel-app',
+    };
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload),

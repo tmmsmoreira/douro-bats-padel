@@ -31,6 +31,13 @@ var PlayerStatus;
     PlayerStatus["ACTIVE"] = "ACTIVE";
     PlayerStatus["INACTIVE"] = "INACTIVE";
     PlayerStatus["INVITED"] = "INVITED";
+    /**
+     * Set when a user has been anonymized (GDPR-style soft-delete). Their PII
+     * on User is scrubbed but PlayerProfile and historical ranking data
+     * (WeeklyScore, RankingSnapshot) remain so leaderboards stay consistent.
+     * DELETED players are hidden from leaderboards and player-history queries.
+     */
+    PlayerStatus["DELETED"] = "DELETED";
 })(PlayerStatus || (exports.PlayerStatus = PlayerStatus = {}));
 var EventFormat;
 (function (EventFormat) {

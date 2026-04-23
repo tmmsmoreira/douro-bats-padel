@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Role } from '@padel/types';
+import { PlayerStatus, Role } from '@padel/types';
 
 @Injectable()
 export class PlayersService {
@@ -182,23 +182,62 @@ export class PlayersService {
     throw new NotFoundException('Player not found');
   }
 
+  /**
+   * Anonymize (soft-delete) a user. Scrubs PII from the User row and marks
+   * their PlayerProfile as DELETED so leaderboard + player-history queries
+   * hide them, while preserving the PlayerProfile + WeeklyScore +
+   * RankingSnapshot rows so historical leaderboards remain internally
+   * consistent. Previously, this method hard-deleted the user, which
+   * cascade-wiped all their ranking history.
+   *
+   * The original email is released (replaced with `deleted-{id}@…`) so the
+   * person can re-register with the same address via a fresh invitation.
+   * tokenVersion is bumped to invalidate any outstanding refresh tokens and
+   * passwordHash is cleared so the anonymized account can no longer log in.
+   */
   async remove(id: string) {
     const user = await this.prisma.user.findUnique({
       where: { id },
+      include: { player: true },
     });
 
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    // Safeguard: Prevent deletion of admin users
+    // Safeguard: prevent anonymizing admin users. Unchanged from the prior
+    // hard-delete behavior — admins must first be demoted.
     if (user.roles && user.roles.includes(Role.ADMIN)) {
       throw new BadRequestException('Cannot delete admin users');
     }
 
-    // Delete the user (cascade will handle related records)
-    await this.prisma.user.delete({
-      where: { id },
+    await this.prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id },
+        data: {
+          email: `deleted-${id}@dorobats.invalid`,
+          name: null,
+          passwordHash: null,
+          phoneNumber: null,
+          profilePhoto: null,
+          dateOfBirth: null,
+          emailVerificationToken: null,
+          emailVerificationExpires: null,
+          resetPasswordToken: null,
+          resetPasswordExpires: null,
+          tokenVersion: { increment: 1 },
+          roles: [Role.VIEWER],
+        },
+      });
+
+      if (user.player) {
+        await tx.playerProfile.update({
+          where: { id: user.player.id },
+          data: { status: PlayerStatus.DELETED },
+        });
+      }
+
+      await tx.pushSubscription.deleteMany({ where: { userId: id } });
     });
 
     return { message: 'User deleted successfully' };

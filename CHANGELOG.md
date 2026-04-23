@@ -10,6 +10,26 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-04-23] — Revoke refresh tokens on password reset; anonymize users on delete
+
+**Commit:** `f0abfcd`
+
+### Backend
+
+- **`AuthService.refresh`** — Now takes a `tokenVersion` argument and rejects refresh tokens whose `tv` claim doesn't match the current `User.tokenVersion`, revoking every outstanding session without a per-token blacklist
+- **`AuthService.resetPassword`** — Increments `tokenVersion` alongside clearing the reset token so any session active before the reset is invalidated
+- **`AuthService.generateTokens`** — Embeds `tv` (tokenVersion) into signed JWT payloads for both access and refresh tokens
+- **`JwtRefreshStrategy`** / **`JwtStrategy`** — Pass `tv` through on validate so the refresh endpoint (and future access-token checks) can compare against the DB
+- **`AuthController.refresh`** — Forwards `req.user.tv` into `authService.refresh` alongside `sub`
+- **`PlayersService.remove`** — Replaced hard-delete with GDPR-style anonymization: scrubs PII, replaces email with `deleted-{id}@dorobats.invalid`, clears `passwordHash`, bumps `tokenVersion`, resets roles to `VIEWER`, flips `PlayerProfile.status` to `DELETED`, and drops push subscriptions in the same transaction; `WeeklyScore` and `RankingSnapshot` rows are preserved so historical leaderboards stay consistent
+- **`getPlayerHistory`** — Returns 404 for `DELETED` profiles to avoid surfacing anonymized data; leaderboard queries filter `DELETED` out
+
+### Infrastructure
+
+- **`20260422140000_add_user_token_version`** — Adds `User.tokenVersion INTEGER NOT NULL DEFAULT 0`; existing JWTs remain valid until their 7-day expiry
+- **`20260422150000_add_player_status_deleted`** — Adds `DELETED` value to the `PlayerStatus` enum
+
+
 ## [2026-04-23] — Fix Railway build by following symlinks when chmodding pnpm bins
 
 **Commit:** `a9ef4ac`

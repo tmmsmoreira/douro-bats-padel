@@ -21,6 +21,11 @@ model User {
   emailVerificationExpires  DateTime?
   resetPasswordToken        String?        @unique
   resetPasswordExpires      DateTime?
+  // Bumped whenever all outstanding refresh tokens should be revoked (e.g.
+  // password reset). The value is embedded as `tv` in issued JWTs and
+  // re-checked on refresh; a mismatch means the token was issued before the
+  // most recent credential change and must be rejected.
+  tokenVersion              Int            @default(0)
   preferredLanguage         Locale         @default(PT)
   player                    PlayerProfile?
   invitationsSent           Invitation[]
@@ -227,6 +232,10 @@ enum PlayerStatus {
   ACTIVE
   INACTIVE
   INVITED
+  // Anonymized users — PII scrubbed, but PlayerProfile + historical WeeklyScore
+  // and RankingSnapshot rows are preserved so leaderboards stay consistent.
+  // Leaderboard and player-history queries exclude DELETED profiles.
+  DELETED
 }
 
 enum EventFormat {

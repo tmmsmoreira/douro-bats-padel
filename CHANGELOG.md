@@ -10,6 +10,15 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-04-23] — Fix production build by moving serwist to dependencies
+
+**Commit:** `7c47f0e`
+
+### Infrastructure
+
+- **`apps/web/package.json`** — Moved `serwist` from `devDependencies` to `dependencies` so production installs (which skip devDependencies) can resolve the import in `apps/web/src/app/sw.ts`, fixing `next build` failing with "Cannot find module 'serwist'".
+
+
 ## [2026-04-23] — Migrate PWA from next-pwa to @serwist/next
 
 **Commit:** `f39b46d`

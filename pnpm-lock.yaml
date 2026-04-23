@@ -301,6 +301,9 @@ importers:
       react-dom:
         specifier: 19.2.0
         version: 19.2.0(react@19.2.0)
+      serwist:
+        specifier: ^9.5.7
+        version: 9.5.7(browserslist@4.28.1)(typescript@5.9.3)
       shadcn:
         specifier: ^3.8.4
         version: 3.8.5(@types/node@20.19.37)(typescript@5.9.3)
@@ -332,9 +335,6 @@ importers:
       baseline-browser-mapping:
         specifier: ^2.10.0
         version: 2.10.10
-      serwist:
-        specifier: ^9.5.7
-        version: 9.5.7(browserslist@4.28.1)(typescript@5.9.3)
       sharp:
         specifier: ^0.34.5
         version: 0.34.5
@@ -6129,6 +6129,7 @@ packages:
         optional: true
     dependencies:
       browserslist: 4.28.1
+    dev: false
 
   /@serwist/webpack-plugin@9.5.7(browserslist@4.28.1)(typescript@5.9.3):
     resolution:
@@ -12025,6 +12026,7 @@ packages:
       {
         integrity: sha512-LtwtVyVYO5BqRvcsKuB2iUMnHwPVByPCXFXOpuU96IZPPoPN6xjOGxZQ74pgSVVLQWtUOYgyeL4GE98BY5D3wg==,
       }
+    dev: false
 
   /ieee754@1.2.1:
     resolution:
@@ -16492,6 +16494,7 @@ packages:
       typescript: 5.9.3
     transitivePeerDependencies:
       - browserslist
+    dev: false
 
   /set-blocking@2.0.0:
     resolution:

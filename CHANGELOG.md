@@ -10,6 +10,16 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-04-23] — Fix Railway build by following symlinks when chmodding pnpm bins
+
+**Commit:** `a9ef4ac`
+
+### Infrastructure
+
+- **`nixpacks.toml`** — Replaced `chmod -R +x` on `node_modules/.bin` with `find -L … -exec chmod +x` so symlinked pnpm bin entries resolve to their real wrapper files, fixing `prisma generate` "Permission denied" failures on Linux.
+- **`railway.toml`** — Applied the same `find -L … -exec chmod +x` fix to the Railway nixpacks install phase to keep both build configs in sync.
+
+
 ## [2026-04-23] — Harden state machine, DTO validation, and auth/push hygiene
 
 **Commit:** `b203d40`

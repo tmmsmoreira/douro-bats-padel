@@ -11,8 +11,9 @@ import { ArrowRight } from 'lucide-react';
 
 export function HomeUpcomingEvents() {
   const t = useTranslations('home');
+  const tErrors = useTranslations('errors');
   const isFromBfcache = useIsFromBfcache();
-  const { data: events, isLoading } = useUpcomingEvents();
+  const { data: events, isLoading, error } = useUpcomingEvents();
 
   // Show only first 3 events on home page
   const displayEvents = events?.slice(0, 3);
@@ -39,9 +40,11 @@ export function HomeUpcomingEvents() {
       <DataStateWrapper
         isLoading={isLoading}
         data={displayEvents}
+        error={error}
         loadingMessage={t('upcomingEvents.loadingEvents')}
         loadingComponent={<EventsListSkeleton count={3} />}
         emptyMessage={t('upcomingEvents.noEvents')}
+        errorMessage={tErrors('failedToLoadEvents')}
       >
         {(events) => (
           <div className="space-y-6">

@@ -9,17 +9,20 @@ import { EventsListSkeleton } from '@/components/shared/event/event-skeletons';
 
 export function EventsList({ from }: { from?: string } = {}) {
   const t = useTranslations('home');
+  const tErrors = useTranslations('errors');
   const isFromBfcache = useIsFromBfcache();
 
-  const { data: events, isLoading } = useUpcomingEvents({ from });
+  const { data: events, isLoading, error } = useUpcomingEvents({ from });
 
   return (
     <DataStateWrapper
       isLoading={isLoading}
       data={events}
+      error={error}
       loadingMessage={t('loadingEvents')}
       loadingComponent={<EventsListSkeleton />}
       emptyMessage={t('noEventsAvailable')}
+      errorMessage={tErrors('failedToLoadEvents')}
     >
       {(events) => (
         <div className="space-y-4">

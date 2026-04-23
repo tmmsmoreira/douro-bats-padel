@@ -21,6 +21,7 @@ export default function EventLayout({
 }) {
   const { id: eventId } = use(params);
   const t = useTranslations('eventDetails');
+  const tErrors = useTranslations('errors');
   const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
@@ -29,7 +30,7 @@ export default function EventLayout({
 
   // Shares the ['event', eventId] cache key with `useEventDetails` on the
   // inner page; layout and page no longer double-fetch.
-  const { data: event, isLoading } = useEventDetails(eventId);
+  const { data: event, isLoading, error } = useEventDetails(eventId);
 
   const { data: draw } = useDraw(eventId);
 
@@ -37,9 +38,11 @@ export default function EventLayout({
     <DataStateWrapper
       isLoading={isLoading}
       data={event}
+      error={error}
       loadingMessage={t('loadingEvent')}
       loadingComponent={<EventLayoutSkeleton />}
       emptyMessage={t('eventNotFound')}
+      errorMessage={tErrors('failedToLoadEvent')}
     >
       {(event) => (
         <div className="space-y-4 md:space-y-6">

@@ -31,6 +31,7 @@ const EVENTS_PER_PAGE = 10;
 
 export function EventsList() {
   const t = useTranslations('eventsList');
+  const tErrors = useTranslations('errors');
   const locale = useLocale();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [statusFilter, setStatusFilter] = useState<EventState>('ALL');
@@ -38,7 +39,7 @@ export function EventsList() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const isFromBfcache = useIsFromBfcache();
 
-  const { data: events, isLoading } = useAdminEvents();
+  const { data: events, isLoading, error } = useAdminEvents();
 
   // Filter events based on selected date and status
   const filteredEvents = useMemo(() => {
@@ -81,9 +82,11 @@ export function EventsList() {
     <DataStateWrapper
       isLoading={isLoading}
       data={events}
+      error={error}
       loadingMessage={t('loadingEvents')}
       loadingComponent={<EventsListSkeleton count={5} withFilters />}
       emptyMessage={t('noEventsFound')}
+      errorMessage={tErrors('failedToLoadEvents')}
     >
       {() => (
         <EventsListContent

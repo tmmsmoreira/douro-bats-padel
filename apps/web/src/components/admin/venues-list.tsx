@@ -31,11 +31,12 @@ import type { Venue } from '@padel/types';
 export function VenuesList() {
   const router = useRouter();
   const t = useTranslations('venuesList');
+  const tErrors = useTranslations('errors');
   const [deleteVenue, setDeleteVenue] = useState<{ id: string; name: string } | null>(null);
   const deleteIconRef = useRef<DeleteIconHandle>(null);
   const squarePenIconRef = useRef<SquarePenIconHandle>(null);
 
-  const { data: venues, isLoading } = useVenues();
+  const { data: venues, isLoading, error } = useVenues();
 
   // Use dedicated hook for deletion
   const deleteMutation = useDeleteVenue();
@@ -52,9 +53,11 @@ export function VenuesList() {
     <DataStateWrapper
       isLoading={isLoading}
       data={venues}
+      error={error}
       loadingMessage={t('loadingVenues')}
       loadingComponent={<VenuesListSkeleton />}
       emptyMessage={t('noVenuesAvailable')}
+      errorMessage={tErrors('unexpectedError')}
     >
       {(venues) => (
         <VenuesListContent

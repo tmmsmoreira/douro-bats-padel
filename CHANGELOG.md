@@ -10,6 +10,22 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-04-23] — Surface real error states when data fetches fail
+
+**Commit:** `f14cd85`
+
+### Frontend
+
+- **`EventLayout`** — Thread `error` from `useEventDetails` into `DataStateWrapper` with `errors.failedToLoadEvent` message so API failures no longer masquerade as "event not found"
+- **`EventsList` (admin)** — Pass `error` from `useAdminEvents` through to `DataStateWrapper` with `errors.failedToLoadEvents`
+- **`PlayersList`** — Pass `error` from `usePlayers` through to `DataStateWrapper` with `errors.unexpectedError`
+- **`ResultsView`** — Surface errors from both `useEventDetails` and `useEventMatches` (coalesced via `??`) with `errors.failedToLoadEvent`
+- **`VenuesList`** — Pass `error` from `useVenues` through to `DataStateWrapper` with `errors.unexpectedError`
+- **`HomeUpcomingEvents`** — Pass `error` from `useUpcomingEvents` through to `DataStateWrapper` with `errors.failedToLoadEvents`
+- **`EventsList` (shared)** — Pass `error` from `useUpcomingEvents` through to `DataStateWrapper` with `errors.failedToLoadEvents`
+- **`PastEventsList`** — Pass `error` from `usePastEvents` through to `DataStateWrapper` with `errors.failedToLoadEvents`
+
+
 ## [2026-04-23] — Enforce Node 20 via pinned .nvmrc and strict engines
 
 **Commit:** `ff10c21`

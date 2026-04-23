@@ -35,12 +35,13 @@ type Player = PlayerRecord;
 
 export function PlayersList() {
   const t = useTranslations('playersList');
+  const tErrors = useTranslations('errors');
   const locale = useLocale();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<PlayerState>('ALL');
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { data: players, isLoading } = usePlayers();
+  const { data: players, isLoading, error } = usePlayers();
 
   // Helper function to get player status
   const getPlayerStatus = (player: Player): PlayerState => {
@@ -96,9 +97,11 @@ export function PlayersList() {
     <DataStateWrapper
       isLoading={isLoading}
       data={players}
+      error={error}
       loadingMessage={t('loadingPlayers')}
       loadingComponent={<PlayersListSkeleton />}
       emptyMessage={t('noPlayersFound')}
+      errorMessage={tErrors('unexpectedError')}
     >
       {() => (
         <PlayersListContent

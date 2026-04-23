@@ -44,6 +44,7 @@ interface ResultsViewProps {
 
 export function ResultsView({ eventId }: ResultsViewProps) {
   const t = useTranslations('resultsEntry');
+  const tErrors = useTranslations('errors');
   const [showPublishDialog, setShowPublishDialog] = useState(false);
   const [showRecomputeDialog, setShowRecomputeDialog] = useState(false);
   const [matchResults, setMatchResults] = useState<
@@ -51,13 +52,13 @@ export function ResultsView({ eventId }: ResultsViewProps) {
   >({});
 
   // Fetch event data to check state and date
-  const { data: event, isLoading: isLoadingEvent } = useEventDetails(eventId);
+  const { data: event, isLoading: isLoadingEvent, error: eventError } = useEventDetails(eventId);
 
   // Fetch draw assignments
   const { data: draw } = useDraw(eventId);
 
   // Fetch existing matches
-  const { data: matches, isLoading } = useEventMatches(eventId);
+  const { data: matches, isLoading, error: matchesError } = useEventMatches(eventId);
 
   // Initialize match results from existing matches
   useEffect(() => {
@@ -215,9 +216,11 @@ export function ResultsView({ eventId }: ResultsViewProps) {
     <DataStateWrapper
       isLoading={isLoadingData}
       data={event}
+      error={eventError ?? matchesError}
       loadingMessage={t('loading')}
       loadingComponent={<ResultsSkeleton />}
       emptyMessage={t('eventNotFound')}
+      errorMessage={tErrors('failedToLoadEvent')}
     >
       {() =>
         validationMessage ? (

@@ -10,9 +10,10 @@ import { motion } from 'motion/react';
 
 export function PastEventsList({ to }: { to?: string } = {}) {
   const t = useTranslations('home');
+  const tErrors = useTranslations('errors');
   const isFromBfcache = useIsFromBfcache();
 
-  const { data: allEvents, isLoading } = usePastEvents({ to });
+  const { data: allEvents, isLoading, error } = usePastEvents({ to });
 
   // Sort by date descending (most recent first) and take only the last 10
   const events = useMemo(() => {
@@ -26,9 +27,11 @@ export function PastEventsList({ to }: { to?: string } = {}) {
     <DataStateWrapper
       isLoading={isLoading}
       data={events}
+      error={error}
       loadingMessage={t('loadingEvents')}
       loadingComponent={<EventsListSkeleton count={3} />}
       emptyMessage={t('noPastEvents')}
+      errorMessage={tErrors('failedToLoadEvents')}
     >
       {(events) => (
         <div className="space-y-4">

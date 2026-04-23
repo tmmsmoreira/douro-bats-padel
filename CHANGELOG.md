@@ -10,6 +10,18 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-04-23] — Switch Railway builder to Railpack and pin Node 20
+
+**Commit:** `03a9503`
+
+### Infrastructure
+
+- **`railway.toml`** — Switched builder from Nixpacks to Railpack, replacing the custom install/build phases with a single `buildCommand` and simplifying `startCommand` now that chmod workarounds are no longer needed
+- **`nixpacks.toml`** — Removed, superseded by Railpack configuration in `railway.toml`
+- **`.nvmrc`** — Added pinning Node to version 20, since `@nestjs/schedule@6` calls `crypto.randomUUID()` which requires Node >=19 and Railpack was resolving to Node 18
+- **`package.json`** — Bumped `engines.node` from `>=18.0.0` to `>=20.0.0` to match the runtime requirement
+
+
 ## [2026-04-23] — Mark migrate-and-start.sh executable in git
 
 **Commit:** `7c2c64c`

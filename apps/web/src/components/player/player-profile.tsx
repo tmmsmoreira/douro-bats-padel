@@ -283,7 +283,7 @@ function ProfileContent({
   const weeklyScores = leaderboardEntry?.weeklyScores ?? [];
   const weeksPlayed = weeklyScores.length;
 
-  const hasNonPlayerRole = (profile.roles?.length ?? 0) > 1 || !profile.roles?.includes('PLAYER');
+  const isAdmin = profile.roles?.includes('ADMIN') ?? false;
 
   return (
     <motion.div
@@ -332,7 +332,7 @@ function ProfileContent({
           editedProfilePhoto={editedProfilePhoto}
           setEditedProfilePhoto={setEditedProfilePhoto}
           validationErrors={validationErrors}
-          hasNonPlayerRole={hasNonPlayerRole}
+          isAdmin={isAdmin}
           handleSaveProfile={handleSaveProfile}
           handleCancelProfileEdit={handleCancelProfileEdit}
           updateProfileMutation={updateProfileMutation}
@@ -499,7 +499,7 @@ function InformationCard({
   editedProfilePhoto,
   setEditedProfilePhoto,
   validationErrors,
-  hasNonPlayerRole,
+  isAdmin,
   handleSaveProfile,
   handleCancelProfileEdit,
   updateProfileMutation,
@@ -517,7 +517,7 @@ function InformationCard({
   editedProfilePhoto: string;
   setEditedProfilePhoto: (value: string) => void;
   validationErrors: ValidationErrors;
-  hasNonPlayerRole: boolean;
+  isAdmin: boolean;
   handleSaveProfile: () => void;
   handleCancelProfileEdit: () => void;
   updateProfileMutation: { isPending: boolean };
@@ -621,7 +621,7 @@ function InformationCard({
                 value={new Date(profile.player.createdAt).toLocaleDateString(locale)}
               />
             )}
-            {hasNonPlayerRole && (
+            {isAdmin && (
               <div>
                 <p className="text-sm text-muted-foreground">{t('role')}</p>
                 <div className="flex gap-2 mt-1 flex-wrap">

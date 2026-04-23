@@ -10,6 +10,15 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-04-23] — Fix profile role badge visibility for non-admin users
+
+**Commit:** `73022aa`
+
+### Bug Fixes
+
+- **`PlayerProfile`** — Replaced the `hasNonPlayerRole` check (which tested for a non-existent `PLAYER` role and thus matched every logged-in user) with an explicit `isAdmin` check against the `ADMIN` role, so `VIEWER` users no longer see the role badge on their own profile.
+
+
 ## [2026-04-23] — Fix footer position on short pages
 
 **Commit:** `e8a035a`

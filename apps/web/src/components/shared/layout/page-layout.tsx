@@ -113,7 +113,10 @@ export function PageLayout({
       <SkipLinks />
       {nav}
       {/* Add padding-top to account for fixed navbar (4rem height + safe-area-inset + 1px border) */}
-      <div style={{ paddingTop: 'calc(4rem + env(safe-area-inset-top, 0px) + 1px)' }}>
+      <div
+        className="flex-1 flex flex-col"
+        style={{ paddingTop: 'calc(4rem + env(safe-area-inset-top, 0px) + 1px)' }}
+      >
         {animate && !isBackNav ? (
           <motion.div {...ANIMATION_VARIANTS.pageTransition} className="flex-1 flex flex-col">
             {mainContent}

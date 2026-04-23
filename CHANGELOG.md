@@ -10,6 +10,15 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-04-23] — Fix footer position on short pages
+
+**Commit:** `e8a035a`
+
+### Frontend
+
+- **`PageLayout`** — Added `flex-1 flex flex-col` to the navbar padding wrapper so the flex chain reaches `<main>`, keeping the footer pinned to the viewport bottom on short pages instead of riding up under the content.
+
+
 ## [2026-04-23] — Fix production build by moving serwist to dependencies
 
 **Commit:** `7c47f0e`

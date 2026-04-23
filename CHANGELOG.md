@@ -10,6 +10,16 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-04-23] — Duplicate pnpm bin chmod into build phase to survive Railway cache
+
+**Commit:** `14533f4`
+
+### Infrastructure
+
+- **`nixpacks.toml`** — Prepended a recursive `chmod +x` over `node_modules/.pnpm` to the build phase command so pnpm binaries (e.g. prisma) remain executable even when Railway reuses a cached install layer
+- **`railway.toml`** — Mirrored the same build-phase chmod in the Railway nixpacks plan to guarantee `prisma generate` and `nest build` run against executable bins on every build regardless of cache state
+
+
 ## [2026-04-23] — Fix Railway build by chmodding pnpm store directly
 
 **Commit:** `7a3512c`

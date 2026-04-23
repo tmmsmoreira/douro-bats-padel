@@ -40,8 +40,8 @@
   },
   "packageManager": "pnpm@8.15.0",
   "engines": {
-    "node": ">=20.0.0",
-    "pnpm": ">=8.0.0"
+    "node": ">=20.19.0 <21",
+    "pnpm": ">=8.15.0"
   },
   "pnpm": {
     "overrides": {

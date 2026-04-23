@@ -10,6 +10,17 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-04-23] — Enforce Node 20 via pinned .nvmrc and strict engines
+
+**Commit:** `ff10c21`
+
+### Infrastructure
+
+- **`.nvmrc`** — Pinned to exact Node version `20.19.0` (from loose `20`) so nvm resolves a single known-good version instead of the latest 20.x
+- **`.npmrc`** — Added `engine-strict=true` so pnpm fails fast when running under the wrong Node version instead of silently accepting mismatches
+- **`package.json`** — Tightened `engines` to `node >=20.19.0 <21` and `pnpm >=8.15.0` to prevent transitive dep engine mismatches (previously permitted Node 18.5.0 despite the .nvmrc)
+
+
 ## [2026-04-23] — Switch Railway builder to Railpack and pin Node 20
 
 **Commit:** `03a9503`

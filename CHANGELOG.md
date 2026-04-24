@@ -10,6 +10,15 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-04-24] — Tighten mobile calendar layout
+
+**Commit:** `02ab99a`
+
+### Frontend
+
+- **`DatePicker`** — Center the calendar on mobile and shrink cell size via `--cell-size` spacing token for a tighter layout
+
+
 ## [2026-04-24] — Mobile date/time pickers move to bottom drawer with new pill variant
 
 **Commit:** `a361694`

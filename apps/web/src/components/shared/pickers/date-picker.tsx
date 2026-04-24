@@ -133,7 +133,7 @@ export function DatePicker({
       onSelect={handleSelect}
       startMonth={new Date(1900, 0)}
       endMonth={new Date(2100, 11)}
-      className={isMobile ? 'w-full' : undefined}
+      className={isMobile ? 'mx-auto [--cell-size:--spacing(10)]' : undefined}
       formatters={
         isMobile
           ? {

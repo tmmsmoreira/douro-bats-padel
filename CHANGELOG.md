@@ -10,6 +10,17 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-04-24] — Keep native swipe-back within a tab and remove page fade-in flash
+
+**Commit:** `8eb739e`
+
+### Frontend
+
+- **`UnifiedNav`** — Mobile tab bar now uses `router.replace` instead of `router.push` so tab switches don't stack history entries, keeping native swipe-back scoped to the current tab's stack rather than traversing unrelated tabs.
+- **`PageLayout`** — Dropped the `motion.div` page-transition wrapper and the `animate` prop, removing the opacity-0 frame that flashed the background when bfcache eviction left the back-nav flag unset.
+- **`ErrorPage`** — Removed the now-obsolete `animate={false}` prop passed to `PageLayout`.
+
+
 ## [2026-04-24] — Highlight cancelled events and colour-code admin status filters
 
 **Commit:** `89ac44e`

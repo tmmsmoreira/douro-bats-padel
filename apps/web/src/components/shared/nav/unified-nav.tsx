@@ -103,32 +103,35 @@ export function UnifiedNav() {
         { href: '/leaderboard', label: t('ranking') },
       ];
 
-  // Tab bar items based on role
+  // Tab bar items based on role.
+  // Use router.replace so tab switches don't add history entries — native
+  // swipe-back then stays within the current tab's stack instead of
+  // traversing between unrelated tabs.
   const tabBarItems = isEditor
     ? [
         {
           id: '/events',
           label: t('events'),
           icon: <CalendarDaysIcon className="w-6 h-6" />,
-          onClick: () => router.push('/events'),
+          onClick: () => router.replace('/events'),
         },
         {
           id: '/players',
           label: t('players'),
           icon: <UsersIcon className="w-6 h-6" />,
-          onClick: () => router.push('/players'),
+          onClick: () => router.replace('/players'),
         },
         {
           id: '/leaderboard',
           label: t('ranking'),
           icon: <TrendingUpIcon className="w-6 h-6" />,
-          onClick: () => router.push('/leaderboard'),
+          onClick: () => router.replace('/leaderboard'),
         },
         {
           id: '/venues',
           label: t('venues'),
           icon: <MapPinIcon className="w-6 h-6" />,
-          onClick: () => router.push('/venues'),
+          onClick: () => router.replace('/venues'),
         },
       ]
     : [
@@ -136,19 +139,19 @@ export function UnifiedNav() {
           id: '/events',
           label: t('events'),
           icon: <CalendarDaysIcon className="w-6 h-6" />,
-          onClick: () => router.push('/events'),
+          onClick: () => router.replace('/events'),
         },
         {
           id: '/leaderboard',
           label: t('ranking'),
           icon: <TrendingUpIcon className="w-6 h-6" />,
-          onClick: () => router.push('/leaderboard'),
+          onClick: () => router.replace('/leaderboard'),
         },
         {
           id: '/profile',
           label: t('profile'),
           icon: <UserIcon className="w-6 h-6" />,
-          onClick: () => router.push('/profile'),
+          onClick: () => router.replace('/profile'),
         },
       ];
 

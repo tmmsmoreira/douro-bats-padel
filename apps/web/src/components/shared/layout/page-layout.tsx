@@ -1,11 +1,6 @@
-'use client';
-
-import { motion } from 'motion/react';
 import { Footer } from '@/components/public/footer';
-import { ANIMATION_VARIANTS } from '@/lib/animations';
 import { cn } from '@/lib/utils';
 import { SkipLinks } from '@/components/shared/nav/skip-links';
-import { useIsFromBfcache } from '@/hooks';
 
 interface PageLayoutProps {
   /**
@@ -30,11 +25,6 @@ interface PageLayoutProps {
    * Additional className for the main content area
    */
   className?: string;
-  /**
-   * Whether to animate the page content on mount
-   * @default true
-   */
-  animate?: boolean;
   /**
    * Custom padding for the main content area
    * If not provided, uses standard responsive padding
@@ -63,7 +53,6 @@ const maxWidthClasses = {
  * - Consistent spacing and responsive behavior
  * - Optional footer
  * - Configurable max-width
- * - Optional page transition animation
  * - Sticky navigation
  *
  * @example
@@ -87,27 +76,8 @@ export function PageLayout({
   maxWidth = '4xl',
   showFooter = true,
   className,
-  animate = true,
   padding,
 }: PageLayoutProps) {
-  const isBackNav = useIsFromBfcache();
-
-  const mainContent = (
-    <main
-      id="main-content"
-      className={cn(
-        'container mx-auto flex-1 min-h-[500px]',
-        // Add horizontal and top padding
-        // Bottom padding is handled by page-bottom-padding class (mobile) and md:pb-6/sm:md:pb-8 (desktop)
-        padding || 'p-4 sm:p-6 page-bottom-padding md:pb-6 sm:md:pb-8',
-        maxWidthClasses[maxWidth],
-        className
-      )}
-    >
-      {children}
-    </main>
-  );
-
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SkipLinks />
@@ -117,13 +87,17 @@ export function PageLayout({
         className="flex-1 flex flex-col"
         style={{ paddingTop: 'calc(4rem + env(safe-area-inset-top, 0px) + 1px)' }}
       >
-        {animate && !isBackNav ? (
-          <motion.div {...ANIMATION_VARIANTS.pageTransition} className="flex-1 flex flex-col">
-            {mainContent}
-          </motion.div>
-        ) : (
-          mainContent
-        )}
+        <main
+          id="main-content"
+          className={cn(
+            'container mx-auto flex-1 min-h-[500px]',
+            padding || 'p-4 sm:p-6 page-bottom-padding md:pb-6 sm:md:pb-8',
+            maxWidthClasses[maxWidth],
+            className
+          )}
+        >
+          {children}
+        </main>
       </div>
       {showFooter && <Footer />}
     </div>

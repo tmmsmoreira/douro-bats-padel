@@ -20,7 +20,7 @@ interface ErrorPageProps {
 
 export function ErrorPage({ title, description, actions }: ErrorPageProps) {
   return (
-    <PageLayout nav={<UnifiedNav />} animate={false}>
+    <PageLayout nav={<UnifiedNav />}>
       <Empty>
         <EmptyHeader>
           <EmptyMedia variant="icon">

@@ -563,6 +563,23 @@ export class EventsService {
     });
   }
 
+  async cancel(id: string) {
+    const event = await this.prisma.event.findUnique({ where: { id } });
+
+    if (!event) {
+      throw new NotFoundException('Event not found');
+    }
+
+    if (event.state === EventState.CANCELLED) {
+      throw new BadRequestException('Event is already cancelled');
+    }
+
+    return this.prisma.event.update({
+      where: { id },
+      data: { state: EventState.CANCELLED },
+    });
+  }
+
   async remove(id: string) {
     const event = await this.prisma.event.findUnique({ where: { id } });
 

@@ -10,6 +10,28 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-04-24] — Add CANCELLED event state for admin-marked non-occurring events
+
+**Commit:** `b57db8e`
+
+### Frontend
+
+- **`EventActionsDropdown`** — Added cancel action with `BanIcon`, confirmation dialog, and `useCancelEvent` mutation; hides edit and primary actions once an event is in the terminal `CANCELLED` state
+- **`useCancelEvent`** — New mutation hook wrapping the `POST /events/:id/cancel` admin endpoint
+- **`EventHeaderInfo` / `EventLayout`** — Extended event `state` union to include `'CANCELLED'`
+- **`DialogContent` / `DialogOverlay`** — Tightened open/close timings (300ms in, 200ms out) and swapped zoom-in for a slide-in-from-bottom entrance for a softer dialog feel
+
+### Backend
+
+- **`EventsController`** — Added `POST /events/:id/cancel` guarded by `RolesGuard` + `Role.ADMIN`
+- **`EventsService.cancel`** — Transitions an event to `CANCELLED`, rejecting unknown IDs (`NotFoundException`) and already-cancelled events (`BadRequestException`); preserves RSVPs and history
+
+### Infrastructure
+
+- **`prisma/schema.prisma`** — Added `CANCELLED` value to the `EventState` enum as a terminal state
+- **`20260424000000_add_event_state_cancelled`** — Migration extending the `EventState` Postgres enum with `CANCELLED`
+
+
 ## [2026-04-24] — Smooth async UI transitions and tighten mobile layouts
 
 **Commit:** `c86bfbd`

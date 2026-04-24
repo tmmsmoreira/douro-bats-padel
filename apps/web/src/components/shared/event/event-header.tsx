@@ -15,7 +15,7 @@ interface EventHeaderInfoProps {
       id: string;
       name: string;
     };
-    state?: 'DRAFT' | 'OPEN' | 'FROZEN' | 'DRAWN' | 'PUBLISHED';
+    state?: 'DRAFT' | 'OPEN' | 'FROZEN' | 'DRAWN' | 'PUBLISHED' | 'CANCELLED';
   };
   locale: string;
   showStatus?: boolean;

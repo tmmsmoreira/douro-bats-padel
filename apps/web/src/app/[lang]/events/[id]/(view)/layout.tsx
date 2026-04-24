@@ -58,7 +58,13 @@ export default function EventLayout({
                     <EventActionsDropdown
                       event={{
                         id: event.id,
-                        state: event.state as 'DRAFT' | 'OPEN' | 'FROZEN' | 'DRAWN' | 'PUBLISHED',
+                        state: event.state as
+                          | 'DRAFT'
+                          | 'OPEN'
+                          | 'FROZEN'
+                          | 'DRAWN'
+                          | 'PUBLISHED'
+                          | 'CANCELLED',
                         endsAt:
                           typeof event.endsAt === 'string'
                             ? event.endsAt

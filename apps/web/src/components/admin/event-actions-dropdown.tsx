@@ -16,6 +16,8 @@ import {
   XIconHandle,
   ArchiveIcon,
   ArchiveIconHandle,
+  BanIcon,
+  BanIconHandle,
 } from 'lucide-animated';
 import {
   DropdownMenu,
@@ -31,6 +33,7 @@ import {
   useFreezeEvent,
   useUnfreezeEvent,
   usePublishEvent,
+  useCancelEvent,
   useDeleteEvent,
 } from '@/hooks/use-events';
 import { usePublishDraw, useUnpublishDraw, useDeleteDraw } from '@/hooks/use-draws';
@@ -45,7 +48,7 @@ interface Draw {
 interface EventActionsDropdownProps {
   event: {
     id: string;
-    state: 'DRAFT' | 'OPEN' | 'FROZEN' | 'DRAWN' | 'PUBLISHED';
+    state: 'DRAFT' | 'OPEN' | 'FROZEN' | 'DRAWN' | 'PUBLISHED' | 'CANCELLED';
     endsAt: string;
   };
   draw: Draw | null;
@@ -57,19 +60,23 @@ export function EventActionsDropdown({ event, draw, onDeleteSuccess }: EventActi
   const tDraw = useTranslations('adminDrawView');
   const [showDeleteDrawDialog, setShowDeleteDrawDialog] = useState(false);
   const [showDeleteEventDialog, setShowDeleteEventDialog] = useState(false);
+  const [showCancelEventDialog, setShowCancelEventDialog] = useState(false);
 
   const eventEndTime = new Date(event.endsAt);
   const hasEventPassed = eventEndTime < new Date();
+  const isCancelled = event.state === 'CANCELLED';
   const deleteIconRef = useRef<DeleteIconHandle>(null);
   const squarePenIconRef = useRef<SquarePenIconHandle>(null);
   const lockIconRef = useRef<LockIconHandle>(null);
   const sendIconRef = useRef<SendIconHandle>(null);
   const xIconRef = useRef<XIconHandle>(null);
   const archiveIconRef = useRef<ArchiveIconHandle>(null);
+  const banIconRef = useRef<BanIconHandle>(null);
   // Event mutations
   const freezeMutation = useFreezeEvent(event.id);
   const unfreezeMutation = useUnfreezeEvent(event.id);
   const publishMutation = usePublishEvent(event.id);
+  const cancelEventMutation = useCancelEvent(event.id);
   const deleteEventMutation = useDeleteEvent(event.id, onDeleteSuccess);
 
   // Draw mutations
@@ -81,11 +88,13 @@ export function EventActionsDropdown({ event, draw, onDeleteSuccess }: EventActi
   // 1. Event hasn't passed yet, OR
   // 2. Event was never published (state is DRAFT, OPEN, or FROZEN), OR
   // 3. Event was never drawn (state is DRAFT, OPEN, or FROZEN)
+  // Cancelled events are terminal and cannot be edited.
   const canEdit =
-    !hasEventPassed ||
-    event.state === 'DRAFT' ||
-    event.state === 'OPEN' ||
-    event.state === 'FROZEN';
+    !isCancelled &&
+    (!hasEventPassed ||
+      event.state === 'DRAFT' ||
+      event.state === 'OPEN' ||
+      event.state === 'FROZEN');
 
   return (
     <>
@@ -97,7 +106,7 @@ export function EventActionsDropdown({ event, draw, onDeleteSuccess }: EventActi
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           {/* Primary Actions */}
-          {!hasEventPassed && (
+          {!hasEventPassed && !isCancelled && (
             <>
               {event.state === 'DRAFT' && (
                 <DropdownMenuItem
@@ -211,8 +220,27 @@ export function EventActionsDropdown({ event, draw, onDeleteSuccess }: EventActi
                   <span>{t('editEvent')}</span>
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
             </>
+          )}
+
+          {/* Destructive group separator — only when items rendered above */}
+          {((!hasEventPassed && !isCancelled) || canEdit) && <DropdownMenuSeparator />}
+
+          {/* Cancel Event Action */}
+          {!isCancelled && (
+            <DropdownMenuItem
+              onClick={() => setShowCancelEventDialog(true)}
+              disabled={cancelEventMutation.isPending}
+              className="gap-2"
+              onMouseEnter={() => banIconRef.current?.startAnimation()}
+              onMouseLeave={() => banIconRef.current?.stopAnimation()}
+            >
+              {cancelEventMutation.isPending && (
+                <Spinner data-icon="inline-start" className="h-4 w-4" />
+              )}
+              <BanIcon ref={banIconRef} size={16} className="h-4 w-4" />
+              <span>{cancelEventMutation.isPending ? t('cancelling') : t('cancelEvent')}</span>
+            </DropdownMenuItem>
           )}
 
           {/* Delete Event Action */}
@@ -246,6 +274,21 @@ export function EventActionsDropdown({ event, draw, onDeleteSuccess }: EventActi
           }}
         />
       )}
+
+      {/* Cancel Event Confirmation Dialog */}
+      <ConfirmationDialog
+        open={showCancelEventDialog}
+        onOpenChange={setShowCancelEventDialog}
+        title={t('cancelEventTitle')}
+        description={t('cancelEventDescription')}
+        confirmText={t('cancelEvent')}
+        cancelText={t('cancel')}
+        isLoading={cancelEventMutation.isPending}
+        onConfirm={() => {
+          cancelEventMutation.mutate();
+          setShowCancelEventDialog(false);
+        }}
+      />
 
       {/* Delete Event Confirmation Dialog */}
       <ConfirmationDialog

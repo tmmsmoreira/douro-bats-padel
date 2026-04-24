@@ -14,6 +14,7 @@ export enum EventState {
   FROZEN = 'FROZEN',
   DRAWN = 'DRAWN',
   PUBLISHED = 'PUBLISHED',
+  CANCELLED = 'CANCELLED',
 }
 
 export enum RSVPStatus {

@@ -166,6 +166,28 @@ export function useUnfreezeEvent(eventId: string) {
 }
 
 /**
+ * Hook to cancel event (terminal state — event did not take place).
+ */
+export function useCancelEvent(eventId: string) {
+  const queryClient = useQueryClient();
+  const authFetch = useAuthFetch();
+
+  return useMutation({
+    mutationFn: async () => {
+      return authFetch.post(`/events/${eventId}/cancel`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['event', eventId] });
+      queryClient.invalidateQueries({ queryKey: ['admin-events'] });
+      toast.success('Event cancelled successfully');
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to cancel event');
+    },
+  });
+}
+
+/**
  * Hook to publish event
  */
 export function usePublishEvent(eventId: string) {

@@ -18,6 +18,7 @@ var EventState;
     EventState["FROZEN"] = "FROZEN";
     EventState["DRAWN"] = "DRAWN";
     EventState["PUBLISHED"] = "PUBLISHED";
+    EventState["CANCELLED"] = "CANCELLED";
 })(EventState || (exports.EventState = EventState = {}));
 var RSVPStatus;
 (function (RSVPStatus) {

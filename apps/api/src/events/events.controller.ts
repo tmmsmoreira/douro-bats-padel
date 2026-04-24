@@ -108,6 +108,13 @@ export class EventsController {
     return this.eventsService.unfreeze(id);
   }
 
+  @Post(':id/cancel')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  async cancel(@Param('id') id: string) {
+    return this.eventsService.cancel(id);
+  }
+
   @Post(':id/rsvp')
   @UseGuards(JwtAuthGuard)
   async rsvp(@Param('id') id: string, @Body() dto: RSVPDto, @Request() req: RequestWithUser) {

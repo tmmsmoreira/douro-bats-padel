@@ -253,6 +253,7 @@ enum EventState {
   FROZEN
   DRAWN
   PUBLISHED
+  CANCELLED
 }
 
 enum RSVPStatus {

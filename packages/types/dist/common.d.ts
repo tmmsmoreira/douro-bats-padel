@@ -11,7 +11,8 @@ export declare enum EventState {
     OPEN = "OPEN",
     FROZEN = "FROZEN",
     DRAWN = "DRAWN",
-    PUBLISHED = "PUBLISHED"
+    PUBLISHED = "PUBLISHED",
+    CANCELLED = "CANCELLED"
 }
 export declare enum RSVPStatus {
     CONFIRMED = "CONFIRMED",

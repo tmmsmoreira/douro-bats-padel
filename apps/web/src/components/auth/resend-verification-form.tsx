@@ -105,7 +105,7 @@ export function ResendVerificationForm() {
               {error}
             </p>
           )}
-          <Button type="submit" className="gradient-primary w-full" disabled={isLoading}>
+          <Button type="submit" variant="gradient" className="w-full" disabled={isLoading}>
             {isLoading ? t('sending') : t('resendButton')}
           </Button>
           <div className="text-center text-sm text-muted-foreground">

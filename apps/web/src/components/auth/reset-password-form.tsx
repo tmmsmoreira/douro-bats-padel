@@ -113,7 +113,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
               {error}
             </p>
           )}
-          <Button type="submit" className="gradient-primary w-full" disabled={isLoading}>
+          <Button type="submit" variant="gradient" className="w-full" disabled={isLoading}>
             {isLoading ? t('resetting') : t('resetPassword')}
           </Button>
           <div className="text-center text-sm text-muted-foreground">

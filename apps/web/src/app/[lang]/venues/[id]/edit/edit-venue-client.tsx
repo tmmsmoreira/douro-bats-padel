@@ -12,8 +12,8 @@ import { useVenue } from '@/hooks/use-venues';
 
 export function EditVenueClient({ venueId }: { venueId: string }) {
   const t = useTranslations('admin');
-  const { data: venue, isLoading } = useVenue(venueId);
-  const showLoading = useMinimumLoading(isLoading, !!venue);
+  const { data: venue, isLoading, isError } = useVenue(venueId);
+  const showLoading = useMinimumLoading(isLoading, !!venue || isError);
 
   if (showLoading) {
     return (

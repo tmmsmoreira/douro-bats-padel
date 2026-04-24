@@ -90,7 +90,6 @@
       "passwordResetSuccess": "Password reset successfully! Please sign in with your new password.",
       "demoCredentials": "Demo credentials:",
       "demoPlayer": "Player: ana.costa@dorobats.com / player123",
-      "demoEditor": "Editor: tiago@dorobats.com / editor123",
       "demoAdmin": "Admin: admin@dorobats.com / admin123"
     },
     "register": {
@@ -722,6 +721,7 @@
     "playerSince": "Player since",
     "accountCreated": "Account created",
     "searchPlayers": "Search players by name or email...",
+    "searchPlayersShort": "Search players...",
     "noPlayersMatchSearch": "No players match your search.",
     "backToPlayers": "Back to Players",
     "playerProfile": "Player Profile",

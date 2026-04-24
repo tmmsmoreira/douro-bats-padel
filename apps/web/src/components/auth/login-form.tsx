@@ -124,7 +124,8 @@ export function LoginForm() {
             )}
             <Button
               type="submit"
-              className="gradient-primary w-full h-11 text-base"
+              variant="gradient"
+              className="w-full h-11 text-base"
               disabled={isLoading}
             >
               {isLoading ? t('signingIn') : t('signIn')}
@@ -155,7 +156,6 @@ export function LoginForm() {
                 <p className="font-medium text-foreground mb-2">{t('demoCredentials')}</p>
                 <div className="text-xs space-y-1">
                   <p>{t('demoPlayer')}</p>
-                  <p>{t('demoEditor')}</p>
                   <p>{t('demoAdmin')}</p>
                 </div>
               </div>

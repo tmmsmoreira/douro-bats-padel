@@ -319,7 +319,8 @@ export function RegisterForm() {
           )}
           <Button
             type="submit"
-            className="gradient-primary w-full h-11 text-base"
+            variant="gradient"
+            className="w-full h-11 text-base"
             disabled={isLoading}
           >
             {isLoading ? t('creatingAccount') : t('createAccount')}

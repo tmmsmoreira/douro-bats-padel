@@ -90,7 +90,6 @@
       "passwordResetSuccess": "Palavra-passe redefinida com sucesso! Por favor, inicia sessão com a tua nova palavra-passe.",
       "demoCredentials": "Credenciais de demonstração:",
       "demoPlayer": "Jogador: ana.costa@dorobats.com / player123",
-      "demoEditor": "Editor: tiago@dorobats.com / editor123",
       "demoAdmin": "Admin: admin@dorobats.com / admin123"
     },
     "register": {
@@ -721,6 +720,7 @@
     "playerSince": "Jogador desde",
     "accountCreated": "Conta criada",
     "searchPlayers": "Pesquisar jogadores por nome ou email...",
+    "searchPlayersShort": "Pesquisar jogadores...",
     "noPlayersMatchSearch": "Nenhum jogador corresponde à tua pesquisa.",
     "backToPlayers": "Voltar aos Jogadores",
     "playerProfile": "Perfil do Jogador",

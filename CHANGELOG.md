@@ -10,6 +10,22 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-04-24] — Adopt Button gradient variant in auth forms and drop stale editor demo creds
+
+**Commit:** `e2cf42f`
+
+### Frontend
+
+- **`LoginForm`** — Switched submit button from `gradient-primary` utility class to the `variant="gradient"` Button API and removed the stale editor demo credentials line
+- **`RegisterForm`** — Migrated submit button to `variant="gradient"` for consistency with the Button component API
+- **`ForgotPasswordForm`** — Migrated submit button to `variant="gradient"`
+- **`ResetPasswordForm`** — Migrated submit button to `variant="gradient"`
+- **`ResendVerificationForm`** — Migrated submit button to `variant="gradient"`
+- **`VerifyEmailForm`** — Migrated "Go to login" button to `variant="gradient"`
+- **`EditVenueClient`** — Extended minimum-loading gate to release on `isError` so failed venue fetches stop spinning indefinitely
+- **`en.json` / `pt.json`** — Removed `demoEditor` credential string (editor role no longer exists) and added `searchPlayersShort` key for compact player search inputs
+
+
 ## [2026-04-23] — Fix profile role badge visibility for non-admin users
 
 **Commit:** `73022aa`

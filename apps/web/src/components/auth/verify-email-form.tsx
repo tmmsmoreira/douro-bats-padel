@@ -95,7 +95,9 @@ export function VerifyEmailForm() {
           <p className="text-center text-sm text-muted-foreground">{message}</p>
           <p className="text-center text-sm text-muted-foreground">{t('redirecting')}</p>
           <Link href={`/${locale}/login`} className="block">
-            <Button className="gradient-primary w-full">{t('goToLogin')}</Button>
+            <Button variant="gradient" className="w-full">
+              {t('goToLogin')}
+            </Button>
           </Link>
         </CardContent>
       </Card>

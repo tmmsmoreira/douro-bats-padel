@@ -10,6 +10,16 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-04-24] — Mobile date/time pickers move to bottom drawer with new pill variant
+
+**Commit:** `a361694`
+
+### Frontend
+
+- **`DatePicker`** — Swapped the mobile Dialog presentation for a vaul `Drawer` so presence animations replay on reopen, and added a `pill` variant (rounded chip with calendar icon, formatted label, and inline clear button) backed by `useLocale` for label formatting
+- **`EventsList`** — Replaced the duplicated inline mobile `Dialog` / desktop `Popover` date-filter implementation with the shared `DatePicker` in `pill` variant, dropping the local `showDatePicker` state, `useIsMobile` / `useLocale` wiring, and the animated `CalendarDaysIconHandle` ref plumbing
+
+
 ## [2026-04-24] — Add CANCELLED event state for admin-marked non-occurring events
 
 **Commit:** `b57db8e`

@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { motion } from 'motion/react';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { Button } from '@/components/ui/button';
-import { X, FilterX } from 'lucide-react';
-import { CalendarDaysIcon, CalendarDaysIconHandle } from 'lucide-animated';
+import { FilterX } from 'lucide-react';
+import { CalendarDaysIcon } from 'lucide-animated';
 import Link from 'next/link';
 import { useState, useMemo } from 'react';
 import { useAdminEvents, useIsFromBfcache } from '@/hooks';
@@ -19,10 +19,7 @@ import {
 } from '@/components/shared';
 import { StatusBadge, type EventStatus } from '@/components/shared/status-badge';
 import { EventsListSkeleton } from '@/components/shared/event/event-skeletons';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useIsMobile } from '@/hooks/use-media-query';
+import { DatePicker } from '@/components/shared/pickers/date-picker';
 import type { EventWithRSVP } from '@padel/types';
 
 type EventState = 'ALL' | EventStatus;
@@ -32,11 +29,9 @@ const EVENTS_PER_PAGE = 10;
 export function EventsList() {
   const t = useTranslations('eventsList');
   const tErrors = useTranslations('errors');
-  const locale = useLocale();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [statusFilter, setStatusFilter] = useState<EventState>('ALL');
   const [currentPage, setCurrentPage] = useState(1);
-  const [showDatePicker, setShowDatePicker] = useState(false);
   const isFromBfcache = useIsFromBfcache();
 
   const { data: events, isLoading, error } = useAdminEvents();
@@ -99,9 +94,6 @@ export function EventsList() {
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
           totalPages={totalPages}
-          showDatePicker={showDatePicker}
-          setShowDatePicker={setShowDatePicker}
-          locale={locale}
           t={t}
           isFromBfcache={isFromBfcache}
         />
@@ -120,9 +112,6 @@ interface EventsListContentProps {
   currentPage: number;
   setCurrentPage: (page: number) => void;
   totalPages: number;
-  showDatePicker: boolean;
-  setShowDatePicker: (show: boolean) => void;
-  locale: string;
   t: ReturnType<typeof useTranslations>;
   isFromBfcache: boolean;
 }
@@ -138,21 +127,12 @@ function EventsListContent({
   currentPage,
   setCurrentPage,
   totalPages,
-  showDatePicker,
-  setShowDatePicker,
-  locale,
   t,
   isFromBfcache,
 }: EventsListContentProps) {
-  // Calculate pagination indices
   const EVENTS_PER_PAGE = 10;
   const startIndex = (currentPage - 1) * EVENTS_PER_PAGE;
   const endIndex = startIndex + EVENTS_PER_PAGE;
-
-  // Check if we're on mobile
-  const isMobile = useIsMobile();
-
-  const iconRef = useRef<CalendarDaysIconHandle>(null);
 
   return (
     <motion.div
@@ -172,102 +152,12 @@ function EventsListContent({
       >
         <ScrollableFadeContainer className="px-4 py-1 sm:mx-0 sm:px-0" fadeWidth={70}>
           <div className="flex items-center gap-2 min-w-max">
-            {/* Date Chip */}
-            {isMobile ? (
-              <>
-                <Button
-                  variant={selectedDate ? 'secondary' : 'outline'}
-                  size="sm"
-                  onClick={() => setShowDatePicker(true)}
-                  className="rounded-full gap-2 h-9 px-4"
-                >
-                  <CalendarDaysIcon className="h-4 w-4" />
-                  {selectedDate
-                    ? new Date(selectedDate).toLocaleDateString(locale, {
-                        month: 'short',
-                        day: 'numeric',
-                      })
-                    : t('selectDate')}
-                  {selectedDate && (
-                    <span
-                      className="ml-1 -mr-1 hover:opacity-70 transition-opacity cursor-pointer"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedDate(undefined);
-                      }}
-                    >
-                      <X className="h-3 w-3" />
-                    </span>
-                  )}
-                </Button>
-                <Dialog open={showDatePicker} onOpenChange={setShowDatePicker}>
-                  <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                      <DialogTitle>{t('selectDate')}</DialogTitle>
-                    </DialogHeader>
-                    <div className="flex justify-center py-4">
-                      <Calendar
-                        mode="single"
-                        selected={selectedDate}
-                        onSelect={(date) => {
-                          setSelectedDate(date);
-                          setShowDatePicker(false);
-                        }}
-                        captionLayout="dropdown"
-                        startMonth={new Date(1900, 0)}
-                        endMonth={new Date(2100, 11)}
-                      />
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </>
-            ) : (
-              <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={selectedDate ? 'secondary' : 'outline'}
-                    size="sm"
-                    className="rounded-full gap-2 h-9 px-4"
-                    onMouseEnter={() => iconRef.current?.startAnimation()}
-                    onMouseLeave={() => iconRef.current?.stopAnimation()}
-                    animate={false}
-                  >
-                    <CalendarDaysIcon ref={iconRef} size={16} className="h-4 w-4" />
-                    {selectedDate
-                      ? new Date(selectedDate).toLocaleDateString(locale, {
-                          month: 'short',
-                          day: 'numeric',
-                        })
-                      : t('selectDate')}
-                    {selectedDate && (
-                      <button
-                        type="button"
-                        className="ml-1 -mr-1 hover:opacity-70 transition-opacity"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedDate(undefined);
-                        }}
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={(date) => {
-                      setSelectedDate(date);
-                      setShowDatePicker(false);
-                    }}
-                    captionLayout="dropdown"
-                    startMonth={new Date(1900, 0)}
-                    endMonth={new Date(2100, 11)}
-                  />
-                </PopoverContent>
-              </Popover>
-            )}
+            <DatePicker
+              variant="pill"
+              value={selectedDate}
+              onChange={setSelectedDate}
+              placeholder={t('selectDate')}
+            />
 
             {/* Status Chips */}
             <Button

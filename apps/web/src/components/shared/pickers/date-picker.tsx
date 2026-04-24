@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useLocale } from 'next-intl';
 import { Calendar } from '@/components/ui/calendar';
 import {
   InputGroup,
@@ -9,8 +10,10 @@ import {
   InputGroupInput,
 } from '@/components/ui/input-group';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { Button } from '@/components/ui/button';
 import { CalendarDaysIcon } from 'lucide-animated';
+import { X } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-media-query';
 
 function formatDateInput(date: Date | undefined): string {
@@ -52,21 +55,25 @@ interface DatePickerProps {
   disabled?: boolean;
   id?: string;
   'aria-invalid'?: boolean;
+  variant?: 'input' | 'pill';
 }
 
 export function DatePicker({
   value,
   onChange,
   onBlur,
-  placeholder = 'DD/MM/YYYY',
+  placeholder,
   disabled,
   id,
   'aria-invalid': ariaInvalid,
+  variant = 'input',
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
   const [date, setDate] = React.useState<Date | undefined>(value);
   const [inputValue, setInputValue] = React.useState(formatDateInput(value));
   const isMobile = useIsMobile();
+  const locale = useLocale();
+  const inputPlaceholder = placeholder ?? 'DD/MM/YYYY';
 
   // Sync with external value changes
   React.useEffect(() => {
@@ -126,15 +133,100 @@ export function DatePicker({
       onSelect={handleSelect}
       startMonth={new Date(1900, 0)}
       endMonth={new Date(2100, 11)}
+      className={isMobile ? 'w-full' : undefined}
+      formatters={
+        isMobile
+          ? {
+              formatMonthDropdown: (d) => d.toLocaleString('default', { month: 'long' }),
+            }
+          : undefined
+      }
     />
   );
+
+  if (variant === 'pill') {
+    const pillLabel = value
+      ? new Date(value).toLocaleDateString(locale, { month: 'short', day: 'numeric' })
+      : (placeholder ?? 'Select date');
+
+    const pillContent = (
+      <>
+        <CalendarDaysIcon size={16} className="h-4 w-4" />
+        {pillLabel}
+        {value && !disabled && (
+          <span
+            role="button"
+            tabIndex={-1}
+            aria-label="Clear date"
+            className="ml-1 -mr-1 hover:opacity-70 transition-opacity cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              setDate(undefined);
+              setInputValue('');
+              onChange?.(undefined);
+            }}
+          >
+            <X className="h-3 w-3" />
+          </span>
+        )}
+      </>
+    );
+
+    const pillClass = 'rounded-full gap-2 h-9 px-4';
+
+    if (isMobile) {
+      return (
+        <>
+          <Button
+            type="button"
+            variant={value ? 'secondary' : 'outline'}
+            size="sm"
+            disabled={disabled}
+            onClick={() => setOpen(true)}
+            className={pillClass}
+            animate={false}
+          >
+            {pillContent}
+          </Button>
+          <Drawer open={open} onOpenChange={setOpen}>
+            <DrawerContent aria-describedby={undefined}>
+              <DrawerHeader>
+                <DrawerTitle>Select date</DrawerTitle>
+              </DrawerHeader>
+              <div className="flex justify-center pb-4">{calendarComponent}</div>
+            </DrawerContent>
+          </Drawer>
+        </>
+      );
+    }
+
+    return (
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            type="button"
+            variant={value ? 'secondary' : 'outline'}
+            size="sm"
+            disabled={disabled}
+            className={pillClass}
+            animate={false}
+          >
+            {pillContent}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+          {calendarComponent}
+        </PopoverContent>
+      </Popover>
+    );
+  }
 
   return (
     <InputGroup>
       <InputGroupInput
         id={id}
         value={inputValue}
-        placeholder={placeholder}
+        placeholder={inputPlaceholder}
         disabled={disabled}
         aria-invalid={ariaInvalid}
         onChange={handleInputChange}
@@ -166,14 +258,14 @@ export function DatePicker({
               <CalendarDaysIcon size={16} />
               <span className="sr-only">Select date</span>
             </InputGroupButton>
-            <Dialog open={open} onOpenChange={setOpen}>
-              <DialogContent className="sm:max-w-[425px]" aria-describedby={undefined}>
-                <DialogHeader>
-                  <DialogTitle>Select date</DialogTitle>
-                </DialogHeader>
-                <div className="flex justify-center">{calendarComponent}</div>
-              </DialogContent>
-            </Dialog>
+            <Drawer open={open} onOpenChange={setOpen}>
+              <DrawerContent aria-describedby={undefined}>
+                <DrawerHeader>
+                  <DrawerTitle>Select date</DrawerTitle>
+                </DrawerHeader>
+                <div className="flex justify-center pb-4">{calendarComponent}</div>
+              </DrawerContent>
+            </Drawer>
           </>
         ) : (
           <Popover open={open} onOpenChange={setOpen}>

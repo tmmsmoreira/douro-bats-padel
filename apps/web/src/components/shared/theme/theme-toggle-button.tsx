@@ -49,7 +49,7 @@ export const ThemeToggleButton = React.forwardRef<HTMLButtonElement>(
 
 // Toggle group version for mobile menu
 export function ThemeToggleGroup() {
-  const { theme, setTheme } = useTheme();
+  const { theme, resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
@@ -61,12 +61,14 @@ export function ThemeToggleGroup() {
     setTheme(value);
   };
 
+  const selected = theme === 'system' ? resolvedTheme : theme;
+
   return (
     <ToggleGroup
       type="single"
       variant="outline"
       size="sm"
-      value={theme}
+      value={mounted ? selected : undefined}
       onValueChange={handleThemeChange}
       disabled={!mounted}
     >

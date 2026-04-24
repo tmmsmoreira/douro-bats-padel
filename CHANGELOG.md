@@ -10,6 +10,27 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-04-24] — Time picker scroll indicators and hydration icon fix
+
+**Commit:** `f09fb87`
+
+### Frontend
+
+- **`TimePicker`** — Extracted the time list into a new `TimeList` subcomponent that auto-scrolls the selected option into view and renders fading top/bottom chevron indicators driven by scroll position, with surface-aware gradient colors for popover vs. drawer variants.
+- **`DatePicker` / `TimePicker`** — Passed `animate={false}` to the trigger icons to prevent icon shift after hydration.
+- **`ThemeToggleGroup`** — Resolved the `system` theme to its actual value and gated the `ToggleGroup` value on `mounted` to avoid hydration mismatch when highlighting the active theme.
+
+
+## [2026-04-24] — Add scroll indicators to time picker and stabilize picker icons
+
+**Commit:** `9bd9dee`
+
+### Frontend
+
+- **`TimePicker`** — Extracted the time list into a new `TimeList` subcomponent that shows top/bottom chevron fade indicators when content is scrollable, auto-scrolls the selected option into view, and adapts its gradient surface (`from-background` / `from-popover`) to the drawer or popover container.
+- **`DatePicker` / `TimePicker`** — Set `animate={false}` on the trigger icon buttons to prevent the lucide-animated icon from shifting after hydration.
+
+
 ## [2026-04-24] — Center time picker options with tabular digits
 
 **Commit:** `4100dad`

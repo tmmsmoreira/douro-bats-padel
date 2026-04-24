@@ -11,7 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import { ClockIcon } from 'lucide-animated';
-import { Check, X } from 'lucide-react';
+import { Check, ChevronDown, ChevronUp, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-media-query';
 
@@ -123,34 +123,13 @@ export function TimePicker({
     }
   };
 
-  const timeListComponent = (
-    <div className="max-h-[300px] overflow-y-auto p-1" tabIndex={-1}>
-      {timeOptions.map((timeOption) => {
-        const isSelected = inputValue === timeOption;
-        return (
-          <button
-            key={timeOption}
-            type="button"
-            tabIndex={-1}
-            className={cn(
-              'relative flex w-full cursor-default select-none items-center justify-center rounded-sm px-8 py-2 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground',
-              isSelected && 'bg-accent/50'
-            )}
-            onMouseDown={(e) => {
-              e.preventDefault(); // Prevent focus
-              handleTimeSelect(timeOption);
-            }}
-          >
-            <span className="tabular-nums">{timeOption}</span>
-            {isSelected && (
-              <span className="absolute right-2 flex size-3.5 items-center justify-center">
-                <Check className="size-4" />
-              </span>
-            )}
-          </button>
-        );
-      })}
-    </div>
+  const renderTimeList = (surfaceClass: string) => (
+    <TimeList
+      options={timeOptions}
+      selected={inputValue}
+      onSelect={handleTimeSelect}
+      surfaceClass={surfaceClass}
+    />
   );
 
   if (variant === 'pill') {
@@ -199,7 +178,7 @@ export function TimePicker({
               <DrawerHeader>
                 <DrawerTitle>Select time</DrawerTitle>
               </DrawerHeader>
-              {timeListComponent}
+              {renderTimeList('from-background')}
             </DrawerContent>
           </Drawer>
         </>
@@ -221,7 +200,7 @@ export function TimePicker({
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto overflow-hidden p-0" align="start">
-          {timeListComponent}
+          {renderTimeList('from-popover')}
         </PopoverContent>
       </Popover>
     );
@@ -260,6 +239,7 @@ export function TimePicker({
               aria-label="Select time"
               disabled={disabled}
               onClick={() => setOpen(true)}
+              animate={false}
             >
               <ClockIcon size={16} />
               <span className="sr-only">Select time</span>
@@ -269,7 +249,7 @@ export function TimePicker({
                 <DrawerHeader>
                   <DrawerTitle>Select time</DrawerTitle>
                 </DrawerHeader>
-                {timeListComponent}
+                {renderTimeList('from-background')}
               </DrawerContent>
             </Drawer>
           </>
@@ -293,11 +273,102 @@ export function TimePicker({
               alignOffset={-8}
               sideOffset={10}
             >
-              {timeListComponent}
+              {renderTimeList('from-popover')}
             </PopoverContent>
           </Popover>
         )}
       </InputGroupAddon>
     </InputGroup>
+  );
+}
+
+interface TimeListProps {
+  options: string[];
+  selected: string;
+  onSelect: (value: string) => void;
+  surfaceClass: string;
+}
+
+function TimeList({ options, selected, onSelect, surfaceClass }: TimeListProps) {
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+  const [canScrollUp, setCanScrollUp] = React.useState(false);
+  const [canScrollDown, setCanScrollDown] = React.useState(false);
+
+  const updateIndicators = React.useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollUp(el.scrollTop > 0);
+    setCanScrollDown(el.scrollTop + el.clientHeight < el.scrollHeight - 1);
+  }, []);
+
+  React.useLayoutEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const selectedEl = el.querySelector<HTMLButtonElement>('[data-selected="true"]');
+    if (selectedEl) {
+      el.scrollTop = Math.max(
+        0,
+        selectedEl.offsetTop - el.clientHeight / 2 + selectedEl.clientHeight / 2
+      );
+    }
+    updateIndicators();
+  }, [updateIndicators]);
+
+  return (
+    <div className="relative">
+      <div
+        aria-hidden
+        className={cn(
+          'pointer-events-none absolute inset-x-0 top-0 z-10 flex h-7 items-center justify-center bg-linear-to-b to-transparent transition-opacity duration-150',
+          surfaceClass,
+          canScrollUp ? 'opacity-100' : 'opacity-0'
+        )}
+      >
+        <ChevronUp className="size-4 text-muted-foreground" />
+      </div>
+      <div
+        ref={scrollRef}
+        onScroll={updateIndicators}
+        className="max-h-[300px] overflow-y-auto p-1"
+        tabIndex={-1}
+      >
+        {options.map((option) => {
+          const isSelected = selected === option;
+          return (
+            <button
+              key={option}
+              data-selected={isSelected}
+              type="button"
+              tabIndex={-1}
+              className={cn(
+                'relative flex w-full cursor-default select-none items-center justify-center rounded-sm px-8 py-2 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground',
+                isSelected && 'bg-accent/50'
+              )}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                onSelect(option);
+              }}
+            >
+              <span className="tabular-nums">{option}</span>
+              {isSelected && (
+                <span className="absolute right-2 flex size-3.5 items-center justify-center">
+                  <Check className="size-4" />
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+      <div
+        aria-hidden
+        className={cn(
+          'pointer-events-none absolute inset-x-0 bottom-0 z-10 flex h-7 items-center justify-center bg-linear-to-t to-transparent transition-opacity duration-150',
+          surfaceClass,
+          canScrollDown ? 'opacity-100' : 'opacity-0'
+        )}
+      >
+        <ChevronDown className="size-4 text-muted-foreground" />
+      </div>
+    </div>
   );
 }

@@ -254,6 +254,7 @@ export function DatePicker({
               aria-label="Select date"
               disabled={disabled}
               onClick={() => setOpen(true)}
+              animate={false}
             >
               <CalendarDaysIcon size={16} />
               <span className="sr-only">Select date</span>

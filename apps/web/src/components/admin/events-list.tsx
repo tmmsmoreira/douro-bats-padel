@@ -17,7 +17,8 @@ import {
   ScrollableFadeContainer,
   Pagination,
 } from '@/components/shared';
-import { StatusBadge, type EventStatus } from '@/components/shared/status-badge';
+import { StatusBadge, statusConfig, type EventStatus } from '@/components/shared/status-badge';
+import { cn } from '@/lib/utils';
 import { EventsListSkeleton } from '@/components/shared/event/event-skeletons';
 import { DatePicker } from '@/components/shared/pickers/date-picker';
 import type { EventWithRSVP } from '@padel/types';
@@ -169,50 +170,40 @@ function EventsListContent({
               {t('allStatuses')}
             </Button>
 
-            <Button
-              variant={statusFilter === 'DRAFT' ? 'secondary' : 'outline'}
-              size="sm"
-              onClick={() => setStatusFilter('DRAFT')}
-              className="rounded-full h-9 px-4"
-            >
-              {t('statusDraft')}
-            </Button>
-
-            <Button
-              variant={statusFilter === 'OPEN' ? 'secondary' : 'outline'}
-              size="sm"
-              onClick={() => setStatusFilter('OPEN')}
-              className="rounded-full h-9 px-4"
-            >
-              {t('statusOpen')}
-            </Button>
-
-            <Button
-              variant={statusFilter === 'FROZEN' ? 'secondary' : 'outline'}
-              size="sm"
-              onClick={() => setStatusFilter('FROZEN')}
-              className="rounded-full h-9 px-4"
-            >
-              {t('statusFrozen')}
-            </Button>
-
-            <Button
-              variant={statusFilter === 'DRAWN' ? 'secondary' : 'outline'}
-              size="sm"
-              onClick={() => setStatusFilter('DRAWN')}
-              className="rounded-full h-9 px-4"
-            >
-              {t('statusDrawn')}
-            </Button>
-
-            <Button
-              variant={statusFilter === 'PUBLISHED' ? 'secondary' : 'outline'}
-              size="sm"
-              onClick={() => setStatusFilter('PUBLISHED')}
-              className="rounded-full h-9 px-4"
-            >
-              {t('statusPublished')}
-            </Button>
+            {(
+              [
+                { value: 'DRAFT', label: t('statusDraft') },
+                { value: 'OPEN', label: t('statusOpen') },
+                { value: 'FROZEN', label: t('statusFrozen') },
+                { value: 'DRAWN', label: t('statusDrawn') },
+                { value: 'PUBLISHED', label: t('statusPublished') },
+                { value: 'CANCELLED', label: t('statusCancelled') },
+              ] as const
+            ).map(({ value, label }) => {
+              const config = statusConfig[value];
+              const isSelected = statusFilter === value;
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setStatusFilter(value)}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 rounded-full border h-9 px-4 text-xs font-semibold uppercase transition-colors',
+                    isSelected
+                      ? config.className
+                      : 'border-border bg-background text-muted-foreground hover:bg-muted'
+                  )}
+                >
+                  <span
+                    className={cn(
+                      'w-1.5 h-1.5 rounded-full',
+                      isSelected ? config.dotColor : 'bg-muted-foreground/40'
+                    )}
+                  />
+                  {label}
+                </button>
+              );
+            })}
           </div>
         </ScrollableFadeContainer>
       </motion.div>

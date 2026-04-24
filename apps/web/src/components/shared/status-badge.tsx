@@ -24,15 +24,14 @@ interface StatusBadgeProps {
   label?: string;
 }
 
-const statusConfig: Record<
-  string,
-  {
-    variant: 'default' | 'secondary' | 'outline' | 'destructive';
-    className: string;
-    dotColor: string;
-    translationKey: string;
-  }
-> = {
+export interface StatusConfigEntry {
+  variant: 'default' | 'secondary' | 'outline' | 'destructive';
+  className: string;
+  dotColor: string;
+  translationKey: string;
+}
+
+export const statusConfig: Record<string, StatusConfigEntry> = {
   // Event statuses
   DRAFT: {
     variant: 'outline',
@@ -91,9 +90,9 @@ const statusConfig: Record<
     translationKey: 'declined',
   },
   CANCELLED: {
-    variant: 'secondary',
-    className: 'bg-muted text-muted-foreground border-border',
-    dotColor: 'bg-muted-foreground',
+    variant: 'destructive',
+    className: 'bg-destructive/10 text-destructive border-destructive/30',
+    dotColor: 'bg-destructive',
     translationKey: 'cancelled',
   },
   // Player profile statuses

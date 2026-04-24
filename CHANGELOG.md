@@ -10,6 +10,17 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-04-24] — Highlight cancelled events and colour-code admin status filters
+
+**Commit:** `89ac44e`
+
+### Frontend
+
+- **`StatusBadge`** — Switched the `CANCELLED` status to a destructive red treatment (`bg-destructive/10`, `text-destructive`, `border-destructive/30`) so non-occurring events stand out at a glance; exported `statusConfig` and its `StatusConfigEntry` type for reuse.
+- **`EventsListContent`** — Replaced the hand-rolled status filter buttons with a data-driven map that pulls each chip's colour from `statusConfig`, so the selected filter adopts the matching badge colour (filter row now doubles as a legend); added the previously missing `CANCELLED` filter chip.
+- **`en.json` / `pt.json`** — Added missing `declined` and `cancelled` status translations (fixes a crash when rendering those badges) plus the new `statusCancelled` filter label.
+
+
 ## [2026-04-24] — Time picker scroll indicators and hydration icon fix
 
 **Commit:** `f09fb87`

@@ -10,6 +10,15 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-04-24] — Center time picker options with tabular digits
+
+**Commit:** `4100dad`
+
+### Frontend
+
+- **`TimePicker`** — Center-aligned option rows and replaced the monospace font with `tabular-nums` so digits stay evenly spaced without the full mono typeface
+
+
 ## [2026-04-24] — Tighten mobile calendar layout
 
 **Commit:** `02ab99a`

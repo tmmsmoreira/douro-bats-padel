@@ -133,7 +133,7 @@ export function TimePicker({
             type="button"
             tabIndex={-1}
             className={cn(
-              'relative flex w-full cursor-default select-none items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground',
+              'relative flex w-full cursor-default select-none items-center justify-center rounded-sm px-8 py-2 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground',
               isSelected && 'bg-accent/50'
             )}
             onMouseDown={(e) => {
@@ -141,7 +141,7 @@ export function TimePicker({
               handleTimeSelect(timeOption);
             }}
           >
-            <span className="flex-1 font-mono">{timeOption}</span>
+            <span className="tabular-nums">{timeOption}</span>
             {isSelected && (
               <span className="absolute right-2 flex size-3.5 items-center justify-center">
                 <Check className="size-4" />

@@ -29,6 +29,7 @@ export default function HomePage() {
   // at 4K/30fps and autoplay would start pulling it during hydration; showing
   // the poster first keeps LCP fast and respects `prefers-reduced-motion`.
   const [showVideo, setShowVideo] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -82,30 +83,32 @@ export default function HomePage() {
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 1.2, ease: 'easeOut' }}
           >
-            {showVideo ? (
+            <div
+              aria-hidden
+              className="absolute inset-0 w-full h-full bg-cover bg-center"
+              style={{
+                backgroundImage:
+                  'url(https://images.pexels.com/videos/33444758/free-video-33444758.jpg?auto=compress&cs=tinysrgb&w=1280)',
+              }}
+            />
+            {showVideo && (
               <video
                 autoPlay
                 muted
                 loop
                 playsInline
                 preload="metadata"
-                poster="https://images.pexels.com/videos/33444758/free-video-33444758.jpg?auto=compress&cs=tinysrgb&w=1280"
-                className="absolute inset-0 w-full h-full object-cover"
+                onCanPlay={() => setVideoReady(true)}
+                className={cn(
+                  'absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-out',
+                  videoReady ? 'opacity-100' : 'opacity-0'
+                )}
               >
                 <source
                   src="https://videos.pexels.com/video-files/33444758/14232220_3840_2160_30fps.mp4"
                   type="video/mp4"
                 />
               </video>
-            ) : (
-              <div
-                aria-hidden
-                className="absolute inset-0 w-full h-full bg-cover bg-center"
-                style={{
-                  backgroundImage:
-                    'url(https://images.pexels.com/videos/33444758/free-video-33444758.jpg?auto=compress&cs=tinysrgb&w=1280)',
-                }}
-              />
             )}
             <div className="absolute inset-0 bg-background/40 backdrop-blur-xs" />
           </motion.div>
@@ -481,7 +484,7 @@ function ConnectAppSection({ t }: { t: (key: string) => string }) {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.6 }}
-            className="relative h-64 sm:h-96 lg:h-[500px] flex items-center justify-center order-2 lg:order-1"
+            className="relative h-48 sm:h-64 lg:h-[500px] flex items-center justify-center"
           >
             <div className="relative w-full h-full max-w-md mx-auto">
               <div className="absolute inset-0 bg-linear-to-br from-primary/20 to-secondary/20 rounded-3xl blur-xl" />
@@ -506,14 +509,14 @@ function ConnectAppSection({ t }: { t: (key: string) => string }) {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.6 }}
-            className="space-y-6 order-1 lg:order-2"
+            className="space-y-6"
           >
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold font-heading">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold font-heading text-center lg:text-left">
               {t('connectApp.title')}
             </h2>
 
             <motion.ul
-              className="space-y-3"
+              className="space-y-3 w-fit mx-auto lg:mx-0"
               initial="hidden"
               whileInView="show"
               viewport={{ once: true, margin: '-100px' }}
@@ -530,7 +533,7 @@ function ConnectAppSection({ t }: { t: (key: string) => string }) {
               ))}
             </motion.ul>
 
-            <div className="pt-4">
+            <div className="pt-4 flex justify-center lg:justify-start">
               {isInstalled ? (
                 <Button size="lg" variant="outline" disabled animate={false}>
                   <Check className="mr-2 h-4 w-4" />

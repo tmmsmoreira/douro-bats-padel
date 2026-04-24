@@ -256,6 +256,10 @@ export function useCreateEvent() {
 
       // Navigate to the newly created event
       router.push(`/admin/events/${data.id}`);
+      // Stay pending through navigation so the submit button keeps its loading state
+      // until the caller unmounts. router.push is fire-and-forget, so without this the
+      // button flashes back to its idle state between isPending=false and the new route mounting.
+      await new Promise<never>(() => {});
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to create event');
@@ -284,6 +288,7 @@ export function useUpdateEvent(eventId: string) {
 
       toast.success('Event updated successfully');
       router.push(`/admin/events/${eventId}`);
+      await new Promise<never>(() => {});
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to update event');

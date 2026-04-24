@@ -2,7 +2,7 @@
 
 import { usePlayers } from '@/hooks/use-players';
 import type { PlayerRecord } from '@/hooks/use-players';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -25,6 +25,8 @@ import { PlayersListSkeleton } from '@/components/shared/player';
 import { ScrollableFadeContainer, Pagination } from '@/components/shared';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { useIsFromBfcache } from '@/hooks';
+import { useIsMobile } from '@/hooks/use-media-query';
+import { cn } from '@/lib/utils';
 import type { PlayerProfileStatus } from '@/components/shared/status-badge';
 
 const PLAYERS_PER_PAGE = 10;
@@ -155,6 +157,9 @@ function PlayersListContent({
   locale: string;
 }) {
   const isBackNav = useIsFromBfcache();
+  const isMobile = useIsMobile();
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const isSearchExpanded = isMobile && isSearchFocused;
   // Create refs for each player's trending icon
   const trendingUpIconRefs = useRef<Map<string, TrendingUpIconHandle>>(new Map());
 
@@ -186,9 +191,13 @@ function PlayersListContent({
         className="-mx-4 sm:mx-0"
       >
         <ScrollableFadeContainer className="px-4 py-2 sm:mx-0 sm:px-1" fadeWidth={70}>
-          <div className="flex items-center gap-2 min-w-max">
+          <div className="flex items-center gap-2 w-full">
             {/* Search Input Chip */}
-            <div className="relative">
+            <motion.div
+              animate={{ width: isSearchExpanded ? '100%' : 'auto' }}
+              transition={{ duration: 0.25, ease: [0.645, 0.045, 0.355, 1] }}
+              className="relative"
+            >
               <SearchIcon
                 ref={searchIconRef}
                 size={16}
@@ -196,11 +205,16 @@ function PlayersListContent({
               />
               <Input
                 type="text"
-                placeholder={t('searchPlayers')}
+                placeholder={isMobile ? t('searchPlayersShort') : t('searchPlayers')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setIsSearchFocused(true)}
+                onBlur={() => setIsSearchFocused(false)}
                 onMouseEnter={() => searchIconRef.current?.startAnimation()}
-                className="pl-9 pr-9 h-9 rounded-full min-w-[200px] sm:min-w-[250px]"
+                className={cn(
+                  'pl-9 pr-9 h-9 rounded-full w-full',
+                  !isSearchExpanded && 'min-w-[200px] md:min-w-[250px]'
+                )}
               />
               {searchQuery && (
                 <Button
@@ -208,7 +222,10 @@ function PlayersListContent({
                   variant="link"
                   size="icon"
                   className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
-                  onClick={() => setSearchQuery('')}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    setSearchQuery('');
+                  }}
                   aria-label="Clear search"
                   onMouseEnter={() => xIconRef.current?.startAnimation()}
                   onMouseLeave={() => xIconRef.current?.stopAnimation()}
@@ -216,44 +233,38 @@ function PlayersListContent({
                   <XIcon ref={xIconRef} size={16} className="h-4 w-4" />
                 </Button>
               )}
-            </div>
+            </motion.div>
 
             {/* Status Filter Chips */}
-            <Button
-              variant={statusFilter === 'ALL' ? 'secondary' : 'outline'}
-              size="sm"
-              onClick={() => setStatusFilter('ALL')}
-              className="rounded-full h-9 px-4"
-            >
-              {t('allStatuses')}
-            </Button>
-
-            <Button
-              variant={statusFilter === 'ACTIVE' ? 'secondary' : 'outline'}
-              size="sm"
-              onClick={() => setStatusFilter('ACTIVE')}
-              className="rounded-full h-9 px-4"
-            >
-              {t('statusActive')}
-            </Button>
-
-            <Button
-              variant={statusFilter === 'INACTIVE' ? 'secondary' : 'outline'}
-              size="sm"
-              onClick={() => setStatusFilter('INACTIVE')}
-              className="rounded-full h-9 px-4"
-            >
-              {t('statusInactive')}
-            </Button>
-
-            <Button
-              variant={statusFilter === 'INVITED' ? 'secondary' : 'outline'}
-              size="sm"
-              onClick={() => setStatusFilter('INVITED')}
-              className="rounded-full h-9 px-4"
-            >
-              {t('statusInvited')}
-            </Button>
+            <AnimatePresence initial={false} mode="popLayout">
+              {!isSearchExpanded &&
+                (
+                  [
+                    ['ALL', t('allStatuses')],
+                    ['ACTIVE', t('statusActive')],
+                    ['INACTIVE', t('statusInactive')],
+                    ['INVITED', t('statusInvited')],
+                  ] as const
+                ).map(([value, label]) => (
+                  <motion.div
+                    key={value}
+                    initial={{ opacity: 0, x: 24 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 32 }}
+                    transition={{ duration: 0.25, ease: [0.645, 0.045, 0.355, 1] }}
+                    className="shrink-0"
+                  >
+                    <Button
+                      variant={statusFilter === value ? 'secondary' : 'outline'}
+                      size="sm"
+                      onClick={() => setStatusFilter(value as PlayerState)}
+                      className="rounded-full h-9 px-4"
+                    >
+                      {label}
+                    </Button>
+                  </motion.div>
+                ))}
+            </AnimatePresence>
           </div>
         </ScrollableFadeContainer>
       </motion.div>

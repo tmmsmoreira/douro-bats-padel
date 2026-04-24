@@ -22,6 +22,10 @@ export function useCreateVenue() {
 
       toast.success('Venue created successfully');
       router.push('/admin/venues');
+      // Stay pending through navigation so the submit button keeps its loading state
+      // until the caller unmounts. router.push is fire-and-forget, so without this the
+      // button flashes back to its idle state between isPending=false and the new route mounting.
+      await new Promise<never>(() => {});
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to create venue');
@@ -50,6 +54,7 @@ export function useUpdateVenue(venueId: string) {
 
       toast.success('Venue updated successfully');
       router.push('/admin/venues');
+      await new Promise<never>(() => {});
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to update venue');

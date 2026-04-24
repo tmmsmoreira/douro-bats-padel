@@ -6,7 +6,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'motion/react';
 import { useLocale, useTranslations } from 'next-intl';
+import { useState } from 'react';
 import { useSplashOffset } from '@/hooks/use-is-standalone';
+import { cn } from '@/lib/utils';
 
 interface AuthPageLayoutProps {
   children: React.ReactNode;
@@ -16,6 +18,10 @@ export function AuthPageLayout({ children }: AuthPageLayoutProps) {
   const locale = useLocale();
   const t = useTranslations('home.hero');
   const splashOffset = useSplashOffset();
+  const [videoReady, setVideoReady] = useState(false);
+
+  const posterUrl =
+    'https://images.pexels.com/videos/34449200/free-video-34449200.jpg?auto=compress&cs=tinysrgb&w=1280';
 
   return (
     <div className="min-h-screen flex relative">
@@ -46,14 +52,22 @@ export function AuthPageLayout({ children }: AuthPageLayoutProps) {
 
       {/* Left side — video with branding (desktop only) */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
+        <div
+          aria-hidden
+          className="absolute inset-0 w-full h-full bg-cover bg-center"
+          style={{ backgroundImage: `url(${posterUrl})` }}
+        />
         <video
           autoPlay
           muted
           loop
           playsInline
           preload="metadata"
-          poster="https://images.pexels.com/videos/34449200/free-video-34449200.jpg?auto=compress&cs=tinysrgb&w=1280"
-          className="absolute inset-0 w-full h-full object-cover"
+          onCanPlay={() => setVideoReady(true)}
+          className={cn(
+            'absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-out',
+            videoReady ? 'opacity-100' : 'opacity-0'
+          )}
         >
           <source
             src="https://videos.pexels.com/video-files/34449200/14597533_2160_3840_60fps.mp4"

@@ -10,6 +10,19 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-04-24] — Smooth async UI transitions and tighten mobile layouts
+
+**Commit:** `c86bfbd`
+
+### Frontend
+
+- **`HomePage`** — Cross-fade hero video into view on `canPlay` instead of snapping from poster to video frame, keeping the poster image always rendered beneath
+- **`ConnectAppSection`** — Flip mobile order so the logo sits above copy, and center-align the heading, checklist, and CTA so the alignment axis stops jumping between breakpoints
+- **`PlayersListContent`** — Expand the search input to full width on mobile focus and animate the status filter chips out via `AnimatePresence`; shortened placeholder on mobile and switched clear button to `onMouseDown` to avoid blur races
+- **`AuthPageLayout`** — Cross-fade the auth background video on `canPlay` to match the hero treatment
+- **submit buttons** — Keep pending state through `router.push` by stalling the mutation until unmount, so the spinner doesn't flash off before the next route mounts
+
+
 ## [2026-04-24] — Hold minimum-loading state until query settles
 
 **Commit:** `1b98529`

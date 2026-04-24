@@ -47,13 +47,14 @@ export function LoginForm() {
 
       if (result?.error) {
         setError(t('invalidCredentials'));
+        setIsLoading(false);
       } else {
         router.push(`/${locale}/events`);
         router.refresh();
+        // Keep the button in loading state until navigation unmounts this component.
       }
     } catch {
       setError(t('errorOccurred'));
-    } finally {
       setIsLoading(false);
     }
   };

@@ -10,6 +10,18 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-04-24] — Restructure event form with section dividers and sticky mobile footer
+
+**Commit:** `f772b19`
+
+### Frontend
+
+- **`EventForm`** — Reorganized into labeled sections with `SectionHeading` helper that surfaces contextual hints via `Popover`, replacing inline descriptions
+- **`EventForm`** — Swapped `Checkbox`/`RadioGroup` controls for `ToggleGroup` and introduced `Separator`/`Collapsible` primitives for clearer visual grouping
+- **`EventForm`** — Surfaced capacity as a `Badge` next to the venue field and derived round/game-time breakdowns (`WARMUP_TIME`, `BREAK_TIME`, `MIN_GAME_TIME`) for preview
+- **`SectionHeading`** — New internal component rendering uppercase section titles with optional `Info` popover hints
+
+
 ## [2026-04-24] — Keep native swipe-back within a tab and remove page fade-in flash
 
 **Commit:** `8eb739e`

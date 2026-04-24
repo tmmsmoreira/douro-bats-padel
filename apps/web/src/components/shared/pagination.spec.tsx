@@ -7,7 +7,6 @@ jest.mock('@/hooks/use-media-query', () => ({
   useIsMobile: jest.fn(),
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { useIsMobile } = require('@/hooks/use-media-query') as { useIsMobile: jest.Mock };
 
 describe('Pagination — desktop', () => {

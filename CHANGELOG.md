@@ -10,6 +10,22 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-04-24] — Hold minimum-loading state until query settles
+
+**Commit:** `1b98529`
+
+### Frontend
+
+- **`useMinimumLoading`** — Only release the loading state once `hasData` is truthy alongside `!isLoading`, preventing empty/error UI flashes on bfcache restores, cache hits, and stale-while-revalidate ticks where `isLoading` flips false before data arrives.
+
+### Infrastructure
+
+- **`jest-dom.d.ts`** — Added ambient type declaration importing `@testing-library/jest-dom` so matcher types are picked up project-wide.
+- **`status-badge.spec.tsx`** — Replaced `as any` casts with the exported `Status` type for type-safe test fixtures.
+- **`pagination.spec.tsx`** — Dropped the stale `no-var-requires` eslint-disable comment.
+- **`badge.spec.tsx`** — Swapped the relative `/link` href for an absolute URL in the `asChild` composition test.
+
+
 ## [2026-04-24] — Adopt Button gradient variant in auth forms and drop stale editor demo creds
 
 **Commit:** `e2cf42f`

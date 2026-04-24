@@ -31,7 +31,7 @@ describe('Badge', () => {
   it('renders as a child element when asChild is true (composition pattern)', () => {
     render(
       <Badge asChild>
-        <a href="/link">Linked</a>
+        <a href="https://example.com">Linked</a>
       </Badge>
     );
 

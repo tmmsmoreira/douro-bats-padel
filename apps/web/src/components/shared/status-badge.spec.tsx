@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { StatusBadge } from './status-badge';
+import { StatusBadge, type Status } from './status-badge';
 
 describe('StatusBadge', () => {
   it('renders the translated label for a known status', () => {
@@ -20,7 +20,7 @@ describe('StatusBadge', () => {
   it('renders nothing (and warns) for an unknown status', () => {
     const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
 
-    const { container } = render(<StatusBadge status={'UNKNOWN_STATE' as any} />);
+    const { container } = render(<StatusBadge status={'UNKNOWN_STATE' as unknown as Status} />);
 
     expect(container).toBeEmptyDOMElement();
     expect(warnSpy).toHaveBeenCalledWith(expect.stringMatching(/No config found for status/));
@@ -47,7 +47,7 @@ describe('StatusBadge', () => {
     'REVOKED',
     'EXPIRED',
   ])('renders for known status %s', (status) => {
-    const { container } = render(<StatusBadge status={status as any} />);
+    const { container } = render(<StatusBadge status={status as Status} />);
 
     // Every known status should produce non-empty output
     expect(container).not.toBeEmptyDOMElement();

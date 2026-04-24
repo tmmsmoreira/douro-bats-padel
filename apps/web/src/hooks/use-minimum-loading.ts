@@ -4,21 +4,22 @@ import { useState, useEffect } from 'react';
 
 /**
  * Custom hook that ensures a loading state is visible for a minimum duration.
- * This prevents jarring flashes when data loads too quickly.
+ * Prevents jarring flashes when data loads too quickly, and holds the loading
+ * state until the query has actually produced a result — `isLoading` alone can
+ * flip to false a tick before data arrives (bfcache restore, cache hit,
+ * stale-while-revalidate), which would briefly expose empty/error UI.
  *
- * @param isLoading - The actual loading state from your data fetching
- * @param hasData - Whether the data has been loaded (optional, defaults to true when not loading)
- * @param minDuration - Minimum duration in milliseconds to show loading state (default: 500ms)
- * @returns boolean - Whether to show the loading state
+ * @param isLoading - Actual loading flag from your data fetching
+ * @param hasData - Whether the query has settled (data or error). Defaults to
+ *   `!isLoading`, which reproduces the caller-less behavior: the hook only
+ *   waits on `isLoading`. Pass `!!data || !!error` to wait for the real
+ *   resolution.
+ * @param minDuration - Minimum ms to show loading state (default: 500)
  *
  * @example
  * ```tsx
- * const { data, isLoading } = useQuery(...);
- * const showLoading = useMinimumLoading(isLoading, !!data);
- *
- * if (showLoading) {
- *   return <LoadingState />;
- * }
+ * const { data, isLoading, isError } = useQuery(...);
+ * const showLoading = useMinimumLoading(isLoading, !!data || isError);
  * ```
  */
 export function useMinimumLoading(
@@ -31,11 +32,9 @@ export function useMinimumLoading(
 
   useEffect(() => {
     if (isLoading && loadingStartTime === null) {
-      // Started loading, record the start time
       setLoadingStartTime(Date.now());
       setShowLoading(true);
-    } else if (!isLoading && loadingStartTime !== null) {
-      // Loading finished, enforce minimum duration
+    } else if (!isLoading && hasData && loadingStartTime !== null) {
       const elapsed = Date.now() - loadingStartTime;
       const remaining = Math.max(0, minDuration - elapsed);
 
@@ -46,7 +45,7 @@ export function useMinimumLoading(
 
       return () => clearTimeout(timer);
     }
-  }, [isLoading, loadingStartTime, minDuration]);
+  }, [isLoading, hasData, loadingStartTime, minDuration]);
 
   return showLoading;
 }

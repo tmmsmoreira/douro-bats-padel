@@ -23,7 +23,7 @@ import { Button } from '@/components/ui/button';
 import { DataStateWrapper } from '@/components/shared/state/data-state-wrapper';
 import { PlayersListSkeleton } from '@/components/shared/player';
 import { ScrollableFadeContainer, Pagination } from '@/components/shared';
-import { StatusBadge } from '@/components/shared/status-badge';
+import { StatusBadge, statusConfig } from '@/components/shared/status-badge';
 import { useIsFromBfcache } from '@/hooks';
 import { useIsMobile } from '@/hooks/use-media-query';
 import { cn } from '@/lib/utils';
@@ -190,8 +190,8 @@ function PlayersListContent({
         transition={{ duration: isBackNav ? 0 : 0.3 }}
         className="-mx-4 sm:mx-0"
       >
-        <ScrollableFadeContainer className="px-4 py-2 sm:mx-0 sm:px-1" fadeWidth={70}>
-          <div className="flex items-center gap-2 w-full">
+        <ScrollableFadeContainer className="px-4 py-1 sm:mx-0 sm:px-0" fadeWidth={70}>
+          <div className="flex items-center gap-2 min-w-max">
             {/* Search Input Chip */}
             <motion.div
               animate={{ width: isSearchExpanded ? '100%' : 'auto' }}
@@ -237,33 +237,65 @@ function PlayersListContent({
 
             {/* Status Filter Chips */}
             <AnimatePresence initial={false} mode="popLayout">
+              {!isSearchExpanded && (
+                <motion.div
+                  key="ALL"
+                  initial={{ opacity: 0, x: 24 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 32 }}
+                  transition={{ duration: 0.25, ease: [0.645, 0.045, 0.355, 1] }}
+                  className="shrink-0"
+                >
+                  <Button
+                    variant={statusFilter === 'ALL' ? 'secondary' : 'outline'}
+                    size="sm"
+                    onClick={() => setStatusFilter('ALL')}
+                    className="rounded-full h-9 px-4"
+                  >
+                    {t('allStatuses')}
+                  </Button>
+                </motion.div>
+              )}
               {!isSearchExpanded &&
                 (
                   [
-                    ['ALL', t('allStatuses')],
-                    ['ACTIVE', t('statusActive')],
-                    ['INACTIVE', t('statusInactive')],
-                    ['INVITED', t('statusInvited')],
+                    { value: 'ACTIVE', label: t('statusActive') },
+                    { value: 'INACTIVE', label: t('statusInactive') },
+                    { value: 'INVITED', label: t('statusInvited') },
                   ] as const
-                ).map(([value, label]) => (
-                  <motion.div
-                    key={value}
-                    initial={{ opacity: 0, x: 24 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 32 }}
-                    transition={{ duration: 0.25, ease: [0.645, 0.045, 0.355, 1] }}
-                    className="shrink-0"
-                  >
-                    <Button
-                      variant={statusFilter === value ? 'secondary' : 'outline'}
-                      size="sm"
-                      onClick={() => setStatusFilter(value as PlayerState)}
-                      className="rounded-full h-9 px-4"
+                ).map(({ value, label }) => {
+                  const config = statusConfig[value];
+                  const isSelected = statusFilter === value;
+                  return (
+                    <motion.div
+                      key={value}
+                      initial={{ opacity: 0, x: 24 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 32 }}
+                      transition={{ duration: 0.25, ease: [0.645, 0.045, 0.355, 1] }}
+                      className="shrink-0"
                     >
-                      {label}
-                    </Button>
-                  </motion.div>
-                ))}
+                      <button
+                        type="button"
+                        onClick={() => setStatusFilter(value)}
+                        className={cn(
+                          'inline-flex items-center gap-1.5 rounded-full border h-9 px-4 text-xs font-semibold uppercase transition-colors',
+                          isSelected
+                            ? config.className
+                            : 'border-border bg-background text-muted-foreground hover:bg-muted'
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            'w-1.5 h-1.5 rounded-full',
+                            isSelected ? config.dotColor : 'bg-muted-foreground/40'
+                          )}
+                        />
+                        {label}
+                      </button>
+                    </motion.div>
+                  );
+                })}
             </AnimatePresence>
           </div>
         </ScrollableFadeContainer>

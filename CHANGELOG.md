@@ -10,6 +10,17 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-04-26] — Match player filter chips to events filter design
+
+**Commit:** `d76e5e0`
+
+### Frontend
+
+- **`PlayersListContent`** — Replaced plain Button-based status filter pills with colored chip-and-dot treatment sourced from `statusConfig`, matching the events filter and the player `StatusBadge` styling
+- **`PlayersListContent`** — Split the "All" filter out from the status loop so only the typed `PlayerState` values (`ACTIVE`, `INACTIVE`, `INVITED`) drive the colored chips
+- **`ScrollableFadeContainer`** wrapper — Switched filter row to `min-w-max` and aligned padding (`py-1`, `sm:px-0`) so trailing scroll space matches the events filter
+
+
 ## [2026-04-24] — Restructure event form with section dividers and sticky mobile footer
 
 **Commit:** `f772b19`

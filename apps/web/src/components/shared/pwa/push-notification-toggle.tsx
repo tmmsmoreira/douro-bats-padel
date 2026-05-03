@@ -34,27 +34,20 @@ export function PushNotificationToggle() {
 
   if (!isSupported) return null;
 
-  if (permission === 'denied') {
-    return (
-      <div className="flex items-center gap-3">
-        <BellOff className="h-4 w-4 text-muted-foreground" />
-        <div className="flex-1">
-          <p className="text-sm font-medium">{t('pushNotifications')}</p>
-          <p className="text-xs text-muted-foreground">{t('pushNotificationsBlocked')}</p>
-        </div>
-      </div>
-    );
-  }
+  const isBlocked = permission === 'denied';
+  const Icon = isBlocked ? BellOff : Bell;
 
   return (
     <div className="flex items-center gap-3">
-      <Bell className="h-4 w-4 text-muted-foreground" />
+      <Icon className="h-4 w-4 text-muted-foreground" />
       <div className="flex-1">
         <p className="text-sm font-medium">{t('pushNotifications')}</p>
-        <p className="text-xs text-muted-foreground">{t('pushNotificationsDescription')}</p>
+        <p className="text-xs text-muted-foreground">
+          {isBlocked ? t('pushNotificationsBlocked') : t('pushNotificationsDescription')}
+        </p>
       </div>
       <Switch
-        checked={isSubscribed}
+        checked={!isBlocked && isSubscribed}
         onCheckedChange={async (checked) => {
           const success = checked ? await subscribe() : await unsubscribe();
           if (success) {
@@ -63,7 +56,7 @@ export function PushNotificationToggle() {
             toast.error(t('pushError'));
           }
         }}
-        disabled={isLoading}
+        disabled={isLoading || isBlocked}
       />
     </div>
   );

@@ -13,9 +13,8 @@ import {
 } from '@/hooks';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Mail, CheckCircle, XCircle, MoreVertical, UserX } from 'lucide-react';
+import { Mail, MoreVertical, UserX } from 'lucide-react';
 import { DeleteIcon, DeleteIconHandle, CopyIcon, CopyIconHandle } from 'lucide-animated';
 import { Button } from '@/components/ui/button';
 import {
@@ -29,7 +28,7 @@ import { toast } from 'sonner';
 import { ConfirmationDialog } from '../shared/confirmation-dialog';
 import { motion } from 'motion/react';
 import { DataStateWrapper } from '@/components/shared/state/data-state-wrapper';
-import { PlayerProfileSkeleton } from '@/components/shared/player';
+import { PlayerAvatar, PlayerProfileSkeleton } from '@/components/shared/player';
 import { PageHeaderSkeleton } from '@/components/shared/skeletons';
 import { useIsFromBfcache } from '@/hooks';
 import { PageHeader } from '@/components/shared/layout/page-header';
@@ -73,18 +72,6 @@ interface PlayerData {
   dateOfBirth?: string | null;
   phoneNumber?: string | null;
   invitation?: Invitation | null;
-}
-
-function getUserInitials(name: string | null, email?: string): string {
-  if (name) {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  }
-  return email?.[0]?.toUpperCase() ?? 'U';
 }
 
 export function PublicPlayerProfile({ playerId }: { playerId: string }) {
@@ -278,27 +265,17 @@ function PublicPlayerProfileContent({
       <Card className="glass-card">
         <CardHeader className="pb-0">
           <div className="flex items-center gap-4">
-            <Avatar className="h-20 w-20 sm:h-24 sm:w-24 shrink-0">
-              <AvatarImage
-                src={player.profilePhoto || undefined}
-                alt={player.name || t('userAltText')}
-              />
-              <AvatarFallback className="gradient-primary text-3xl">
-                {getUserInitials(player.name, player.email)}
-              </AvatarFallback>
-            </Avatar>
+            <PlayerAvatar
+              name={player.name}
+              email={player.email}
+              profilePhoto={player.profilePhoto}
+              emailVerified={player.emailVerified}
+              size="xl"
+              alt={player.name || t('userAltText')}
+            />
             <div className="flex-1 min-w-0">
-              <CardTitle className="text-2xl sm:text-3xl flex items-center gap-2 flex-wrap">
-                <span className="truncate">{player.name || tList('noName')}</span>
-                {player.emailVerified === true && (
-                  <CheckCircle className="h-5 w-5 text-green-600 shrink-0" aria-hidden />
-                )}
-                {player.emailVerified === false && (
-                  <XCircle
-                    className="h-5 w-5 text-muted-foreground shrink-0"
-                    aria-label={t('emailNotVerified')}
-                  />
-                )}
+              <CardTitle className="text-2xl sm:text-3xl truncate">
+                {player.name || tList('noName')}
               </CardTitle>
               {player.email && (
                 <div className="flex items-center gap-1 text-sm text-muted-foreground mt-2 min-w-0">
@@ -322,7 +299,7 @@ function PublicPlayerProfileContent({
       </Card>
 
       {/* Admin-only Player Details */}
-      {isAdminOrEditor && <AdminDetailsCard player={player} t={t} tList={tList} locale={locale} />}
+      {isAdminOrEditor && <AdminDetailsCard player={player} t={t} locale={locale} />}
 
       {/* Invitation Section - Only visible for pending invitations */}
       {player.invitation && (
@@ -465,12 +442,10 @@ function PublicPlayerProfileContent({
 function AdminDetailsCard({
   player,
   t,
-  tList,
   locale,
 }: {
   player: PlayerData;
   t: ReturnType<typeof useTranslations>;
-  tList: ReturnType<typeof useTranslations>;
   locale: string;
 }) {
   return (
@@ -504,12 +479,6 @@ function AdminDetailsCard({
             <DetailField
               label={t('playerSince')}
               value={new Date(player.player.createdAt).toLocaleDateString(locale)}
-            />
-          )}
-          {player.createdAt && (
-            <DetailField
-              label={tList('accountCreated')}
-              value={new Date(player.createdAt).toLocaleDateString(locale)}
             />
           )}
           {player.roles && player.roles.length > 0 && (

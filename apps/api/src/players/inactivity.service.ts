@@ -32,10 +32,15 @@ export class InactivityService {
       const thresholdDate = new Date();
       thresholdDate.setDate(thresholdDate.getDate() - this.inactivityThresholdDays);
 
-      // Find all ACTIVE players
+      // Find all ACTIVE players. Skip accounts younger than the threshold —
+      // signing up implicitly counts as activity, so they get a full window
+      // before being eligible for the inactivity sweep.
       const activePlayers = await this.prisma.playerProfile.findMany({
         where: {
           status: PlayerStatus.ACTIVE,
+          createdAt: {
+            lt: thresholdDate,
+          },
         },
         include: {
           rsvps: {

@@ -2,8 +2,8 @@
 
 import { motion, AnimatePresence } from 'motion/react';
 import { Link } from '@/i18n/navigation';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { PlayerAvatar } from '@/components/shared/player';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Session } from 'next-auth';
 import { LogoutIcon, UserIcon } from 'lucide-animated';
@@ -92,22 +92,14 @@ export function MobileMenu({
                   {/* User Profile Section */}
                   {session && (
                     <div className="flex items-center gap-4 pb-2">
-                      <Avatar className="h-16 w-16">
-                        <AvatarImage
-                          src={session?.user?.profilePhoto || undefined}
-                          alt={session?.user?.name || 'User'}
-                        />
-                        <AvatarFallback className="gradient-primary text-xl">
-                          {session?.user?.name
-                            ? session.user.name
-                                .split(' ')
-                                .map((n) => n[0])
-                                .join('')
-                                .toUpperCase()
-                                .slice(0, 2)
-                            : session?.user?.email?.[0]?.toUpperCase() || 'U'}
-                        </AvatarFallback>
-                      </Avatar>
+                      <PlayerAvatar
+                        name={session?.user?.name}
+                        email={session?.user?.email}
+                        profilePhoto={session?.user?.profilePhoto}
+                        size="xl"
+                        className="h-16 w-16 sm:h-16 sm:w-16 text-xl"
+                        alt={session?.user?.name || 'User'}
+                      />
                       <div className="flex-1 min-w-0">
                         {session?.user?.name && (
                           <p className="font-semibold text-lg truncate">{session.user.name}</p>

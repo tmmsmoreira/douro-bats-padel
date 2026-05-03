@@ -112,7 +112,7 @@ describe('AuthService', () => {
       ).rejects.toBeInstanceOf(ConflictException);
     });
 
-    it('hashes the password, stores a verification token, and sends a verification email', async () => {
+    it('hashes the password and creates an auto-verified user (invitation already proves the address)', async () => {
       invitationsService.validate.mockResolvedValue({ valid: true, email: 'x@y.com' });
       prisma.user.findUnique.mockResolvedValue(null);
       prisma.user.create.mockResolvedValue({
@@ -133,33 +133,13 @@ describe('AuthService', () => {
       expect(createArgs.data).toMatchObject({
         email: 'x@y.com',
         passwordHash: 'hashed-password',
-        emailVerified: false,
+        emailVerified: true,
         roles: [Role.VIEWER],
       });
-      // Verification token should be a SHA-256 hex string (64 chars)
-      expect(createArgs.data.emailVerificationToken).toMatch(/^[a-f0-9]{64}$/);
-      // Expiry is 24h from fixedNow
-      expect((createArgs.data.emailVerificationExpires as Date).getTime()).toBe(
-        fixedNow.getTime() + 86_400_000
-      );
+      expect(createArgs.data.emailVerificationToken).toBeUndefined();
+      expect(createArgs.data.emailVerificationExpires).toBeUndefined();
       expect(invitationsService.markAsUsed).toHaveBeenCalledWith('tok');
-      expect(emailService.sendVerificationEmail).toHaveBeenCalled();
-    });
-
-    it('does not fail the signup if the verification email throws', async () => {
-      invitationsService.validate.mockResolvedValue({ valid: true, email: 'x@y.com' });
-      prisma.user.findUnique.mockResolvedValue(null);
-      prisma.user.create.mockResolvedValue({ id: 'new-user', email: 'x@y.com', name: 'X' });
-      emailService.sendVerificationEmail.mockRejectedValue(new Error('SMTP down'));
-
-      await expect(
-        service.signup({
-          email: 'x@y.com',
-          password: 'pw',
-          name: 'X',
-          invitationToken: 'tok',
-        } as any)
-      ).resolves.toMatchObject({ message: expect.stringMatching(/Registration successful/) });
+      expect(emailService.sendVerificationEmail).not.toHaveBeenCalled();
     });
   });
 
@@ -195,14 +175,6 @@ describe('AuthService', () => {
 
       await expect(service.login({ email: 'x@y.com', password: 'wrong' } as any)).rejects.toThrow(
         /Invalid credentials/
-      );
-    });
-
-    it('rejects when the email is not verified', async () => {
-      prisma.user.findUnique.mockResolvedValue({ ...baseUser(), emailVerified: false });
-
-      await expect(service.login({ email: 'x@y.com', password: 'pw' } as any)).rejects.toThrow(
-        /verify your email/i
       );
     });
 

@@ -6,7 +6,6 @@ import { useUpdateProfile, useProfile, useIsFromBfcache, useLeaderboard } from '
 import { useAuthFetch } from '@/hooks/use-api';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Field, FieldLabel, FieldDescription } from '@/components/ui/field';
@@ -17,7 +16,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { toast } from 'sonner';
 import { motion } from 'motion/react';
 import { DataStateWrapper } from '@/components/shared/state/data-state-wrapper';
-import { PlayerProfileSkeleton } from '@/components/shared/player';
+import { PlayerAvatar, PlayerProfileSkeleton } from '@/components/shared/player';
 import { PageHeaderSkeleton } from '@/components/shared/skeletons';
 import { PageHeader } from '@/components/shared/layout/page-header';
 import { PushNotificationToggle } from '@/components/shared/pwa/push-notification-toggle';
@@ -27,7 +26,7 @@ import { ConfirmationDialog } from '@/components/shared/confirmation-dialog';
 import { PlayerStatsStrip } from './player-stats-strip';
 import { WeeklyScoresCard } from './weekly-scores-card';
 import { SquarePenIcon, SquarePenIconHandle, LogoutIcon, LogoutIconHandle } from 'lucide-animated';
-import { Mail, CheckCircle, XCircle, MailWarning } from 'lucide-react';
+import { Mail, MailWarning } from 'lucide-react';
 import type { PlayerProfileStatus } from '@/components/shared/status-badge';
 import type { LeaderboardEntry, UserWithPlayer } from '@padel/types';
 import { cn } from '@/lib/utils';
@@ -219,18 +218,6 @@ export function PlayerProfile() {
       )}
     </DataStateWrapper>
   );
-}
-
-function getUserInitials(name?: string | null, email?: string) {
-  if (name) {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  }
-  return email?.[0]?.toUpperCase() || 'U';
 }
 
 interface ProfileContentProps {
@@ -427,30 +414,17 @@ function ProfileHeaderCard({
     <Card className="glass-card">
       <CardHeader className="pb-0">
         <div className="flex items-center gap-4">
-          <Avatar className="h-20 w-20 sm:h-24 sm:w-24 shrink-0">
-            <AvatarImage
-              src={
-                isEditingProfile
-                  ? editedProfilePhoto || undefined
-                  : profile.profilePhoto || undefined
-              }
-              alt={profile.name || t('userAltText')}
-            />
-            <AvatarFallback className="gradient-primary text-3xl">
-              {getUserInitials(profile.name, profile.email)}
-            </AvatarFallback>
-          </Avatar>
+          <PlayerAvatar
+            name={profile.name}
+            email={profile.email}
+            profilePhoto={isEditingProfile ? editedProfilePhoto : profile.profilePhoto}
+            emailVerified={profile.emailVerified}
+            size="xl"
+            alt={profile.name || t('userAltText')}
+          />
           <div className="flex-1 min-w-0">
-            <CardTitle className="text-2xl sm:text-3xl flex items-center gap-2 flex-wrap">
-              <span className="truncate">{profile.name || t('noName')}</span>
-              {profile.emailVerified ? (
-                <CheckCircle className="h-5 w-5 text-green-600 shrink-0" aria-hidden />
-              ) : (
-                <XCircle
-                  className="h-5 w-5 text-muted-foreground shrink-0"
-                  aria-label={t('emailNotVerified')}
-                />
-              )}
+            <CardTitle className="text-2xl sm:text-3xl truncate">
+              {profile.name || t('noName')}
             </CardTitle>
             <div className="flex items-center gap-1 text-sm text-muted-foreground mt-2 min-w-0">
               <Mail className="h-4 w-4 shrink-0" />

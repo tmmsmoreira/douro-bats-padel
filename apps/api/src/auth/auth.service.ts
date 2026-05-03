@@ -68,26 +68,17 @@ export class AuthService {
     }
 
     const passwordHash = await bcrypt.hash(dto.password, BCRYPT_SALT_ROUNDS);
-
-    // Generate email verification token
-    const verificationToken = crypto.randomBytes(32).toString('hex');
-    const emailVerificationToken = crypto
-      .createHash('sha256')
-      .update(verificationToken)
-      .digest('hex');
-    const emailVerificationExpires = new Date(Date.now() + VERIFICATION_TOKEN_TTL_MS); // 24 hours from now
-
     const preferredLanguage = normalizeLocale(dto.language);
 
-    const user = await this.prisma.user.create({
+    // Invitation redemption already proves the user controls this address
+    // (the invite link was sent to it), so we skip the second verify-link step.
+    await this.prisma.user.create({
       data: {
         email: dto.email,
         name: dto.name,
         passwordHash,
         roles: [Role.VIEWER],
-        emailVerified: false,
-        emailVerificationToken,
-        emailVerificationExpires,
+        emailVerified: true,
         preferredLanguage,
         player: {
           create: {
@@ -95,9 +86,6 @@ export class AuthService {
             status: 'ACTIVE',
           },
         },
-      },
-      include: {
-        player: true,
       },
     });
 
@@ -109,21 +97,8 @@ export class AuthService {
       // Don't fail registration if this fails
     }
 
-    // Send verification email
-    try {
-      await this.emailService.sendVerificationEmail(
-        user.email,
-        user.name || 'User',
-        verificationToken,
-        user.preferredLanguage as Locale
-      );
-    } catch (error) {
-      this.logger.error('Failed to send verification email:', error);
-      // Don't fail registration if email fails
-    }
-
     return {
-      message: 'Registration successful! Please check your email to verify your account.',
+      message: 'Registration successful! You can now sign in.',
     };
   }
 
@@ -140,11 +115,6 @@ export class AuthService {
 
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
-    }
-
-    // Check if email is verified
-    if (!user.emailVerified) {
-      throw new UnauthorizedException('Please verify your email before logging in');
     }
 
     return this.generateTokens(user.id, user.email, user.roles as Role[], user.tokenVersion);
@@ -266,7 +236,9 @@ export class AuthService {
       phoneNumber: user.phoneNumber,
       profilePhoto: user.profilePhoto,
       roles: user.roles,
+      emailVerified: user.emailVerified,
       preferredLanguage: user.preferredLanguage,
+      createdAt: user.createdAt,
       player: user.player,
     };
   }
@@ -480,7 +452,9 @@ export class AuthService {
       phoneNumber: user.phoneNumber,
       profilePhoto: user.profilePhoto,
       roles: user.roles,
+      emailVerified: user.emailVerified,
       preferredLanguage: user.preferredLanguage,
+      createdAt: user.createdAt,
       player: user.player,
     };
   }

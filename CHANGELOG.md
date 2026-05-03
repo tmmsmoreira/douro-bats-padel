@@ -10,6 +10,24 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-05-03] — Auto-verify invited signups, share PlayerAvatar, and patch profile/inactivity gaps
+
+**Commit:** `c81a185`
+
+### Frontend
+
+- **`PlayerAvatar`** — Extracted shared component with size variants, gradient fallback, and verified/unverified bottom-right marker; replaces duplicated avatar markup and inline verification icon across players list, both profile pages, and nav avatars
+- **`players-list`** — Migrated to `PlayerAvatar`, dropped inline `CheckCircle` verification icon, and derived an `INVITED` status key from `player.invitation`
+- **Push notification toggle** — Kept visible in disabled/off state when browser permission is denied instead of swapping in a message-only block
+
+### Backend
+
+- **`AuthService.signup`** — Auto-verifies invited users (the invite link already proves email control); removed verification token generation, expiry, and `sendVerificationEmail` call
+- **`AuthService.login`** — Removed the `emailVerified` block that rejected unverified accounts at login
+- **`AuthService` `/auth/me` and `updateProfile`** — Added missing `emailVerified` and `createdAt` fields to responses, fixing the persistent "Email not verified" banner
+- **`InactivityService`** — Skips accounts with `createdAt` newer than the inactivity threshold so freshly-invited players aren't flipped to `INACTIVE` overnight
+
+
 ## [2026-04-26] — Match player filter chips to events filter design
 
 **Commit:** `d76e5e0`

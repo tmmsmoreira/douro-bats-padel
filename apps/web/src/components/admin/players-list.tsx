@@ -5,9 +5,8 @@ import type { PlayerRecord } from '@/hooks/use-players';
 import { motion, AnimatePresence } from 'motion/react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
-import { Mail, CheckCircle, UserX, BellOff } from 'lucide-react';
+import { Mail, UserX, BellOff } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { useState, useMemo, useRef, useEffect } from 'react';
@@ -21,9 +20,10 @@ import {
 } from 'lucide-animated';
 import { Button } from '@/components/ui/button';
 import { DataStateWrapper } from '@/components/shared/state/data-state-wrapper';
-import { PlayersListSkeleton } from '@/components/shared/player';
+import { PlayerAvatar, PlayersListSkeleton } from '@/components/shared/player';
 import { ScrollableFadeContainer, Pagination } from '@/components/shared';
 import { StatusBadge, statusConfig } from '@/components/shared/status-badge';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useIsFromBfcache } from '@/hooks';
 import { useIsMobile } from '@/hooks/use-media-query';
 import { cn } from '@/lib/utils';
@@ -334,138 +334,125 @@ function PlayersListContent({
             }}
             className="space-y-4"
           >
-            {paginatedPlayers.map((player) => (
-              <motion.div
-                key={player.id}
-                variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  show: { opacity: 1, y: 0, transition: { duration: isBackNav ? 0 : 0.4 } },
-                }}
-              >
-                <Link
-                  href={`/players/${player.id}`}
-                  className="block"
-                  onMouseEnter={() => trendingUpIconRefs.current.get(player.id)?.startAnimation()}
+            {paginatedPlayers.map((player) => {
+              const playerStatusKey: PlayerProfileStatus | 'INVITED' | undefined = player.invitation
+                ? 'INVITED'
+                : (player.player?.status as PlayerProfileStatus | undefined);
+
+              return (
+                <motion.div
+                  key={player.id}
+                  variants={{
+                    hidden: { opacity: 0, y: 20 },
+                    show: { opacity: 1, y: 0, transition: { duration: isBackNav ? 0 : 0.4 } },
+                  }}
                 >
-                  <Card className="glass-card group hover:shadow-xl transition-shadow duration-200 ease-out border-border/50">
-                    <CardContent className="p-6 space-y-4">
-                      {/* Top Section: Avatar, Name, Email, and Status Badge */}
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex items-start gap-3 flex-1 min-w-0">
-                          {/* Avatar with verified badge */}
-                          <div className="relative shrink-0">
-                            <Avatar className="h-14 w-14">
-                              <AvatarImage
-                                src={player.profilePhoto || undefined}
-                                alt={player.name || player.email}
-                              />
-                              <AvatarFallback className="gradient-primary text-lg font-semibold">
-                                {player.name
-                                  ? player.name
-                                      .split(' ')
-                                      .map((n) => n[0])
-                                      .join('')
-                                      .toUpperCase()
-                                      .slice(0, 2)
-                                  : player.email[0].toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            {player.emailVerified && (
-                              <div className="absolute -bottom-1 -right-1 bg-background rounded-full p-0.5">
-                                <CheckCircle className="h-4 w-4 text-success" />
+                  <Link
+                    href={`/players/${player.id}`}
+                    className="block"
+                    onMouseEnter={() => trendingUpIconRefs.current.get(player.id)?.startAnimation()}
+                  >
+                    <Card className="glass-card group hover:shadow-xl transition-shadow duration-200 ease-out border-border/50">
+                      <CardContent className="p-6 space-y-4">
+                        {/* Top Section: Avatar, Name, Email, and Status Badge */}
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex items-start gap-3 flex-1 min-w-0">
+                            <PlayerAvatar
+                              name={player.name}
+                              email={player.email}
+                              profilePhoto={player.profilePhoto}
+                              emailVerified={player.emailVerified}
+                              size="lg"
+                            />
+
+                            <div className="flex-1 min-w-0 space-y-1.5">
+                              <h3 className="group-hover:text-primary transition-colors font-heading font-semibold text-lg truncate">
+                                {player.name || t('noName')}
+                              </h3>
+                              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                                <Mail className="h-3.5 w-3.5 shrink-0" />
+                                <span className="truncate">{player.email}</span>
                               </div>
+                            </div>
+                          </div>
+
+                          {/* Status Badge - Top Right */}
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {player.player?.notificationsPaused && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span
+                                    className="inline-flex shrink-0"
+                                    tabIndex={0}
+                                    aria-label={t('notificationsPaused')}
+                                  >
+                                    <BellOff className="h-4 w-4 text-muted-foreground" />
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent>{t('notificationsPaused')}</TooltipContent>
+                              </Tooltip>
+                            )}
+                            {playerStatusKey && (
+                              <StatusBadge status={playerStatusKey as PlayerProfileStatus} />
                             )}
                           </div>
-
-                          {/* Name and Email */}
-                          <div className="flex-1 min-w-0 space-y-1.5">
-                            <h3 className="group-hover:text-primary transition-colors font-heading font-semibold text-lg truncate">
-                              {player.name || t('noName')}
-                            </h3>
-                            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                              <Mail className="h-3.5 w-3.5 shrink-0" />
-                              <span className="truncate">{player.email}</span>
-                            </div>
-                          </div>
                         </div>
 
-                        {/* Status Badge - Top Right */}
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          {player.player?.notificationsPaused && (
-                            <BellOff
-                              className="h-4 w-4 text-muted-foreground"
-                              aria-label={t('notificationsPaused')}
-                            />
-                          )}
-                          {player.invitation ? (
-                            <StatusBadge status="INVITED" />
-                          ) : (
-                            player.player && (
-                              <StatusBadge status={player.player.status as PlayerProfileStatus} />
-                            )
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Bottom Section: Player Info and Rating */}
-                      {player.invitation ? (
-                        <div className="flex items-end justify-between text-sm text-muted-foreground pt-4 border-t border-border/50">
-                          <div className="space-y-1">
-                            <div>
-                              <span className="font-medium">{t('invitedOn')}:</span>{' '}
-                              <span className="font-semibold text-foreground">
-                                {new Date(player.createdAt).toLocaleDateString(locale)}
-                              </span>
-                            </div>
-                            <div>
-                              <span className="font-medium">{t('expiresOn')}:</span>{' '}
-                              <span className="font-semibold text-foreground">
-                                {new Date(player.invitation.expiresAt).toLocaleDateString(locale)}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex items-end justify-between text-sm text-muted-foreground pt-4 border-t border-border/50">
-                          <div className="space-y-1">
-                            {player.player && (
+                        {/* Bottom: meta + rating (or invited details) */}
+                        {player.invitation ? (
+                          <div className="flex items-end justify-between text-sm text-muted-foreground pt-4 border-t border-border/50">
+                            <div className="space-y-1">
                               <div>
-                                <span className="font-medium">{t('playerSince')}:</span>{' '}
+                                <span className="font-medium">{t('invitedOn')}:</span>{' '}
                                 <span className="font-semibold text-foreground">
-                                  {new Date(player.player.createdAt).toLocaleDateString(locale)}
+                                  {new Date(player.createdAt).toLocaleDateString(locale)}
                                 </span>
                               </div>
-                            )}
-                            <div>
-                              <span className="font-medium">{t('accountCreated')}:</span>{' '}
-                              <span className="font-semibold text-foreground">
-                                {new Date(player.createdAt).toLocaleDateString(locale)}
-                              </span>
+                              <div>
+                                <span className="font-medium">{t('expiresOn')}:</span>{' '}
+                                <span className="font-semibold text-foreground">
+                                  {new Date(player.invitation.expiresAt).toLocaleDateString(locale)}
+                                </span>
+                              </div>
                             </div>
                           </div>
-                          {/* Rating - Bottom Right */}
-                          {player.player && (
-                            <div className="flex flex-col items-end gap-0.5 shrink-0">
-                              <div className="flex items-center gap-1.5 text-3xl font-bold text-primary font-heading">
-                                <TrendingUpIcon
-                                  ref={setTrendingUpIconRef(player.id)}
-                                  size={20}
-                                  className="text-primary"
-                                />
-                                <span className="gradient-text">{player.player.rating}</span>
-                              </div>
-                              <div className="text-xs text-muted-foreground font-medium">
-                                {t('rating')}
-                              </div>
+                        ) : (
+                          <div className="flex items-end justify-between text-sm text-muted-foreground pt-4 border-t border-border/50">
+                            <div className="space-y-1">
+                              {player.player && (
+                                <div>
+                                  <span className="font-medium">{t('playerSince')}:</span>{' '}
+                                  <span className="font-semibold text-foreground">
+                                    {new Date(player.player.createdAt).toLocaleDateString(locale)}
+                                  </span>
+                                </div>
+                              )}
                             </div>
-                          )}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </Link>
-              </motion.div>
-            ))}
+                            {player.player && (
+                              <div className="flex flex-col items-end gap-1 shrink-0">
+                                <div className="flex items-center gap-1.5">
+                                  <TrendingUpIcon
+                                    ref={setTrendingUpIconRef(player.id)}
+                                    size={18}
+                                    className="text-primary"
+                                  />
+                                  <span className="text-4xl font-bold gradient-text font-heading leading-none tracking-tight tabular-nums">
+                                    {player.player.rating}
+                                  </span>
+                                </div>
+                                <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-[0.18em]">
+                                  {t('rating')}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </Link>
+                </motion.div>
+              );
+            })}
           </motion.div>
 
           {/* Pagination */}

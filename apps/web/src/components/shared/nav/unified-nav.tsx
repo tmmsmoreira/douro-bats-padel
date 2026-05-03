@@ -7,7 +7,7 @@ import { useScrollDirection } from '@/hooks/use-scroll-direction';
 import { useIsEditor } from '@/hooks/use-is-editor';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { PlayerAvatar } from '@/components/shared/player';
 import { TabBar } from '@/components/native/tab-bar';
 import Image from 'next/image';
 import {
@@ -248,22 +248,13 @@ export function UnifiedNav() {
                         className="relative h-10 w-10 rounded-full"
                         animate={false}
                       >
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage
-                            src={session?.user?.profilePhoto || undefined}
-                            alt={session?.user?.name || 'User'}
-                          />
-                          <AvatarFallback className="gradient-primary">
-                            {session?.user?.name
-                              ? session.user.name
-                                  .split(' ')
-                                  .map((n) => n[0])
-                                  .join('')
-                                  .toUpperCase()
-                                  .slice(0, 2)
-                              : session?.user?.email?.[0]?.toUpperCase() || 'U'}
-                          </AvatarFallback>
-                        </Avatar>
+                        <PlayerAvatar
+                          name={session?.user?.name}
+                          email={session?.user?.email}
+                          profilePhoto={session?.user?.profilePhoto}
+                          size="md"
+                          alt={session?.user?.name || 'User'}
+                        />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-56" align="end" forceMount>

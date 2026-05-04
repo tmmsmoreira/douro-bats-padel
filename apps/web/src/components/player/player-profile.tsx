@@ -432,18 +432,20 @@ function ProfileHeaderCard({
             </div>
           </div>
           {!isEditingProfile && (
-            <Button
-              onClick={onEditProfile}
-              variant="outline"
-              size="icon"
-              onMouseEnter={() => squarePenIconRef.current?.startAnimation()}
-              onMouseLeave={() => squarePenIconRef.current?.stopAnimation()}
-              aria-label={t('editProfile')}
-              className="shrink-0"
-              animate
-            >
-              <SquarePenIcon ref={squarePenIconRef} size={16} className="h-4 w-4" />
-            </Button>
+            <div className="self-start">
+              <Button
+                onClick={onEditProfile}
+                variant="ghost"
+                size="icon"
+                onMouseEnter={() => squarePenIconRef.current?.startAnimation()}
+                onMouseLeave={() => squarePenIconRef.current?.stopAnimation()}
+                aria-label={t('editProfile')}
+                className="shrink-0"
+                animate
+              >
+                <SquarePenIcon ref={squarePenIconRef} size={16} className="h-4 w-4" />
+              </Button>
+            </div>
           )}
         </div>
       </CardHeader>

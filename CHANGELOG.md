@@ -10,6 +10,21 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-05-04] — Fix hydration race in DataStateWrapper and tighten avatar/datepicker UI details
+
+**Commit:** `0d8d7af`
+
+### Frontend
+
+- **`DataStateWrapper`** — Defer the `aria-busy` and loading/content branch to post-mount so SSR and first client paint match, fixing the hydration mismatch on `/pt/profile` caused by warm TanStack Query / bfcache state.
+- **`DatePicker`** — Apply `tabular-nums` to the text input and calendar/year dropdowns so years like `2011` and `2026` share the same width, and pass `defaultMonth={date}` so the popover/drawer opens on the currently selected date (helps far-from-today fields like DOB).
+- **`PlayerAvatar`** — Skip the Radix Tooltip on touch devices using `useIsMobile`; the verified/unverified icon and `aria-label` remain, avoiding tap conflicts with parent Link/Card navigation.
+- **`ProfileHeaderCard`** — Edit button switched from `outline` to `ghost` variant and wrapped in a `self-start` container for cleaner alignment.
+- **`WeeklyScoresCard`** — Week label widened to `w-16` with `whitespace-nowrap` so `Semana 1` doesn't wrap in Portuguese.
+- **`PlayersListContent`** — `RATING` label normalized to the canonical `text-[11px] uppercase tracking-wide font-medium` used by the stats strip.
+- **`CalendarDropdown`** — Added `tabular-nums` to the select trigger and content so year/month options align consistently.
+
+
 ## [2026-05-04] — Require name, DOB, and phone at signup; complete-profile flow for OAuth users
 
 **Commit:** `ba3af43`

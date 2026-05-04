@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { MailboxIcon } from '@/components/icons/mailbox-icon';
@@ -103,10 +103,21 @@ export function DataStateWrapper<T>({
   const hasDataOrError = !!data || !!error;
   const showLoading = useMinimumLoading(isLoading, hasDataOrError, minLoadingDuration);
 
+  // The server can't know whether the client has a warm TanStack Query / bfcache,
+  // so `isLoading` (and thus showLoading) can differ between SSR and first client
+  // paint. Force the first paint into the loading state on both sides so the
+  // hydrated DOM matches; useEffect flips this on mount and the real showLoading
+  // takes over.
+  const [hasMounted, setHasMounted] = useState(false);
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+  const effectiveShowLoading = !hasMounted || showLoading;
+
   return (
-    <div aria-live="polite" aria-busy={showLoading}>
+    <div aria-live="polite" aria-busy={effectiveShowLoading}>
       <AnimatePresence mode="wait">
-        {showLoading ? (
+        {effectiveShowLoading ? (
           loadingComponent ? (
             <motion.div
               key="loading"

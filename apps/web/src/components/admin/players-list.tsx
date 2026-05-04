@@ -440,7 +440,7 @@ function PlayersListContent({
                                     {player.player.rating}
                                   </span>
                                 </div>
-                                <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-[0.18em]">
+                                <div className="text-[11px] uppercase tracking-wide text-muted-foreground font-medium">
                                   {t('rating')}
                                 </div>
                               </div>

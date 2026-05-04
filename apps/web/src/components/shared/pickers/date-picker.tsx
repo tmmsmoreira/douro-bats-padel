@@ -130,10 +130,11 @@ export function DatePicker({
       mode="single"
       captionLayout="dropdown"
       selected={date}
+      defaultMonth={date}
       onSelect={handleSelect}
       startMonth={new Date(1900, 0)}
       endMonth={new Date(2100, 11)}
-      className={isMobile ? 'mx-auto [--cell-size:--spacing(10)]' : undefined}
+      className={isMobile ? 'mx-auto tabular-nums [--cell-size:--spacing(10)]' : 'tabular-nums'}
       formatters={
         isMobile
           ? {
@@ -229,6 +230,7 @@ export function DatePicker({
         placeholder={inputPlaceholder}
         disabled={disabled}
         aria-invalid={ariaInvalid}
+        className="tabular-nums"
         onChange={handleInputChange}
         onBlur={() => {
           if (inputValue && !parseDateInput(inputValue)) {

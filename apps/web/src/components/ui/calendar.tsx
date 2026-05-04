@@ -201,10 +201,10 @@ function CalendarDropdown({ value, onChange, options }: DropdownProps) {
         handleChange(value);
       }}
     >
-      <SelectTrigger className="pr-1.5 focus:ring-0">
+      <SelectTrigger className="pr-1.5 tabular-nums focus:ring-0">
         <SelectValue>{selected?.label}</SelectValue>
       </SelectTrigger>
-      <SelectContent position="popper" className="max-h-80">
+      <SelectContent position="popper" className="max-h-80 tabular-nums">
         {options.map((option, id: number) => (
           <SelectItem key={`${option.value}-${id}`} value={option.value?.toString() ?? ''}>
             {option.label}

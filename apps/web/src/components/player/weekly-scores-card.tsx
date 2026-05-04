@@ -33,7 +33,7 @@ export function WeeklyScoresCard({ weeklyScores, limit = 5 }: WeeklyScoresCardPr
                 const pct = (score / maxScore) * 100;
                 return (
                   <div key={idx} className="flex items-center gap-3">
-                    <span className="text-xs text-muted-foreground w-10 shrink-0">
+                    <span className="text-xs text-muted-foreground w-16 shrink-0 whitespace-nowrap">
                       {t('week')} {recent.length - idx}
                     </span>
                     <div className="flex-1 h-2 rounded-full bg-primary/10 overflow-hidden">

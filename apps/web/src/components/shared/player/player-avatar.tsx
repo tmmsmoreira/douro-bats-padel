@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useIsMobile } from '@/hooks/use-media-query';
 import { cn } from '@/lib/utils';
 
 export type PlayerAvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -76,6 +77,7 @@ export function PlayerAvatar({
   alt,
 }: PlayerAvatarProps) {
   const t = useTranslations('profile');
+  const isMobile = useIsMobile();
 
   const verifiedState: 'verified' | 'unverified' | 'none' = stack
     ? 'none'
@@ -91,10 +93,15 @@ export function PlayerAvatar({
   const MarkerIcon = verifiedState === 'verified' ? CheckCircle : XCircle;
   const markerColor = verifiedState === 'verified' ? 'text-success' : 'text-muted-foreground';
 
+  // Skip the Radix Tooltip on touch devices: it fights with parent links/cards
+  // (tap either navigates without revealing it, or briefly opens then dismisses).
+  // The icon still conveys the state visually; the aria-label stays for SR users.
+  const showTooltip = verifiedState !== 'none' && !noTooltip && !isMobile;
+
   const marker = (
     <span
       className="absolute -bottom-1 -right-1 bg-card rounded-full p-0.5 inline-flex"
-      tabIndex={noTooltip ? undefined : 0}
+      tabIndex={showTooltip ? 0 : undefined}
       aria-label={markerLabel}
     >
       <MarkerIcon className={cn(markerColor, markerSizeClasses[size])} aria-hidden />
@@ -110,13 +117,13 @@ export function PlayerAvatar({
         </AvatarFallback>
       </Avatar>
       {verifiedState !== 'none' &&
-        (noTooltip ? (
-          marker
-        ) : (
+        (showTooltip ? (
           <Tooltip>
             <TooltipTrigger asChild>{marker}</TooltipTrigger>
             <TooltipContent>{markerLabel}</TooltipContent>
           </Tooltip>
+        ) : (
+          marker
         ))}
     </div>
   );

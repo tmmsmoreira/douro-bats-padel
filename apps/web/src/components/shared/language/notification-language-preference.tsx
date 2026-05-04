@@ -4,19 +4,8 @@ import { useTranslations } from 'next-intl';
 import { Languages } from 'lucide-react';
 import { Locale } from '@padel/types';
 import { useProfile, useUpdateProfile } from '@/hooks';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { EnFlagIcon, PtFlagIcon } from '@/components/icons';
-
-const FLAGS: Record<Locale, React.ComponentType<{ size?: number }>> = {
-  [Locale.EN]: EnFlagIcon,
-  [Locale.PT]: PtFlagIcon,
-};
 
 export function NotificationLanguagePreference() {
   const t = useTranslations('profile');
@@ -34,30 +23,24 @@ export function NotificationLanguagePreference() {
         <p className="text-sm font-medium">{t('notificationLanguage')}</p>
         <p className="text-xs text-muted-foreground">{t('notificationLanguageDescription')}</p>
       </div>
-      <Select
+      <ToggleGroup
+        type="single"
+        variant="outline"
+        size="sm"
         value={current}
         onValueChange={(value) => {
+          if (!value || value === current) return;
           updateProfile.mutate({ preferredLanguage: value as Locale });
         }}
         disabled={updateProfile.isPending}
       >
-        <SelectTrigger size="sm" className="w-auto min-w-[140px]">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {(Object.keys(FLAGS) as Locale[]).map((locale) => {
-            const Flag = FLAGS[locale];
-            return (
-              <SelectItem key={locale} value={locale}>
-                <span className="flex items-center gap-2">
-                  <Flag size={16} />
-                  <span>{t(`languages.${locale}` as const)}</span>
-                </span>
-              </SelectItem>
-            );
-          })}
-        </SelectContent>
-      </Select>
+        <ToggleGroupItem value={Locale.EN} aria-label={t('languages.EN')}>
+          <EnFlagIcon size={16} />
+        </ToggleGroupItem>
+        <ToggleGroupItem value={Locale.PT} aria-label={t('languages.PT')}>
+          <PtFlagIcon size={16} />
+        </ToggleGroupItem>
+      </ToggleGroup>
     </div>
   );
 }

@@ -10,6 +10,16 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-05-04] — Unify Conta-row affordances for push toggle and notification language
+
+**Commit:** `41b498d`
+
+### Frontend
+
+- **`PushNotificationToggle`** — On iOS where Web Push requires PWA install, render the standard row with a disabled `Switch` instead of a no-toggle variant, so the affordance matches the events-notifications row above; browsers without Push support still render nothing
+- **`NotificationLanguagePreference`** — Replace the `Select` dropdown with a `ToggleGroup` of EN/PT flag icons, mirroring `LanguageToggleGroup` in the mobile menu so email/push language uses the same segmented-flag affordance as the UI language switcher
+
+
 ## [2026-05-04] — Fix profile-edit reload flicker and avatar wrapper sizing
 
 **Commit:** `bc85acf`

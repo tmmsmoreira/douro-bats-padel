@@ -15,6 +15,7 @@ interface UserProfile {
   emailVerified: boolean;
   preferredLanguage: Locale;
   createdAt: string;
+  profileCompleted: boolean;
   player: {
     id: string;
     rating: number;

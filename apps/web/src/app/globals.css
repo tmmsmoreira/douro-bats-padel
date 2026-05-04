@@ -247,6 +247,25 @@
       scrollbar-width: none;
     }
   }
+
+  /* PWA feel on touch devices: no long-press callouts, no text selection on UI */
+  @media (pointer: coarse) {
+    * {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    /* Re-enable selection for editable elements and explicit opt-in */
+    input,
+    textarea,
+    [contenteditable],
+    .select-text,
+    .select-text * {
+      -webkit-touch-callout: default;
+      -webkit-user-select: text;
+      user-select: text;
+    }
+  }
 }
 
 @layer utilities {

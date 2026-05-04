@@ -12,6 +12,7 @@ import { AppLoadingScreen } from '@/components/shared/state/app-loading-screen';
 import { OfflineIndicator } from '@/components/shared/pwa/offline-indicator';
 import { ServiceWorkerUpdatePrompt } from '@/components/shared/pwa/sw-update-prompt';
 import { PullToRefresh } from '@/components/native/pull-to-refresh';
+import { ProfileCompletionGate } from '@/components/auth/profile-completion-gate';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-space-grotesk' });
@@ -237,6 +238,7 @@ export default async function LangLayout({
             <OfflineIndicator />
             <ServiceWorkerUpdatePrompt />
             <PullToRefresh />
+            <ProfileCompletionGate />
             {children}
           </NextIntlClientProvider>
         </Providers>

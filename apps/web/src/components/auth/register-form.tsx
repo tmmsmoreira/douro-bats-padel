@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { DatePicker } from '@/components/shared/pickers/date-picker';
 import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
@@ -22,12 +23,13 @@ export function RegisterForm() {
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>(undefined);
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  const [verificationToken, setVerificationToken] = useState('');
   const [validatingInvitation, setValidatingInvitation] = useState(true);
   const [invitationValid, setInvitationValid] = useState(false);
   const [invitationEmail, setInvitationEmail] = useState('');
@@ -104,17 +106,30 @@ export function RegisterForm() {
       return;
     }
 
+    // Validate date of birth + phone number presence
+    if (!dateOfBirth) {
+      setError(t('dateOfBirthRequired'));
+      setIsLoading(false);
+      return;
+    }
+    if (!phoneNumber.trim()) {
+      setError(t('phoneNumberRequired'));
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const data = await authFetch.post<{ token?: string }>('/auth/signup', {
+      await authFetch.post('/auth/signup', {
         name,
         email,
+        dateOfBirth: dateOfBirth.toISOString().split('T')[0],
+        phoneNumber: phoneNumber.trim(),
         password,
         invitationToken,
         language: locale.toUpperCase(),
       });
 
       setSuccess(true);
-      if (data.token) setVerificationToken(data.token);
       setIsLoading(false);
     } catch (err) {
       setError(err instanceof Error && err.message ? err.message : t('registrationFailed'));
@@ -199,39 +214,12 @@ export function RegisterForm() {
               />
             </svg>
           </div>
-          <p className="text-sm text-muted-foreground text-center">
-            {t('successMessage', { email })}
-          </p>
-          {process.env.NODE_ENV === 'development' && verificationToken && (
-            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-              <p className="text-sm font-medium text-yellow-800 mb-2">{t('devModeToken')}</p>
-              <code className="text-xs bg-white p-2 block rounded border break-all">
-                {verificationToken}
-              </code>
-              <Link
-                href={`/${locale}/verify-email?token=${verificationToken}`}
-                className="text-sm text-yellow-800 hover:underline mt-2 inline-block"
-              >
-                {t('clickToVerify')}
-              </Link>
-            </div>
-          )}
+          <p className="text-sm text-muted-foreground text-center">{t('successMessage')}</p>
           <Link href={`/${locale}/login`} className="block">
-            <Button variant="outline" className="w-full">
+            <Button variant="gradient" className="w-full">
               {t('goToLogin')}
             </Button>
           </Link>
-          <div className="text-center text-sm text-muted-foreground">
-            <p>
-              {t('didntReceiveEmail')}{' '}
-              <Link
-                href={`/${locale}/resend-verification`}
-                className="text-primary hover:underline"
-              >
-                {t('resendVerification')}
-              </Link>
-            </p>
-          </div>
         </CardContent>
       </Card>
     );
@@ -276,6 +264,31 @@ export function RegisterForm() {
             <p id="email-help" className="text-xs text-muted-foreground">
               {t('emailPreFilled')}
             </p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="dateOfBirth">{t('dateOfBirth')}</Label>
+            <DatePicker
+              id="dateOfBirth"
+              value={dateOfBirth}
+              onChange={setDateOfBirth}
+              placeholder={t('dateOfBirthPlaceholder')}
+              aria-invalid={!!error}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="phoneNumber">{t('phoneNumber')}</Label>
+            <Input
+              id="phoneNumber"
+              type="tel"
+              placeholder={t('phoneNumberPlaceholder')}
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              className="h-11"
+              required
+              autoComplete="tel"
+              aria-invalid={!!error}
+              aria-describedby={error ? 'register-error' : undefined}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">{t('password')}</Label>

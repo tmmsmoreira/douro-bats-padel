@@ -125,6 +125,8 @@ describe('AuthService', () => {
         email: 'x@y.com',
         password: 'secret-pw',
         name: 'X',
+        dateOfBirth: '1990-05-04',
+        phoneNumber: '+351912345678',
         invitationToken: 'tok',
       } as any);
 
@@ -135,11 +137,34 @@ describe('AuthService', () => {
         passwordHash: 'hashed-password',
         emailVerified: true,
         roles: [Role.VIEWER],
+        name: 'X',
+        phoneNumber: '+351912345678',
       });
+      expect(createArgs.data.dateOfBirth).toBeInstanceOf(Date);
       expect(createArgs.data.emailVerificationToken).toBeUndefined();
       expect(createArgs.data.emailVerificationExpires).toBeUndefined();
       expect(invitationsService.markAsUsed).toHaveBeenCalledWith('tok');
       expect(emailService.sendVerificationEmail).not.toHaveBeenCalled();
+    });
+
+    it('rejects with ConflictException when phoneNumber is already in use', async () => {
+      invitationsService.validate.mockResolvedValue({ valid: true, email: 'x@y.com' });
+      prisma.user.findUnique.mockResolvedValue(null);
+      prisma.user.create.mockRejectedValue({
+        code: 'P2002',
+        meta: { target: ['phoneNumber'] },
+      });
+
+      await expect(
+        service.signup({
+          email: 'x@y.com',
+          password: 'secret-pw',
+          name: 'X',
+          dateOfBirth: '1990-05-04',
+          phoneNumber: '+351912345678',
+          invitationToken: 'tok',
+        } as any)
+      ).rejects.toBeInstanceOf(ConflictException);
     });
   });
 

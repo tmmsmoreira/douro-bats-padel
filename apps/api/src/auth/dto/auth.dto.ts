@@ -44,10 +44,19 @@ export class SignupDtoClass implements ISignupDto {
   @Matches(/[0-9]/, { message: 'Password must contain at least one number' })
   password: string;
 
-  @IsOptional()
   @IsString()
+  @MinLength(1)
   @MaxLength(120)
-  name?: string;
+  name: string;
+
+  @IsString()
+  @MaxLength(32)
+  dateOfBirth: string;
+
+  @IsString()
+  @MinLength(1)
+  @MaxLength(32)
+  phoneNumber: string;
 
   @IsString()
   @MinLength(1)

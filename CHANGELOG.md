@@ -10,6 +10,24 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-05-04] — Require name, DOB, and phone at signup; complete-profile flow for OAuth users
+
+**Commit:** `ba3af43`
+
+### Frontend
+
+- **`CompleteProfileForm`** — New form at `/complete-profile` that pre-fills partial values, validates name/DOB/phone, and PATCHes `/auth/profile` before routing home
+- **`ProfileCompletionGate`** — New gate mounted in the lang layout that redirects signed-in users with `profileCompleted: false` to `/complete-profile` (catches Google OAuth users missing DOB/phone)
+- **`register-form`** — Adds DatePicker and tel input with client-side validation; refreshes the stale "check your email" success state since invitation signups now auto-verify
+- **`globals.css`** — Disables `-webkit-touch-callout` and `user-select` on coarse pointers (with re-enables for inputs, contenteditable, and `.select-text`) so the PWA stops feeling like a webpage on iOS
+
+### Backend
+
+- **`AuthService.signup`** — Persists `dateOfBirth` and `phoneNumber` on user creation and maps Prisma `P2002` on `phoneNumber` to `ConflictException`
+- **`SignupDto`** — `name` is now required; adds required `dateOfBirth` and `phoneNumber` fields with validation
+- **`/auth/me`** — Response now includes a derived `profileCompleted` boolean based on presence of name, DOB, and phone
+
+
 ## [2026-05-03] — Auto-verify invited signups, share PlayerAvatar, and patch profile/inactivity gaps
 
 **Commit:** `c81a185`

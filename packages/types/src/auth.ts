@@ -16,7 +16,9 @@ export interface LoginDto {
 export interface SignupDto {
   email: string;
   password: string;
-  name?: string;
+  name: string;
+  dateOfBirth: string;
+  phoneNumber: string;
   invitationToken: string;
   language?: Locale;
 }

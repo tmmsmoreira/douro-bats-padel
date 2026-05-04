@@ -72,22 +72,32 @@ export class AuthService {
 
     // Invitation redemption already proves the user controls this address
     // (the invite link was sent to it), so we skip the second verify-link step.
-    await this.prisma.user.create({
-      data: {
-        email: dto.email,
-        name: dto.name,
-        passwordHash,
-        roles: [Role.VIEWER],
-        emailVerified: true,
-        preferredLanguage,
-        player: {
-          create: {
-            rating: 0,
-            status: 'ACTIVE',
+    try {
+      await this.prisma.user.create({
+        data: {
+          email: dto.email,
+          name: dto.name,
+          dateOfBirth: new Date(dto.dateOfBirth),
+          phoneNumber: dto.phoneNumber,
+          passwordHash,
+          roles: [Role.VIEWER],
+          emailVerified: true,
+          preferredLanguage,
+          player: {
+            create: {
+              rating: 0,
+              status: 'ACTIVE',
+            },
           },
         },
-      },
-    });
+      });
+    } catch (error: unknown) {
+      const prismaError = error as { code?: string; meta?: { target?: string[] } };
+      if (prismaError.code === 'P2002' && prismaError.meta?.target?.includes('phoneNumber')) {
+        throw new ConflictException('Phone number already in use');
+      }
+      throw error;
+    }
 
     // Mark invitation as used
     try {
@@ -239,6 +249,7 @@ export class AuthService {
       emailVerified: user.emailVerified,
       preferredLanguage: user.preferredLanguage,
       createdAt: user.createdAt,
+      profileCompleted: !!(user.name && user.dateOfBirth && user.phoneNumber),
       player: user.player,
     };
   }
@@ -455,6 +466,7 @@ export class AuthService {
       emailVerified: user.emailVerified,
       preferredLanguage: user.preferredLanguage,
       createdAt: user.createdAt,
+      profileCompleted: !!(user.name && user.dateOfBirth && user.phoneNumber),
       player: user.player,
     };
   }

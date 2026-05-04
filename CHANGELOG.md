@@ -10,6 +10,22 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-05-04] — Poll for SW updates, sync session on profile edit, and bottom-anchor mobile toasts
+
+**Commit:** `08e1f0a`
+
+### Frontend
+
+- **`ServiceWorkerUpdatePrompt`** — Actively call `registration.update()` on mount, on tab focus/visibility, and every 30 minutes so installed PWAs reliably surface the update toast across deploys instead of sitting on the old build
+- **`Providers`** — Switch the Sonner `Toaster` to `bottom-center` on mobile (via `useIsMobile`) so toasts aren't hidden behind the notch/safe-area on installed PWAs or below the navbar on web
+- **`DataStateWrapper`** — Gate the SSR/hydration loading guard on an app-wide `hasAppHydrated` flag so only the first paint pays the loading→content `AnimatePresence` flash; subsequent mounts (tab nav, modals) skip it
+- **`useUpdateProfile`** — Stop awaiting `updateSession` in `onSuccess` (it flicked `status` to `'loading'` and unmounted the form mid-save); invalidate + close first, then push only JWT-preserved fields (`name`, `profilePhoto`) in the background
+
+### Backend
+
+- **`auth.ts` (NextAuth `jwt` callback)** — Handle `trigger === 'update'` so `useSession().update()` propagates `profilePhoto` and `roles` into the token, fixing the stale navbar avatar after a profile edit
+
+
 ## [2026-05-04] — Fix hydration race in DataStateWrapper and tighten avatar/datepicker UI details
 
 **Commit:** `0d8d7af`

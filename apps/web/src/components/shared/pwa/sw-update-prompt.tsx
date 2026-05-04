@@ -12,7 +12,18 @@ import { toast } from 'sonner';
  *
  * Required because `skipWaiting: false` in `src/app/sw.ts` — otherwise a new
  * SW would silently take over and the user could lose in-flight state.
+ *
+ * We also actively poll for updates: browsers only auto-check sw.js on
+ * navigation (and even then bounded by HTTP caching), so an installed PWA can
+ * sit on the old version across deploys. We call `registration.update()` on
+ * mount, on tab focus/visibility, and on a 30-minute interval so a deployed
+ * change reliably surfaces the prompt.
+ *
+ * NOTE: Serwist disables the SW in development (next.config.mjs), so this
+ * prompt only fires in production builds.
  */
+const UPDATE_POLL_MS = 30 * 60 * 1000;
+
 export function ServiceWorkerUpdatePrompt() {
   const t = useTranslations('swUpdate');
 
@@ -38,6 +49,10 @@ export function ServiceWorkerUpdatePrompt() {
       });
     };
 
+    let intervalId: ReturnType<typeof setInterval> | undefined;
+    let onFocus: (() => void) | undefined;
+    let onVisibility: (() => void) | undefined;
+
     navigator.serviceWorker.ready.then((registration) => {
       if (registration.waiting) {
         promptUser(registration.waiting);
@@ -52,10 +67,29 @@ export function ServiceWorkerUpdatePrompt() {
           }
         });
       });
+
+      const checkForUpdate = () => {
+        registration.update().catch(() => {
+          // Network errors are expected (offline) — ignore.
+        });
+      };
+
+      checkForUpdate();
+      intervalId = setInterval(checkForUpdate, UPDATE_POLL_MS);
+
+      onFocus = checkForUpdate;
+      onVisibility = () => {
+        if (document.visibilityState === 'visible') checkForUpdate();
+      };
+      window.addEventListener('focus', onFocus);
+      document.addEventListener('visibilitychange', onVisibility);
     });
 
     return () => {
       navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange);
+      if (intervalId) clearInterval(intervalId);
+      if (onFocus) window.removeEventListener('focus', onFocus);
+      if (onVisibility) document.removeEventListener('visibilitychange', onVisibility);
     };
   }, [t]);
 

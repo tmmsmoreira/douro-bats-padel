@@ -22,6 +22,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { ThemeProvider } from './theme-provider';
 import { Toaster } from 'sonner';
 import { TooltipProvider } from './ui/tooltip';
+import { useIsMobile } from '@/hooks/use-media-query';
 import type { Session } from 'next-auth';
 
 /**
@@ -57,6 +58,7 @@ export function Providers({
   session?: Session | null;
 }) {
   const isRestoredFromBfcache = useRef(false);
+  const isMobile = useIsMobile();
 
   const [queryClient] = useState(
     () =>
@@ -118,7 +120,7 @@ export function Providers({
           <QueryClientProvider client={queryClient}>
             <TooltipProvider>
               {children}
-              <Toaster richColors position="top-right" />
+              <Toaster richColors position={isMobile ? 'bottom-center' : 'top-right'} />
             </TooltipProvider>
           </QueryClientProvider>
         </SessionErrorHandler>

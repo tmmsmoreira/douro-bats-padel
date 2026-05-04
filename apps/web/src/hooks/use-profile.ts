@@ -61,19 +61,22 @@ export function useUpdateProfile(onSuccessCallback?: () => void) {
     mutationFn: async (data: UpdateProfileData) => {
       return authFetch.patch<UserProfile>('/auth/profile', data);
     },
-    onSuccess: async (data) => {
-      // Update the session with new user data
-      await updateSession({
-        ...session,
-        user: {
-          ...session?.user,
-          ...data,
-        },
-      });
-
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
       toast.success('Profile updated successfully');
       onSuccessCallback?.();
+
+      // Push session-backed fields to the JWT in the background so the navbar
+      // avatar/name update without a sign-in. We don't await — blocking here
+      // flickers `status: 'loading'`, which unmounts the profile form.
+      void updateSession({
+        ...session,
+        user: {
+          ...session?.user,
+          name: data.name ?? session?.user?.name,
+          profilePhoto: data.profilePhoto ?? session?.user?.profilePhoto,
+        },
+      });
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to update profile');

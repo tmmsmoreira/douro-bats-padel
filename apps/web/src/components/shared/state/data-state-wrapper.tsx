@@ -8,6 +8,12 @@ import { LoadingState } from './loading-state';
 import { useMinimumLoading } from '@/hooks/use-minimum-loading';
 import { useIsFromBfcache } from '@/hooks';
 
+// App-wide flag: false during SSR and the very first client paint, then flipped
+// to true after the first useEffect runs anywhere. Subsequent mounts (e.g. tab
+// navigations) skip the SSR hydration guard, so we don't pay the loading-flash
+// cost when there's no server render to reconcile against.
+let hasAppHydrated = false;
+
 interface DataStateWrapperProps<T> {
   /**
    * The actual loading state from your data fetching
@@ -106,13 +112,16 @@ export function DataStateWrapper<T>({
   // The server can't know whether the client has a warm TanStack Query / bfcache,
   // so `isLoading` (and thus showLoading) can differ between SSR and first client
   // paint. Force the first paint into the loading state on both sides so the
-  // hydrated DOM matches; useEffect flips this on mount and the real showLoading
-  // takes over.
-  const [hasMounted, setHasMounted] = useState(false);
+  // hydrated DOM matches — but only for the *first* mount in the app session.
+  // Subsequent mounts (tab navigation, opening modals, etc.) are pure client
+  // renders with no SSR to reconcile against, so they skip the guard and avoid
+  // the AnimatePresence loading→content flash.
+  const [needsHydrationGuard, setNeedsHydrationGuard] = useState(!hasAppHydrated);
   useEffect(() => {
-    setHasMounted(true);
+    hasAppHydrated = true;
+    setNeedsHydrationGuard(false);
   }, []);
-  const effectiveShowLoading = !hasMounted || showLoading;
+  const effectiveShowLoading = needsHydrationGuard || showLoading;
 
   return (
     <div aria-live="polite" aria-busy={effectiveShowLoading}>

@@ -166,7 +166,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
       return true;
     },
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, trigger, session }) {
       // Initial sign in - store tokens and set expiration
       if (user) {
         token.accessToken = user.accessToken;
@@ -179,6 +179,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // For Google OAuth, use the backend user ID
         if (account?.provider === 'google') {
           token.sub = user.id;
+        }
+        return token;
+      }
+
+      // Client-side useSession().update(...) triggers this branch — propagate
+      // mutable user fields (e.g. profilePhoto after profile edit) so the navbar
+      // avatar and other session-driven UI reflect the new value without sign-in.
+      if (trigger === 'update' && session?.user) {
+        if (typeof session.user.profilePhoto !== 'undefined') {
+          token.profilePhoto = session.user.profilePhoto ?? undefined;
+        }
+        if (Array.isArray(session.user.roles)) {
+          token.roles = session.user.roles;
         }
         return token;
       }

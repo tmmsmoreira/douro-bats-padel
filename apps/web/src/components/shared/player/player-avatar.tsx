@@ -1,6 +1,7 @@
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -93,18 +94,28 @@ export function PlayerAvatar({
   const MarkerIcon = verifiedState === 'verified' ? CheckCircle : XCircle;
   const markerColor = verifiedState === 'verified' ? 'text-success' : 'text-muted-foreground';
 
-  // Skip the Radix Tooltip on touch devices: it fights with parent links/cards
-  // (tap either navigates without revealing it, or briefly opens then dismisses).
-  // The icon still conveys the state visually; the aria-label stays for SR users.
-  const showTooltip = verifiedState !== 'none' && !noTooltip && !isMobile;
+  const showOverlay = verifiedState !== 'none' && !noTooltip;
 
-  const marker = (
-    <span
-      className="absolute -bottom-1 -right-1 bg-card rounded-full p-0.5 inline-flex"
-      tabIndex={showTooltip ? 0 : undefined}
-      aria-label={markerLabel}
-    >
-      <MarkerIcon className={cn(markerColor, markerSizeClasses[size])} aria-hidden />
+  const markerClasses =
+    'absolute -bottom-1 -right-1 bg-card rounded-full p-0.5 inline-flex outline-none focus-visible:ring-2 focus-visible:ring-ring/50';
+  const markerIcon = (
+    <MarkerIcon className={cn(markerColor, markerSizeClasses[size])} aria-hidden />
+  );
+
+  // Radix Tooltip is hover/focus only — Popover responds to taps. Use Tooltip on
+  // desktop (instant on hover) and Popover on touch (tap to reveal, tap-outside
+  // to dismiss). Both use a real <button> so screen readers and keyboard users
+  // get a proper trigger. `noTooltip` is for callers where the avatar already
+  // sits inside a Link/menu trigger and the marker shouldn't add a focus stop.
+  const markerButton = (
+    <button type="button" className={markerClasses} aria-label={markerLabel}>
+      {markerIcon}
+    </button>
+  );
+
+  const markerStatic = (
+    <span className={markerClasses} aria-label={markerLabel}>
+      {markerIcon}
     </span>
   );
 
@@ -117,13 +128,27 @@ export function PlayerAvatar({
         </AvatarFallback>
       </Avatar>
       {verifiedState !== 'none' &&
-        (showTooltip ? (
-          <Tooltip>
-            <TooltipTrigger asChild>{marker}</TooltipTrigger>
-            <TooltipContent>{markerLabel}</TooltipContent>
-          </Tooltip>
+        (showOverlay ? (
+          isMobile ? (
+            <Popover>
+              <PopoverTrigger asChild>{markerButton}</PopoverTrigger>
+              <PopoverContent
+                className="w-auto max-w-xs p-2 text-xs"
+                align="end"
+                side="bottom"
+                sideOffset={6}
+              >
+                {markerLabel}
+              </PopoverContent>
+            </Popover>
+          ) : (
+            <Tooltip>
+              <TooltipTrigger asChild>{markerButton}</TooltipTrigger>
+              <TooltipContent>{markerLabel}</TooltipContent>
+            </Tooltip>
+          )
         ) : (
-          marker
+          markerStatic
         ))}
     </div>
   );

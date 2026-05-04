@@ -10,6 +10,20 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-05-04] — Tighten player profile/list chrome with tappable verified marker and shadowed status chips
+
+**Commit:** `285daf7`
+
+### Frontend
+
+- **`PlayerAvatar`** — Split the verified-email marker into a Tooltip on desktop and Popover on touch so taps actually reveal the label; promoted the marker to a real `<button>` with focus-visible ring, and added a `noTooltip` escape hatch for call sites where the avatar sits inside a parent Link/menu trigger
+- **`PlayersList`** — Passed `noTooltip` to row avatars (wrapped in Link to `/players/[id]`), unified the search placeholder to the short string on both mobile and desktop to avoid truncation, bumped `ScrollableFadeContainer` padding to `sm:px-1` so the input's focus ring isn't clipped, and added `shadow-xs` to status filter chips
+- **`EventsList`** — Added `shadow-xs` to status filter chips to match the neighboring "All" button
+- **`ProfileHeaderCard` / `PublicPlayerProfileContent`** — Switched the header email from `truncate` to `break-all` (with `items-start` and `mt-0.5` on the Mail icon) so long addresses wrap on narrow viewports
+- **`InformationCard` / `AdminDetailsCard`** — Dropped the duplicated Name/Email read-only rows in view mode since the header already shows them; edit mode still keeps the disabled email field with the "cannot be changed" hint
+- **`en.json` / `pt.json`** — Removed the now-unused `searchPlayers` long key from both dictionaries
+
+
 ## [2026-05-04] — Poll for SW updates, sync session on profile edit, and bottom-anchor mobile toasts
 
 **Commit:** `08e1f0a`

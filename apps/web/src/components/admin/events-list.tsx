@@ -188,7 +188,7 @@ function EventsListContent({
                   type="button"
                   onClick={() => setStatusFilter(value)}
                   className={cn(
-                    'inline-flex items-center gap-1.5 rounded-full border h-9 px-4 text-xs font-semibold uppercase transition-colors',
+                    'inline-flex items-center gap-1.5 rounded-full border h-9 px-4 text-xs font-semibold uppercase shadow-xs transition-colors',
                     isSelected
                       ? config.className
                       : 'border-border bg-background text-muted-foreground hover:bg-muted'

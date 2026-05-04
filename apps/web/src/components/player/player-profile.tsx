@@ -426,9 +426,9 @@ function ProfileHeaderCard({
             <CardTitle className="text-2xl sm:text-3xl truncate">
               {profile.name || t('noName')}
             </CardTitle>
-            <div className="flex items-center gap-1 text-sm text-muted-foreground mt-2 min-w-0">
-              <Mail className="h-4 w-4 shrink-0" />
-              <span className="truncate">{profile.email}</span>
+            <div className="flex items-start gap-1 text-sm text-muted-foreground mt-2 min-w-0">
+              <Mail className="h-4 w-4 shrink-0 mt-0.5" />
+              <span className="break-all">{profile.email}</span>
             </div>
           </div>
           {!isEditingProfile && (
@@ -580,8 +580,6 @@ function InformationCard({
           </>
         ) : (
           <>
-            <ReadField label={t('name')} value={profile.name || t('notSet')} />
-            <ReadField label={t('email')} value={profile.email} />
             <ReadField
               label={t('dateOfBirth')}
               value={

@@ -190,7 +190,7 @@ function PlayersListContent({
         transition={{ duration: isBackNav ? 0 : 0.3 }}
         className="-mx-4 sm:mx-0"
       >
-        <ScrollableFadeContainer className="px-4 py-1 sm:mx-0 sm:px-0" fadeWidth={70}>
+        <ScrollableFadeContainer className="px-4 py-1 sm:mx-0 sm:px-1" fadeWidth={70}>
           <div className="flex items-center gap-2 min-w-max">
             {/* Search Input Chip */}
             <motion.div
@@ -205,7 +205,7 @@ function PlayersListContent({
               />
               <Input
                 type="text"
-                placeholder={isMobile ? t('searchPlayersShort') : t('searchPlayers')}
+                placeholder={t('searchPlayersShort')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => setIsSearchFocused(true)}
@@ -279,7 +279,7 @@ function PlayersListContent({
                         type="button"
                         onClick={() => setStatusFilter(value)}
                         className={cn(
-                          'inline-flex items-center gap-1.5 rounded-full border h-9 px-4 text-xs font-semibold uppercase transition-colors',
+                          'inline-flex items-center gap-1.5 rounded-full border h-9 px-4 text-xs font-semibold uppercase shadow-xs transition-colors',
                           isSelected
                             ? config.className
                             : 'border-border bg-background text-muted-foreground hover:bg-muted'
@@ -363,6 +363,7 @@ function PlayersListContent({
                               profilePhoto={player.profilePhoto}
                               emailVerified={player.emailVerified}
                               size="lg"
+                              noTooltip
                             />
 
                             <div className="flex-1 min-w-0 space-y-1.5">

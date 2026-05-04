@@ -278,9 +278,9 @@ function PublicPlayerProfileContent({
                 {player.name || tList('noName')}
               </CardTitle>
               {player.email && (
-                <div className="flex items-center gap-1 text-sm text-muted-foreground mt-2 min-w-0">
-                  <Mail className="h-4 w-4 shrink-0" />
-                  <span className="truncate">{player.email}</span>
+                <div className="flex items-start gap-1 text-sm text-muted-foreground mt-2 min-w-0">
+                  <Mail className="h-4 w-4 shrink-0 mt-0.5" />
+                  <span className="break-all">{player.email}</span>
                 </div>
               )}
             </div>
@@ -455,7 +455,6 @@ function AdminDetailsCard({
       </CardHeader>
       <CardContent className="pt-0">
         <div className="grid gap-4 sm:grid-cols-2">
-          {player.email && <DetailField label={t('email')} value={player.email} />}
           <DetailField
             label={t('phoneNumber')}
             value={player.phoneNumber || t('notSet')}

@@ -10,6 +10,19 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-05-04] — Fix DOB shifting one day on save in non-UTC timezones
+
+**Commit:** `ce85a7a`
+
+### Bug Fixes
+
+- **`date-only.ts`** — New `formatDateOnly` / `parseDateOnly` helpers that treat DOB as a calendar date using local Y/M/D components, avoiding the UTC offset shift caused by `toISOString().split('T')[0]` on a local-midnight Date (e.g. UTC+1 turning 1988-04-12 into 1988-04-11)
+- **`RegisterForm`** — Signup payload now uses `formatDateOnly` for `dateOfBirth` so the saved date matches what the user picked
+- **`CompleteProfileForm`** — State init parses DOB via `parseDateOnly`; submit serializes via `formatDateOnly`
+- **`PlayerProfile`** — `handleEditProfile` init, change-detection comparison, mutation payload, and view-mode display all switched to the date-only helpers; the change-detection bug that compared `"1988-04-12"` against the full ISO `"1988-04-12T00:00:00.000Z"` (always reporting changed) is fixed by comparing two `YYYY-MM-DD` strings
+- **`PublicPlayerProfile`** — Admin DOB field renders via `parseDateOnly(...).toLocaleDateString(locale)` so the displayed calendar date matches the stored value
+
+
 ## [2026-05-04] — Tighten player profile/list chrome with tappable verified marker and shadowed status chips
 
 **Commit:** `285daf7`

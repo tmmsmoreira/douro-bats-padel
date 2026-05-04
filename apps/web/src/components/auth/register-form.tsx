@@ -13,6 +13,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 import { useAuthFetch } from '@/hooks/use-api';
+import { formatDateOnly } from '@/lib/date-only';
 
 export function RegisterForm() {
   const searchParams = useSearchParams();
@@ -122,7 +123,7 @@ export function RegisterForm() {
       await authFetch.post('/auth/signup', {
         name,
         email,
-        dateOfBirth: dateOfBirth.toISOString().split('T')[0],
+        dateOfBirth: formatDateOnly(dateOfBirth),
         phoneNumber: phoneNumber.trim(),
         password,
         invitationToken,

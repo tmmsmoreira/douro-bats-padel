@@ -41,6 +41,7 @@ import { useIsMobile } from '@/hooks/use-media-query';
 import { PlayerStatsStrip } from './player-stats-strip';
 import { WeeklyScoresCard } from './weekly-scores-card';
 import { cn } from '@/lib/utils';
+import { parseDateOnly } from '@/lib/date-only';
 
 interface PlayerData {
   id: string;
@@ -462,11 +463,7 @@ function AdminDetailsCard({
           />
           <DetailField
             label={t('dateOfBirth')}
-            value={
-              player.dateOfBirth
-                ? new Date(player.dateOfBirth).toLocaleDateString(locale)
-                : t('notSet')
-            }
+            value={parseDateOnly(player.dateOfBirth)?.toLocaleDateString(locale) ?? t('notSet')}
             muted={!player.dateOfBirth}
           />
           <DetailField

@@ -30,6 +30,7 @@ import { Mail, MailWarning } from 'lucide-react';
 import type { PlayerProfileStatus } from '@/components/shared/status-badge';
 import type { LeaderboardEntry, UserWithPlayer } from '@padel/types';
 import { cn } from '@/lib/utils';
+import { formatDateOnly, parseDateOnly } from '@/lib/date-only';
 
 const CARD_EASING: [number, number, number, number] = [0.165, 0.84, 0.44, 1];
 
@@ -136,7 +137,7 @@ export function PlayerProfile() {
 
   const handleEditProfile = () => {
     setEditedName(profile?.name || '');
-    setEditedDateOfBirth(profile?.dateOfBirth ? new Date(profile.dateOfBirth) : undefined);
+    setEditedDateOfBirth(parseDateOnly(profile?.dateOfBirth));
     setEditedPhoneNumber(profile?.phoneNumber || '');
     setEditedProfilePhoto(profile?.profilePhoto || '');
     setValidationErrors({});
@@ -148,7 +149,7 @@ export function PlayerProfile() {
 
     const nameChanged = editedName.trim() !== (profile?.name || '');
     const dateOfBirthChanged = editedDateOfBirth
-      ? editedDateOfBirth.toISOString().split('T')[0] !== profile?.dateOfBirth
+      ? formatDateOnly(editedDateOfBirth) !== (profile?.dateOfBirth?.slice(0, 10) || '')
       : !!profile?.dateOfBirth;
     const phoneNumberChanged = editedPhoneNumber.trim() !== (profile?.phoneNumber || '');
     const profilePhotoChanged = editedProfilePhoto.trim() !== (profile?.profilePhoto || '');
@@ -164,7 +165,7 @@ export function PlayerProfile() {
 
     updateProfileMutation.mutate({
       name: editedName.trim(),
-      dateOfBirth: editedDateOfBirth ? editedDateOfBirth.toISOString().split('T')[0] : undefined,
+      dateOfBirth: editedDateOfBirth ? formatDateOnly(editedDateOfBirth) : undefined,
       phoneNumber: editedPhoneNumber.trim() || undefined,
       profilePhoto: editedProfilePhoto.trim() || undefined,
     });
@@ -582,11 +583,7 @@ function InformationCard({
           <>
             <ReadField
               label={t('dateOfBirth')}
-              value={
-                profile.dateOfBirth
-                  ? new Date(profile.dateOfBirth).toLocaleDateString(locale)
-                  : t('notSet')
-              }
+              value={parseDateOnly(profile.dateOfBirth)?.toLocaleDateString(locale) ?? t('notSet')}
             />
             <ReadField label={t('phoneNumber')} value={profile.phoneNumber || t('notSet')} />
             {profile.player?.createdAt && (

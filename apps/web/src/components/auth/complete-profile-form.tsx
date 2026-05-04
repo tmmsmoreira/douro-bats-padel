@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { DatePicker } from '@/components/shared/pickers/date-picker';
 import { useProfile, useUpdateProfile } from '@/hooks/use-profile';
+import { formatDateOnly, parseDateOnly } from '@/lib/date-only';
 import { Loader2 } from 'lucide-react';
 
 export function CompleteProfileForm() {
@@ -19,7 +20,7 @@ export function CompleteProfileForm() {
 
   const [name, setName] = useState(profile?.name ?? '');
   const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>(
-    profile?.dateOfBirth ? new Date(profile.dateOfBirth) : undefined
+    parseDateOnly(profile?.dateOfBirth)
   );
   const [phoneNumber, setPhoneNumber] = useState(profile?.phoneNumber ?? '');
   const [error, setError] = useState('');
@@ -54,7 +55,7 @@ export function CompleteProfileForm() {
     try {
       await updateProfile.mutateAsync({
         name: name.trim(),
-        dateOfBirth: dateOfBirth.toISOString().split('T')[0],
+        dateOfBirth: formatDateOnly(dateOfBirth),
         phoneNumber: phoneNumber.trim(),
       });
       router.replace('/');

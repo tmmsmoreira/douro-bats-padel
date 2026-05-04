@@ -10,6 +10,16 @@ _Auto-generated on every commit from the actual diff._
 
 <!-- CHANGELOG_INSERT_POINT -->
 
+## [2026-05-04] — Fix profile-edit reload flicker and avatar wrapper sizing
+
+**Commit:** `bc85acf`
+
+### Bug Fixes
+
+- **`PlayerProfile`** — Gate `DataStateWrapper` loading state on `status === 'loading' && !profile` so the brief `useSession().update()` re-auth after a profile mutation no longer unmounts `ProfileContent` and replays its mount animations like a full reload
+- **`PlayerAvatar`** — Move `avatarSizeClasses[size]` from the inner `<Avatar>` to the outer wrapper and switch the inner `<Avatar>` to `size-full` so `className` size overrides (e.g. mobile menu's `h-16 w-16`) apply to both, keeping the avatar within its wrapper and preventing the user's email from being pushed past the viewport
+
+
 ## [2026-05-04] — Fix DOB shifting one day on save in non-UTC timezones
 
 **Commit:** `ce85a7a`

@@ -182,7 +182,7 @@ export function PlayerProfile() {
 
   return (
     <DataStateWrapper
-      isLoading={status === 'loading' || isLoading}
+      isLoading={(status === 'loading' && !profile) || isLoading}
       data={profile}
       loadingMessage={t('loadingProfile')}
       loadingComponent={

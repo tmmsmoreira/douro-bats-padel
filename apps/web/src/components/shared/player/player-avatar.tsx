@@ -120,8 +120,8 @@ export function PlayerAvatar({
   );
 
   return (
-    <div className={cn('relative shrink-0', className)}>
-      <Avatar className={avatarSizeClasses[size]}>
+    <div className={cn('relative shrink-0', avatarSizeClasses[size], className)}>
+      <Avatar className="size-full">
         <AvatarImage src={profilePhoto || undefined} alt={alt || name || email || 'User'} />
         <AvatarFallback className={cn('gradient-primary font-semibold', fallbackTextClasses[size])}>
           {getPlayerInitials(name, email)}
